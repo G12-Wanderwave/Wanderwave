@@ -10,3 +10,6 @@ Instead of interacting with beacons, users can also use a more passive mode, whe
 As for the gamification aspects, users will receive achievements rewarding them for the number of songs shared and reviews, distance traveled, popularity... Those might even give points to use for things like customization and what not.
 In conclusion, our app aims to redefine the way users discover and share music. By merging physical activity with music discovery, we offer a novel solution to the challenge of musical monotony, encouraging users to expand their musical horizons in an engaging and interactive manner.
 As a Vortex resident, I want to discover what music others in my community are listening to, so that I can uncover new songs and diversify my musical experiences during my daily commute to EPFL.
+
+
+https://www.figma.com/files/project/215171825/Team-project?fuid=1213059135171411879
