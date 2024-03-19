@@ -1,0 +1,66 @@
+[
+    {
+        "merged": "ch.epfl.cs311.wanderwave.app-debug-53:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "ch.epfl.cs311.wanderwave.app-main-55:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "ch.epfl.cs311.wanderwave.app-debug-53:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "ch.epfl.cs311.wanderwave.app-main-55:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "ch.epfl.cs311.wanderwave.app-debug-53:/mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "ch.epfl.cs311.wanderwave.app-main-55:/mipmap-hdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "ch.epfl.cs311.wanderwave.app-debug-53:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "ch.epfl.cs311.wanderwave.app-main-55:/mipmap-mdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "ch.epfl.cs311.wanderwave.app-debug-53:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "ch.epfl.cs311.wanderwave.app-main-55:/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "ch.epfl.cs311.wanderwave.app-debug-53:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "ch.epfl.cs311.wanderwave.app-main-55:/mipmap-hdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "ch.epfl.cs311.wanderwave.app-debug-53:/xml_backup_rules.xml.flat",
+        "source": "ch.epfl.cs311.wanderwave.app-main-55:/xml/backup_rules.xml"
+    },
+    {
+        "merged": "ch.epfl.cs311.wanderwave.app-debug-53:/mipmap-anydpi_ic_launcher.xml.flat",
+        "source": "ch.epfl.cs311.wanderwave.app-main-55:/mipmap-anydpi/ic_launcher.xml"
+    },
+    {
+        "merged": "ch.epfl.cs311.wanderwave.app-debug-53:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "ch.epfl.cs311.wanderwave.app-main-55:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "ch.epfl.cs311.wanderwave.app-debug-53:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "ch.epfl.cs311.wanderwave.app-main-55:/mipmap-mdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "ch.epfl.cs311.wanderwave.app-debug-53:/mipmap-anydpi_ic_launcher_round.xml.flat",
+        "source": "ch.epfl.cs311.wanderwave.app-main-55:/mipmap-anydpi/ic_launcher_round.xml"
+    },
+    {
+        "merged": "ch.epfl.cs311.wanderwave.app-debug-53:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "ch.epfl.cs311.wanderwave.app-main-55:/mipmap-xxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "ch.epfl.cs311.wanderwave.app-debug-53:/xml_data_extraction_rules.xml.flat",
+        "source": "ch.epfl.cs311.wanderwave.app-main-55:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "ch.epfl.cs311.wanderwave.app-debug-53:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "ch.epfl.cs311.wanderwave.app-main-55:/mipmap-xxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "ch.epfl.cs311.wanderwave.app-debug-53:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "ch.epfl.cs311.wanderwave.app-main-55:/mipmap-xhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "ch.epfl.cs311.wanderwave.app-debug-53:/drawable_ic_launcher_background.xml.flat",
+        "source": "ch.epfl.cs311.wanderwave.app-main-55:/drawable/ic_launcher_background.xml"
+    }
+]

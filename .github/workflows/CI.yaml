@@ -1,4 +1,4 @@
-name: Bootcamp CI - Test Runner
+name: Wanderwave CI
 
 # Run the workflow when commits are pushed on main or when a PR is modified
 on:
@@ -14,14 +14,11 @@ on:
 
 
 jobs:
-  bootcamp-ci:
-    name: CI-Bootcamp
+  wanderwave-ci:
+    name: CI-Wanderwave
     # Execute the CI on the course's runners
     runs-on:
       group: runners_v1
-
-    env:
-      app_name: BootcampDebug
 
     defaults:
       run:
