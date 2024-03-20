@@ -48,9 +48,11 @@ fun AppScaffold(navController: NavHostController) {
           BottomAppBar(
               modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
                 TOP_LEVEL_DESTINATIONS.forEach { destination ->
-                  Button(onClick = {navController.navigate(destination.route)}, modifier = Modifier.padding(8.dp)) {
-                    Text(text = destination.route)
-                  }
+                  Button(
+                      onClick = { navController.navigate(destination.route) },
+                      modifier = Modifier.padding(8.dp)) {
+                        Text(text = destination.route)
+                      }
                 }
               }
         }

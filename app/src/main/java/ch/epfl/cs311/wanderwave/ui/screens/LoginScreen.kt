@@ -5,16 +5,11 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,10 +19,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -41,45 +34,40 @@ import kotlinx.coroutines.tasks.await
 
 @Composable
 fun LoginScreen() {
-//  Text(text = "LoginScreen Placeholder")
+  //  Text(text = "LoginScreen Placeholder")
 
   var user by remember { mutableStateOf(Firebase.auth.currentUser) }
   val launcher =
-    rememberFirebaseAuthLauncher(
-      onAuthComplete = { result ->
-        user = result.user
-        //TODO Navigation to next screen
-      },
-      onAuthError = { user = null })
+      rememberFirebaseAuthLauncher(
+          onAuthComplete = { result ->
+            user = result.user
+            // TODO Navigation to next screen
+          },
+          onAuthError = { user = null })
   val token = stringResource(R.string.default_web_client_id)
   val context = LocalContext.current
   val gso =
-    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-      .requestIdToken(token)
-      .requestEmail()
-      .build()
+      GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+          .requestIdToken(token)
+          .requestEmail()
+          .build()
   val googleSignInClient = GoogleSignIn.getClient(context, gso)
   Column(
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.Center,
-    modifier = Modifier.fillMaxSize()) {
-    Button(
-      onClick = { launcher.launch(googleSignInClient.signInIntent) },
-      modifier =
-      Modifier
-        .wrapContentSize()
-    ) {
-      Text(
-        text = "Sign in with Google"
-      )
-    }
-  }
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.Center,
+      modifier = Modifier.fillMaxSize()) {
+        Button(
+            onClick = { launcher.launch(googleSignInClient.signInIntent) },
+            modifier = Modifier.wrapContentSize()) {
+              Text(text = "Sign in with Google")
+            }
+      }
 }
 
 @Composable
 fun rememberFirebaseAuthLauncher(
-  onAuthComplete: (AuthResult) -> Unit,
-  onAuthError: (ApiException) -> Unit
+    onAuthComplete: (AuthResult) -> Unit,
+    onAuthError: (ApiException) -> Unit
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
   val scope = rememberCoroutineScope()
   return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
