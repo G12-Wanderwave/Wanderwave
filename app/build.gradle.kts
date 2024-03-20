@@ -96,6 +96,11 @@ dependencies {
 
     implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+
+    implementation("com.google.android.gms:play-services-auth:20.1.0")
+
+//    implementation ("net.openid:appauth:0.7.0")
 
 }
 kapt {
@@ -133,4 +138,6 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
+
+    apply(plugin = "com.google.gms.google-services")
 }
