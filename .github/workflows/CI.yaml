@@ -18,8 +18,7 @@ jobs:
     name: CI-Wanderwave
 
     # run on a new ubuntu VM
-    runs-on:
-      group: ubuntu-latest
+    runs-on: ubuntu-latest
 
     defaults:
       run:
