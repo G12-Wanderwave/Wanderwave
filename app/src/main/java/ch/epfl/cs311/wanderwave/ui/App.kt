@@ -25,19 +25,21 @@ import ch.epfl.cs311.wanderwave.ui.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
 import ch.epfl.cs311.wanderwave.ui.screens.LaunchScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
+import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
+import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
 @Composable
-fun App(navController: NavHostController) {
+fun App(navController: NavHostController, trackListViewModel: TrackListViewModel) {
   WanderwaveTheme {
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-      AppScaffold(navController)
+      AppScaffold(navController, trackListViewModel)
     }
   }
 }
 
 @Composable
-fun AppScaffold(navController: NavHostController) {
+fun AppScaffold(navController: NavHostController, trackListViewModel: TrackListViewModel) {
   val navBackStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = navBackStackEntry?.destination?.route
   val navActions = NavigationActions(navController)
@@ -50,9 +52,11 @@ fun AppScaffold(navController: NavHostController) {
           BottomAppBar(
               modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
                 TOP_LEVEL_DESTINATIONS.forEach { destination ->
-                  Button(onClick = { navActions.navigateTo(destination)}, modifier = Modifier.padding(8.dp)) {
-                    Text(text = destination.route)
-                  }
+                  Button(
+                      onClick = { navActions.navigateTo(destination) },
+                      modifier = Modifier.padding(8.dp)) {
+                        Text(text = destination.route)
+                      }
                 }
               }
         }
@@ -63,6 +67,7 @@ fun AppScaffold(navController: NavHostController) {
             modifier = Modifier.padding(innerPadding)) {
               composable(Route.LAUNCH) { LaunchScreen() }
               composable(Route.LOGIN) { LoginScreen() }
+              composable(Route.TRACK_LIST) { TrackListScreen(trackListViewModel) }
             }
       }
 }
