@@ -20,6 +20,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
 import ch.epfl.cs311.wanderwave.ui.screens.LaunchScreen
@@ -39,6 +40,7 @@ fun App(navController: NavHostController) {
 fun AppScaffold(navController: NavHostController) {
   val navBackStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = navBackStackEntry?.destination?.route
+  val navActions = NavigationActions(navController)
 
   Scaffold(
       bottomBar = {
@@ -48,7 +50,7 @@ fun AppScaffold(navController: NavHostController) {
           BottomAppBar(
               modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
                 TOP_LEVEL_DESTINATIONS.forEach { destination ->
-                  Button(onClick = { /*TODO*/}, modifier = Modifier.padding(8.dp)) {
+                  Button(onClick = { navActions.navigateTo(destination)}, modifier = Modifier.padding(8.dp)) {
                     Text(text = destination.route)
                   }
                 }
