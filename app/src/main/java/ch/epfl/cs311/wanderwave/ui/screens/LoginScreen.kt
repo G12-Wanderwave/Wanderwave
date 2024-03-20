@@ -34,8 +34,11 @@ import kotlinx.coroutines.tasks.await
 
 @Composable
 fun LoginScreen() {
-  //  Text(text = "LoginScreen Placeholder")
+  GoogleSignIn()
+}
 
+@Composable
+fun GoogleSignIn() {
   var user by remember { mutableStateOf(Firebase.auth.currentUser) }
   val launcher =
       rememberFirebaseAuthLauncher(
