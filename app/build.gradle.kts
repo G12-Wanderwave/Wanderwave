@@ -5,6 +5,10 @@ plugins {
     id("com.ncorti.ktfmt.gradle") version "0.16.0"
     kotlin("kapt") // Kotlin annotation processing plugin
     id("com.google.dagger.hilt.android") // Dagger Hilt plugin, used for dependency injection
+
+    id("com.google.gms.google-services") //Google services Gradle plugin
+
+
 }
 
 android {
@@ -89,6 +93,10 @@ dependencies {
     kaptTest("com.google.dagger:hilt-android-compiler:2.49")
 
     implementation("androidx.navigation:navigation-compose:2.6.0-rc01")
+
+    implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
+    implementation("com.google.firebase:firebase-analytics")
+
 }
 kapt {
     correctErrorTypes = true
