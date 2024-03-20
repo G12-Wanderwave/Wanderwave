@@ -12,11 +12,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
 @Composable
-fun TrackListScreen(viewModel: TrackListViewModel) {
+fun TrackListScreen() {
+  val viewModel: TrackListViewModel = hiltViewModel()
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
   Surface(modifier = Modifier.fillMaxSize()) {

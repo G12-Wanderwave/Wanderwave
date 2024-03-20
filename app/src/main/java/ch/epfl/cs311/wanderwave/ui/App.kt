@@ -27,19 +27,18 @@ import ch.epfl.cs311.wanderwave.ui.screens.LaunchScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
-import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
 @Composable
-fun App(navController: NavHostController, trackListViewModel: TrackListViewModel) {
+fun App(navController: NavHostController) {
   WanderwaveTheme {
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-      AppScaffold(navController, trackListViewModel)
+      AppScaffold(navController)
     }
   }
 }
 
 @Composable
-fun AppScaffold(navController: NavHostController, trackListViewModel: TrackListViewModel) {
+fun AppScaffold(navController: NavHostController) {
   val navBackStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = navBackStackEntry?.destination?.route
   val navActions = NavigationActions(navController)
@@ -67,7 +66,7 @@ fun AppScaffold(navController: NavHostController, trackListViewModel: TrackListV
             modifier = Modifier.padding(innerPadding)) {
               composable(Route.LAUNCH) { LaunchScreen() }
               composable(Route.LOGIN) { LoginScreen() }
-              composable(Route.TRACK_LIST) { TrackListScreen(trackListViewModel) }
+              composable(Route.TRACK_LIST) { TrackListScreen() }
             }
       }
 }

@@ -97,6 +97,8 @@ dependencies {
     kaptTest("com.google.dagger:hilt-android-compiler:2.49")
 
     implementation("androidx.navigation:navigation-compose:2.6.0-rc01")
+    // Hilt Navigation Compose library for injecting ViewModels in Compose
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 }
 kapt {
     correctErrorTypes = true
