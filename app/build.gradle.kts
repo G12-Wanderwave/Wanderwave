@@ -100,6 +100,7 @@ dependencies {
 
     implementation("com.google.android.gms:play-services-auth:20.1.0")
 
+    implementation ("com.squareup.okhttp3:okhttp:4.12.0")
 //    implementation ("net.openid:appauth:0.7.0")
 
 }
