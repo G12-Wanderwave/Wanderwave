@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
-import android.graphics.drawable.shapes.Shape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -19,71 +18,63 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 @Composable
 fun LaunchScreen() {
-  Column (
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.Center,
-    modifier = Modifier.fillMaxSize()
-  ){
+  Column(
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.Center,
+      modifier = Modifier.fillMaxSize()) {
+        Text(
+            text = "Launch Screen",
+            modifier = Modifier.padding(16.dp),
+            fontWeight = FontWeight(700),
+            fontSize = 40.sp,
+            color = MaterialTheme.colorScheme.onBackground)
+        Box(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(16.dp)
+                    .border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(16.dp))
+                    .padding(16.dp)) {
+              Text(
+                  text = "Primary",
+                  modifier = Modifier.align(Alignment.Center),
+                  fontWeight = FontWeight(700),
+                  fontSize = 40.sp,
+                  color = MaterialTheme.colorScheme.primary)
+            }
 
-    Text(text = "Launch Screen",
-      modifier = Modifier.padding(16.dp),
-      fontWeight = FontWeight(700),
-      fontSize = 40.sp,
-      color = MaterialTheme.colorScheme.onBackground
-    )
-    Box(
-      modifier = Modifier
-        .fillMaxWidth()
-        .padding(16.dp)
-        .border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(16.dp))
-        .padding(16.dp)
-    ){
-      Text(text = "Primary",
-        modifier = Modifier.align(Alignment.Center),
-        fontWeight = FontWeight(700),
-        fontSize = 40.sp,
-        color = MaterialTheme.colorScheme.primary
-      )
-    }
+        Box(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(16.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(16.dp)) {
+              Text(
+                  text = "primary on surface",
+                  modifier = Modifier.align(Alignment.Center),
+                  fontWeight = FontWeight(700),
+                  fontSize = 30.sp,
+                  color = MaterialTheme.colorScheme.primary)
+            }
 
-    Box(
-      modifier = Modifier
-        .fillMaxWidth()
-        .padding(16.dp)
-        .clip(RoundedCornerShape(16.dp))
-        .background(MaterialTheme.colorScheme.surface)
-        .padding(16.dp)
-    ){
-      Text(text = "primary on surface",
-        modifier = Modifier.align(Alignment.Center),
-        fontWeight = FontWeight(700),
-        fontSize = 30.sp,
-        color = MaterialTheme.colorScheme.primary
-      )
-    }
-
-    Box(
-      modifier = Modifier
-        .fillMaxWidth()
-        .padding(16.dp)
-        .clip(RoundedCornerShape(16.dp))
-        .background(MaterialTheme.colorScheme.primaryContainer)
-        .padding(16.dp)
-    ){
-      Text(text = "Primary Container",
-        modifier = Modifier.align(Alignment.Center),
-        fontWeight = FontWeight(700),
-        fontSize = 40.sp,
-        color = MaterialTheme.colorScheme.onPrimaryContainer
-      )
-    }
-
-
-  }
+        Box(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(16.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .padding(16.dp)) {
+              Text(
+                  text = "Primary Container",
+                  modifier = Modifier.align(Alignment.Center),
+                  fontWeight = FontWeight(700),
+                  fontSize = 40.sp,
+                  color = MaterialTheme.colorScheme.onPrimaryContainer)
+            }
+      }
 }
 
 /*

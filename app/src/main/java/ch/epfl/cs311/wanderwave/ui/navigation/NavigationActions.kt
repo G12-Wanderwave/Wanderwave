@@ -1,14 +1,11 @@
 package ch.epfl.cs311.wanderwave.ui.navigation
 
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.outlined.List
-import androidx.compose.material.icons.outlined.Place
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-
 
 object Route {
   const val LAUNCH = "launch"
@@ -17,6 +14,7 @@ object Route {
 
 // Top level destination
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: Int)
+
 class NavigationActions(val navController: NavHostController) {
 
   val navigationController = navController
@@ -47,7 +45,7 @@ class NavigationActions(val navController: NavHostController) {
 }
 
 val TOP_LEVEL_DESTINATIONS =
-  listOf(
-    TopLevelDestination(route = Route.LAUNCH, icon = Icons.Filled.ExitToApp, textId = 1),
-    TopLevelDestination(route = Route.LOGIN, icon = Icons.Filled.AccountBox, textId = 2),
-  )
+    listOf(
+        TopLevelDestination(route = Route.LAUNCH, icon = Icons.Filled.ExitToApp, textId = 1),
+        TopLevelDestination(route = Route.LOGIN, icon = Icons.Filled.AccountBox, textId = 2),
+    )
