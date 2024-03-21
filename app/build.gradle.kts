@@ -55,6 +55,8 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            merges += "META-INF/LICENSE.md"
+            merges += "META-INF/LICENSE-notice.md"
         }
     }
 }
@@ -70,6 +72,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -99,6 +102,26 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.6.0-rc01")
     // Hilt Navigation Compose library for injecting ViewModels in Compose
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.4.0")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
+
+    androidTestImplementation("com.kaspersky.android-components:kaspresso:1.4.3")
+    // Allure support
+    androidTestImplementation("com.kaspersky.android-components:kaspresso-allure-support:1.4.3")
+    // Jetpack Compose support
+    androidTestImplementation("com.kaspersky.android-components:kaspresso-compose-support:1.4.1")
+
+    // Dependency for using Intents in instrumented tests
+    androidTestImplementation("androidx.test.espresso:espresso-intents:3.5.1")
+
+    // Dependencies for using MockK in instrumented tests
+    androidTestImplementation("io.mockk:mockk:1.13.10")
+    androidTestImplementation("io.mockk:mockk-android:1.13.10")
+    androidTestImplementation("io.mockk:mockk-agent:1.13.10")
 }
 kapt {
     correctErrorTypes = true

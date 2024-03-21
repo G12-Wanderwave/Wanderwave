@@ -14,8 +14,4 @@ class TrackRepositoryImpl @Inject constructor(private val localRepository: Local
   override fun getAll(): Flow<List<Track>> {
     return localRepository.getAll()
   }
-
-  override fun getTrackById(id: String): Flow<Track> {
-    return localRepository.getTrackById(id)
-  }
 }

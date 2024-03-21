@@ -16,8 +16,4 @@ class LocalTrackRepository @Inject constructor(private val database: AppDatabase
   override fun getAll(): Flow<List<Track>> {
     return flow { emit(trackDao.getAll().map { it.toTrack() }) }
   }
-
-  override fun getTrackById(id: String): Flow<Track> {
-    return flow { emit(trackDao.getTrackById(id).toTrack()) }
-  }
 }

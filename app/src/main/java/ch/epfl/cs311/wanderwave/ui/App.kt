@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -31,9 +32,11 @@ import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 @Composable
 fun App(navController: NavHostController) {
   WanderwaveTheme {
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-      AppScaffold(navController)
-    }
+    Surface(
+        modifier = Modifier.fillMaxSize().testTag("app"),
+        color = MaterialTheme.colorScheme.background) {
+          AppScaffold(navController)
+        }
   }
 }
 
@@ -53,7 +56,9 @@ fun AppScaffold(navController: NavHostController) {
                 TOP_LEVEL_DESTINATIONS.forEach { destination ->
                   Button(
                       onClick = { navActions.navigateTo(destination) },
-                      modifier = Modifier.padding(8.dp)) {
+                      modifier =
+                          Modifier.padding(8.dp)
+                              .testTag("bottomAppBarButton" + destination.route)) {
                         Text(text = destination.route)
                       }
                 }
