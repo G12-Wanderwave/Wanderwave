@@ -97,6 +97,14 @@ jobs:
           script: ./gradlew connectedCheck --parallel --build-cache
 
       # This step generates the coverage report which will be used later in the semster for monitoring purposes
-      #- name: Generate coverage
-      #  run: |
-      #    ./gradlew jacocoTestReport
+      - name: Generate coverage
+        run: |
+          ./gradlew jacocoTestReport
+      
+      - name: Show coverage in PR
+        uses: madrapps/jacoco-report@v1.6.1
+        with: 
+          paths: ${{ github.workspace }}/app/build/reports/jacoco/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: '# :lobster: Coverage Report'
+          update-comment: true
