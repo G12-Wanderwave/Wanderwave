@@ -57,10 +57,10 @@ jobs:
             ~/.gradle/wrapper
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
 
-      # To Load a fake google map api key for the test 
+      # To Load a google map api key for the test 
       - name: Loading Local.properties (dummy)
         run: |
-          echo MAPS_API_KEY=\"0\" > ./local.properties 
+          echo MAPS_API_KEY=${{ secrets.MAPS_API_KEY }} > ./local.properties 
 
       - name: Grant execute permission for gradlew
         run: |
