@@ -106,7 +106,10 @@ jobs:
           ./gradlew jacocoTestReport
       
       - name: print coverage report
-        run: cat ${{ github.workspace }}/app/build/reports/jacoco/jacocoTestReport.xml
+        run: |
+          ls build/
+          ls build/reports/
+          cat ${{ github.workspace }}/app/build/reports/jacoco/jacocoTestReport.xml
       
       - name: Show coverage in PR
         uses: madrapps/jacoco-report@v1.6.1
