@@ -70,7 +70,6 @@ jobs:
         run: |
           chmod +x ./gradlew
 
-      # Remove the "#" if you want to enforce the formatting check when pushing on your repo
       - name: KTFmt Check
         run: |
           # To run the CI with debug informations, add --info
@@ -112,3 +111,10 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: '# :lobster: Coverage Report'
           update-comment: true
+
+      - name: Fail PR if coverage is less than 80%
+        if: ${{ steps.jacoco.outputs.coverage < 80.0 }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setFailed('Overall coverage is less than 80%!')
