@@ -16,6 +16,7 @@ jobs:
     # run on a new ubuntu VM
     runs-on: ubuntu-latest
 
+    # need these permissions to modify the PR
     permissions: 
       contents: write
       pull-requests: write
@@ -39,6 +40,7 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
+      # Setup JDK 17 (necessary for gradle)
       - name: Setup JDK
         uses: actions/setup-java@v3
         with:
@@ -62,10 +64,12 @@ jobs:
         run: |
           echo MAPS_API_KEY=${{ secrets.MAPS_API_KEY }} > ./local.properties 
 
+      # Make the gradlew script executable
       - name: Grant execute permission for gradlew
         run: |
           chmod +x ./gradlew
 
+      # Check code formatting and fail if it's not correct
       - name: KTFmt Check
         run: |
           # To run the CI with debug informations, add --info
@@ -77,6 +81,7 @@ jobs:
           # To run the CI with debug information, add --info
           ./gradlew assembleDebug lint --parallel --build-cache
 
+      # Run all unit and instrumentation tests
       - name: Run tests
         run: |
           # To run the CI with debug information, add --info
@@ -108,6 +113,7 @@ jobs:
           title: '# :lobster: Coverage Report'
           update-comment: true
 
+      # Fail the PR if low coverage
       - name: Fail PR if coverage is less than 80%
         if: ${{ steps.jacoco.outputs.coverage < 80.0 }}
         uses: actions/github-script@v6
