@@ -20,6 +20,10 @@ jobs:
     # run on a new ubuntu VM
     runs-on: ubuntu-latest
 
+    permissions: 
+      contents: write
+      pull-requests: write
+
     defaults:
       run:
         working-directory: ./${{ env.base_folder }}
