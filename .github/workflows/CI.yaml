@@ -108,7 +108,10 @@ jobs:
       - name: print coverage report
         run: |
           ls ${{ github.workspace }}/app/build/
+          echo "\n"
           ls ${{ github.workspace }}/app/build/reports/
+          echo "\n"
+          ls ${{ github.workspace }}/app/build/reports/jacoco/
           cat ${{ github.workspace }}/app/build/reports/jacoco/jacocoTestReport.xml
       
       - name: Show coverage in PR
