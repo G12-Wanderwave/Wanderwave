@@ -2,10 +2,6 @@ name: Wanderwave CI
 
 # Run the workflow when commits are pushed on main or when a PR is modified
 on:
-  push:
-    branches:
-      - main
-
   pull_request:
     types:
       - opened
