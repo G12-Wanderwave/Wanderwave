@@ -42,11 +42,13 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 
+/** Composable function to display the LoginScreen. */
 @Composable
 fun LoginScreen() {
-  SpotifySignIn()
+  GoogleSignIn()
 }
 
+/** Composable function to handle Spotify sign in. */
 @Composable
 fun SpotifySignIn() {
 
@@ -55,7 +57,7 @@ fun SpotifySignIn() {
   Button(
       onClick = {
         val authUrl =
-            "https://accounts.spotify.com/authorize?client_id=TODO&response_type=code&redirect_uri=wanderwave://spotifycallback"
+            "https://accounts.spotify.com/authorize?client_id=TODO&response_type=code&redirect_uri=wanderwave://spotifycallback" // TODO Replace with string resource
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(authUrl))
         startActivity(context, intent, null)
         val data: Uri? = intent.data
@@ -69,6 +71,11 @@ fun SpotifySignIn() {
       }
 }
 
+/**
+ * Function to request access token from Spotify.
+ *
+ * @param code The authorization code received from Spotify.
+ */
 private fun requestAccessToken(code: String?) {
 
   val client = OkHttpClient()
@@ -107,8 +114,10 @@ private fun requestAccessToken(code: String?) {
   }
 }
 
+/** Composable function to handle Google sign in. */
 @Composable
 fun GoogleSignIn() {
+
   var user by remember { mutableStateOf(Firebase.auth.currentUser) }
   val launcher =
       rememberFirebaseAuthLauncher(
@@ -137,6 +146,13 @@ fun GoogleSignIn() {
       }
 }
 
+/**
+ * Composable function to remember the Firebase authentication launcher.
+ *
+ * @param onAuthComplete Callback function to handle successful authentication.
+ * @param onAuthError Callback function to handle authentication error.
+ * @return ManagedActivityResultLauncher for handling the result of the authentication activity.
+ */
 @Composable
 fun rememberFirebaseAuthLauncher(
     onAuthComplete: (AuthResult) -> Unit,
