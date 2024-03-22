@@ -51,22 +51,20 @@ fun AppScaffold(navController: NavHostController) {
         Row(
             horizontalArrangement = Arrangement.Center,
         ) {
-            if (currentRoute != Route.LOGIN) {
-                BottomAppBar(
-                    modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)
-                ) {
-                    TOP_LEVEL_DESTINATIONS.forEach { destination ->
-                        Button(
-                            onClick = { navActions.navigateTo(destination) },
-                            modifier =
+          if (currentRoute != Route.LOGIN) {
+            BottomAppBar(
+                modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
+                  TOP_LEVEL_DESTINATIONS.forEach { destination ->
+                    Button(
+                        onClick = { navActions.navigateTo(destination) },
+                        modifier =
                             Modifier.padding(8.dp)
-                                .testTag("bottomAppBarButton" + destination.route)
-                        ) {
-                            Text(text = destination.route)
+                                .testTag("bottomAppBarButton" + destination.route)) {
+                          Text(text = destination.route)
                         }
-                    }
+                  }
                 }
-            }
+          }
         }
       }) { innerPadding ->
         NavHost(

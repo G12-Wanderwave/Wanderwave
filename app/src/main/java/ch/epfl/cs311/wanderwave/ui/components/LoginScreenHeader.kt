@@ -16,14 +16,12 @@ import ch.epfl.cs311.wanderwave.R
 
 @Composable
 fun LoginScreenHeader(modifier: Modifier) {
-    Box(contentAlignment = Alignment.Center, modifier = modifier
-        .fillMaxWidth()
-        .padding(16.dp)) {
-        Row(
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(text = stringResource(id = R.string.header_title), style = MaterialTheme.typography.displayLarge,
-                color = MaterialTheme.colorScheme.primary)
-        }
+  Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxWidth().padding(16.dp)) {
+    Row(horizontalArrangement = Arrangement.Center) {
+      Text(
+          text = stringResource(id = R.string.header_title),
+          style = MaterialTheme.typography.displayLarge,
+          color = MaterialTheme.colorScheme.primary)
     }
+  }
 }

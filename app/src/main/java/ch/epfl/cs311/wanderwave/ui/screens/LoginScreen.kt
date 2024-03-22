@@ -13,6 +13,6 @@ fun LoginScreen() {
   Column(modifier = Modifier.testTag("loginScreen")) {
     LoginScreenHeader(modifier = Modifier.weight(1f))
     WelcomeTitle(modifier = Modifier.weight(4f))
-    SignInButton(modifier = Modifier.weight(1f)){}
+    SignInButton(modifier = Modifier.weight(1f)) {}
   }
 }

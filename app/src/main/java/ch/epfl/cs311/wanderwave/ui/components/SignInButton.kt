@@ -18,16 +18,15 @@ import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
 
 @Composable
-fun SignInButton(modifier: Modifier, onClick: () -> Unit){
-    Box(modifier = modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-        Button(onClick = { onClick() }) {
-            Icon(
-                painter = painterResource(id = R.drawable.spotify_icon_rgb_black),
-                contentDescription = "Spotify Icon",
-                modifier = Modifier.height(27.dp)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(text = "Sign-in with Spotify", style = MaterialTheme.typography.titleMedium)
-        }
+fun SignInButton(modifier: Modifier, onClick: () -> Unit) {
+  Box(modifier = modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+    Button(onClick = { onClick() }) {
+      Icon(
+          painter = painterResource(id = R.drawable.spotify_icon_rgb_black),
+          contentDescription = "Spotify Icon",
+          modifier = Modifier.height(27.dp))
+      Spacer(modifier = Modifier.width(12.dp))
+      Text(text = "Sign-in with Spotify", style = MaterialTheme.typography.titleMedium)
     }
+  }
 }

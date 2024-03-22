@@ -18,16 +18,18 @@ import ch.epfl.cs311.wanderwave.R
 
 @Composable
 fun WelcomeTitle(modifier: Modifier) {
-    Column(verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp)) {
-        Text(text = stringResource(id = R.string.welcome_title), style = MaterialTheme.typography.displayLarge,
+  Column(
+      verticalArrangement = Arrangement.Center,
+      horizontalAlignment = Alignment.CenterHorizontally,
+      modifier = modifier.fillMaxWidth().padding(16.dp)) {
+        Text(
+            text = stringResource(id = R.string.welcome_title),
+            style = MaterialTheme.typography.displayLarge,
             textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(10.dp))
-        Text(text = stringResource(id = R.string.welcome_subtitle),
+        Text(
+            text = stringResource(id = R.string.welcome_subtitle),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center)
-    }
+      }
 }
