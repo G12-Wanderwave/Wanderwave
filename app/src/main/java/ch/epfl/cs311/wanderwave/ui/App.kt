@@ -15,23 +15,28 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
 import ch.epfl.cs311.wanderwave.ui.screens.LaunchScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
+import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 
 @Composable
 fun App(navController: NavHostController) {
   WanderwaveTheme {
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-      AppScaffold(navController)
-    }
+    Surface(
+        modifier = Modifier.fillMaxSize().testTag("app"),
+        color = MaterialTheme.colorScheme.background) {
+          AppScaffold(navController)
+        }
   }
 }
 
@@ -39,6 +44,7 @@ fun App(navController: NavHostController) {
 fun AppScaffold(navController: NavHostController) {
   val navBackStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = navBackStackEntry?.destination?.route
+  val navActions = NavigationActions(navController)
 
   Scaffold(
       bottomBar = {
@@ -48,9 +54,13 @@ fun AppScaffold(navController: NavHostController) {
           BottomAppBar(
               modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
                 TOP_LEVEL_DESTINATIONS.forEach { destination ->
-                  Button(onClick = { /*TODO*/}, modifier = Modifier.padding(8.dp)) {
-                    Text(text = destination.route)
-                  }
+                  Button(
+                      onClick = { navActions.navigateTo(destination) },
+                      modifier =
+                          Modifier.padding(8.dp)
+                              .testTag("bottomAppBarButton" + destination.route)) {
+                        Text(text = destination.route)
+                      }
                 }
               }
         }
@@ -61,6 +71,7 @@ fun AppScaffold(navController: NavHostController) {
             modifier = Modifier.padding(innerPadding)) {
               composable(Route.LAUNCH) { LaunchScreen() }
               composable(Route.LOGIN) { LoginScreen() }
+              composable(Route.TRACK_LIST) { TrackListScreen() }
             }
       }
 }
