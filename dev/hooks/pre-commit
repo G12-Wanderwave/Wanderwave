@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Stash any changes that are not staged for commit
+git stash -k -u
+
+# Run the ktfmtFormat task using gradlew
+./gradlew ktfmtFormat
+
+# Check the exit code of the previous command
+if [[ $? -ne 0 ]]; then
+    echo "ktfmtFormat task failed for some reason."
+    git stash pop -q
+    exit 1
+fi
+
+# Add all changes to the commit
+git add -A
+
+# Restore the stashed changes
+git stash pop -q
+
+# If everything is fine, allow the commit to proceed
+exit 0
