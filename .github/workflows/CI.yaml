@@ -75,6 +75,11 @@ jobs:
         run: |
           chmod +x ./gradlew
 
+      # Clean the project before building it
+      - name: Gradle clean
+        run: |
+          ./gradlew clean
+
       # Check code formatting and fail if it's not correct
       - name: KTFmt Check
         run: |
