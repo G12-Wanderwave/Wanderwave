@@ -5,14 +5,4 @@ plugins {
 
     // Dagger Hilt plugin, used for dependency injection
     id("com.google.dagger.hilt.android") version "2.49" apply false
-    // SonarCloud plugin for running static code analysis
-    id("org.sonarqube") version "4.4.1.3373"
-}
-
-sonar {
-    properties {
-        property("sonar.projectKey", "G12-Wanderwave_Wanderwave")
-        property("sonar.organization", "g12-wanderwave")
-        property("sonar.host.url", "https://sonarcloud.io")
-    }
 }
