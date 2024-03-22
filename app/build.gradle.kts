@@ -5,6 +5,9 @@ plugins {
     id("com.ncorti.ktfmt.gradle") version "0.16.0"
     kotlin("kapt") // Kotlin annotation processing plugin
     id("com.google.dagger.hilt.android") // Dagger Hilt plugin, used for dependency injection
+
+    // SonarCloud plugin for running static code analysis
+    id("org.sonarqube") version "4.4.1.3373"
 }
 
 android {
@@ -125,4 +128,13 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "G12-Wanderwave_Wanderwave")
+        property("sonar.organization", "g12-wanderwave")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+    }
 }
