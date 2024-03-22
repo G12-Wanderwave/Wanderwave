@@ -58,6 +58,12 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
       # To Load a google map api key for the test 
       - name: Loading Local.properties (dummy)
@@ -105,18 +111,8 @@ jobs:
         run: |
           ./gradlew jacocoTestReport
       
-      - name: Show coverage in PR
-        uses: madrapps/jacoco-report@v1.6.1
-        with: 
-          paths: ${{ github.workspace }}/app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: '# :lobster: Coverage Report'
-          update-comment: true
-
-      # Fail the PR if low coverage
-      - name: Fail PR if coverage is less than 80%
-        if: ${{ steps.jacoco.outputs.coverage < 80.0 }}
-        uses: actions/github-script@v6
-        with:
-          script: |
-            core.setFailed('Overall coverage is less than 80%!')
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./gradlew build sonar --info
