@@ -23,7 +23,34 @@
 hs_err_pid*
 replay_pid*
 
+# Gradle temporary files
+.tmp/
+
+# IntelliJ IDEA files
+.idea/
 *.iml
+
+# Ignore Android related files
+android/
+
+# Ignore caches
+caches/
+
+# Ignore daemon files
+daemon/
+
+# Ignore JDKs
+jdks/
+
+# Ignore Kotlin profile
+kotlin-profile/
+
+# Ignore native files
+native/
+
+# Ignore wrapper
+wrapper/
+
 .gradle
 /local.properties
 /.idea/caches

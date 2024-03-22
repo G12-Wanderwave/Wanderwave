@@ -1,0 +1,123 @@
+name: Wanderwave CI
+
+# Run the workflow when commits are pushed on main or when a PR is modified
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+
+jobs:
+  wanderwave-ci:
+    name: CI-Wanderwave
+
+    # run on a new ubuntu VM
+    runs-on: ubuntu-latest
+
+    # need these permissions to modify the PR
+    permissions: 
+      contents: write
+      pull-requests: write
+
+    defaults:
+      run:
+        working-directory: ./${{ env.base_folder }}
+
+    steps:
+      # First step : Checkout the repository on the runner
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of Sonar analysis (if we use Sonar Later)
+
+      # Kernel-based Virtual Machine (KVM) is an open source virtualization technology built into Linux. Enabling it allows the Android emulator to run faster.
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      # Setup JDK 17 (necessary for gradle)
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      # Caching is a very useful part of a CI, as a workflow is executed in a clean environement every time,
+      # this means that one would need to re-download and re-process gradle files for every run. Which is very time consuming.
+      #
+      # To avoid that, we cache the the gradle folder to reuse it later.
+      - name: Cache Gradle
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      # To Load a google map api key for the test 
+      - name: Loading Local.properties (dummy)
+        run: |
+          echo MAPS_API_KEY=${{ secrets.MAPS_API_KEY }} > ./local.properties 
+
+      # Make the gradlew script executable
+      - name: Grant execute permission for gradlew
+        run: |
+          chmod +x ./gradlew
+
+      # Clean the project before building it
+      - name: Gradle clean
+        run: |
+          ./gradlew clean
+
+      # Check code formatting and fail if it's not correct
+      - name: KTFmt Check
+        run: |
+          # To run the CI with debug informations, add --info
+          ./gradlew ktfmtCheck
+
+      # This step runs gradle commands to build the application
+      - name: Assemble
+        run: |
+          # To run the CI with debug information, add --info
+          ./gradlew assembleDebug lint --parallel --build-cache
+
+      # Run all unit and instrumentation tests
+      - name: Run tests
+        run: |
+          # To run the CI with debug information, add --info
+          ./gradlew check --parallel --build-cache
+
+      #run instrumentation tests on an android emulator
+      - name: Run instrumentation tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          avd-name: github
+          force-avd-creation: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: ./gradlew connectedCheck --parallel --build-cache
+
+      # This step generates the coverage report which will be used later in the semster for monitoring purposes
+      - name: Generate coverage
+        run: |
+          ./gradlew jacocoTestReport
+      
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./gradlew build sonar --info
