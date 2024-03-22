@@ -14,5 +14,6 @@ sonar {
         property("sonar.projectKey", "G12-Wanderwave_Wanderwave")
         property("sonar.organization", "g12-wanderwave")
         property("sonar.host.url", "https://sonarcloud.io")
+        property("soner.coverage.jacoco.xmlReportPaths", "app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
     }
 }
