@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">wanderwave</string>
+    <string name="header_title">Wander\u03C8ave</string>
+    <string name="welcome_title">Hello there!</string>
+    <string name="welcome_subtitle">Ready to discover new music?</string>
 </resources>
