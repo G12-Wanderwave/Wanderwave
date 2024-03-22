@@ -25,11 +25,13 @@ fun WelcomeTitle(modifier: Modifier) {
         Text(
             text = stringResource(id = R.string.welcome_title),
             style = MaterialTheme.typography.displayLarge,
-            textAlign = TextAlign.Center)
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface)
         Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = stringResource(id = R.string.welcome_subtitle),
             style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center)
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface)
       }
 }
