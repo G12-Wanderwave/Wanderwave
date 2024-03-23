@@ -11,7 +11,9 @@ import androidx.navigation.NavHostController
 object Route {
   const val LAUNCH = "launch"
   const val LOGIN = "login"
+  const val MAIN = "main"
   const val TRACK_LIST = "trackList"
+  const val THEME = "theme"
 }
 
 // Top level destination
@@ -51,4 +53,6 @@ val TOP_LEVEL_DESTINATIONS =
         TopLevelDestination(route = Route.LAUNCH, icon = Icons.Filled.ExitToApp, textId = 1),
         TopLevelDestination(route = Route.LOGIN, icon = Icons.Filled.AccountBox, textId = 2),
         TopLevelDestination(route = Route.TRACK_LIST, icon = Icons.Filled.List, textId = 3),
+        TopLevelDestination(route = Route.MAIN, icon = Icons.Filled.List, textId = 4),
+        TopLevelDestination(route = Route.THEME, icon = Icons.Filled.List, textId = 5),
     )

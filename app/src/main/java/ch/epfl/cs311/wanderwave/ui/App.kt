@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +27,8 @@ import ch.epfl.cs311.wanderwave.ui.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
 import ch.epfl.cs311.wanderwave.ui.screens.LaunchScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
+import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
+import ch.epfl.cs311.wanderwave.ui.screens.ThemeScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 
@@ -51,7 +54,7 @@ fun AppScaffold(navController: NavHostController) {
         Row(
             horizontalArrangement = Arrangement.Center,
         ) {
-          if (currentRoute != Route.LOGIN) {
+          if (currentRoute != Route.LOGIN && currentRoute != Route.LAUNCH) {
             BottomAppBar(
                 modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
                   TOP_LEVEL_DESTINATIONS.forEach { destination ->
@@ -60,7 +63,7 @@ fun AppScaffold(navController: NavHostController) {
                         modifier =
                             Modifier.padding(8.dp)
                                 .testTag("bottomAppBarButton" + destination.route)) {
-                          Text(text = destination.route)
+                          Text(text = destination.route, modifier = Modifier.width(8.dp))
                         }
                   }
                 }
@@ -71,9 +74,11 @@ fun AppScaffold(navController: NavHostController) {
             navController = navController,
             startDestination = Route.LAUNCH,
             modifier = Modifier.padding(innerPadding)) {
-              composable(Route.LAUNCH) { LaunchScreen() }
-              composable(Route.LOGIN) { LoginScreen() }
+              composable(Route.LAUNCH) { LaunchScreen(navActions) }
+              composable(Route.LOGIN) { LoginScreen(navActions) }
+              composable(Route.MAIN) { MainPlaceHolder(navActions) }
               composable(Route.TRACK_LIST) { TrackListScreen() }
+              composable(Route.THEME) { ThemeScreen() }
             }
       }
 }
