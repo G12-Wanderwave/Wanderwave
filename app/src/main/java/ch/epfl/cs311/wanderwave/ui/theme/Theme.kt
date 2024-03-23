@@ -95,5 +95,5 @@ fun WanderwaveTheme(
     }
   }
 
-  MaterialTheme(colorScheme = colorScheme, content = content)
+  MaterialTheme(colorScheme = colorScheme, content = content, typography = Typography)
 }

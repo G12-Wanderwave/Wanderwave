@@ -11,7 +11,7 @@ import ch.epfl.cs311.wanderwave.ui.components.WelcomeTitle
 @Composable
 fun LoginScreen() {
   Column(modifier = Modifier.testTag("loginScreen")) {
-    LoginScreenHeader(modifier = Modifier.weight(1f))
+    LoginScreenHeader(modifier = Modifier.weight(1.5f))
     WelcomeTitle(modifier = Modifier.weight(4f))
     SignInButton(modifier = Modifier.weight(1f)) {}
   }
