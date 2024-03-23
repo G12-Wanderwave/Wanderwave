@@ -26,6 +26,7 @@ import ch.epfl.cs311.wanderwave.ui.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
 import ch.epfl.cs311.wanderwave.ui.screens.LaunchScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
+import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 
@@ -72,6 +73,7 @@ fun AppScaffold(navController: NavHostController) {
               composable(Route.LAUNCH) { LaunchScreen() }
               composable(Route.LOGIN) { LoginScreen() }
               composable(Route.TRACK_LIST) { TrackListScreen() }
+              composable(Route.MAP) { MapScreen() }
             }
       }
 }

@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -12,6 +13,7 @@ object Route {
   const val LAUNCH = "launch"
   const val LOGIN = "login"
   const val TRACK_LIST = "trackList"
+  const val MAP = "map"
 }
 
 // Top level destination
@@ -51,4 +53,5 @@ val TOP_LEVEL_DESTINATIONS =
         TopLevelDestination(route = Route.LAUNCH, icon = Icons.Filled.ExitToApp, textId = 1),
         TopLevelDestination(route = Route.LOGIN, icon = Icons.Filled.AccountBox, textId = 2),
         TopLevelDestination(route = Route.TRACK_LIST, icon = Icons.Filled.List, textId = 3),
+        TopLevelDestination(route = Route.MAP, icon = Icons.Filled.Place, textId = 4)
     )
