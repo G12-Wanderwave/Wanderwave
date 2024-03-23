@@ -8,6 +8,8 @@ plugins {
     kotlin("kapt") // Kotlin annotation processing plugin
     id("com.google.dagger.hilt.android") // Dagger Hilt plugin, used for dependency injection
 
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+
     // SonarCloud plugin for running static code analysis
     id("org.sonarqube") version "4.4.1.3373"
 }
@@ -93,6 +95,9 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore:24.10.0")
     implementation("com.google.android.play:core-ktx:1.7.0")
     */
+
+    implementation("com.google.maps.android:maps-compose:4.3.3")
+
     implementation("com.google.dagger:hilt-android:2.49")
     kapt("com.google.dagger:hilt-android-compiler:2.49")
 
