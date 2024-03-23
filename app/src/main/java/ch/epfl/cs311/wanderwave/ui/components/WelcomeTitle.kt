@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -26,12 +27,14 @@ fun WelcomeTitle(modifier: Modifier) {
             text = stringResource(id = R.string.welcome_title),
             style = MaterialTheme.typography.displayLarge,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurface)
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.testTag("welcomeTitle"))
         Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = stringResource(id = R.string.welcome_subtitle),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurface)
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.testTag("welcomeSubtitle"))
       }
 }
