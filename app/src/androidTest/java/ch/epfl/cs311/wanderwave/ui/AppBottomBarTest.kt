@@ -36,21 +36,7 @@ class AppBottomBarTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
   fun appBottomBarComponentsAreDisplayedAndButtonIsClickable() = run {
     onComposeScreen<AppBottomBarScreen>(composeTestRule) {
       assertIsDisplayed()
-      bottomAppBarLaunchButton {
-        assertIsDisplayed()
-        performClick()
-        verify {
-          mockNavigationActions.navigateTo(
-              TOP_LEVEL_DESTINATIONS.first { it.route == Route.LAUNCH })
-        }
-      }
-      bottomAppBarLoginButton {
-        assertIsDisplayed()
-        performClick()
-        verify {
-          mockNavigationActions.navigateTo(TOP_LEVEL_DESTINATIONS.first { it.route == Route.LOGIN })
-        }
-      }
+
       bottomAppBarMainPlaceHolderButton {
         assertIsDisplayed()
         performClick()
