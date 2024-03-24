@@ -9,7 +9,5 @@ import com.google.maps.android.compose.GoogleMap
 @Composable
 @Preview
 fun MapScreen() {
-  GoogleMap(
-    modifier = Modifier.testTag("mapScreen")
-  )
+  GoogleMap(modifier = Modifier.testTag("mapScreen"))
 }

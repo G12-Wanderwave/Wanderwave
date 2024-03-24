@@ -53,5 +53,4 @@ val TOP_LEVEL_DESTINATIONS =
         TopLevelDestination(route = Route.LAUNCH, icon = Icons.Filled.ExitToApp, textId = 1),
         TopLevelDestination(route = Route.LOGIN, icon = Icons.Filled.AccountBox, textId = 2),
         TopLevelDestination(route = Route.TRACK_LIST, icon = Icons.Filled.List, textId = 3),
-        TopLevelDestination(route = Route.MAP, icon = Icons.Filled.Place, textId = 4)
-    )
+        TopLevelDestination(route = Route.MAP, icon = Icons.Filled.Place, textId = 4))
