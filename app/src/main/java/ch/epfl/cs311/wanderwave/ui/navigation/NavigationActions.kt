@@ -41,6 +41,10 @@ class NavigationActions(val navController: NavHostController) {
     navigationController.popBackStack()
   }
 
+  val navigateToLogin: () -> Unit = {
+    navigationController.navigate("login") { popUpTo(Route.LOGIN) { inclusive = true } }
+  }
+
   val navigateToCreateToDo: () -> Unit = { navigationController.navigate("createToDo") }
   val navigateToEditToDo: (String) -> Unit = { taskId ->
     navigationController.navigate("editToDo/$taskId")

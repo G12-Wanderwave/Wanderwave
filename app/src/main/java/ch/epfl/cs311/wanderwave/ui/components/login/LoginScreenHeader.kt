@@ -1,4 +1,4 @@
-package ch.epfl.cs311.wanderwave.ui.components
+package ch.epfl.cs311.wanderwave.ui.components.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement

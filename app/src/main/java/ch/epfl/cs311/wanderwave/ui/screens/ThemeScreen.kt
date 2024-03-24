@@ -25,7 +25,7 @@ fun ThemeScreen() {
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center,
-      modifier = Modifier.fillMaxSize().testTag("launchScreen")) {
+      modifier = Modifier.fillMaxSize().testTag("themeScreen")) {
         Text(
             text = "Launch Screen",
             modifier = Modifier.padding(16.dp),
