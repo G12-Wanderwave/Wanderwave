@@ -28,7 +28,9 @@ fun AppBottomBar(navActions: NavigationActions, currentRoute: String?) {
               Button(
                   onClick = { navActions.navigateTo(destination) },
                   modifier =
-                      Modifier.padding(8.dp).testTag("bottomAppBarButton" + destination.route)) {
+                      Modifier.padding(8.dp)
+                          .testTag("bottomAppBarButton" + destination.route)
+                          .width(40.dp)) {
                     Text(text = destination.route, modifier = Modifier.width(8.dp))
                   }
             }
