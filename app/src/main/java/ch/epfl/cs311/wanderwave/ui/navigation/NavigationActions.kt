@@ -40,9 +40,6 @@ class NavigationActions(navController: NavHostController) {
     navigationController.popBackStack()
   }
   */
-  val navigateToLogin: () -> Unit = {
-    navigationController.navigate("login") { popUpTo(Route.LOGIN) { inclusive = true } }
-  }
 }
 
 val TOP_LEVEL_DESTINATIONS =

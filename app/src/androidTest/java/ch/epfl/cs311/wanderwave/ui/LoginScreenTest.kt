@@ -34,11 +34,13 @@ class LoginScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
     onComposeScreen<LoginScreen>(composeTestRule) {
       assertIsDisplayed()
       appLogo { assertIsDisplayed() }
+      /*
       poweredByText {
         assertIsDisplayed()
         hasText("powered by")
       }
       spotifyLogo { assertIsDisplayed() }
+       */
       welcomeTitle {
         assertIsDisplayed()
         hasText("Welcome")

@@ -3,6 +3,8 @@ package ch.epfl.cs311.wanderwave.ui
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.ui.navigation.Route
+import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
@@ -39,6 +41,8 @@ class MainPlaceHolderTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCo
       }
     }
     // Verify that navigateTo is called with the correct argument
-    verify { mockNavigationActions.navigateToLogin() }
+    verify {
+      mockNavigationActions.navigateTo(TOP_LEVEL_DESTINATIONS.first { it.route == Route.LOGIN })
+    }
   }
 }
