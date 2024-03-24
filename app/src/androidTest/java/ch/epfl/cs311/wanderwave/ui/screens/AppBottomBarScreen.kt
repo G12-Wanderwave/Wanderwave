@@ -12,5 +12,4 @@ class AppBottomBarScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
   val bottomAppBarLoginButton = onNode { hasTestTag("bottomAppBarButton" + Route.LOGIN) }
   val bottomAppBarTrackListButton = onNode { hasTestTag("bottomAppBarButton" + Route.TRACK_LIST) }
   val bottomAppBarMainPlaceHolderButton = onNode { hasTestTag("bottomAppBarButton" + Route.MAIN) }
-  val bottomAppBarThemeButton = onNode { hasTestTag("bottomAppBarButton" + Route.THEME) }
 }

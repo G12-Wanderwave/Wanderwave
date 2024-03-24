@@ -1,9 +1,14 @@
 package ch.epfl.cs311.wanderwave.ui
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.MainActivity
+import ch.epfl.cs311.wanderwave.ui.screens.AppBottomBarScreen
 import ch.epfl.cs311.wanderwave.ui.screens.AppScreen
+import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
+import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
+import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -19,4 +24,14 @@ class AppTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport
 
   @Test
   fun appIsDisplayed() = run { onComposeScreen<AppScreen>(composeTestRule) { assertIsDisplayed() } }
+
+  @Test
+  fun canNavigateFromLoginToMainToTrackList() = run {
+    onComposeScreen<LoginScreen>(composeTestRule) { signInButton.performClick() }
+    onComposeScreen<MainPlaceHolder>(composeTestRule) { isDisplayed() }
+    onComposeScreen<AppBottomBarScreen>(composeTestRule) {
+      bottomAppBarTrackListButton.performClick()
+    }
+    onComposeScreen<TrackListScreen>(composeTestRule) { isDisplayed() }
+  }
 }

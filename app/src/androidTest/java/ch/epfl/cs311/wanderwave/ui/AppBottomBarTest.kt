@@ -66,13 +66,6 @@ class AppBottomBarTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
               TOP_LEVEL_DESTINATIONS.first { it.route == Route.TRACK_LIST })
         }
       }
-      bottomAppBarThemeButton {
-        assertIsDisplayed()
-        performClick()
-        verify {
-          mockNavigationActions.navigateTo(TOP_LEVEL_DESTINATIONS.first { it.route == Route.THEME })
-        }
-      }
     }
   }
 }

@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -20,7 +19,6 @@ import ch.epfl.cs311.wanderwave.ui.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.screens.LaunchScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
-import ch.epfl.cs311.wanderwave.ui.screens.ThemeScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 
@@ -51,7 +49,6 @@ fun AppScaffold(navController: NavHostController) {
           composable(Route.LOGIN) { LoginScreen(navActions) }
           composable(Route.MAIN) { MainPlaceHolder(navActions) }
           composable(Route.TRACK_LIST) { TrackListScreen() }
-          composable(Route.THEME) { ThemeScreen() }
         }
   }
 }
