@@ -58,4 +58,15 @@ class AppTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport
       trackListScreen { assertIsDisplayed() }
     }
   }
+
+  @Test
+  fun canNavigateToMapScreen() = run {
+    onComposeScreen<AppScreen>(composeTestRule) {
+      mapScreenButton {
+        assertIsDisplayed()
+        performClick()
+      }
+      mapScreen { assertIsDisplayed() }
+    }
+  }
 }

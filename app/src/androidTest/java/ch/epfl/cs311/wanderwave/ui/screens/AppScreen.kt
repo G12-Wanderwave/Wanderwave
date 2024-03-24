@@ -11,8 +11,10 @@ class AppScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
   val loginScreenButton = onNode { hasTestTag("bottomAppBarButton" + Route.LOGIN) }
   val trackListScreenButton = onNode { hasTestTag("bottomAppBarButton" + Route.TRACK_LIST) }
   val launchScreenButton = onNode { hasTestTag("bottomAppBarButton" + Route.LAUNCH) }
+  val mapScreenButton = onNode { hasTestTag("bottomAppBarButton" + Route.MAP) }
 
   val loginScreen = onNode { hasTestTag("loginScreen") }
   val trackListScreen = onNode { hasTestTag("trackListScreen") }
   val launchScreen = onNode { hasTestTag("launchScreen") }
+  val mapScreen = onNode { hasTestTag("mapScreen") }
 }
