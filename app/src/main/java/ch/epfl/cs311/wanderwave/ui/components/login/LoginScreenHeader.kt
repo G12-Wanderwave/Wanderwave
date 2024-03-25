@@ -31,20 +31,5 @@ fun LoginScreenHeader(modifier: Modifier) {
                     .fillMaxWidth()
                     .padding(start = 50.dp, end = 50.dp)
                     .testTag("appLogo"))
-        /*
-        Spacer(modifier = Modifier.height(10.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Text(
-              text = "powered by",
-              style = MaterialTheme.typography.titleSmall,
-              color = MaterialTheme.colorScheme.onSurface,
-              modifier = Modifier.testTag("poweredByText"))
-          Spacer(modifier = Modifier.width(10.dp))
-          Image(
-              painter = painterResource(id = R.drawable.spotify_logo_cmyk_green),
-              contentDescription = "Spotify logo",
-              modifier = Modifier.height(30.dp).testTag("spotifyLogo"))
-        }
-        */
       }
 }

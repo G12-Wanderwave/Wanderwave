@@ -9,15 +9,3 @@ import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
 fun LaunchScreen(navigationActions: NavigationActions) {
   navigationActions.navigateTo(TOP_LEVEL_DESTINATIONS.first { it.route == Route.LOGIN })
 }
-
-/*
- val user by userSessionViewModel.user.observeAsState()
-
- LaunchedEffect(key1 = user) {
-     if (user != null) {
-         navActions.navigateTo(TOP_LEVEL_DESTINATIONS.first { it.route == Route.MAIN })
-     } else {
-         navActions.navigateTo(DESTINATIONS.first { it.route == Route.LOGIN })
-     }
- }
-*/

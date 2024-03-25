@@ -35,11 +35,10 @@ class NavigationActions(navController: NavHostController) {
       restoreState = true
     }
   }
-  /*
+
   fun goBack() {
     navigationController.popBackStack()
   }
-  */
 }
 
 val TOP_LEVEL_DESTINATIONS =

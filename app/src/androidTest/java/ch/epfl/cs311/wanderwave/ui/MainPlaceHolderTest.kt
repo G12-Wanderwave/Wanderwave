@@ -35,7 +35,7 @@ class MainPlaceHolderTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCo
   fun mainPlaceHolderIsDisplayedAndSignOutButtonClickNavigatesToLogin() = run {
     onComposeScreen<MainPlaceHolder>(composeTestRule) {
       assertIsDisplayed()
-      singOutButton {
+      signOutButton {
         assertIsDisplayed()
         performClick()
       }
