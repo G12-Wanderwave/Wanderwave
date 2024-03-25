@@ -40,11 +40,7 @@ class AppTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport
   fun canNavigateToMapScreen() = run {
     onComposeScreen<LoginScreen>(composeTestRule) { signInButton.performClick() }
     onComposeScreen<MainPlaceHolder>(composeTestRule) { isDisplayed() }
-    onComposeScreen<AppBottomBarScreen>(composeTestRule) {
-      mapScreenButton.performClick()
-    }
-    onComposeScreen<MapScreen>(composeTestRule) {
-      isDisplayed()
-    }
+    onComposeScreen<AppBottomBarScreen>(composeTestRule) { mapScreenButton.performClick() }
+    onComposeScreen<MapScreen>(composeTestRule) { isDisplayed() }
   }
 }

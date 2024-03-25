@@ -18,8 +18,8 @@ import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.screens.LaunchScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
-import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
+import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 
@@ -40,17 +40,17 @@ fun AppScaffold(navController: NavHostController) {
   val currentRoute = navBackStackEntry?.destination?.route
   val navActions = NavigationActions(navController)
 
-  Scaffold(bottomBar = { AppBottomBar(navActions = navActions, currentRoute = currentRoute) }) { innerPadding ->
+  Scaffold(bottomBar = { AppBottomBar(navActions = navActions, currentRoute = currentRoute) }) {
+      innerPadding ->
     NavHost(
-      navController = navController,
-      startDestination = Route.LAUNCH,
-      modifier = Modifier.padding(innerPadding)
-    ) {
-      composable(Route.LAUNCH) { LaunchScreen(navActions) }
-      composable(Route.LOGIN) { LoginScreen(navActions) }
-      composable(Route.MAIN) { MainPlaceHolder(navActions) }
-      composable(Route.TRACK_LIST) { TrackListScreen() }
-      composable(Route.MAP) { MapScreen() }
-    }
+        navController = navController,
+        startDestination = Route.LAUNCH,
+        modifier = Modifier.padding(innerPadding)) {
+          composable(Route.LAUNCH) { LaunchScreen(navActions) }
+          composable(Route.LOGIN) { LoginScreen(navActions) }
+          composable(Route.MAIN) { MainPlaceHolder(navActions) }
+          composable(Route.TRACK_LIST) { TrackListScreen() }
+          composable(Route.MAP) { MapScreen() }
+        }
   }
 }
