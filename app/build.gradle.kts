@@ -125,6 +125,10 @@ dependencies {
     androidTestImplementation("io.mockk:mockk:1.13.10")
     androidTestImplementation("io.mockk:mockk-android:1.13.10")
     androidTestImplementation("io.mockk:mockk-agent:1.13.10")
+
+    // Dependencies for the photo part
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
 }
 kapt {
     correctErrorTypes = true

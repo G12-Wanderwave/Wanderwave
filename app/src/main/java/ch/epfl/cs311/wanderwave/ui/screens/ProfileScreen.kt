@@ -1,21 +1,32 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,31 +34,90 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
+import ch.epfl.cs311.wanderwave.model.data.Profile
+import coil.compose.AsyncImage
 
+const val SCALE_X = 0.5f
+const val SCALE_Y = 0.5f
+const val SCALE_X_TEXTFIELD = 1f
+const val SCALE_Y_TEXTFIELD = 1f
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(profile:Profile) {
+    var isInEditMode by remember { mutableStateOf(false) }
+    var currentProfile by remember { mutableStateOf(profile) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
     ){
         Box(modifier = Modifier
             .fillMaxWidth()) {
-            visitCard(Modifier)
-            profileSwitch(Modifier.align(Alignment.TopEnd))
-            clickableIcon(Modifier.align(Alignment.BottomEnd))
+
+
+            if( !isInEditMode){
+               VisitCard(Modifier,currentProfile)
+            }else{
+                EditableVisitCard(
+                    modifier = Modifier,
+                    profile = currentProfile,
+                    onProfileChange = { updatedProfile ->
+                        currentProfile = updatedProfile
+                        // Additional logic to handle the updated profile can be added here.
+                    }
+                )
+
+            }
+            ProfileSwitch(Modifier.align(Alignment.TopEnd))
+            ClickableIcon(Modifier.align(Alignment.BottomEnd), isInEditMode){ value ->
+                isInEditMode = value
+            }
         }
     }
 }
+
 @Composable
-fun profileSwitch(modifier: Modifier = Modifier){
+fun GetPicture(){
+    var imageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+    val launcher = rememberLauncherForActivityResult(
+        contract =
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        imageUri = uri
+    }
+
+
+    AsyncImage(
+        model = imageUri,
+        contentDescription = null,
+        modifier = Modifier
+            .padding(4.dp)
+            .fillMaxHeight().width(100.dp)
+            .clip(RoundedCornerShape(12.dp)),
+        contentScale = ContentScale.Crop,
+    )
+    Button(onClick = {
+        launcher.launch("image/*")
+    }) {
+        Text(text = "select image")
+    }
+
+
+
+}
+@Composable
+fun ProfileSwitch(modifier: Modifier = Modifier ){
     var isInPublicMode by remember { mutableStateOf(true) }
-    
+
     Switch(
         checked = isInPublicMode,
         onCheckedChange = { //
@@ -58,8 +128,8 @@ fun profileSwitch(modifier: Modifier = Modifier){
         modifier = modifier
             .graphicsLayer{
             // Replace scaleX and scaleY with your desired scale factors
-            scaleX = 0.5f // 1.0f is the original size, 1.5f is 50% larger
-            scaleY = 0.5f
+            scaleX = SCALE_X // 1.0f is the original size, 1.5f is 50% larger
+            scaleY = SCALE_Y
         },
         //TODO: Look again at the color of the theme
         colors = SwitchDefaults.colors(
@@ -72,12 +142,15 @@ fun profileSwitch(modifier: Modifier = Modifier){
         )
 }
 @Composable
-fun clickableIcon(modifier: Modifier){
-    var isInEditMode by remember { mutableStateOf(false) }
+fun ClickableIcon(modifier: Modifier,
+                  isInEditMode: Boolean,
+                  onModeChange: (Boolean) -> Unit){
 
     IconButton(modifier = modifier.
     then(Modifier.size(24.dp)),
-        onClick = { isInEditMode = !isInEditMode}){
+        onClick = { onModeChange(!isInEditMode)
+        //TODO: add the fact to send to the DB the new updated profile
+        }) {
         Icon(Icons.Filled.Create,
             contentDescription = "Edit",
             modifier = modifier,
@@ -89,26 +162,117 @@ fun clickableIcon(modifier: Modifier){
 
 }
 @Composable
-fun visitCard(modifier: Modifier = Modifier){
+fun VisitCard(modifier: Modifier = Modifier,profile: Profile){
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Image(painter = painterResource(id = R.drawable.profile_picture),
+        Image(painter = painterResource(id =profile.profilePictureResId),
               contentDescription = "profile picture",
               modifier = modifier
                   .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 16.dp)
                   .size(width = 150.dp, height = 100.dp)
                   .fillMaxWidth()
                   .testTag("profilePicture"))
+
         Column {
-            Text("First Name2")
-            Text("Last Name")
-            Text("Description")
-            Text("# of likes")
+            Text(profile.firstName)
+            Text(profile.lastName)
+            Text(profile.description)
+            Text(profile.numberOfLikes.toString())
 
         }
     }
 }
+
+
+@Composable
+fun EditableVisitCard(modifier: Modifier = Modifier, profile: Profile, onProfileChange: (Profile) -> Unit) {
+    var firstName by remember { mutableStateOf(profile.firstName) }
+    var lastName by remember { mutableStateOf(profile.lastName) }
+    var description by remember { mutableStateOf(profile.description) }
+
+    Row() {
+        Image(
+            painter = painterResource(id = profile.profilePictureResId),
+            contentDescription = "Profile picture",
+            modifier = modifier
+                .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
+                .size(width = 150.dp, height = 100.dp)
+                .clickable {
+                    val newProfile = if (profile.profilePictureResId == R.drawable.profile_picture) {
+                        profile.copy(profilePictureResId = R.drawable.new_profile)
+                    } else {
+                        profile.copy(profilePictureResId = R.drawable.profile_picture)
+                    }
+                    onProfileChange(newProfile)
+                }
+                .testTag("profilePicture"),
+
+        )
+
+        Column( modifier = modifier
+            .padding(vertical = 50.dp)
+        ){
+            SmallTextField(
+                value = firstName,
+                onValueChange = { newName ->
+                    firstName = newName
+                    onProfileChange(profile.copy(firstName = newName))
+                },
+                label = { Text("First Name") }
+            )
+            SmallTextField(
+                value = lastName,
+                onValueChange = { newName ->
+                    lastName = newName
+                    onProfileChange(profile.copy(lastName = newName))
+                },
+                label = { Text("Last Name") }
+            )
+            SmallTextField(
+                value = description,
+                onValueChange = { newDescription ->
+                    description = newDescription
+                    onProfileChange(profile.copy(description = newDescription))
+                },
+                label = { Text("Description") }
+            )
+
+        }
+    }
+}
+
+@Composable
+fun SmallTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: @Composable () -> Unit
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = label,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(30.dp)
+            .padding(20.dp)
+    )
+}
+
 @Preview
 @Composable
 fun ProfileScreenPreview() {
-    ProfileScreen()
+
+    var profile: Profile by remember{
+        mutableStateOf(
+            Profile(
+            firstName = "First Name",
+            lastName = "Last Name",
+            description = "Description",
+            numberOfLikes = 0,
+            isPublic = true,
+            profilePictureResId = R.drawable.profile_picture
+            )
+        )
+    }
+
+    ProfileScreen(profile)
 }

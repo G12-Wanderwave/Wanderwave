@@ -6,5 +6,7 @@ data class Profile (
     var lastName: String,
     var description: String,
     var numberOfLikes:Int,
-    var isPublic:Boolean
+    var isPublic:Boolean,
+    val profilePictureResId: Int,
+
     )
