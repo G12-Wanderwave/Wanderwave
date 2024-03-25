@@ -1,5 +1,7 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
+import android.content.ContentResolver
+import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -7,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -74,7 +77,7 @@ fun ProfileScreen(profile:Profile) {
                     }
                 )
 
-            }
+           }
             ProfileSwitch(Modifier.align(Alignment.TopEnd))
             ClickableIcon(Modifier.align(Alignment.BottomEnd), isInEditMode){ value ->
                 isInEditMode = value
@@ -84,29 +87,9 @@ fun ProfileScreen(profile:Profile) {
 }
 
 @Composable
-fun GetPicture(){
-    var imageUri by remember {
-        mutableStateOf<Uri?>(null)
-    }
-    val launcher = rememberLauncherForActivityResult(
-        contract =
-        ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        imageUri = uri
-    }
+fun GetPicture(profile:Profile){
 
-
-    AsyncImage(
-        model = imageUri,
-        contentDescription = null,
-        modifier = Modifier
-            .padding(4.dp)
-            .fillMaxHeight().width(100.dp)
-            .clip(RoundedCornerShape(12.dp)),
-        contentScale = ContentScale.Crop,
-    )
     Button(onClick = {
-        launcher.launch("image/*")
     }) {
         Text(text = "select image")
     }
@@ -164,7 +147,8 @@ fun ClickableIcon(modifier: Modifier,
 @Composable
 fun VisitCard(modifier: Modifier = Modifier,profile: Profile){
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Image(painter = painterResource(id =profile.profilePictureResId),
+        AsyncImage(
+            model = profile.profilePictureUri,//painterResource(id =profile.profilePictureResId),
               contentDescription = "profile picture",
               modifier = modifier
                   .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 16.dp)
@@ -172,6 +156,15 @@ fun VisitCard(modifier: Modifier = Modifier,profile: Profile){
                   .fillMaxWidth()
                   .testTag("profilePicture"))
 
+        /*AsyncImage(
+            model = profile.profilePictureUri,
+            contentDescription = null,
+            modifier = Modifier
+                //.padding(4.dp)
+                //.width(100.dp)
+                .clip(RoundedCornerShape(12.dp)),
+            contentScale = ContentScale.Crop,
+        )*/
         Column {
             Text(profile.firstName)
             Text(profile.lastName)
@@ -189,25 +182,49 @@ fun EditableVisitCard(modifier: Modifier = Modifier, profile: Profile, onProfile
     var lastName by remember { mutableStateOf(profile.lastName) }
     var description by remember { mutableStateOf(profile.description) }
 
+    var imageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+    val launcher = rememberLauncherForActivityResult(
+        contract =
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        imageUri = uri
+    }
+    profile.profilePictureUri = imageUri
+
     Row() {
-        Image(
-            painter = painterResource(id = profile.profilePictureResId),
+        AsyncImage(
+            model = profile.profilePictureUri,//painterResource(id = ),
             contentDescription = "Profile picture",
             modifier = modifier
                 .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
                 .size(width = 150.dp, height = 100.dp)
                 .clickable {
-                    val newProfile = if (profile.profilePictureResId == R.drawable.profile_picture) {
-                        profile.copy(profilePictureResId = R.drawable.new_profile)
-                    } else {
-                        profile.copy(profilePictureResId = R.drawable.profile_picture)
-                    }
+                    launcher.launch("image/*")
+
+                    /*val newProfile =
+                        if (profile.profilePictureResId == R.drawable.profile_picture) {
+                            profile.copy(profilePictureResId = R.drawable.new_profile)
+                        } else {
+                            profile.copy(profilePictureResId = R.drawable.profile_picture)
+                        }
                     onProfileChange(newProfile)
+                    */
                 }
                 .testTag("profilePicture"),
 
         )
-
+/*
+        AsyncImage(
+            model = profile.profilePictureResId,
+            contentDescription = null,
+            modifier = Modifier
+                //.padding(4.dp)
+                //.width(100.dp)
+                .clip(RoundedCornerShape(12.dp)),
+            contentScale = ContentScale.Crop,
+        )*/
         Column( modifier = modifier
             .padding(vertical = 50.dp)
         ){
@@ -249,27 +266,28 @@ fun SmallTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = label,
+        //label = label,
         modifier = Modifier
-            .fillMaxWidth()
-            .height(30.dp)
-            .padding(20.dp)
+            .height(IntrinsicSize.Min)
+
+            //.fillMaxWidth()
+            //.height(30.dp)
     )
 }
+
 
 @Preview
 @Composable
 fun ProfileScreenPreview() {
-
     var profile: Profile by remember{
         mutableStateOf(
             Profile(
-            firstName = "First Name",
-            lastName = "Last Name",
-            description = "Description",
+            firstName = "My Name",
+            lastName = "My Name",
+            description = "My Description",
             numberOfLikes = 0,
             isPublic = true,
-            profilePictureResId = R.drawable.profile_picture
+            profilePictureUri = null
             )
         )
     }
