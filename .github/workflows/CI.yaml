@@ -69,8 +69,6 @@ jobs:
       - name: Loading Local.properties (dummy)
         run: |
           echo MAPS_API_KEY=${{ secrets.MAPS_API_KEY }} > ./local.properties 
-          pwd
-          cat ./local.properties
 
       # Make the gradlew script executable
       - name: Grant execute permission for gradlew
