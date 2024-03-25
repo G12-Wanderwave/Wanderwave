@@ -68,9 +68,9 @@ jobs:
       # To Load a google map api key for the test 
       - name: Loading Local.properties (dummy)
         run: |
-          pwd
-          ls
           echo MAPS_API_KEY=${{ secrets.MAPS_API_KEY }} > ./local.properties 
+          pwd
+          cat ./local.properties
 
       # Make the gradlew script executable
       - name: Grant execute permission for gradlew
