@@ -27,6 +27,10 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // Spotify API redirect URI: wanderwave-auth://callback
+        manifestPlaceholders["redirectSchemeName"] = "wanderwave-auth"
+        manifestPlaceholders["redirectHostName"] = "callback"
     }
 
     buildTypes {
@@ -91,6 +95,10 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation(libs.spotify.auth)
+    implementation(libs.gson)
+    implementation(files("../libs/spotify-app-remote-release-0.8.0.aar"))
 
     implementation("androidx.room:room-runtime:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
