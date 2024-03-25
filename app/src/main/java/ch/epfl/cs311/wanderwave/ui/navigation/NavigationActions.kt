@@ -36,6 +36,10 @@ class NavigationActions(navController: NavHostController) {
     }
   }
 
+  fun navigateTo(route: String) {
+    navigationController.navigate(route)
+  }
+
   fun goBack() {
     navigationController.popBackStack()
   }

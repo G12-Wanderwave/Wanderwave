@@ -31,13 +31,10 @@ import kotlinx.coroutines.launch
 fun App(navController: NavHostController) {
   WanderwaveTheme {
     Surface(
-      modifier = Modifier
-        .fillMaxSize()
-        .testTag("appScreen"),
-      color = MaterialTheme.colorScheme.background
-    ) {
-      AppScaffold(navController)
-    }
+        modifier = Modifier.fillMaxSize().testTag("appScreen"),
+        color = MaterialTheme.colorScheme.background) {
+          AppScaffold(navController)
+        }
   }
 }
 
@@ -46,33 +43,26 @@ fun AppScaffold(navController: NavHostController) {
   val navBackStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = navBackStackEntry?.destination?.route
   val navActions = NavigationActions(navController)
-  val snackbarHostState  = remember { SnackbarHostState() }
+  val snackbarHostState = remember { SnackbarHostState() }
 
   val scope = rememberCoroutineScope()
 
   val showSnackbar = { message: String ->
-    scope.launch {
-      snackbarHostState.showSnackbar(message)
-    }
+    scope.launch { snackbarHostState.showSnackbar(message) }
     Unit
   }
 
   Scaffold(
-    bottomBar = { AppBottomBar(navActions = navActions, currentRoute = currentRoute) },
-    snackbarHost = {
-      SnackbarHost(
-        hostState = snackbarHostState
-      )
-    }) { innerPadding ->
-    NavHost(
-      navController = navController,
-      startDestination = Route.LAUNCH,
-      modifier = Modifier.padding(innerPadding)
-    ) {
-      composable(Route.LAUNCH) { LaunchScreen(navActions) }
-      composable(Route.LOGIN) { LoginScreen(navActions, showSnackbar) }
-      composable(Route.MAIN) { MainPlaceHolder(navActions) }
-      composable(Route.TRACK_LIST) { TrackListScreen() }
-    }
-  }
+      bottomBar = { AppBottomBar(navActions = navActions, currentRoute = currentRoute) },
+      snackbarHost = { SnackbarHost(hostState = snackbarHostState) }) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = Route.LAUNCH,
+            modifier = Modifier.padding(innerPadding)) {
+              composable(Route.LAUNCH) { LaunchScreen(navActions) }
+              composable(Route.LOGIN) { LoginScreen(navActions, showSnackbar) }
+              composable(Route.MAIN) { MainPlaceHolder(navActions) }
+              composable(Route.TRACK_LIST) { TrackListScreen() }
+            }
+      }
 }
