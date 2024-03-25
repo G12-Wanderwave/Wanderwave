@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "wanderwave"
+rootProject.name = "Wanderwave"
 include(":app")
  
