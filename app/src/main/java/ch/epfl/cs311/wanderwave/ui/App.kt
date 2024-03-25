@@ -4,9 +4,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.navigation.NavHostController
@@ -21,15 +25,19 @@ import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun App(navController: NavHostController) {
   WanderwaveTheme {
     Surface(
-        modifier = Modifier.fillMaxSize().testTag("appScreen"),
-        color = MaterialTheme.colorScheme.background) {
-          AppScaffold(navController)
-        }
+      modifier = Modifier
+        .fillMaxSize()
+        .testTag("appScreen"),
+      color = MaterialTheme.colorScheme.background
+    ) {
+      AppScaffold(navController)
+    }
   }
 }
 
@@ -38,17 +46,33 @@ fun AppScaffold(navController: NavHostController) {
   val navBackStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = navBackStackEntry?.destination?.route
   val navActions = NavigationActions(navController)
+  val snackbarHostState  = remember { SnackbarHostState() }
 
-  Scaffold(bottomBar = { AppBottomBar(navActions = navActions, currentRoute = currentRoute) }) {
-      innerPadding ->
+  val scope = rememberCoroutineScope()
+
+  val showSnackbar = { message: String ->
+    scope.launch {
+      snackbarHostState.showSnackbar(message)
+    }
+    Unit
+  }
+
+  Scaffold(
+    bottomBar = { AppBottomBar(navActions = navActions, currentRoute = currentRoute) },
+    snackbarHost = {
+      SnackbarHost(
+        hostState = snackbarHostState
+      )
+    }) { innerPadding ->
     NavHost(
-        navController = navController,
-        startDestination = Route.LAUNCH,
-        modifier = Modifier.padding(innerPadding)) {
-          composable(Route.LAUNCH) { LaunchScreen(navActions) }
-          composable(Route.LOGIN) { LoginScreen(navActions) }
-          composable(Route.MAIN) { MainPlaceHolder(navActions) }
-          composable(Route.TRACK_LIST) { TrackListScreen() }
-        }
+      navController = navController,
+      startDestination = Route.LAUNCH,
+      modifier = Modifier.padding(innerPadding)
+    ) {
+      composable(Route.LAUNCH) { LaunchScreen(navActions) }
+      composable(Route.LOGIN) { LoginScreen(navActions, showSnackbar) }
+      composable(Route.MAIN) { MainPlaceHolder(navActions) }
+      composable(Route.TRACK_LIST) { TrackListScreen() }
+    }
   }
 }

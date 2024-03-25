@@ -15,7 +15,7 @@ import ch.epfl.cs311.wanderwave.ui.components.login.WelcomeTitle
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 
 @Composable
-fun LoginScreen(navigationActions: NavigationActions) {
+fun LoginScreen(navigationActions: NavigationActions, showMessage: (String) -> Unit){
   var spotifyLoginShown: Boolean by remember { mutableStateOf(false) }
 
   Column(modifier = Modifier.testTag("loginScreen")) {
@@ -24,9 +24,9 @@ fun LoginScreen(navigationActions: NavigationActions) {
     SignInButton(modifier = Modifier.weight(1f)) { spotifyLoginShown = true }
     if (spotifyLoginShown) {
       SpotifyAuthentication(
-          onSuccess = { token, expiresIn -> println("Logged in with token: $token, expiresIn: $expiresIn") },
-          onError = { println("Error logging in: $it") },
-          onCancel = { println("User cancelled login") })
+          onSuccess = { token, expiresIn -> showMessage("Logged in with token: $token, expiresIn: $expiresIn") },
+          onError = { showMessage("Error logging in: $it") },
+          onCancel = { showMessage("User cancelled login") })
     }
   }
 }
