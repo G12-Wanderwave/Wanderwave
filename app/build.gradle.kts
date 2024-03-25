@@ -10,6 +10,9 @@ plugins {
 
     // SonarCloud plugin for running static code analysis
     id("org.sonarqube") version "4.4.1.3373"
+
+    // handling secrets.properties
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
@@ -186,4 +189,12 @@ sonar {
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
     }
+}
+
+secrets {
+    propertiesFileName = "secrets.properties"
+
+    defaultPropertiesFileName = "local.defaults.properties"
+
+    ignoreList.add("sdk.*")       // Ignore all keys matching the regexp "sdk.*"
 }
