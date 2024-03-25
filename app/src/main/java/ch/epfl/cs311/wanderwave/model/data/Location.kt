@@ -13,7 +13,7 @@ data class Location(
    * Name of the location.
    * Useful if the location corresponds to some point of interest.
    */
-  val name: String,
+  val name: String = "",
 
 ) {
   fun toLatLng(): LatLng {
