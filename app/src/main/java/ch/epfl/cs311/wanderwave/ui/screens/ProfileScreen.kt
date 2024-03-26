@@ -7,6 +7,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -18,9 +19,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -57,44 +61,35 @@ fun ProfileScreen(profile:Profile) {
     var isInEditMode by remember { mutableStateOf(false) }
     var currentProfile by remember { mutableStateOf(profile) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-    ){
-        Box(modifier = Modifier
-            .fillMaxWidth()) {
+    if (isInEditMode){
 
+        EditableVisitCard(
+            profile = currentProfile,
+            onProfileChange = { updatedProfile ->
+                currentProfile = updatedProfile
+                // Additional logic to handle the updated profile can be added here.
+            }
+        )
+        ClickableIcon(Modifier,Icons.Filled.ExitToApp, isInEditMode){ value ->
+            isInEditMode = value
+        }
+    }else{
 
-            if( !isInEditMode){
-               VisitCard(Modifier,currentProfile)
-            }else{
-                EditableVisitCard(
-                    modifier = Modifier,
-                    profile = currentProfile,
-                    onProfileChange = { updatedProfile ->
-                        currentProfile = updatedProfile
-                        // Additional logic to handle the updated profile can be added here.
-                    }
-                )
-
-           }
-            ProfileSwitch(Modifier.align(Alignment.TopEnd))
-            ClickableIcon(Modifier.align(Alignment.BottomEnd), isInEditMode){ value ->
-                isInEditMode = value
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ){
+            Box(modifier = Modifier
+                .fillMaxWidth()) {
+                VisitCard(Modifier,currentProfile)
+                ProfileSwitch(Modifier.align(Alignment.TopEnd))
+                ClickableIcon(Modifier.align(Alignment.BottomEnd),Icons.Filled.Create, isInEditMode){ value ->
+                    isInEditMode = value
+                }
             }
         }
+
     }
-}
-
-@Composable
-fun GetPicture(profile:Profile){
-
-    Button(onClick = {
-    }) {
-        Text(text = "select image")
-    }
-
-
 
 }
 @Composable
@@ -126,6 +121,7 @@ fun ProfileSwitch(modifier: Modifier = Modifier ){
 }
 @Composable
 fun ClickableIcon(modifier: Modifier,
+                  icon : ImageVector,
                   isInEditMode: Boolean,
                   onModeChange: (Boolean) -> Unit){
 
@@ -134,7 +130,7 @@ fun ClickableIcon(modifier: Modifier,
         onClick = { onModeChange(!isInEditMode)
         //TODO: add the fact to send to the DB the new updated profile
         }) {
-        Icon(Icons.Filled.Create,
+        Icon(icon,
             contentDescription = "Edit",
             modifier = modifier,
             tint = if (isInEditMode)  MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary
@@ -147,24 +143,25 @@ fun ClickableIcon(modifier: Modifier,
 @Composable
 fun VisitCard(modifier: Modifier = Modifier,profile: Profile){
     Row(verticalAlignment = Alignment.CenterVertically) {
-        AsyncImage(
-            model = profile.profilePictureUri,//painterResource(id =profile.profilePictureResId),
-              contentDescription = "profile picture",
-              modifier = modifier
-                  .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 16.dp)
-                  .size(width = 150.dp, height = 100.dp)
-                  .fillMaxWidth()
-                  .testTag("profilePicture"))
-
-        /*AsyncImage(
-            model = profile.profilePictureUri,
-            contentDescription = null,
-            modifier = Modifier
-                //.padding(4.dp)
-                //.width(100.dp)
-                .clip(RoundedCornerShape(12.dp)),
-            contentScale = ContentScale.Crop,
-        )*/
+        if (profile.profilePictureUri != null) {
+            AsyncImage(
+                model = profile.profilePictureUri,
+                contentDescription = "Profile picture",
+                modifier = modifier
+                    .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
+                    .size(width = 150.dp, height = 100.dp)
+                    .testTag("profilePicture")
+            )
+        } else {
+            Image(
+                painter = painterResource(id = R.drawable.profile_picture),
+                contentDescription = "Profile picture",
+                modifier = modifier
+                    .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
+                    .size(width = 150.dp, height = 100.dp)
+                    .testTag("profilePicture")
+            )
+        }
         Column {
             Text(profile.firstName)
             Text(profile.lastName)
@@ -191,75 +188,93 @@ fun EditableVisitCard(modifier: Modifier = Modifier, profile: Profile, onProfile
     ) { uri: Uri? ->
         imageUri = uri
     }
-    profile.profilePictureUri = imageUri
+    if(imageUri!=null)profile.profilePictureUri=imageUri
 
-    Row() {
-        AsyncImage(
-            model = profile.profilePictureUri,//painterResource(id = ),
-            contentDescription = "Profile picture",
-            modifier = modifier
-                .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
-                .size(width = 150.dp, height = 100.dp)
-                .clickable {
-                    launcher.launch("image/*")
-
-                    /*val newProfile =
-                        if (profile.profilePictureResId == R.drawable.profile_picture) {
-                            profile.copy(profilePictureResId = R.drawable.new_profile)
-                        } else {
-                            profile.copy(profilePictureResId = R.drawable.profile_picture)
+    Column (){
+        Box(modifier = Modifier.fillMaxWidth()) {
+            if (profile.profilePictureUri != null) {
+                AsyncImage(
+                    model = profile.profilePictureUri,
+                    contentDescription = "Profile picture",
+                    modifier = modifier
+                        .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
+                        .size(width = 150.dp, height = 100.dp)
+                        .clickable {
+                            launcher.launch("image/*")
                         }
-                    onProfileChange(newProfile)
-                    */
-                }
-                .testTag("profilePicture"),
+                        .align(Alignment.Center) // Center horizontally and vertically inside the Box
+                    .testTag("profilePicture")
+                )
+            } else {
+                Image(
+                    painter = painterResource(id = R.drawable.profile_picture),
+                    contentDescription = "Profile picture",
+                    modifier = modifier
+                        .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
+                        .size(width = 150.dp, height = 100.dp)
+                        .clickable {
+                            launcher.launch("image/*")
+                        }
+                        .align(Alignment.Center)
+                        .testTag("profilePicture")
+                )
+            }
+        }
 
-        )
-/*
-        AsyncImage(
-            model = profile.profilePictureResId,
-            contentDescription = null,
-            modifier = Modifier
-                //.padding(4.dp)
-                //.width(100.dp)
-                .clip(RoundedCornerShape(12.dp)),
-            contentScale = ContentScale.Crop,
-        )*/
-        Column( modifier = modifier
-            .padding(vertical = 50.dp)
-        ){
-            SmallTextField(
-                value = firstName,
-                onValueChange = { newName ->
-                    firstName = newName
-                    onProfileChange(profile.copy(firstName = newName))
-                },
-                label = { Text("First Name") }
-            )
-            SmallTextField(
-                value = lastName,
-                onValueChange = { newName ->
-                    lastName = newName
-                    onProfileChange(profile.copy(lastName = newName))
-                },
-                label = { Text("Last Name") }
-            )
-            SmallTextField(
-                value = description,
-                onValueChange = { newDescription ->
-                    description = newDescription
-                    onProfileChange(profile.copy(description = newDescription))
-                },
-                label = { Text("Description") }
-            )
+
+        Row(horizontalArrangement = Arrangement.Center){
+            Column (
+                modifier= Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally// Spacing between items
+            ){
+                Row(
+
+                ){
+
+                    SmallTextField(
+                        value = firstName,
+                        modifier = Modifier
+                            .width(150.dp),
+                        onValueChange = { newName ->
+                            firstName = newName
+                            onProfileChange(profile.copy(firstName = newName))
+                        },
+                        label = { Text("First Name") }
+                    )
+                    SmallTextField(
+                        value = lastName,
+                        modifier = Modifier
+                            .width(150.dp),
+                        onValueChange = { newName ->
+                            lastName = newName
+                            onProfileChange(profile.copy(lastName = newName))
+                        },
+                        label = { Text("Last Name") }
+                    )
+                }
+                SmallTextField(
+                    value = description,
+                    modifier = Modifier,
+                    onValueChange = { newDescription ->
+                        description = newDescription
+                        onProfileChange(profile.copy(description = newDescription))
+                    },
+                    label = { Text("Description") }
+                )
+
+            }
 
         }
     }
 }
 
+
+
 @Composable
 fun SmallTextField(
     value: String,
+    modifier: Modifier,
     onValueChange: (String) -> Unit,
     label: @Composable () -> Unit
 ) {
@@ -267,15 +282,17 @@ fun SmallTextField(
         value = value,
         onValueChange = onValueChange,
         //label = label,
-        modifier = Modifier
+        modifier = modifier
             .height(IntrinsicSize.Min)
-
-            //.fillMaxWidth()
-            //.height(30.dp)
+            .padding(horizontal = 8.dp)
     )
 }
 
+@Composable
+fun SelectImage(){
 
+
+}
 @Preview
 @Composable
 fun ProfileScreenPreview() {
