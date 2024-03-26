@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.viewmodel
 import androidx.lifecycle.ViewModel
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
+import ch.epfl.cs311.wanderwave.model.repository.BeaconRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,7 +13,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MapViewModel @Inject constructor(private val repository: BeaconRepository) :
+class MapViewModel @Inject constructor(private val repository: BeaconRepositoryImpl) :
   ViewModel() {
 
   private val _uiState = MutableStateFlow(BeaconListUiState(loading = true))
