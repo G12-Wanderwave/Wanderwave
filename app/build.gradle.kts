@@ -106,6 +106,9 @@ dependencies {
 
     implementation("com.google.maps.android:maps-compose:4.3.3")
 
+    implementation("com.google.android.gms:play-services-location:21.1.0")
+    implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
+
     implementation("com.google.dagger:hilt-android:2.49")
     kapt("com.google.dagger:hilt-android-compiler:2.49")
 
