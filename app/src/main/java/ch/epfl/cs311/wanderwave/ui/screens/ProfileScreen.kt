@@ -276,7 +276,7 @@ fun EditableTextFields(
             value = description,
             modifier =
                 Modifier.height(IntrinsicSize.Min)
-                    .width(338.dp) // TODO: see how to do well
+                    .width(338.dp)
                     .padding(horizontal = 8.dp)
                     .testTag("description"),
             onValueChange = onDescriptionChange,
@@ -303,6 +303,7 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit) {
             colors = ButtonDefaults.buttonColors(containerColor = md_theme_light_primary),
             modifier = Modifier.width(100.dp).testTag("saveButton")) {
               Text("Save")
+            //TODO: Send the data to the server
             }
         Spacer(modifier = Modifier.width(8.dp))
         Button(
