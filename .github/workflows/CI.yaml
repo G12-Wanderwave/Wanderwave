@@ -16,6 +16,9 @@ jobs:
     # run on a new ubuntu VM
     runs-on: ubuntu-latest
 
+    env:
+      KEYSTORE_RELEASE_PASSWORD: ${{ secrets.KEYSTORE_RELEASE_PASSWORD }}
+
     # need these permissions to modify the PR
     permissions: 
       contents: write
@@ -70,6 +73,9 @@ jobs:
         run: |
           echo MAPS_API_KEY=${{ secrets.MAPS_API_KEY }} >> ./secrets.properties 
           echo SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }} >> ./secrets.properties 
+          mkdir ~/.android
+          echo "${{ secrets.KEYSTORE_DEBUG_B64 }}" | base64 -d > ~/.android/debug.keystore
+          echo "${{ secrets.KEYSTORE_RELEASE_B64 }}" | base64 -d > ./release.keystore
 
       # Make the gradlew script executable
       - name: Grant execute permission for gradlew
