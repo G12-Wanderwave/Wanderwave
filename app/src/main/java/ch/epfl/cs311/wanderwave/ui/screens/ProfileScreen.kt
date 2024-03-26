@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -31,6 +32,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -43,10 +45,13 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_error
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_primary
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import coil.compose.AsyncImage
 
 const val SCALE_X = 0.5f
@@ -63,42 +68,35 @@ val INPUT_BOX_NAM_SIZE = 150.dp
  * @since 1.0
  * @last update 1.0
  *
- * @param profile the profile of the user
- **/
+ * @param viewModel the viewModel that will handle the profile
+ * **/
 @Composable
-fun ProfileScreen(profile:Profile) {
-    var isInEditMode by remember { mutableStateOf(false) }
-    var currentProfile by remember { mutableStateOf(profile) }
+fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
+    // Observe LiveData changes and convert them into state for Composable to react
+    val currentProfileState by viewModel.profile.observeAsState()
+    val isInEditMode by viewModel.isInEditMode.observeAsState(false)
 
-    if (isInEditMode){
+    // If currentProfileState is null, do not proceed to render the UI
+    val currentProfile: Profile = currentProfileState ?: return
 
+    if (isInEditMode) {
         EditableVisitCard(
             profile = currentProfile,
             onProfileChange = { updatedProfile ->
-                currentProfile = updatedProfile
+                // Instead of changing local state, directly update the ViewModel
+                viewModel.updateProfile(updatedProfile)
             },
-            isInEditMode = isInEditMode
-        ){ value ->
-            isInEditMode = value
-        }
-    }else{
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-        ){
-            Box(modifier = Modifier
-                .fillMaxWidth()) {
-                VisitCard(Modifier,currentProfile)
-                ProfileSwitch(Modifier.align(Alignment.TopEnd))
-                ClickableIcon(Modifier.align(Alignment.BottomEnd),Icons.Filled.Create, isInEditMode){ value ->
-                    isInEditMode = value
-                }
+            viewModel = viewModel
+        )
+    } else {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                VisitCard(Modifier, currentProfile)
+                ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
+                ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create, viewModel)
             }
         }
-
     }
-
 }
 /**
  * This handle the logic behind the switch that can permit the user to switch to the anonymous mode
@@ -109,15 +107,14 @@ fun ProfileScreen(profile:Profile) {
  * @param modifier to place the switch at a  place, and still be able to modify it.
 **/
 @Composable
-fun ProfileSwitch(modifier: Modifier = Modifier ){
-    var isInPublicMode by remember { mutableStateOf(true) }
+fun ProfileSwitch(modifier: Modifier = Modifier ,viewModel: ProfileViewModel){
 
     Switch(
-        checked = isInPublicMode,
+        checked = viewModel.isInPublicMode.value?:true,
         onCheckedChange = { //
             //TODO: add the fact that we are going anonymous,
             //This could be done by just settings a certain value in the profile class to 1
-            isInPublicMode = !isInPublicMode
+            viewModel.togglePublicMode()
                           },
         modifier = modifier
             .graphicsLayer{
@@ -149,16 +146,18 @@ fun ProfileSwitch(modifier: Modifier = Modifier ){
 @Composable
 fun ClickableIcon(modifier: Modifier,
                   icon : ImageVector,
-                  isInEditMode: Boolean,
-                  onModeChange: (Boolean) -> Unit){
+                  viewModel: ProfileViewModel,){
 
     IconButton(modifier = modifier.
     then(Modifier.size(24.dp)),
-        onClick = { onModeChange(!isInEditMode)}) {
+        onClick = {
+            viewModel.toggleEditMode()
+            Log.d("Edit button clicked",viewModel.isInEditMode.value.toString())
+        }) {
         Icon(icon,
             contentDescription = "Edit",
             modifier = modifier,
-            tint = if (isInEditMode) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary
+           // tint = if (isInEditMode) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary
         )
 
     }
@@ -325,7 +324,9 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit) {
  * @param onModeChange enable to transmit the changed to the caller
  **/
 @Composable
-fun EditableVisitCard(profile: Profile, onProfileChange: (Profile) -> Unit, isInEditMode: Boolean, onModeChange: (Boolean) -> Unit) {
+fun EditableVisitCard(profile: Profile,
+                      onProfileChange: (Profile) -> Unit,
+                    viewModel: ProfileViewModel){
     val profile2 = profile.copy()
     var firstName by remember { mutableStateOf(profile2.firstName) }
     var lastName by remember { mutableStateOf(profile2.lastName) }
@@ -349,10 +350,10 @@ fun EditableVisitCard(profile: Profile, onProfileChange: (Profile) -> Unit, isIn
         Spacer(Modifier.padding(18.dp))
         ActionButtons(
             onSave = {
-                onModeChange(!isInEditMode)
+                viewModel.toggleEditMode()
                 onProfileChange(profile.copy(firstName = firstName, lastName = lastName, description = description, profilePictureUri = profile2.profilePictureUri))
             },            onCancel = {
-                onModeChange(!isInEditMode)
+                viewModel.toggleEditMode()
             }
         )
     }
@@ -411,5 +412,5 @@ fun ProfileScreenPreview() {
         )
     }
 
-    ProfileScreen(profile)
+    ProfileScreen(ProfileViewModel())
 }
