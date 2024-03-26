@@ -65,10 +65,11 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      # To Load a google map api key for the test 
-      - name: Loading Local.properties (dummy)
+      # Load secrets
+      - name: Loading secrets.properties
         run: |
-          echo MAPS_API_KEY=${{ secrets.MAPS_API_KEY }} > ./local.properties 
+          echo MAPS_API_KEY=${{ secrets.MAPS_API_KEY }} >> ./secrets.properties 
+          echo SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }} >> ./secrets.properties 
 
       # Make the gradlew script executable
       - name: Grant execute permission for gradlew
