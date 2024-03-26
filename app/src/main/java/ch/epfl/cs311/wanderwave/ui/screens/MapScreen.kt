@@ -7,11 +7,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.local.BeaconEntity
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.maps.android.compose.GoogleMap
@@ -23,7 +21,7 @@ import com.google.maps.android.compose.MarkerState
 fun MapScreen() {
   val viewModel : MapViewModel = hiltViewModel()
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-  addMockBeacons()
+//  addMockBeacons()
   GoogleMap() {
     DisplayBeacons(uiState.beacons)
   }
@@ -40,12 +38,12 @@ fun DisplayBeacons(beacons: List<Beacon>) {
 
   // Add a marker for each beacon
   //source for the icon: https://www.svgrepo.com/svg/448258/waypoint
-  val customIcon = BitmapDescriptorFactory.fromResource(R.drawable.waypoint)
+//  val customIcon = BitmapDescriptorFactory.fromResource(R.drawable.waypoint)
   beacons.forEach() {
     Marker(
       state = MarkerState(position = it.location.toLatLng()),
       title = it.id,
-      icon = customIcon,
+//      icon = customIcon,
     )
   }
 }

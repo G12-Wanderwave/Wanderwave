@@ -3,7 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
-    //id("com.google.gms.google-services")
+    id("com.google.gms.google-services")
     id("com.ncorti.ktfmt.gradle") version "0.16.0"
     kotlin("kapt") // Kotlin annotation processing plugin
     id("com.google.dagger.hilt.android") // Dagger Hilt plugin, used for dependency injection
