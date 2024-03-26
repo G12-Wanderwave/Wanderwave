@@ -203,7 +203,7 @@ fun EditableVisitCard(modifier: Modifier = Modifier,
                 }
                 .align(Alignment.Center) // Center horizontally and vertically inside the Box
                 .testTag("profilePicture"),
-                profile = profile)
+                profile = profile2)
         }
 
 
@@ -221,7 +221,6 @@ fun EditableVisitCard(modifier: Modifier = Modifier,
                         onValueChange = { newName ->
                             firstName = newName
                             profile2.copy(firstName=newName)
-                            //onProfileChange(profile.copy(firstName = newName))
                         },
                         label = { Text("First Name") }
                     )
@@ -231,8 +230,6 @@ fun EditableVisitCard(modifier: Modifier = Modifier,
                             .width(150.dp),
                         onValueChange = { newName ->
                             lastName = newName
-                            profile2.copy(lastName=newName)
-                            //onProfileChange(profile.copy(lastName = newName))
                         },
                         label = { Text("Last Name") }
                     )
@@ -244,7 +241,6 @@ fun EditableVisitCard(modifier: Modifier = Modifier,
                         description = newDescription
 
                         profile2.copy(description=description)
-                        //onProfileChange(profile.copy(description = newDescription))
                     },
                     label = { Text("Description") }
                 )
@@ -254,7 +250,8 @@ fun EditableVisitCard(modifier: Modifier = Modifier,
                         onProfileChange(profile.copy(
                             firstName = firstName,
                             lastName = lastName,
-                            description = description
+                            description = description,
+                            profilePictureUri = profile2.profilePictureUri
                         ))
                       },
                     colors = ButtonDefaults.buttonColors(
