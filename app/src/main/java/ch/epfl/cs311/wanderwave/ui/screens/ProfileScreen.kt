@@ -143,26 +143,14 @@ fun ClickableIcon(modifier: Modifier,
 @Composable
 fun VisitCard(modifier: Modifier = Modifier,profile: Profile){
     Row(verticalAlignment = Alignment.CenterVertically) {
-        if (profile.profilePictureUri != null) {
-            AsyncImage(
-                model = profile.profilePictureUri,
-                contentDescription = "Profile picture",
-                modifier = modifier
-                    .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
-                    .size(width = 150.dp, height = 100.dp)
-                    .testTag("profilePicture")
-            )
-        } else {
-            Image(
-                painter = painterResource(id = R.drawable.profile_picture),
-                contentDescription = "Profile picture",
-                modifier = modifier
-                    .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
-                    .size(width = 150.dp, height = 100.dp)
-                    .testTag("profilePicture")
-            )
-        }
-        Column {
+        SelectImage(modifier = Modifier
+            .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
+            .size(width = 150.dp, height = 100.dp)
+            .testTag("profilePicture"), profile = profile)
+
+        Column (
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            ){
             Text(profile.firstName)
             Text(profile.lastName)
             Text(profile.description)
@@ -190,35 +178,16 @@ fun EditableVisitCard(modifier: Modifier = Modifier, profile: Profile, onProfile
     }
     if(imageUri!=null)profile.profilePictureUri=imageUri
 
-    Column (){
+    Column {
         Box(modifier = Modifier.fillMaxWidth()) {
-            if (profile.profilePictureUri != null) {
-                AsyncImage(
-                    model = profile.profilePictureUri,
-                    contentDescription = "Profile picture",
-                    modifier = modifier
-                        .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
-                        .size(width = 150.dp, height = 100.dp)
-                        .clickable {
-                            launcher.launch("image/*")
-                        }
-                        .align(Alignment.Center) // Center horizontally and vertically inside the Box
-                    .testTag("profilePicture")
-                )
-            } else {
-                Image(
-                    painter = painterResource(id = R.drawable.profile_picture),
-                    contentDescription = "Profile picture",
-                    modifier = modifier
-                        .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
-                        .size(width = 150.dp, height = 100.dp)
-                        .clickable {
-                            launcher.launch("image/*")
-                        }
-                        .align(Alignment.Center)
-                        .testTag("profilePicture")
-                )
-            }
+            SelectImage(modifier = Modifier
+                .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
+                .size(width = 150.dp, height = 100.dp)
+                .clickable {
+                    launcher.launch("image/*")
+                }
+                .align(Alignment.Center) // Center horizontally and vertically inside the Box
+                .testTag("profilePicture"), profile = profile)
         }
 
 
@@ -289,8 +258,20 @@ fun SmallTextField(
 }
 
 @Composable
-fun SelectImage(){
-
+fun SelectImage(modifier: Modifier, profile: Profile){
+    if (profile.profilePictureUri != null) {
+        AsyncImage(
+            model = profile.profilePictureUri,
+            contentDescription = "Profile picture",
+            modifier =modifier
+        )
+    } else {
+        Image(
+            painter = painterResource(id = R.drawable.profile_picture),
+            contentDescription = "Profile picture",
+            modifier = modifier
+        )
+    }
 
 }
 @Preview
