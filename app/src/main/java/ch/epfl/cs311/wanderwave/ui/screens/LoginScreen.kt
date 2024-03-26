@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -20,6 +21,7 @@ import ch.epfl.cs311.wanderwave.ui.navigation.Route
 import ch.epfl.cs311.wanderwave.viewmodel.LoginScreenViewModel
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationResponse
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -27,11 +29,17 @@ fun LoginScreen(
     showMessage: (String) -> Unit,
     viewModel: LoginScreenViewModel = hiltViewModel()
 ) {
+  val scope = rememberCoroutineScope()
   val launcher =
       rememberLauncherForActivityResult(
           contract = ActivityResultContracts.StartActivityForResult()) {
             handleLoginActivityResult(
-                it, viewModel::handleTokenResponse, showMessage, navigationActions)
+                it,
+                { token, expiresIn ->
+                  scope.launch { viewModel.handleTokenResponse(token, expiresIn) }
+                },
+                showMessage,
+                navigationActions)
           }
   val context = LocalContext.current
 
