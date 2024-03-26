@@ -16,6 +16,9 @@ jobs:
     # run on a new ubuntu VM
     runs-on: ubuntu-latest
 
+    env:
+      KEYSTORE_RELEASE_PASSWORD: ${{ secrets.KEYSTORE_RELEASE_PASSWORD }}
+
     # need these permissions to modify the PR
     permissions: 
       contents: write
