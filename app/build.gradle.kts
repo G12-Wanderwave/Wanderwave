@@ -36,6 +36,15 @@ android {
         manifestPlaceholders["redirectHostName"] = "callback"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../release.keystore")
+            storePassword = System.getenv("KEYSTORE_RELEASE_PASSWORD")
+            keyAlias = "release"
+            keyPassword = System.getenv("KEYSTORE_RELEASE_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -43,6 +52,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
         debug {
             enableUnitTestCoverage = true

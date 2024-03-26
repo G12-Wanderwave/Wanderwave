@@ -66,4 +66,5 @@ wrapper/
 .cxx
 local.properties
 secrets.properties
+*.keystore
 

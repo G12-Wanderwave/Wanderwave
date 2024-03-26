@@ -70,6 +70,8 @@ jobs:
         run: |
           echo MAPS_API_KEY=${{ secrets.MAPS_API_KEY }} >> ./secrets.properties 
           echo SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }} >> ./secrets.properties 
+          mkdir ~/.android
+          echo "${{ secrets.KEYSTORE_DEBUG_B64 }}" | base64 -d > ~/.android/debug.keystore
 
       # Make the gradlew script executable
       - name: Grant execute permission for gradlew
