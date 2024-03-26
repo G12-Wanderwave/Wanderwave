@@ -32,10 +32,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
         debug {
             enableUnitTestCoverage = true
@@ -130,7 +127,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.6.0")
 
     // Dependencies for the Observable part
-    implementation ("androidx.compose.runtime:runtime-livedata:1.0.0-alpha07")
+    implementation("androidx.compose.runtime:runtime-livedata:1.0.0-alpha07")
 }
 kapt {
     correctErrorTypes = true
@@ -145,16 +142,16 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
     }
 
     val fileFilter = listOf(
-        "**/R.class",
-        "**/R$*.class",
-        "**/BuildConfig.*",
-        "**/Manifest*.*",
-        "**/*Test*.*",
-        "android/**/*.*",
-        "**/*Hilt*.*",  // Exclude Hilt generated code
-        "hilt_aggregated_deps/**",  // Exclude Hilt generated code
-        "**/*_Factory.class",  // Exclude Hilt generated code
-        "**/*_MembersInjector.class",  // Exclude Hilt generated code
+            "**/R.class",
+            "**/R$*.class",
+            "**/BuildConfig.*",
+            "**/Manifest*.*",
+            "**/*Test*.*",
+            "android/**/*.*",
+            "**/*Hilt*.*",  // Exclude Hilt generated code
+            "hilt_aggregated_deps/**",  // Exclude Hilt generated code
+            "**/*_Factory.class",  // Exclude Hilt generated code
+            "**/*_MembersInjector.class",  // Exclude Hilt generated code
     )
     val debugTree = fileTree("${project.buildDir}/tmp/kotlin-classes/debug") {
         exclude(fileFilter)

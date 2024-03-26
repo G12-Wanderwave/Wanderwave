@@ -5,4 +5,5 @@ plugins {
 
     // Dagger Hilt plugin, used for dependency injection
     id("com.google.dagger.hilt.android") version "2.49" apply false
+
 }
