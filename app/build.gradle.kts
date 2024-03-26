@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.cli.jvm.main
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -17,6 +17,8 @@ plugins {
     // google firebase
     id("com.google.gms.google-services")
 }
+
+
 
 android {
     namespace = "ch.epfl.cs311.wanderwave"
@@ -97,6 +99,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.appcompat)
     implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -151,6 +154,12 @@ dependencies {
 
     // Dependencies for the photo part
     implementation("io.coil-kt:coil-compose:2.6.0")
+    androidTestImplementation("io.mockk:mockk:1.13.10")
+    androidTestImplementation("io.mockk:mockk-android:1.13.10")
+    androidTestImplementation("io.mockk:mockk-agent:1.13.10")
+
+    //Dependencies for Firebase
+    implementation ("com.google.firebase:firebase-database-ktx:20.3.1")
 }
 kapt {
     correctErrorTypes = true
