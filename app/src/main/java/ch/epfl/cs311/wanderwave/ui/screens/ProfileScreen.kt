@@ -46,7 +46,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_error
@@ -140,8 +139,7 @@ fun ProfileSwitch(modifier: Modifier = Modifier ,viewModel: ProfileViewModel){
  *
  * @param modifier the modifier to be applied to the Icon
  * @param icon the icon to be display
- * @param isInEditMode says what is the current mode
- * @param onModeChange enable to transmit the changed to the caller
+ * @param viewModel the viewModel that will handle the profile
  **/
 @Composable
 fun ClickableIcon(modifier: Modifier,
@@ -320,8 +318,8 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit) {
  *
  * @param profile the profile of the user
  * @param onProfileChange enable to transmit the changed to the caller
- * @param isInEditMode says what is the current mode
- * @param onModeChange enable to transmit the changed to the caller
+ * @param viewModel the viewModel that will handle the profile
+ *
  **/
 @Composable
 fun EditableVisitCard(profile: Profile,
@@ -399,18 +397,6 @@ fun SelectImage(modifier: Modifier, profile: Profile){
 @Preview
 @Composable
 fun ProfileScreenPreview() {
-    val profile: Profile by remember{
-        mutableStateOf(
-            Profile(
-            firstName = "My FirstName",
-            lastName = "My LastName",
-            description = "My Description",
-            numberOfLikes = 0,
-            isPublic = true,
-            profilePictureUri = null
-            )
-        )
-    }
 
     ProfileScreen(ProfileViewModel())
 }
