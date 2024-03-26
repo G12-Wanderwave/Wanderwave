@@ -3,8 +3,10 @@ package ch.epfl.cs311.wanderwave.ui.screens
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -50,6 +54,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_error
+import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_primary
 import coil.compose.AsyncImage
 
 const val SCALE_X = 0.5f
@@ -68,11 +74,15 @@ fun ProfileScreen(profile:Profile) {
             onProfileChange = { updatedProfile ->
                 currentProfile = updatedProfile
                 // Additional logic to handle the updated profile can be added here.
-            }
-        )
-        ClickableIcon(Modifier,Icons.Filled.ExitToApp, isInEditMode){ value ->
+
+            },
+            isInEditMode = isInEditMode
+        ){ value ->
             isInEditMode = value
         }
+        /*ClickableIcon(Modifier,Icons.Filled.ExitToApp, isInEditMode){ value ->
+            isInEditMode = value
+        }*/
     }else{
 
         Column(
@@ -162,10 +172,16 @@ fun VisitCard(modifier: Modifier = Modifier,profile: Profile){
 
 
 @Composable
-fun EditableVisitCard(modifier: Modifier = Modifier, profile: Profile, onProfileChange: (Profile) -> Unit) {
-    var firstName by remember { mutableStateOf(profile.firstName) }
-    var lastName by remember { mutableStateOf(profile.lastName) }
-    var description by remember { mutableStateOf(profile.description) }
+fun EditableVisitCard(modifier: Modifier = Modifier,
+                      profile: Profile,
+                      onProfileChange: (Profile) -> Unit,
+                      isInEditMode: Boolean,
+                      onModeChange: (Boolean) -> Unit) {
+
+    var profile2 = profile.copy()
+    var firstName by remember { mutableStateOf(profile2.firstName) }
+    var lastName by remember { mutableStateOf(profile2.lastName) }
+    var description by remember { mutableStateOf(profile2.description) }
 
     var imageUri by remember {
         mutableStateOf<Uri?>(null)
@@ -176,8 +192,7 @@ fun EditableVisitCard(modifier: Modifier = Modifier, profile: Profile, onProfile
     ) { uri: Uri? ->
         imageUri = uri
     }
-    if(imageUri!=null)profile.profilePictureUri=imageUri
-
+    if(imageUri!=null)profile2.profilePictureUri=imageUri
     Column {
         Box(modifier = Modifier.fillMaxWidth()) {
             SelectImage(modifier = Modifier
@@ -187,7 +202,8 @@ fun EditableVisitCard(modifier: Modifier = Modifier, profile: Profile, onProfile
                     launcher.launch("image/*")
                 }
                 .align(Alignment.Center) // Center horizontally and vertically inside the Box
-                .testTag("profilePicture"), profile = profile)
+                .testTag("profilePicture"),
+                profile = profile)
         }
 
 
@@ -197,17 +213,15 @@ fun EditableVisitCard(modifier: Modifier = Modifier, profile: Profile, onProfile
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally// Spacing between items
             ){
-                Row(
-
-                ){
-
+                Row{
                     SmallTextField(
                         value = firstName,
                         modifier = Modifier
                             .width(150.dp),
                         onValueChange = { newName ->
                             firstName = newName
-                            onProfileChange(profile.copy(firstName = newName))
+                            profile2.copy(firstName=newName)
+                            //onProfileChange(profile.copy(firstName = newName))
                         },
                         label = { Text("First Name") }
                     )
@@ -217,7 +231,8 @@ fun EditableVisitCard(modifier: Modifier = Modifier, profile: Profile, onProfile
                             .width(150.dp),
                         onValueChange = { newName ->
                             lastName = newName
-                            onProfileChange(profile.copy(lastName = newName))
+                            profile2.copy(lastName=newName)
+                            //onProfileChange(profile.copy(lastName = newName))
                         },
                         label = { Text("Last Name") }
                     )
@@ -227,12 +242,43 @@ fun EditableVisitCard(modifier: Modifier = Modifier, profile: Profile, onProfile
                     modifier = Modifier,
                     onValueChange = { newDescription ->
                         description = newDescription
-                        onProfileChange(profile.copy(description = newDescription))
+
+                        profile2.copy(description=description)
+                        //onProfileChange(profile.copy(description = newDescription))
                     },
                     label = { Text("Description") }
                 )
+                Button(
+                    onClick = {
+                        onModeChange(!isInEditMode)
+                        onProfileChange(profile.copy(
+                            firstName = firstName,
+                            lastName = lastName,
+                            description = description
+                        ))
+                      },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = md_theme_light_primary
+                    ),
+                ) {
+                    Text("Save")
+                }
 
+                Button(
+                    onClick = {
+                        onModeChange(!isInEditMode)
+                      },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent
+
+                    ),
+                    border = BorderStroke(1.dp, md_theme_light_error), // Set the border color and width
+                ) {
+                    Text(text = "Cancel",
+                        color = md_theme_light_error)
+                }
             }
+
 
         }
     }
