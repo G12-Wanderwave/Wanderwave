@@ -72,6 +72,7 @@ jobs:
           echo SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }} >> ./secrets.properties 
           mkdir ~/.android
           echo "${{ secrets.KEYSTORE_DEBUG_B64 }}" | base64 -d > ~/.android/debug.keystore
+          echo "${{ secrets.KEYSTORE_RELEASE_B64 }}" | base64 -d > ./release.keystore
 
       # Make the gradlew script executable
       - name: Grant execute permission for gradlew
