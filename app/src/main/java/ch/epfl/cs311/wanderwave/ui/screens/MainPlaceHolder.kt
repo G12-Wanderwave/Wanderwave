@@ -16,7 +16,7 @@ fun MainPlaceHolder(navigationActions: NavigationActions) {
     Text(text = "MainPlaceHolder")
     Button(
         onClick = {
-          navigationActions.navigateTo(TOP_LEVEL_DESTINATIONS.first { it.route == Route.LOGIN })
+          navigationActions.navigateTo(Route.LOGIN)
         },
         modifier = Modifier.testTag("signOutButton")) {
           Text(text = "Sign Out")

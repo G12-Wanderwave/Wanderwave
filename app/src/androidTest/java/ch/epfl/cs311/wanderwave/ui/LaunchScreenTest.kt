@@ -28,7 +28,7 @@ class LaunchScreenTest {
     composeTestRule.setContent { LaunchScreen(mockNavigationActions) }
     // Verify that navigateTo is called with the correct argument
     verify {
-      mockNavigationActions.navigateTo(TOP_LEVEL_DESTINATIONS.first { it.route == Route.LOGIN })
+      mockNavigationActions.navigateTo(Route.LOGIN)
     }
   }
 }
