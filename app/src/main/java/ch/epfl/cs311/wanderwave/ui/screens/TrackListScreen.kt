@@ -24,20 +24,14 @@ fun TrackListScreen(showMessage: (String) -> Unit) {
   val viewModel: TrackListViewModel = hiltViewModel()
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-  LaunchedEffect(uiState) {
-    uiState.message?.let { message -> showMessage(message) }
-  }
+  LaunchedEffect(uiState) { uiState.message?.let { message -> showMessage(message) } }
 
   Surface(modifier = Modifier.fillMaxSize()) {
     LazyColumn(modifier = Modifier.testTag("trackListScreen")) {
       items(uiState.tracks.size) { index ->
         val track = uiState.tracks[index]
 
-        Column(
-          modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth()
-        ) {
+        Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
           TextButton(onClick = { viewModel.playTrack(track) }) {
             Text(text = "${track.artist} - ${track.title}")
           }

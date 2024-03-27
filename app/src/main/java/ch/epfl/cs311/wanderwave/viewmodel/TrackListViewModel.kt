@@ -14,11 +14,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class TrackListViewModel @Inject constructor(
-  private val repository: TrackRepositoryImpl,
-  private val spotifyController: SpotifyController
-) :
-  ViewModel() {
+class TrackListViewModel
+@Inject
+constructor(
+    private val repository: TrackRepositoryImpl,
+    private val spotifyController: SpotifyController
+) : ViewModel() {
 
   private val _uiState = MutableStateFlow(TrackListUiState(loading = true))
   val uiState: StateFlow<TrackListUiState> = _uiState
@@ -37,7 +38,7 @@ class TrackListViewModel @Inject constructor(
 
   fun playTrack(track: Track) {
     CoroutineScope(Dispatchers.IO).launch {
-      if(!spotifyController.playTrack(track).first()){
+      if (!spotifyController.playTrack(track).first()) {
         _uiState.value = _uiState.value.copy(message = "Failed to play track")
       }
     }
@@ -45,7 +46,7 @@ class TrackListViewModel @Inject constructor(
 }
 
 data class TrackListUiState(
-  val tracks: List<Track> = listOf(),
-  val loading: Boolean = false,
-  val message: String? = null
+    val tracks: List<Track> = listOf(),
+    val loading: Boolean = false,
+    val message: String? = null
 )

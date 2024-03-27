@@ -67,7 +67,7 @@ fun AppScaffold(navController: NavHostController) {
       snackbarHost = { SnackbarHost(hostState = snackbarHostState) }) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Route.LOGIN.routeString,
+            startDestination = Route.SPOTIFY_CONNECT.routeString,
             modifier = Modifier.padding(innerPadding)) {
               composable(Route.SPOTIFY_CONNECT.routeString) { SpotifyConnectScreen(navActions) }
               composable(Route.LOGIN.routeString) { LoginScreen(navActions, showSnackbar) }
