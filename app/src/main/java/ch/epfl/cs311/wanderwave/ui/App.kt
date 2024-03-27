@@ -20,9 +20,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.navigation.Route
-import ch.epfl.cs311.wanderwave.ui.screens.LaunchScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
+import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import kotlinx.coroutines.launch
@@ -57,9 +57,9 @@ fun AppScaffold(navController: NavHostController) {
       snackbarHost = { SnackbarHost(hostState = snackbarHostState) }) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Route.LAUNCH,
+            startDestination = Route.SPOTIFY_CONNECT,
             modifier = Modifier.padding(innerPadding)) {
-              composable(Route.LAUNCH) { LaunchScreen(navActions) }
+              composable(Route.SPOTIFY_CONNECT) { SpotifyConnectScreen(navActions) }
               composable(Route.LOGIN) { LoginScreen(navActions, showSnackbar) }
               composable(Route.MAIN) { MainPlaceHolder(navActions) }
               composable(Route.TRACK_LIST) { TrackListScreen() }

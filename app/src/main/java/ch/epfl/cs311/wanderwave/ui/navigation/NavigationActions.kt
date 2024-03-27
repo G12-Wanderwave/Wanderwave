@@ -11,6 +11,7 @@ import androidx.navigation.NavHostController
 object Route {
   const val LAUNCH = "launch"
   const val LOGIN = "login"
+  const val SPOTIFY_CONNECT = "spotifyConnect"
   const val MAIN = "main"
   const val TRACK_LIST = "trackList"
 }
