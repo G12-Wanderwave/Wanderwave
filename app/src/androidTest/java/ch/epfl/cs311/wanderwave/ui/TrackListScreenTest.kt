@@ -25,7 +25,7 @@ class TrackListScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCo
 
   @Before
   fun setup() {
-    composeTestRule.setContent { TrackListScreen() }
+    composeTestRule.setContent { TrackListScreen {} }
   }
 
   @Test
