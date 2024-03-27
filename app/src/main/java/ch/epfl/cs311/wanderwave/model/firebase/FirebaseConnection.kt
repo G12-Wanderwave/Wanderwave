@@ -1,10 +1,7 @@
 package ch.epfl.cs311.wanderwave.model.firebase
 
-
 import android.util.Log
-
 import ch.epfl.cs311.wanderwave.model.data.Profile
-
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
@@ -23,16 +20,16 @@ class FirebaseConnection {
   fun isUidExisting(spotifyUid: String): Boolean {
     var isExisting = false
     db.collection("users")
-      .whereEqualTo("spotifyUid", spotifyUid)
-      .get()
-      .addOnSuccessListener { documents ->
-        if (documents.size() > 0) {
-          isExisting = true
+        .whereEqualTo("spotifyUid", spotifyUid)
+        .get()
+        .addOnSuccessListener { documents ->
+          if (documents.size() > 0) {
+            isExisting = true
+          }
         }
-      }
-      .addOnFailureListener { exception ->
-        Log.w("Firestore", "Error getting documents: ", exception)
-      }
+        .addOnFailureListener { exception ->
+          Log.w("Firestore", "Error getting documents: ", exception)
+        }
     return isExisting
   }
 
@@ -46,14 +43,13 @@ class FirebaseConnection {
     val numberOfLikes = document.getLong("numberOfLikes")?.toInt() ?: 0
     val isPublic = document.getBoolean("isPublic") ?: false
     return Profile(
-      firstName = firstname,
-      lastName = lastname,
-      description = description,
-      firebaseUid = uid,
-      spotifyUid = spotifyUid,
-      numberOfLikes = numberOfLikes,
-      isPublic = isPublic
-    )
+        firstName = firstname,
+        lastName = lastname,
+        description = description,
+        firebaseUid = uid,
+        spotifyUid = spotifyUid,
+        numberOfLikes = numberOfLikes,
+        isPublic = isPublic)
   }
 
   // obtain a Profile
@@ -61,40 +57,38 @@ class FirebaseConnection {
     Log.d("Firestore", "Fetching profile from Firestore...")
     val profile = MutableStateFlow(Profile("", "", "", 0, false, null, "", ""))
     db.collection("profiles")
-      .document(uid)
-      .get()
-      .addOnSuccessListener { document ->
-        if (document != null && document.data != null) {
-          val _profile = documentToProfile(document) // You need to implement this function
-          profile.tryEmit(_profile)
-        } else {
-          Log.d("Firestore", "No such Profile document")
+        .document(uid)
+        .get()
+        .addOnSuccessListener { document ->
+          if (document != null && document.data != null) {
+            val _profile = documentToProfile(document) // You need to implement this function
+            profile.tryEmit(_profile)
+          } else {
+            Log.d("Firestore", "No such Profile document")
+          }
         }
-      }
-      .addOnFailureListener { e ->
-        Log.e("Firestore", "Error getting document: ", e)
-      }
-      //  Log.d("Firestore", "Fetched profile from Firestore: $profile")
-    return profile
-      .onEach { _profile -> Log.d("Firestore", "Fetched profile from Firestore: $_profile") }
+        .addOnFailureListener { e -> Log.e("Firestore", "Error getting document: ", e) }
+    //  Log.d("Firestore", "Fetched profile from Firestore: $profile")
+    return profile.onEach { _profile ->
+      Log.d("Firestore", "Fetched profile from Firestore: $_profile")
+    }
   }
 
   fun addProfile(profile: Profile) {
     val profileMap =
-      hashMapOf(
-        "firstName" to profile.firstName,
-        "lastName" to profile.lastName,
-        "description" to profile.description,
-        "numberOfLikes" to profile.numberOfLikes,
-        "isPublic" to profile.isPublic,
-        "profilePictureUri" to profile.profilePictureUri.toString()
-      )
+        hashMapOf(
+            "firstName" to profile.firstName,
+            "lastName" to profile.lastName,
+            "description" to profile.description,
+            "numberOfLikes" to profile.numberOfLikes,
+            "isPublic" to profile.isPublic,
+            "profilePictureUri" to profile.profilePictureUri.toString())
 
     db.collection("profiles")
-      .document(profile.firebaseUid)
-      .set(profileMap)
-      .addOnFailureListener { e -> Log.e("Firestore", "Error adding document: ", e) }
-      .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully added!") }
+        .document(profile.firebaseUid)
+        .set(profileMap)
+        .addOnFailureListener { e -> Log.e("Firestore", "Error adding document: ", e) }
+        .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully added!") }
   }
 
   // Update stored todos
@@ -102,20 +96,19 @@ class FirebaseConnection {
     val uid = profile.firebaseUid
 
     val profileMap =
-      hashMapOf(
-        "firstName" to profile.firstName,
-        "lastName" to profile.lastName,
-        "description" to profile.description,
-        "numberOfLikes" to profile.numberOfLikes,
-        "isPublic" to profile.isPublic,
-        "profilePictureUri" to profile.profilePictureUri.toString()
-      )
+        hashMapOf(
+            "firstName" to profile.firstName,
+            "lastName" to profile.lastName,
+            "description" to profile.description,
+            "numberOfLikes" to profile.numberOfLikes,
+            "isPublic" to profile.isPublic,
+            "profilePictureUri" to profile.profilePictureUri.toString())
 
     db.collection("profiles")
-      .document(uid)
-      .set(profileMap)
-      .addOnFailureListener { e -> Log.e("Firestore", "Error updating document: ", e) }
-      .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully updated!") }
+        .document(uid)
+        .set(profileMap)
+        .addOnFailureListener { e -> Log.e("Firestore", "Error updating document: ", e) }
+        .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully updated!") }
   }
 
   // Remove todos from the database

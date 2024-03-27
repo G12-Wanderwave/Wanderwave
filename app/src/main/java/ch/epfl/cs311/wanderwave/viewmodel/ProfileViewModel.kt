@@ -51,9 +51,7 @@ class ProfileViewModel : ViewModel() {
       _profile.value = _profile.value!!.copy(firebaseUid = newUid)
       firebaseConnection.addProfile(_profile.value!!)
     } else {
-      firebaseConnection.getProfile(_profile.value!!.spotifyUid).onEach {
-        _profile.value = it
-      }
+      firebaseConnection.getProfile(_profile.value!!.spotifyUid).onEach { _profile.value = it }
     }
   }
 }

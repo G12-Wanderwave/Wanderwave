@@ -42,10 +42,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
@@ -305,7 +303,7 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit) {
             colors = ButtonDefaults.buttonColors(containerColor = md_theme_light_primary),
             modifier = Modifier.width(100.dp).testTag("saveButton")) {
               Text("Save")
-            //TODO: Send the data to the server
+              // TODO: Send the data to the server
             }
         Spacer(modifier = Modifier.width(8.dp))
         Button(
@@ -402,8 +400,8 @@ fun SelectImage(modifier: Modifier, profile: Profile) {
  * @last update 1.0
  */
 
-//@Preview
-//@Composable
-//fun ProfileScreenPreview() {
+// @Preview
+// @Composable
+// fun ProfileScreenPreview() {
 //  ProfileScreen(navigationActions,ProfileViewModel())
-//}
+// }

@@ -20,7 +20,6 @@ fun LoginScreen(navigationActions: NavigationActions, profileViewModel: ProfileV
     SignInButton(modifier = Modifier.weight(1f)) {
       // TODO : fetch the profile from the spotify API
 
-
       navigationActions.navigateTo(TOP_LEVEL_DESTINATIONS.first { it.route == Route.MAIN })
     }
   }
