@@ -32,7 +32,8 @@ class LogoutScreenViewModel @Inject constructor(private val spotifyController: S
       }
       else -> {
         _uiState.value =
-            LogoutScreenUiState(hasResult = true, success = false, message = "User cancelled logout")
+            LogoutScreenUiState(
+                hasResult = true, success = false, message = "User cancelled logout")
       }
     }
   }
