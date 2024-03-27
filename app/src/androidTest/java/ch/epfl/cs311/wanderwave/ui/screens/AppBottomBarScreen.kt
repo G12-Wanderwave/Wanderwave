@@ -1,7 +1,7 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
-import ch.epfl.cs311.wanderwave.ui.navigation.Route
+import ch.epfl.cs311.wanderwave.navigation.Route
 import io.github.kakaocup.compose.node.element.ComposeScreen
 
 class AppBottomBarScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
