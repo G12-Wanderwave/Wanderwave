@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
@@ -24,18 +23,14 @@ fun AppBottomBar(navActions: NavigationActions, currentRoute: String?) {
   Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.testTag("appBottomBar")) {
     if (currentRoute != Route.LOGIN && currentRoute != Route.LAUNCH) {
       BottomAppBar(
-          modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)) {
+          modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
             TOP_LEVEL_DESTINATIONS.forEach { destination ->
               Button(
-                onClick = { navActions.navigateTo(destination) },
-                modifier =
-                Modifier
-                  .padding(8.dp)
-                  .testTag("bottomAppBarButton" + destination.route)) {
-                Text(text = stringResource(destination.textId))
-              }
+                  onClick = { navActions.navigateTo(destination) },
+                  modifier =
+                      Modifier.padding(8.dp).testTag("bottomAppBarButton" + destination.route)) {
+                    Text(text = stringResource(destination.textId))
+                  }
             }
           }
     }
