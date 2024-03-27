@@ -33,7 +33,7 @@ fun LoginScreen(navigationActions: NavigationActions) {
               spotifyUid = "123",
               firebaseUid = "123",
               profilePictureUri = null)
-      // profileViewModel.fetchProfile(profile)
+      profileViewModel.fetchProfile(profile)
       navigationActions.navigateTo(TOP_LEVEL_DESTINATIONS.first { it.route == Route.MAIN })
     }
   }
