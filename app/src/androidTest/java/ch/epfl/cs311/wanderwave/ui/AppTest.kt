@@ -1,7 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.MainActivity
 import ch.epfl.cs311.wanderwave.ui.screens.AppBottomBarScreen
