@@ -1,25 +1,38 @@
 package ch.epfl.cs311.wanderwave.ui.navigation
 
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import ch.epfl.cs311.wanderwave.R
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavHostController
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
-object Route {
-  const val LAUNCH = "launch"
-  const val LOGIN = "login"
-  const val MAIN = "main"
-  const val TRACK_LIST = "trackList"
+enum class Route(val routeString: String, val showBottomBar: Boolean) {
+  LOGIN("login", false),
+  MAIN("main", true),
+  TRACK_LIST("trackList", true);
+
+  companion object {
+    fun forRouteString(routeString: String): Route? {
+      return entries.firstOrNull { it.routeString == routeString }
+    }
+  }
 }
 
 // Top level destination
-data class TopLevelDestination(val route: String, val iconId: Int, val textId: Int)
+data class TopLevelDestination(val route: Route, val iconId: Int, val textId: Int)
 
 class NavigationActions(navController: NavHostController) {
 
   private val navigationController = navController
 
-  fun navigateTo(destination: TopLevelDestination) {
-    navigationController.navigate(destination.route) {
+  private var _currentRouteFlow = MutableStateFlow(getCurrentRoute())
+  val currentRouteFlow: StateFlow<Route?> = _currentRouteFlow
+
+  fun navigateToTopLevel(topLevelRoute: Route) {
+    navigationController.navigate(topLevelRoute.routeString) {
       // Pop up to the start destination of the graph to
       // avoid building up a large stack of destinations
       // on the back stack as users select items
@@ -30,10 +43,19 @@ class NavigationActions(navController: NavHostController) {
       // Restore state when reselecting a previously selected item
       restoreState = true
     }
+    _currentRouteFlow.value = topLevelRoute
   }
 
-  fun navigateTo(route: String) {
-    navigationController.navigate(route)
+  fun getCurrentRoute(): Route? {
+    navigationController.currentDestination?.route?.let {
+      return Route.forRouteString(it)
+    }
+    return null
+  }
+
+  fun navigateTo(route: Route) {
+    navigationController.navigate(route.routeString)
+    _currentRouteFlow.value = route
   }
 
   fun goBack() {
