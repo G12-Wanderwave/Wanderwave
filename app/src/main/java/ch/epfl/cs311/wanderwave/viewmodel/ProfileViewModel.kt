@@ -1,13 +1,13 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class ProfileViewModel : ViewModel() {
   private val _profile =
-      MutableLiveData(
+      MutableStateFlow(
           Profile(
               firstName = "My FirstName",
               lastName = "My LastName",
@@ -15,16 +15,16 @@ class ProfileViewModel : ViewModel() {
               numberOfLikes = 0,
               isPublic = true,
               profilePictureUri = null))
-  val profile: LiveData<Profile> = _profile
+  val profile: StateFlow<Profile> = _profile
 
-  private val _isInEditMode = MutableLiveData(false)
-  val isInEditMode: LiveData<Boolean> = _isInEditMode
+  private val _isInEditMode = MutableStateFlow(false)
+  val isInEditMode: StateFlow<Boolean> = _isInEditMode
 
-  private val _isInPublicMode = MutableLiveData(false)
-  val isInPublicMode: LiveData<Boolean> = _isInPublicMode
+  private val _isInPublicMode = MutableStateFlow(false)
+  val isInPublicMode: StateFlow<Boolean> = _isInPublicMode
 
   fun toggleEditMode() {
-    _isInEditMode.value = !(_isInEditMode.value ?: false)
+    _isInEditMode.value = !_isInEditMode.value
   }
 
   fun updateProfile(updatedProfile: Profile) {
@@ -32,6 +32,6 @@ class ProfileViewModel : ViewModel() {
   }
 
   fun togglePublicMode() {
-    _isInPublicMode.value = !(_isInPublicMode.value ?: false)
+    _isInPublicMode.value = !_isInPublicMode.value
   }
 }

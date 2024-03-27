@@ -30,8 +30,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,7 +44,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_error
@@ -68,11 +67,10 @@ val INPUT_BOX_NAM_SIZE = 150.dp
  * @last update 1.0
  */
 @Composable
-fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
+fun ProfileScreen(viewModel: ProfileViewModel) {
   // Observe LiveData changes and convert them into state for Composable to react
-  val currentProfileState by viewModel.profile.observeAsState()
-  val isInEditMode by viewModel.isInEditMode.observeAsState(false)
-
+  val currentProfileState by viewModel.profile.collectAsState()
+  val isInEditMode by viewModel.isInEditMode.collectAsState(false)
   // If currentProfileState is null, do not proceed to render the UI
   val currentProfile: Profile = currentProfileState ?: return
 
@@ -105,12 +103,8 @@ fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
  */
 @Composable
 fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel) {
-  // Observe the whole profile as state
-  val profile by viewModel.profile.observeAsState()
-
   // Determine the current public mode state
-  val isPublicMode by viewModel.isInPublicMode.observeAsState(false)
-
+  val isPublicMode by viewModel.isInPublicMode.collectAsState(false)
   Switch(
       checked = isPublicMode,
       onCheckedChange = {
@@ -303,7 +297,7 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit) {
             colors = ButtonDefaults.buttonColors(containerColor = md_theme_light_primary),
             modifier = Modifier.width(100.dp).testTag("saveButton")) {
               Text("Save")
-            //TODO: Send the data to the server
+              // TODO: Send the data to the server
             }
         Spacer(modifier = Modifier.width(8.dp))
         Button(
@@ -402,5 +396,6 @@ fun SelectImage(modifier: Modifier, profile: Profile) {
 @Preview
 @Composable
 fun ProfileScreenPreview() {
-  ProfileScreen(ProfileViewModel())
+  val vm = ProfileViewModel()
+  ProfileScreen(vm)
 }

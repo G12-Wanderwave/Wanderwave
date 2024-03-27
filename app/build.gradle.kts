@@ -126,8 +126,6 @@ dependencies {
     // Dependencies for the photo part
     implementation("io.coil-kt:coil-compose:2.6.0")
 
-    // Dependencies for the Observable part
-    implementation("androidx.compose.runtime:runtime-livedata:1.0.0-alpha07")
 }
 kapt {
     correctErrorTypes = true
