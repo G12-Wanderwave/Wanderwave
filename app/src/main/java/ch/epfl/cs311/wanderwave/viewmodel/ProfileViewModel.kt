@@ -41,17 +41,19 @@ class ProfileViewModel : ViewModel() {
     _isInPublicMode.value = !(_isInPublicMode.value ?: false)
   }
 
-  fun fetchProfile() {
+  fun fetchProfile(profile: Profile) {
     // TODO : fetch profile from Spotify
     // _profile.value = spotifyConnection.getProfile()....
     // Fetch profile from Firestore if it doesn't exist, create it
-    val isUidExisting = firebaseConnection.isUidExisting(_profile.value!!.spotifyUid)
-    if (!isUidExisting) {
-      val newUid = firebaseConnection.getNewUid()
-      _profile.value = _profile.value!!.copy(firebaseUid = newUid)
-      firebaseConnection.addProfile(_profile.value!!)
+    if (firebaseConnection.isUidExisting(profile.spotifyUid)) {
+      firebaseConnection.getProfile(profile.spotifyUid).onEach { fetchedProfile ->
+        _profile.value = fetchedProfile
+      }
     } else {
-      firebaseConnection.getProfile(_profile.value!!.spotifyUid).onEach { _profile.value = it }
+      val newUid = firebaseConnection.getNewUid()
+      val newProfile = profile.copy(firebaseUid = newUid)
+      firebaseConnection.addProfile(newProfile)
+      _profile.value = newProfile
     }
   }
 }
