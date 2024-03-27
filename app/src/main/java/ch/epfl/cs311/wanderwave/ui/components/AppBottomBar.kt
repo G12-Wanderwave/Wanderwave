@@ -13,8 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.navigation.TOP_LEVEL_DESTINATIONS
 
 @Composable
 fun AppBottomBar(navActions: NavigationActions) {

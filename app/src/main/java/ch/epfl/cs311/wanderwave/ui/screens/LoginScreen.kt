@@ -4,11 +4,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.login.LoginScreenHeader
 import ch.epfl.cs311.wanderwave.ui.components.login.SignInButton
 import ch.epfl.cs311.wanderwave.ui.components.login.WelcomeTitle
-import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.ui.navigation.Route
 
 @Composable
 fun LoginScreen(navigationActions: NavigationActions) {

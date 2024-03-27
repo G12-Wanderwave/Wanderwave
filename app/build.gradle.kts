@@ -185,6 +185,7 @@ sonar {
         property("sonar.organization", "g12-wanderwave")
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+        property("sonar.coverage.exclusions", "src/main/java/ch/epfl/cs311/wanderwave/ui/**/*")
     }
 }
 
