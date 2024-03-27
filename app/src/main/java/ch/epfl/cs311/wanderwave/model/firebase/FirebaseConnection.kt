@@ -14,10 +14,6 @@ class FirebaseConnection {
 
   private val db = FirebaseFirestore.getInstance()
 
-  // Obtain new UIDs
-  fun getNewUid(): String {
-    return db.collection("users").document().id
-  }
 
   fun isUidExisting(spotifyUid: String, callback: (Boolean, Profile?) -> Unit) {
     db.collection("users")

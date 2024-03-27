@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -45,7 +46,7 @@ fun AppScaffold(navController: NavHostController) {
   val navActions = NavigationActions(navController)
 
 
-  val profileViewModel = ProfileViewModel()
+  val profileViewModel:ProfileViewModel = hiltViewModel()
 
   Scaffold(bottomBar = { AppBottomBar(navActions = navActions, currentRoute = currentRoute) }) {
       innerPadding ->
