@@ -27,9 +27,9 @@ fun SpotifyConnectScreen(
   LaunchedEffect(state) {
     if (state.hasResult) {
       if (state.success) {
-        navigationActions.navigateTo(Route.MAIN)
+        navigationActions.navigateToTopLevel(Route.MAIN)
       } else {
-        navigationActions.navigateTo(Route.LOGIN)
+        navigationActions.navigateToTopLevel(Route.LOGIN)
       }
     } else {
       viewModel.connectRemote()
@@ -40,7 +40,7 @@ fun SpotifyConnectScreen(
       modifier = Modifier.fillMaxSize().testTag("spotifyConnectScreen"),
       contentAlignment = androidx.compose.ui.Alignment.Center) {
         CircularProgressIndicator(
-            modifier = Modifier.width(64.dp),
+            modifier = Modifier.width(64.dp).testTag("spotifyConnectProgressIndicator"),
             color = MaterialTheme.colorScheme.secondary,
             trackColor = MaterialTheme.colorScheme.surfaceVariant)
       }

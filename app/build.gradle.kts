@@ -146,6 +146,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.intents)
 
     // Dependencies for using MockK in instrumented tests
+    testImplementation(libs.mockk)
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.mockk.agent)
