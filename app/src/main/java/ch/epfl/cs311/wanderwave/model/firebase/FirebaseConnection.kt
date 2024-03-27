@@ -14,7 +14,6 @@ class FirebaseConnection {
 
   private val db = FirebaseFirestore.getInstance()
 
-
   fun isUidExisting(spotifyUid: String, callback: (Boolean, Profile?) -> Unit) {
     db.collection("users")
         .whereEqualTo("spotifyUid", spotifyUid)

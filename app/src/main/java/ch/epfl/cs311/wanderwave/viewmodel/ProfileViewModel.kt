@@ -8,8 +8,8 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.firebase.FirebaseConnection
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(private val repository: ProfileRepositoryImpl) :
@@ -58,16 +58,11 @@ class ProfileViewModel @Inject constructor(private val repository: ProfileReposi
 
         _profile.value = fetchedProfile
         // update profile on the local database
-        viewModelScope.launch {
-          repository.insert(fetchedProfile!!)
-        }
-
+        viewModelScope.launch { repository.insert(fetchedProfile!!) }
       } else {
         val newProfile = profile
         firebaseConnection.addProfile(newProfile)
-        viewModelScope.launch {
-          repository.insert(fetchedProfile!!)
-        }
+        viewModelScope.launch { repository.insert(fetchedProfile!!) }
         _profile.value = newProfile
       }
     }

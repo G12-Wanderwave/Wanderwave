@@ -4,11 +4,9 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
-import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
-import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
 import io.mockk.impl.annotations.RelaxedMockK
@@ -26,8 +24,7 @@ class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSup
 
   @get:Rule val mockkRule = MockKRule(this)
 
-  @RelaxedMockK
-  private lateinit var mockNavigationActions: NavigationActions
+  @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
   @Before
   fun setup() {
