@@ -1,14 +1,11 @@
 package ch.epfl.cs311.wanderwave.ui.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.List
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import ch.epfl.cs311.wanderwave.R
 
 object Route {
   const val LAUNCH = "launch"
@@ -49,6 +46,7 @@ class NavigationActions(navController: NavHostController) {
 
 val TOP_LEVEL_DESTINATIONS =
     listOf(
-        TopLevelDestination(route = Route.TRACK_LIST, icon = Icons.AutoMirrored.Filled.List, textId = 3),
-        TopLevelDestination(route = Route.MAIN, icon = Icons.AutoMirrored.Filled.List, textId = 4),
+        TopLevelDestination(route = Route.TRACK_LIST, iconId = R.drawable.tracklist, textId = R.string.trackList),
+        // 0 is temporary, main will be removed later
+        TopLevelDestination(route = Route.MAIN, iconId = 0, textId = R.string.main),
     )
