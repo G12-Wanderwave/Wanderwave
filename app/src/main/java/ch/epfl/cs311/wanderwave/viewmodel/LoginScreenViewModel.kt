@@ -26,9 +26,7 @@ class LoginScreenViewModel @Inject constructor(private val spotifyController: Sp
         _uiState.value =
             LoginScreenUiState(
                 hasResult = true,
-                success = true,
-                message =
-                    "Logged in with token: ${response.accessToken}, expiresIn: ${response.expiresIn}")
+                success = true)
       }
       AuthorizationResponse.Type.ERROR -> {
         _uiState.value =

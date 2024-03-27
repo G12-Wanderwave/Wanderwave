@@ -19,7 +19,6 @@ constructor(private val spotifyController: SpotifyController) : ViewModel() {
   suspend fun connectRemote() {
     val connectResult = spotifyController.connectRemote().first()
     if (connectResult == SpotifyController.ConnectResult.SUCCESS) {
-      spotifyController.appRemote?.playerApi?.play("spotify:track:4PTG3Z6ehGkBFwjybzWkR8")
       _uiState.value = SpotifyConnectScreenUiState(hasResult = true, success = true)
     } else {
       _uiState.value = SpotifyConnectScreenUiState(hasResult = true, success = false)
