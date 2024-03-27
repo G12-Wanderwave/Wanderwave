@@ -29,18 +29,18 @@ class AppTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport
   @Test
   fun canNavigateFromLoginToMainToTrackList() = run {
     onComposeScreen<LoginScreen>(composeTestRule) { signInButton.performClick() }
-    onComposeScreen<MainPlaceHolder>(composeTestRule) { isDisplayed() }
+    onComposeScreen<MainPlaceHolder>(composeTestRule) { assertIsDisplayed() }
     onComposeScreen<AppBottomBarScreen>(composeTestRule) {
       bottomAppBarTrackListButton.performClick()
     }
-    onComposeScreen<TrackListScreen>(composeTestRule) { isDisplayed() }
+    onComposeScreen<TrackListScreen>(composeTestRule) { assertIsDisplayed() }
   }
 
   @Test
   fun canNavigateToMapScreen() = run {
     onComposeScreen<LoginScreen>(composeTestRule) { signInButton.performClick() }
-    onComposeScreen<MainPlaceHolder>(composeTestRule) { isDisplayed() }
+    onComposeScreen<MainPlaceHolder>(composeTestRule) { assertIsDisplayed() }
     onComposeScreen<AppBottomBarScreen>(composeTestRule) { mapScreenButton.performClick() }
-    onComposeScreen<MapScreen>(composeTestRule) { isDisplayed() }
+    onComposeScreen<MapScreen>(composeTestRule) { assertIsDisplayed() }
   }
 }
