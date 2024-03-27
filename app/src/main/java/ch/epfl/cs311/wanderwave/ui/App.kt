@@ -13,6 +13,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
+import ch.epfl.cs311.wanderwave.model.localDb.LocalProfileRepository
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.navigation.Route
@@ -40,7 +43,10 @@ fun AppScaffold(navController: NavHostController) {
   val navBackStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = navBackStackEntry?.destination?.route
   val navActions = NavigationActions(navController)
-  val profileViewModel = ProfileViewModel()
+  val appDatabase = AppDatabase.getInstance()
+  val profileRepositoryImpl = ProfileRepositoryImpl(LocalProfileRepository(AppDatabase.))
+  val profileViewModel = ProfileViewModel(profileRepositoryImpl)
+
 
   Scaffold(bottomBar = { AppBottomBar(navActions = navActions, currentRoute = currentRoute) }) {
       innerPadding ->
