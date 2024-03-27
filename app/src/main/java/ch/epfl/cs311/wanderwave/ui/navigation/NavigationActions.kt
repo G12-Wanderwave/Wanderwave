@@ -11,15 +11,16 @@ import androidx.navigation.NavHostController
 object Route {
   const val LAUNCH = "launch"
   const val LOGIN = "login"
+  const val MAIN = "main"
   const val TRACK_LIST = "trackList"
 }
 
 // Top level destination
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: Int)
 
-class NavigationActions(val navController: NavHostController) {
+class NavigationActions(navController: NavHostController) {
 
-  val navigationController = navController
+  private val navigationController = navController
 
   fun navigateTo(destination: TopLevelDestination) {
     navigationController.navigate(destination.route) {
@@ -38,12 +39,6 @@ class NavigationActions(val navController: NavHostController) {
   fun goBack() {
     navigationController.popBackStack()
   }
-
-  val navigateToCreateToDo: () -> Unit = { navigationController.navigate("createToDo") }
-  val navigateToEditToDo: (String) -> Unit = { taskId ->
-    navigationController.navigate("editToDo/$taskId")
-  }
-  val navigateToOverview: () -> Unit = { navigationController.navigate("overview") }
 }
 
 val TOP_LEVEL_DESTINATIONS =
@@ -51,4 +46,5 @@ val TOP_LEVEL_DESTINATIONS =
         TopLevelDestination(route = Route.LAUNCH, icon = Icons.Filled.ExitToApp, textId = 1),
         TopLevelDestination(route = Route.LOGIN, icon = Icons.Filled.AccountBox, textId = 2),
         TopLevelDestination(route = Route.TRACK_LIST, icon = Icons.Filled.List, textId = 3),
+        TopLevelDestination(route = Route.MAIN, icon = Icons.Filled.List, textId = 4),
     )
