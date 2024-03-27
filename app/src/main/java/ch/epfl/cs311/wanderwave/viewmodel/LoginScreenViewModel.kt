@@ -23,10 +23,7 @@ class LoginScreenViewModel @Inject constructor(private val spotifyController: Sp
   fun handleAuthorizationResponse(response: AuthorizationResponse) {
     when (response.type) {
       AuthorizationResponse.Type.TOKEN -> {
-        _uiState.value =
-            LoginScreenUiState(
-                hasResult = true,
-                success = true)
+        _uiState.value = LoginScreenUiState(hasResult = true, success = true)
       }
       AuthorizationResponse.Type.ERROR -> {
         _uiState.value =
