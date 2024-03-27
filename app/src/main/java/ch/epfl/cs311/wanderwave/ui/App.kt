@@ -55,7 +55,7 @@ fun AppScaffold(navController: NavHostController) {
         startDestination = Route.LAUNCH,
         modifier = Modifier.padding(innerPadding)) {
           composable(Route.LAUNCH) { LaunchScreen(navActions) }
-          composable(Route.LOGIN) { LoginScreen(navActions, profileViewModel) }
+          composable(Route.LOGIN) { LoginScreen(navActions) }
           composable(Route.MAIN) { MainPlaceHolder(navActions) }
           composable(Route.TRACK_LIST) { TrackListScreen() }
           composable(Route.PROFILE_SCREEN) { ProfileScreen(navActions, profileViewModel) }
