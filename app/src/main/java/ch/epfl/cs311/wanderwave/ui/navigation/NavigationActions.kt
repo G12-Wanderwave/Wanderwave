@@ -1,10 +1,8 @@
 package ch.epfl.cs311.wanderwave.ui.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.List
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import ch.epfl.cs311.wanderwave.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -22,7 +20,7 @@ enum class Route(val routeString: String, val showBottomBar: Boolean) {
 }
 
 // Top level destination
-data class TopLevelDestination(val route: Route, val icon: ImageVector, val textId: Int)
+data class TopLevelDestination(val route: Route, val iconId: Int, val textId: Int)
 
 class NavigationActions(navController: NavHostController) {
 
@@ -65,6 +63,8 @@ class NavigationActions(navController: NavHostController) {
 
 val TOP_LEVEL_DESTINATIONS =
     listOf(
-        TopLevelDestination(route = Route.TRACK_LIST, icon = Icons.Filled.List, textId = 3),
-        TopLevelDestination(route = Route.MAIN, icon = Icons.Filled.List, textId = 4),
+        TopLevelDestination(
+            route = Route.TRACK_LIST, iconId = R.drawable.tracklist, textId = R.string.trackList),
+        // 0 is temporary, main will be removed later
+        TopLevelDestination(route = Route.MAIN, iconId = 0, textId = R.string.main),
     )

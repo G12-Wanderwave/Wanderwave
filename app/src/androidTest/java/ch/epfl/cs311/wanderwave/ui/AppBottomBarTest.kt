@@ -6,6 +6,8 @@ import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.screens.AppBottomBarScreen
+import ch.epfl.cs311.wanderwave.ui.screens.LaunchScreen
+import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -47,5 +49,15 @@ class AppBottomBarTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
         verify { mockNavigationActions.navigateToTopLevel(Route.TRACK_LIST) }
       }
     }
+  }
+
+  @Test
+  fun appBottomBarIsNotDisplayedOnLoginScreen() = run {
+    onComposeScreen<LoginScreen>(composeTestRule) { assertDoesNotExist() }
+  }
+
+  @Test
+  fun appBottomBarIsNotDisplayedOnLaunchScreen() = run {
+    onComposeScreen<LaunchScreen>(composeTestRule) { assertDoesNotExist() }
   }
 }
