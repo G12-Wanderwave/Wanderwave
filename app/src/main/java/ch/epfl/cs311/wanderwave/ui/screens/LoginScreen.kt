@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.ui.components.login.LoginScreenHeader
 import ch.epfl.cs311.wanderwave.ui.components.login.SignInButton
@@ -12,9 +13,10 @@ import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 @Composable
-fun LoginScreen(navigationActions: NavigationActions, profileViewModel: ProfileViewModel) {
+fun LoginScreen(navigationActions: NavigationActions, profileViewModel: ProfileViewModel = hiltViewModel()) {
   Column(modifier = Modifier.testTag("loginScreen")) {
     LoginScreenHeader(modifier = Modifier.weight(1.5f))
     WelcomeTitle(modifier = Modifier.weight(4f))

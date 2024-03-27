@@ -1,13 +1,17 @@
 package ch.epfl.cs311.wanderwave.ui
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -24,8 +28,10 @@ class LoginScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
 
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
+
   @Before
   fun setup() {
+
     composeTestRule.setContent { LoginScreen(mockNavigationActions) }
   }
 
