@@ -7,13 +7,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.tasks.await
 
 class FirebaseConnection {
 
-  init {
-
-  }
+  init {}
 
   private val db = FirebaseFirestore.getInstance()
 
@@ -22,18 +19,18 @@ class FirebaseConnection {
     return db.collection("users").document().id
   }
 
-  fun isUidExisting(spotifyUid: String, callback: (Boolean,Profile?) -> Unit) {
+  fun isUidExisting(spotifyUid: String, callback: (Boolean, Profile?) -> Unit) {
     db.collection("users")
-      .whereEqualTo("spotifyUid", spotifyUid)
-      .get()
-      .addOnSuccessListener { documents ->
-        val isExisting = documents.size() > 0
-        callback(isExisting, if (isExisting) documentToProfile(documents.documents[0]) else null)
-      }
-      .addOnFailureListener { exception ->
-        Log.w("Firestore", "Error getting documents: ", exception)
-        callback(false,null) // Assuming failure means document doesn't exist
-      }
+        .whereEqualTo("spotifyUid", spotifyUid)
+        .get()
+        .addOnSuccessListener { documents ->
+          val isExisting = documents.size() > 0
+          callback(isExisting, if (isExisting) documentToProfile(documents.documents[0]) else null)
+        }
+        .addOnFailureListener { exception ->
+          Log.w("Firestore", "Error getting documents: ", exception)
+          callback(false, null) // Assuming failure means document doesn't exist
+        }
   }
 
   // Document to Profile
@@ -77,17 +74,17 @@ class FirebaseConnection {
     }
   }
 
-  fun profileToHash(profile: Profile): HashMap<String, Any>{
+  fun profileToHash(profile: Profile): HashMap<String, Any> {
     val profileMap: HashMap<String, Any> =
-      hashMapOf(
-        "firstName" to profile.firstName,
-        "lastName" to profile.lastName,
-        "description" to profile.description,
-        "numberOfLikes" to profile.numberOfLikes,
-        "spotifyUid" to profile.spotifyUid,
-        "firebaseUid" to profile.firebaseUid,
-        "isPublic" to profile.isPublic,
-        "profilePictureUri" to (profile.profilePictureUri?.toString() ?: ""))
+        hashMapOf(
+            "firstName" to profile.firstName,
+            "lastName" to profile.lastName,
+            "description" to profile.description,
+            "numberOfLikes" to profile.numberOfLikes,
+            "spotifyUid" to profile.spotifyUid,
+            "firebaseUid" to profile.firebaseUid,
+            "isPublic" to profile.isPublic,
+            "profilePictureUri" to (profile.profilePictureUri?.toString() ?: ""))
     return profileMap
   }
 
