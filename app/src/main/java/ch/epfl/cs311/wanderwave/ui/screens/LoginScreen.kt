@@ -9,7 +9,6 @@ import ch.epfl.cs311.wanderwave.ui.components.login.SignInButton
 import ch.epfl.cs311.wanderwave.ui.components.login.WelcomeTitle
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.navigation.Route
-import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
 
 @Composable
 fun LoginScreen(navigationActions: NavigationActions) {
@@ -17,7 +16,7 @@ fun LoginScreen(navigationActions: NavigationActions) {
     LoginScreenHeader(modifier = Modifier.weight(1.5f))
     WelcomeTitle(modifier = Modifier.weight(4f))
     SignInButton(modifier = Modifier.weight(1f)) {
-      navigationActions.navigateTo(TOP_LEVEL_DESTINATIONS.first { it.route == Route.MAIN })
+      navigationActions.navigateToTopLevel(Route.MAIN)
     }
   }
 }
