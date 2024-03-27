@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
@@ -28,7 +29,7 @@ fun AppBottomBar(navActions: NavigationActions) {
             modifier =
                 Modifier.padding(8.dp)
                     .testTag("bottomAppBarButton" + destination.route.routeString)) {
-              Text(text = destination.route.routeString)
+              Text(text = stringResource(id = destination.textId))
             }
       }
     }

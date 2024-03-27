@@ -1,11 +1,5 @@
 package ch.epfl.cs311.wanderwave.ui.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import ch.epfl.cs311.wanderwave.R
@@ -73,5 +67,4 @@ val TOP_LEVEL_DESTINATIONS =
             route = Route.TRACK_LIST, iconId = R.drawable.tracklist, textId = R.string.trackList),
         // 0 is temporary, main will be removed later
         TopLevelDestination(route = Route.MAIN, iconId = 0, textId = R.string.main),
-        TopLevelDestination(route = Route.MAP, iconId = R.drawable.map, textId = R.string.map)
-    )
+        TopLevelDestination(route = Route.MAP, iconId = R.drawable.map, textId = R.string.map))

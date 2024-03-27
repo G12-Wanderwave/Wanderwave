@@ -20,6 +20,7 @@ activityCompose = "1.8.2"
 composeBom = "2023.08.00"
 lifecycleRuntimeCompose = "2.7.0"
 appcompat = "1.6.1"
+mapsCompose = "4.3.3"
 mockkAgent = "1.13.10"
 mockkAndroid = "1.13.10"
 mockk = "1.13.10"
@@ -45,6 +46,7 @@ hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltA
 kaspresso-allure-support = { module = "com.kaspersky.android-components:kaspresso-allure-support", version.ref = "kaspressoAllureSupport" }
 kaspresso = { module = "com.kaspersky.android-components:kaspresso", version.ref = "kaspresso" }
 kaspresso-compose-support = { module = "com.kaspersky.android-components:kaspresso-compose-support", version.ref = "kaspressoComposeSupport" }
+maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
 mockk-agent = { module = "io.mockk:mockk-agent", version.ref = "mockkAgent" }
 mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockkAndroid" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
