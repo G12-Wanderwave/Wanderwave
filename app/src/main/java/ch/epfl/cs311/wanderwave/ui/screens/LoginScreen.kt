@@ -13,7 +13,8 @@ import ch.epfl.cs311.wanderwave.ui.navigation.Route
 @Composable
 fun LoginScreen(navigationActions: NavigationActions) {
   Column(modifier = Modifier.testTag("loginScreen")) {
-    LoginScreenHeader(modifier = Modifier.weight(1.5f))
+    LoginScreenHeader(navigationActions, modifier = Modifier.weight(1.5f))
+    // LoginScreenAnimation(modifier = Modifier.weight(3f))
     WelcomeTitle(modifier = Modifier.weight(4f))
     SignInButton(modifier = Modifier.weight(1f)) {
       navigationActions.navigateToTopLevel(Route.MAIN)
