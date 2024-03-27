@@ -14,7 +14,6 @@ import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onCompose
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.verify
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,13 +26,9 @@ class AppBottomBarTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
 
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
-  @Before
-  fun setup() {
-    composeTestRule.setContent { AppBottomBar(mockNavigationActions, Route.MAIN) }
-  }
-
   @Test
   fun appBottomBarComponentsAreDisplayedAndButtonIsClickable() = run {
+    composeTestRule.setContent { AppBottomBar(mockNavigationActions, Route.MAIN) }
     onComposeScreen<AppBottomBarScreen>(composeTestRule) {
       assertIsDisplayed()
 
@@ -53,5 +48,17 @@ class AppBottomBarTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
         }
       }
     }
+  }
+
+  @Test
+  fun appBottomBarIsNotDisplayedOnLoginScreen() = run {
+    composeTestRule.setContent { AppBottomBar(mockNavigationActions, Route.LOGIN) }
+    onComposeScreen<AppBottomBarScreen>(composeTestRule) { assertDoesNotExist() }
+  }
+
+  @Test
+  fun appBottomBarIsNotDisplayedOnLaunchScreen() = run {
+    composeTestRule.setContent { AppBottomBar(mockNavigationActions, Route.LAUNCH) }
+    onComposeScreen<AppBottomBarScreen>(composeTestRule) { assertDoesNotExist() }
   }
 }
