@@ -3,6 +3,9 @@ package ch.epfl.cs311.wanderwave.ui
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiSelector
 import ch.epfl.cs311.wanderwave.MainActivity
 import ch.epfl.cs311.wanderwave.ui.screens.AppBottomBarScreen
 import ch.epfl.cs311.wanderwave.ui.screens.AppScreen
@@ -41,6 +44,12 @@ class AppTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport
     onComposeScreen<LoginScreen>(composeTestRule) { signInButton.performClick() }
     onComposeScreen<MainPlaceHolder>(composeTestRule) { isDisplayed() }
     onComposeScreen<AppBottomBarScreen>(composeTestRule) { mapScreenButton.performClick() }
+
+    val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+    val allowButton = device.findObject(UiSelector().text("Allow"))
+    if (allowButton.exists()) {
+      allowButton.click()
+    }
     onComposeScreen<MapScreen>(composeTestRule) { isDisplayed() }
   }
 }
