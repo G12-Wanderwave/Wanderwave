@@ -39,6 +39,10 @@ class NavigationActions(navController: NavHostController) {
   fun goBack() {
     navigationController.popBackStack()
   }
+
+  fun getCurrentRoute(): String {
+    return navigationController.currentDestination?.route ?: ""
+  }
 }
 
 val TOP_LEVEL_DESTINATIONS =
