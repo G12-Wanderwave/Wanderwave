@@ -1,4 +1,4 @@
-package ch.epfl.cs311.wanderwave.ui.navigation
+package ch.epfl.cs311.wanderwave.navigation
 
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
