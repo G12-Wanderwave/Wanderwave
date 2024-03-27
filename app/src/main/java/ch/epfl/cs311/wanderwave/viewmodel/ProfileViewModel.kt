@@ -6,12 +6,12 @@ import androidx.lifecycle.ViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.firebase.FirebaseConnection
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
-import ch.epfl.cs311.wanderwave.model.repository.TrackRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor(private val repository: ProfileRepositoryImpl) : ViewModel() {
+class ProfileViewModel @Inject constructor(private val repository: ProfileRepositoryImpl) :
+    ViewModel() {
   private val _profile =
       MutableLiveData(
           Profile(

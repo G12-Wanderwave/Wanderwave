@@ -26,6 +26,8 @@ import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 @Composable
 fun App(navController: NavHostController) {
@@ -38,15 +40,15 @@ fun App(navController: NavHostController) {
   }
 }
 
+@AndroidEntryPoint
 @Composable
 fun AppScaffold(navController: NavHostController) {
   val navBackStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = navBackStackEntry?.destination?.route
   val navActions = NavigationActions(navController)
-  val appDatabase = AppDatabase.getInstance()
-  val profileRepositoryImpl = ProfileRepositoryImpl(LocalProfileRepository(AppDatabase.))
-  val profileViewModel = ProfileViewModel(profileRepositoryImpl)
 
+  val profileRepositoryImpl = ProfileRepositoryImpl()
+  val profileViewModel = ProfileViewModel(profileRepositoryImpl)
 
   Scaffold(bottomBar = { AppBottomBar(navActions = navActions, currentRoute = currentRoute) }) {
       innerPadding ->
