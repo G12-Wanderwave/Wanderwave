@@ -75,13 +75,8 @@ android {
             merges += "META-INF/LICENSE.md"
             merges += "META-INF/LICENSE-notice.md"
         }
-    }
-
-    testOptions {
-        packagingOptions {
-            jniLibs {
-                useLegacyPackaging = true
-            }
+        jniLibs {
+            useLegacyPackaging = true
         }
     }
 }
