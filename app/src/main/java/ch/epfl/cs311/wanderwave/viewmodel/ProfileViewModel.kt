@@ -12,6 +12,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(private val repository: ProfileRepositoryImpl) :
     ViewModel() {
+
   private val _profile =
       MutableLiveData(
           Profile(
