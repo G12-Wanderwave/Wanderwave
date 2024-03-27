@@ -1,6 +1,3 @@
 <resources>
     <string name="app_name">wanderwave</string>
-    <string name="welcome_title">Welcome</string>
-    <string name="welcome_subtitle">Ready to discover new music?</string>
-    <string name="button_label">Sign-in with Spotify</string>
 </resources>

@@ -65,6 +65,4 @@ wrapper/
 .externalNativeBuild
 .cxx
 local.properties
-secrets.properties
-*.keystore
 
