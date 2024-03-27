@@ -14,7 +14,7 @@ fun MainPlaceHolder(navigationActions: NavigationActions) {
   Row(modifier = Modifier.testTag("mainPlaceHolderScreen")) {
     Text(text = "MainPlaceHolder")
     Button(
-        onClick = { navigationActions.navigateToTopLevel(Route.LOGIN) },
+        onClick = { navigationActions.navigateToTopLevel(Route.LOGOUT) },
         modifier = Modifier.testTag("signOutButton")) {
           Text(text = "Sign Out")
         }

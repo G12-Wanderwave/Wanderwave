@@ -24,6 +24,7 @@ import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
+import ch.epfl.cs311.wanderwave.ui.screens.LogoutScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
 import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
@@ -34,10 +35,13 @@ import kotlinx.coroutines.launch
 fun App(navController: NavHostController) {
   WanderwaveTheme {
     Surface(
-        modifier = Modifier.fillMaxSize().testTag("appScreen"),
-        color = MaterialTheme.colorScheme.background) {
-          AppScaffold(navController)
-        }
+      modifier = Modifier
+        .fillMaxSize()
+        .testTag("appScreen"),
+      color = MaterialTheme.colorScheme.background
+    ) {
+      AppScaffold(navController)
+    }
   }
 }
 
@@ -57,22 +61,24 @@ fun AppScaffold(navController: NavHostController) {
   LaunchedEffect(currentRouteState) { showBottomBar = currentRouteState?.showBottomBar ?: false }
 
   Scaffold(
-      bottomBar = {
-        if (showBottomBar) {
-          AppBottomBar(
-              navActions = navActions,
-          )
-        }
-      },
-      snackbarHost = { SnackbarHost(hostState = snackbarHostState) }) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = Route.SPOTIFY_CONNECT.routeString,
-            modifier = Modifier.padding(innerPadding)) {
-              composable(Route.SPOTIFY_CONNECT.routeString) { SpotifyConnectScreen(navActions) }
-              composable(Route.LOGIN.routeString) { LoginScreen(navActions, showSnackbar) }
-              composable(Route.MAIN.routeString) { MainPlaceHolder(navActions) }
-              composable(Route.TRACK_LIST.routeString) { TrackListScreen(showSnackbar) }
-            }
+    bottomBar = {
+      if (showBottomBar) {
+        AppBottomBar(
+          navActions = navActions,
+        )
       }
+    },
+    snackbarHost = { SnackbarHost(hostState = snackbarHostState) }) { innerPadding ->
+    NavHost(
+      navController = navController,
+      startDestination = Route.SPOTIFY_CONNECT.routeString,
+      modifier = Modifier.padding(innerPadding)
+    ) {
+      composable(Route.SPOTIFY_CONNECT.routeString) { SpotifyConnectScreen(navActions) }
+      composable(Route.LOGIN.routeString) { LoginScreen(navActions, showSnackbar) }
+      composable(Route.LOGOUT.routeString) { LogoutScreen(navActions, showSnackbar) }
+      composable(Route.MAIN.routeString) { MainPlaceHolder(navActions) }
+      composable(Route.TRACK_LIST.routeString) { TrackListScreen(showSnackbar) }
+    }
+  }
 }
