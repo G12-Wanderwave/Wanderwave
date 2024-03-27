@@ -30,7 +30,8 @@ fun LoginScreenHeader(navigationActions: NavigationActions, modifier: Modifier) 
   val colorSpots = List(10) { i -> lerp(startColor, endColor, i / 9f) }
   FloatingActionButton(
       onClick = { navigationActions.navigateTo(Route.ABOUT) },
-      containerColor = MaterialTheme.colorScheme.background) {
+      containerColor = MaterialTheme.colorScheme.background,
+      modifier = Modifier.testTag("appIcon")) {
         Column(modifier = modifier.padding(start = 47.dp, end = 47.dp)) {
           Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             Icon(
