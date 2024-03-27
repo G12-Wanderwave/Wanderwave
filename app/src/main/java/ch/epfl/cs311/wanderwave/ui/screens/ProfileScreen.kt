@@ -45,8 +45,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_error
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_primary
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
@@ -68,7 +70,7 @@ val INPUT_BOX_NAM_SIZE = 150.dp
  * @last update 1.0
  */
 @Composable
-fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel()) {
+fun ProfileScreen(navAction: NavigationActions, viewModel: ProfileViewModel = hiltViewModel()) {
   // Observe LiveData changes and convert them into state for Composable to react
   val currentProfileState by viewModel.profile.observeAsState()
   val isInEditMode by viewModel.isInEditMode.observeAsState(false)
@@ -399,8 +401,9 @@ fun SelectImage(modifier: Modifier, profile: Profile) {
  * @since 1.0
  * @last update 1.0
  */
-@Preview
-@Composable
-fun ProfileScreenPreview() {
-  ProfileScreen(ProfileViewModel())
-}
+
+//@Preview
+//@Composable
+//fun ProfileScreenPreview() {
+//  ProfileScreen(navigationActions,ProfileViewModel())
+//}

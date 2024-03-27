@@ -19,8 +19,10 @@ import ch.epfl.cs311.wanderwave.ui.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.screens.LaunchScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
+import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
 @Composable
 fun App(navController: NavHostController) {
@@ -38,6 +40,7 @@ fun AppScaffold(navController: NavHostController) {
   val navBackStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = navBackStackEntry?.destination?.route
   val navActions = NavigationActions(navController)
+  val profileViewModel = ProfileViewModel()
 
   Scaffold(bottomBar = { AppBottomBar(navActions = navActions, currentRoute = currentRoute) }) {
       innerPadding ->
@@ -49,6 +52,7 @@ fun AppScaffold(navController: NavHostController) {
           composable(Route.LOGIN) { LoginScreen(navActions) }
           composable(Route.MAIN) { MainPlaceHolder(navActions) }
           composable(Route.TRACK_LIST) { TrackListScreen() }
+          composable(Route.PROFILE_SCREEN) { ProfileScreen(navActions,profileViewModel) }
         }
   }
 }

@@ -13,6 +13,7 @@ object Route {
   const val LOGIN = "login"
   const val MAIN = "main"
   const val TRACK_LIST = "trackList"
+  const val PROFILE_SCREEN = "profileScreen"
 }
 
 // Top level destination

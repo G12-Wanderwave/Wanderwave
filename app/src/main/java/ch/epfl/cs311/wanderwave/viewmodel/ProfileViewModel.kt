@@ -14,6 +14,8 @@ class ProfileViewModel : ViewModel() {
               description = "My Description",
               numberOfLikes = 0,
               isPublic = true,
+              spotifyUid = "My Spotify UID",
+              firebaseUid = "My Firebase UID",
               profilePictureUri = null))
   val profile: LiveData<Profile> = _profile
 
