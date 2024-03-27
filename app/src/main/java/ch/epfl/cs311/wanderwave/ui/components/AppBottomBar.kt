@@ -12,29 +12,26 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.ui.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
 
 @Composable
-fun AppBottomBar(navActions: NavigationActions, currentRoute: String?) {
+fun AppBottomBar(navActions: NavigationActions) {
   Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.testTag("appBottomBar")) {
-    if (currentRoute != Route.LOGIN && currentRoute != Route.LAUNCH) {
-      BottomAppBar(
-          modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
-            TOP_LEVEL_DESTINATIONS.forEach { destination ->
-              if (destination != TOP_LEVEL_DESTINATIONS.first { it.route == Route.LAUNCH } &&
-                  destination != TOP_LEVEL_DESTINATIONS.first { it.route == Route.LOGIN }) {
-                Button(
-                    onClick = { navActions.navigateTo(destination) },
-                    modifier =
-                        Modifier.padding(8.dp).testTag("bottomAppBarButton" + destination.route)) {
-                      Text(text = destination.route)
-                    }
-              }
+    BottomAppBar(
+        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface),
+    ) {
+      for (destination in TOP_LEVEL_DESTINATIONS) {
+        Button(
+            onClick = { navActions.navigateToTopLevel(destination.route) },
+            modifier =
+                Modifier.padding(8.dp)
+                    .testTag("bottomAppBarButton" + destination.route.routeString)) {
+              Text(text = stringResource(id = destination.textId))
             }
-          }
+      }
     }
   }
 }

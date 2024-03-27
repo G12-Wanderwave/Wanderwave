@@ -1,7 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
@@ -32,17 +31,17 @@ class AppTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport
   @Test
   fun canNavigateFromLoginToMainToTrackList() = run {
     onComposeScreen<LoginScreen>(composeTestRule) { signInButton.performClick() }
-    onComposeScreen<MainPlaceHolder>(composeTestRule) { isDisplayed() }
+    onComposeScreen<MainPlaceHolder>(composeTestRule) { assertIsDisplayed() }
     onComposeScreen<AppBottomBarScreen>(composeTestRule) {
       bottomAppBarTrackListButton.performClick()
     }
-    onComposeScreen<TrackListScreen>(composeTestRule) { isDisplayed() }
+    onComposeScreen<TrackListScreen>(composeTestRule) { assertIsDisplayed() }
   }
 
   @Test
   fun canNavigateToMapScreen() = run {
     onComposeScreen<LoginScreen>(composeTestRule) { signInButton.performClick() }
-    onComposeScreen<MainPlaceHolder>(composeTestRule) { isDisplayed() }
+    onComposeScreen<MainPlaceHolder>(composeTestRule) { assertIsDisplayed() }
     onComposeScreen<AppBottomBarScreen>(composeTestRule) { mapScreenButton.performClick() }
 
     val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
@@ -50,6 +49,6 @@ class AppTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport
     if (allowButton.exists()) {
       allowButton.click()
     }
-    onComposeScreen<MapScreen>(composeTestRule) { isDisplayed() }
+    onComposeScreen<MapScreen>(composeTestRule) { assertIsDisplayed() }
   }
 }

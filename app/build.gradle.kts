@@ -8,10 +8,11 @@ plugins {
     kotlin("kapt") // Kotlin annotation processing plugin
     id("com.google.dagger.hilt.android") // Dagger Hilt plugin, used for dependency injection
 
-    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
-
     // SonarCloud plugin for running static code analysis
     id("org.sonarqube") version "4.4.1.3373"
+
+    // handling secrets.properties
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
@@ -31,6 +32,15 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../release.keystore")
+            storePassword = System.getenv("KEYSTORE_RELEASE_PASSWORD")
+            keyAlias = "release"
+            keyPassword = System.getenv("KEYSTORE_RELEASE_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -38,6 +48,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
         debug {
             enableUnitTestCoverage = true
@@ -53,6 +64,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -63,13 +75,8 @@ android {
             merges += "META-INF/LICENSE.md"
             merges += "META-INF/LICENSE-notice.md"
         }
-    }
-
-    testOptions {
-        packagingOptions {
-            jniLibs {
-                useLegacyPackaging = true
-            }
+        jniLibs {
+            useLegacyPackaging = true
         }
     }
 }
@@ -94,9 +101,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation("androidx.room:room-runtime:2.6.1")
-    kapt("androidx.room:room-compiler:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
+    implementation(libs.androidx.room.runtime)
+    kapt(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
 
     /*
     implementation("com.google.firebase:firebase-database-ktx:20.3.0")
@@ -104,43 +111,42 @@ dependencies {
     implementation("com.google.android.play:core-ktx:1.7.0")
     */
 
-    implementation("com.google.maps.android:maps-compose:4.3.3")
+    implementation(libs.maps.compose)
 
-    implementation("com.google.android.gms:play-services-location:21.1.0")
-    implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
+    implementation(libs.play.services.location)
+    implementation(libs.accompanist.permissions)
 
-    implementation("com.google.dagger:hilt-android:2.49")
-    kapt("com.google.dagger:hilt-android-compiler:2.49")
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
 
-    androidTestImplementation("com.google.dagger:hilt-android-testing:2.49")
-    kaptAndroidTest("com.google.dagger:hilt-android-compiler:2.49")
+    androidTestImplementation(libs.hilt.android.testing)
+    kaptAndroidTest(libs.dagger.hilt.android.compiler)
 
-    testImplementation("com.google.dagger:hilt-android-testing:2.49")
-    kaptTest("com.google.dagger:hilt-android-compiler:2.49")
+    testImplementation(libs.dagger.hilt.android.testing)
+    kaptTest(libs.google.hilt.android.compiler)
 
-    implementation("androidx.navigation:navigation-compose:2.6.0-rc01")
+    implementation(libs.androidx.navigation.compose)
     // Hilt Navigation Compose library for injecting ViewModels in Compose
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation(libs.androidx.hilt.navigation.compose)
 
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.4.0")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.ui.test.junit4)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
 
-    androidTestImplementation("com.kaspersky.android-components:kaspresso:1.4.3")
+    androidTestImplementation(libs.kaspresso)
     // Allure support
-    androidTestImplementation("com.kaspersky.android-components:kaspresso-allure-support:1.4.3")
+    androidTestImplementation(libs.kaspresso.allure.support)
     // Jetpack Compose support
-    androidTestImplementation("com.kaspersky.android-components:kaspresso-compose-support:1.4.1")
+    androidTestImplementation(libs.kaspresso.compose.support)
 
     // Dependency for using Intents in instrumented tests
-    androidTestImplementation("androidx.test.espresso:espresso-intents:3.5.1")
+    androidTestImplementation(libs.androidx.espresso.intents)
 
     // Dependencies for using MockK in instrumented tests
-    androidTestImplementation("io.mockk:mockk:1.13.10")
-    androidTestImplementation("io.mockk:mockk-android:1.13.10")
-    androidTestImplementation("io.mockk:mockk-agent:1.13.10")
+    androidTestImplementation(libs.mockk)
+    androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.mockk.agent)
 }
 kapt {
     correctErrorTypes = true
@@ -166,14 +172,14 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         "**/*_Factory.class",  // Exclude Hilt generated code
         "**/*_MembersInjector.class",  // Exclude Hilt generated code
     )
-    val debugTree = fileTree("${project.buildDir}/tmp/kotlin-classes/debug") {
+    val debugTree = fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
         exclude(fileFilter)
     }
     val mainSrc = "${project.projectDir}/src/main/java"
 
     sourceDirectories.setFrom(files(mainSrc))
     classDirectories.setFrom(files(debugTree))
-    executionData.setFrom(fileTree(project.buildDir) {
+    executionData.setFrom(fileTree(project.layout.buildDirectory.get()) {
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
@@ -186,4 +192,12 @@ sonar {
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
     }
+}
+
+secrets {
+    propertiesFileName = "secrets.properties"
+
+    defaultPropertiesFileName = "local.defaults.properties"
+
+    ignoreList.add("sdk.*")       // Ignore all keys matching the regexp "sdk.*"
 }
