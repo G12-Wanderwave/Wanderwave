@@ -12,7 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
@@ -21,17 +20,16 @@ import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
 fun AppBottomBar(navActions: NavigationActions) {
   Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.testTag("appBottomBar")) {
     BottomAppBar(
-      modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface),
+        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface),
     ) {
       for (destination in TOP_LEVEL_DESTINATIONS) {
         Button(
-          onClick = { navActions.navigateToTopLevel(destination.route) },
-          modifier =
-          Modifier.padding(8.dp)
-            .testTag("bottomAppBarButton" + destination.route.routeString)
-        ) {
-          Text(text = destination.route.routeString)
-        }
+            onClick = { navActions.navigateToTopLevel(destination.route) },
+            modifier =
+                Modifier.padding(8.dp)
+                    .testTag("bottomAppBarButton" + destination.route.routeString)) {
+              Text(text = destination.route.routeString)
+            }
       }
     }
   }

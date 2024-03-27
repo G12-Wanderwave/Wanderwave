@@ -1,11 +1,8 @@
 package ch.epfl.cs311.wanderwave.ui.navigation
 
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import ch.epfl.cs311.wanderwave.R
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.List
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
+import ch.epfl.cs311.wanderwave.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
