@@ -1,4 +1,4 @@
-package ch.epfl.cs311.wanderwave.ui.navigation
+package ch.epfl.cs311.wanderwave.navigation
 
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 
 enum class Route(val routeString: String, val showBottomBar: Boolean) {
   LOGIN("login", false),
-  ABOUT("about", false),
   MAIN("main", true),
   TRACK_LIST("trackList", true);
 
