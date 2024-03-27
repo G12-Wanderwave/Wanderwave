@@ -8,15 +8,18 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.navigation.Route
@@ -40,29 +43,36 @@ fun App(navController: NavHostController) {
 
 @Composable
 fun AppScaffold(navController: NavHostController) {
-  val navBackStackEntry by navController.currentBackStackEntryAsState()
-  val currentRoute = navBackStackEntry?.destination?.route
   val navActions = NavigationActions(navController)
+  var showBottomBar by remember { mutableStateOf(false) }
+  val currentRouteState by navActions.currentRouteFlow.collectAsStateWithLifecycle()
   val snackbarHostState = remember { SnackbarHostState() }
 
   val scope = rememberCoroutineScope()
-
   val showSnackbar = { message: String ->
     scope.launch { snackbarHostState.showSnackbar(message) }
     Unit
   }
 
+  LaunchedEffect(currentRouteState) { showBottomBar = currentRouteState?.showBottomBar ?: false }
+
   Scaffold(
-      bottomBar = { AppBottomBar(navActions = navActions, currentRoute = currentRoute) },
+      bottomBar = {
+        if (showBottomBar) {
+          AppBottomBar(
+              navActions = navActions,
+          )
+        }
+      },
       snackbarHost = { SnackbarHost(hostState = snackbarHostState) }) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Route.SPOTIFY_CONNECT,
+            startDestination = Route.LOGIN.routeString,
             modifier = Modifier.padding(innerPadding)) {
-              composable(Route.SPOTIFY_CONNECT) { SpotifyConnectScreen(navActions) }
-              composable(Route.LOGIN) { LoginScreen(navActions, showSnackbar) }
-              composable(Route.MAIN) { MainPlaceHolder(navActions) }
-              composable(Route.TRACK_LIST) { TrackListScreen() }
+              composable(Route.SPOTIFY_CONNECT.routeString) { SpotifyConnectScreen(navActions) }
+              composable(Route.LOGIN.routeString) { LoginScreen(navActions, showSnackbar) }
+              composable(Route.MAIN.routeString) { MainPlaceHolder(navActions) }
+              composable(Route.TRACK_LIST.routeString) { TrackListScreen() }
             }
       }
 }

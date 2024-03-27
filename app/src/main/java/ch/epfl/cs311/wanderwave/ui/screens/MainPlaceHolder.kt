@@ -8,16 +8,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.navigation.Route
-import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
 
 @Composable
 fun MainPlaceHolder(navigationActions: NavigationActions) {
   Row(modifier = Modifier.testTag("mainPlaceHolderScreen")) {
     Text(text = "MainPlaceHolder")
     Button(
-        onClick = {
-          navigationActions.navigateTo(TOP_LEVEL_DESTINATIONS.first { it.route == Route.LOGIN })
-        },
+        onClick = { navigationActions.navigateToTopLevel(Route.LOGIN) },
         modifier = Modifier.testTag("signOutButton")) {
           Text(text = "Sign Out")
         }

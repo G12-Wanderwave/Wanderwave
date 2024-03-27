@@ -18,28 +18,27 @@ import ch.epfl.cs311.wanderwave.viewmodel.SpotifyConnectScreenViewModel
 
 @Composable
 fun SpotifyConnectScreen(
-  navigationActions: NavigationActions,
-  viewModel: SpotifyConnectScreenViewModel = hiltViewModel()
+    navigationActions: NavigationActions,
+    viewModel: SpotifyConnectScreenViewModel = hiltViewModel()
 ) {
   val state by viewModel.uiState.collectAsStateWithLifecycle()
 
   LaunchedEffect(state) {
-    if(state.hasResult) {
-      if(state.success) {
+    if (state.hasResult) {
+      if (state.success) {
         navigationActions.navigateTo(Route.MAIN)
-      }else {
+      } else {
         navigationActions.navigateTo(Route.LOGIN)
       }
-    }else{
+    } else {
       viewModel.connectRemote()
     }
   }
 
   Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
     CircularProgressIndicator(
-      modifier = Modifier.width(64.dp),
-      color = MaterialTheme.colorScheme.secondary,
-      trackColor = MaterialTheme.colorScheme.surfaceVariant
-    )
+        modifier = Modifier.width(64.dp),
+        color = MaterialTheme.colorScheme.secondary,
+        trackColor = MaterialTheme.colorScheme.surfaceVariant)
   }
 }

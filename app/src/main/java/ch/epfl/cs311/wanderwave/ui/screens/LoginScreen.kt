@@ -33,7 +33,7 @@ fun LoginScreen(
   LaunchedEffect(state) {
     state.let {
       if (it.hasResult) {
-        if(it.message != null) {
+        if (it.message != null) {
           showMessage(it.message)
         }
         if (it.success) {
