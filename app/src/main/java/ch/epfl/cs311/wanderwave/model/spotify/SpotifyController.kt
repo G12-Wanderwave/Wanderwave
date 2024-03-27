@@ -2,15 +2,21 @@ package ch.epfl.cs311.wanderwave.model.spotify
 
 import android.content.Context
 import ch.epfl.cs311.wanderwave.BuildConfig
+import ch.epfl.cs311.wanderwave.model.data.Track
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
+import com.spotify.android.appremote.api.PlayerApi.StreamType
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.android.appremote.api.error.NotLoggedInException
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.timeout
+import java.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 class SpotifyController(private val context: Context) {
 
@@ -71,6 +77,18 @@ class SpotifyController(private val context: Context) {
 
   fun disconnectRemote() {
     appRemote?.let { SpotifyAppRemote.disconnect(it) }
+  }
+
+  @OptIn(FlowPreview::class)
+  fun playTrack(track: Track): Flow<Boolean> {
+    return callbackFlow {
+      val callResult = appRemote?.let {
+        it.playerApi.play(track.id)
+          .setResultCallback { trySend(true) }
+          .setErrorCallback { trySend(false) }
+      }
+      awaitClose {callResult?.cancel()}
+    }
   }
 
   data class State(
