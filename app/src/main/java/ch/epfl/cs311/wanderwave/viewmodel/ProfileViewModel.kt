@@ -52,6 +52,7 @@ class ProfileViewModel @Inject constructor(private val repository: ProfileReposi
     // TODO : fetch profile from Spotify
     // _profile.value = spotifyConnection.getProfile()....
     // Fetch profile from Firestore if it doesn't exist, create it
+
     firebaseConnection.isUidExisting(profile.spotifyUid) { isExisting, fetchedProfile ->
       if (isExisting) {
 
