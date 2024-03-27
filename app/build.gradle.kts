@@ -8,10 +8,11 @@ plugins {
     kotlin("kapt") // Kotlin annotation processing plugin
     id("com.google.dagger.hilt.android") // Dagger Hilt plugin, used for dependency injection
 
-    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
-
     // SonarCloud plugin for running static code analysis
     id("org.sonarqube") version "4.4.1.3373"
+
+    // handling secrets.properties
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
@@ -31,6 +32,15 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../release.keystore")
+            storePassword = System.getenv("KEYSTORE_RELEASE_PASSWORD")
+            keyAlias = "release"
+            keyPassword = System.getenv("KEYSTORE_RELEASE_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -38,6 +48,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
         debug {
             enableUnitTestCoverage = true
@@ -53,6 +64,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -183,4 +195,12 @@ sonar {
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
     }
+}
+
+secrets {
+    propertiesFileName = "secrets.properties"
+
+    defaultPropertiesFileName = "local.defaults.properties"
+
+    ignoreList.add("sdk.*")       // Ignore all keys matching the regexp "sdk.*"
 }
