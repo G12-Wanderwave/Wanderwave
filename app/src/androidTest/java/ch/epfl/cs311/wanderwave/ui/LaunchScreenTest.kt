@@ -3,7 +3,6 @@ package ch.epfl.cs311.wanderwave.ui
 import androidx.compose.ui.test.junit4.createComposeRule
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.navigation.Route
-import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
 import ch.epfl.cs311.wanderwave.ui.screens.LaunchScreen
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.RelaxedMockK
@@ -27,8 +26,6 @@ class LaunchScreenTest {
   fun launchScreenNavigatesToLogin() {
     composeTestRule.setContent { LaunchScreen(mockNavigationActions) }
     // Verify that navigateTo is called with the correct argument
-    verify {
-      mockNavigationActions.navigateTo(TOP_LEVEL_DESTINATIONS.first { it.route == Route.LOGIN })
-    }
+    verify { mockNavigationActions.navigateToTopLevel(Route.LOGIN) }
   }
 }

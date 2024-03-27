@@ -1,10 +1,8 @@
 package ch.epfl.cs311.wanderwave.ui
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepositoryImpl
-import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
@@ -27,11 +25,7 @@ class TrackListScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCo
 
   @Before
   fun setup() {
-    composeTestRule.setContent {
-      val navHostController = rememberNavController()
-      val navigationActions = NavigationActions(navHostController)
-      TrackListScreen(navigationActions)
-    }
+    composeTestRule.setContent { TrackListScreen() }
   }
 
   @Test

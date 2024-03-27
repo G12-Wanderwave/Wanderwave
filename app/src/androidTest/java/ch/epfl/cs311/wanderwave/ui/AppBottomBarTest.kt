@@ -5,7 +5,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.navigation.Route
-import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
 import ch.epfl.cs311.wanderwave.ui.screens.AppBottomBarScreen
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
@@ -29,7 +28,7 @@ class AppBottomBarTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
 
   @Before
   fun setup() {
-    composeTestRule.setContent { AppBottomBar(mockNavigationActions, Route.MAIN) }
+    composeTestRule.setContent { AppBottomBar(mockNavigationActions, Route.MAIN.routeString) }
   }
 
   @Test
@@ -40,17 +39,12 @@ class AppBottomBarTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
       bottomAppBarMainPlaceHolderButton {
         assertIsDisplayed()
         performClick()
-        verify {
-          mockNavigationActions.navigateTo(TOP_LEVEL_DESTINATIONS.first { it.route == Route.MAIN })
-        }
+        verify { mockNavigationActions.navigateToTopLevel(Route.MAIN) }
       }
       bottomAppBarTrackListButton {
         assertIsDisplayed()
         performClick()
-        verify {
-          mockNavigationActions.navigateTo(
-              TOP_LEVEL_DESTINATIONS.first { it.route == Route.TRACK_LIST })
-        }
+        verify { mockNavigationActions.navigateToTopLevel(Route.TRACK_LIST) }
       }
     }
   }
