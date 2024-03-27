@@ -98,14 +98,6 @@ class SpotifyController(private val context: Context) {
       awaitClose { callResult?.cancel() }
     }
   }
-
-  data class State(
-    val isAuthorized: Boolean = false,
-    val token: String = "",
-    val isRemoteConnected: Boolean = false,
-    val spotifyAppRemote: SpotifyAppRemote? = null
-  )
-
   enum class ConnectResult {
     SUCCESS,
     NOT_LOGGED_IN,
