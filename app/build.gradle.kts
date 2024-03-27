@@ -13,6 +13,9 @@ plugins {
 
     // handling secrets.properties
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+
+    // google firebase
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -112,11 +115,11 @@ dependencies {
     kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
 
-    /*
+    implementation("com.google.firebase:firebase-core:17.0.0")
     implementation("com.google.firebase:firebase-database-ktx:20.3.0")
     implementation("com.google.firebase:firebase-firestore:24.10.0")
     implementation("com.google.android.play:core-ktx:1.7.0")
-    */
+
     implementation("com.google.dagger:hilt-android:2.49")
     kapt("com.google.dagger:hilt-android-compiler:2.49")
 

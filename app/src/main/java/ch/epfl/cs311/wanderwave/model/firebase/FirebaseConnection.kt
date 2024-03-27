@@ -7,8 +7,13 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.tasks.await
 
 class FirebaseConnection {
+
+  init {
+
+  }
 
   private val db = FirebaseFirestore.getInstance()
 
@@ -17,20 +22,18 @@ class FirebaseConnection {
     return db.collection("users").document().id
   }
 
-  fun isUidExisting(spotifyUid: String): Boolean {
-    var isExisting = false
+  fun isUidExisting(spotifyUid: String, callback: (Boolean,Profile?) -> Unit) {
     db.collection("users")
-        .whereEqualTo("spotifyUid", spotifyUid)
-        .get()
-        .addOnSuccessListener { documents ->
-          if (documents.size() > 0) {
-            isExisting = true
-          }
-        }
-        .addOnFailureListener { exception ->
-          Log.w("Firestore", "Error getting documents: ", exception)
-        }
-    return isExisting
+      .whereEqualTo("spotifyUid", spotifyUid)
+      .get()
+      .addOnSuccessListener { documents ->
+        val isExisting = documents.size() > 0
+        callback(isExisting, if (isExisting) documentToProfile(documents.documents[0]) else null)
+      }
+      .addOnFailureListener { exception ->
+        Log.w("Firestore", "Error getting documents: ", exception)
+        callback(false,null) // Assuming failure means document doesn't exist
+      }
   }
 
   // Document to Profile
@@ -74,17 +77,24 @@ class FirebaseConnection {
     }
   }
 
-  fun addProfile(profile: Profile) {
-    val profileMap =
-        hashMapOf(
-            "firstName" to profile.firstName,
-            "lastName" to profile.lastName,
-            "description" to profile.description,
-            "numberOfLikes" to profile.numberOfLikes,
-            "isPublic" to profile.isPublic,
-            "profilePictureUri" to profile.profilePictureUri.toString())
+  fun profileToHash(profile: Profile): HashMap<String, Any>{
+    val profileMap: HashMap<String, Any> =
+      hashMapOf(
+        "firstName" to profile.firstName,
+        "lastName" to profile.lastName,
+        "description" to profile.description,
+        "numberOfLikes" to profile.numberOfLikes,
+        "spotifyUid" to profile.spotifyUid,
+        "firebaseUid" to profile.firebaseUid,
+        "isPublic" to profile.isPublic,
+        "profilePictureUri" to (profile.profilePictureUri?.toString() ?: ""))
+    return profileMap
+  }
 
-    db.collection("profiles")
+  fun addProfile(profile: Profile) {
+    val profileMap = profileToHash(profile)
+
+    db.collection("users")
         .document(profile.firebaseUid)
         .set(profileMap)
         .addOnFailureListener { e -> Log.e("Firestore", "Error adding document: ", e) }
@@ -95,16 +105,9 @@ class FirebaseConnection {
   fun updateProfile(profile: Profile) {
     val uid = profile.firebaseUid
 
-    val profileMap =
-        hashMapOf(
-            "firstName" to profile.firstName,
-            "lastName" to profile.lastName,
-            "description" to profile.description,
-            "numberOfLikes" to profile.numberOfLikes,
-            "isPublic" to profile.isPublic,
-            "profilePictureUri" to profile.profilePictureUri.toString())
+    val profileMap = profileToHash(profile)
 
-    db.collection("profiles")
+    db.collection("users")
         .document(uid)
         .set(profileMap)
         .addOnFailureListener { e -> Log.e("Firestore", "Error updating document: ", e) }
@@ -113,7 +116,7 @@ class FirebaseConnection {
 
   // Remove todos from the database
   fun deleteProfile(profile: Profile) {
-    db.collection("profiles").document(profile.firebaseUid).delete().addOnFailureListener { e ->
+    db.collection("users").document(profile.firebaseUid).delete().addOnFailureListener { e ->
       Log.e("Firestore", "Error deleting document: ", e)
     }
   }

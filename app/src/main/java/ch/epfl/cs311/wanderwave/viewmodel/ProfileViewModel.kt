@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,16 +10,18 @@ import kotlinx.coroutines.flow.onEach
 
 class ProfileViewModel : ViewModel() {
   private val _profile =
-      MutableLiveData(
-          Profile(
-              firstName = "My FirstName",
-              lastName = "My LastName",
-              description = "My Description",
-              numberOfLikes = 0,
-              isPublic = true,
-              spotifyUid = "My Spotify UID",
-              firebaseUid = "My Firebase UID",
-              profilePictureUri = null))
+    MutableLiveData(
+      Profile(
+        firstName = "My FirstName",
+        lastName = "My LastName",
+        description = "My Description",
+        numberOfLikes = 0,
+        isPublic = true,
+        spotifyUid = "My Spotify UID",
+        firebaseUid = "My Firebase UID",
+        profilePictureUri = null
+      )
+    )
   val profile: LiveData<Profile> = _profile
 
   private val _isInEditMode = MutableLiveData(false)
@@ -45,15 +48,18 @@ class ProfileViewModel : ViewModel() {
     // TODO : fetch profile from Spotify
     // _profile.value = spotifyConnection.getProfile()....
     // Fetch profile from Firestore if it doesn't exist, create it
-    if (firebaseConnection.isUidExisting(profile.spotifyUid)) {
-      firebaseConnection.getProfile(profile.spotifyUid).onEach { fetchedProfile ->
+    firebaseConnection.isUidExisting(profile.spotifyUid) { isExisting, fetchedProfile ->
+      if (isExisting) {
+//        Log.d("Firestore", "Profile exists in Firestore, ${fetchedProfile!!.firebaseUid} ${fetchedProfile.spotifyUid}")
+        //        firebaseConnection.getProfile(fetchedProfile!!.firebaseUid).onEach { fetchedProfile ->
         _profile.value = fetchedProfile
+//        }
+      } else {
+        val newUid = firebaseConnection.getNewUid()
+        val newProfile = profile.copy(firebaseUid = newUid)
+        firebaseConnection.addProfile(newProfile)
+        _profile.value = newProfile
       }
-    } else {
-      val newUid = firebaseConnection.getNewUid()
-      val newProfile = profile.copy(firebaseUid = newUid)
-      firebaseConnection.addProfile(newProfile)
-      _profile.value = newProfile
     }
   }
 }
