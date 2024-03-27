@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 enum class Route(val routeString: String, val showBottomBar: Boolean) {
-  LAUNCH("launch", false),
   LOGIN("login", false),
   MAIN("main", true),
   TRACK_LIST("trackList", true);

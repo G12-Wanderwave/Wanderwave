@@ -8,12 +8,6 @@ class AppBottomBarScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
     ComposeScreen<AppBottomBarScreen>(
         semanticsProvider = semanticsProvider, viewBuilderAction = { hasTestTag("appBottomBar") }) {
 
-  val bottomAppBarLaunchButton = onNode {
-    hasTestTag("bottomAppBarButton" + Route.LAUNCH.routeString)
-  }
-  val bottomAppBarLoginButton = onNode {
-    hasTestTag("bottomAppBarButton" + Route.LOGIN.routeString)
-  }
   val bottomAppBarTrackListButton = onNode {
     hasTestTag("bottomAppBarButton" + Route.TRACK_LIST.routeString)
   }

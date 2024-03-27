@@ -22,7 +22,7 @@ fun AppBottomBar(navActions: NavigationActions) {
     BottomAppBar(
         modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface),
     ) {
-      TOP_LEVEL_DESTINATIONS.forEach { destination ->
+      for (destination in TOP_LEVEL_DESTINATIONS) {
         Button(
             onClick = { navActions.navigateToTopLevel(destination.route) },
             modifier =
