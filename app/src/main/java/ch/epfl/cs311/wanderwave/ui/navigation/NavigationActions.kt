@@ -18,7 +18,7 @@ object Route {
 }
 
 // Top level destination
-data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: Int)
+data class TopLevelDestination(val route: String, val iconId: Int, val textId: Int)
 
 class NavigationActions(navController: NavHostController) {
 
@@ -38,6 +38,10 @@ class NavigationActions(navController: NavHostController) {
     }
   }
 
+  fun navigateTo(route: String) {
+    navigationController.navigate(route)
+  }
+
   fun goBack() {
     navigationController.popBackStack()
   }
@@ -45,8 +49,6 @@ class NavigationActions(navController: NavHostController) {
 
 val TOP_LEVEL_DESTINATIONS =
     listOf(
-        TopLevelDestination(route = Route.LAUNCH, icon = Icons.AutoMirrored.Filled.ExitToApp, textId = 1),
-        TopLevelDestination(route = Route.LOGIN, icon = Icons.Filled.AccountBox, textId = 2),
         TopLevelDestination(route = Route.TRACK_LIST, icon = Icons.AutoMirrored.Filled.List, textId = 3),
         TopLevelDestination(route = Route.MAIN, icon = Icons.AutoMirrored.Filled.List, textId = 4),
     )
