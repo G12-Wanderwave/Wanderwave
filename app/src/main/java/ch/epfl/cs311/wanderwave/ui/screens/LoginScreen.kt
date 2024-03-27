@@ -10,13 +10,17 @@ import ch.epfl.cs311.wanderwave.ui.components.login.WelcomeTitle
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
 @Composable
-fun LoginScreen(navigationActions: NavigationActions) {
+fun LoginScreen(navigationActions: NavigationActions, profileViewModel: ProfileViewModel) {
   Column(modifier = Modifier.testTag("loginScreen")) {
     LoginScreenHeader(modifier = Modifier.weight(1.5f))
     WelcomeTitle(modifier = Modifier.weight(4f))
     SignInButton(modifier = Modifier.weight(1f)) {
+      // TODO : fetch the profile from the spotify API
+
+
       navigationActions.navigateTo(TOP_LEVEL_DESTINATIONS.first { it.route == Route.MAIN })
     }
   }
