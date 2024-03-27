@@ -17,7 +17,7 @@ import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
 
 @Composable
-fun AppBottomBar(navActions: NavigationActions, currentRoute: String?) {
+fun AppBottomBar(navActions: NavigationActions) {
   Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.testTag("appBottomBar")) {
     BottomAppBar(
         modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface),
@@ -25,7 +25,9 @@ fun AppBottomBar(navActions: NavigationActions, currentRoute: String?) {
       TOP_LEVEL_DESTINATIONS.forEach { destination ->
         Button(
             onClick = { navActions.navigateToTopLevel(destination.route) },
-            modifier = Modifier.padding(8.dp).testTag("bottomAppBarButton" + destination.route)) {
+            modifier =
+                Modifier.padding(8.dp)
+                    .testTag("bottomAppBarButton" + destination.route.routeString)) {
               Text(text = destination.route.routeString)
             }
       }

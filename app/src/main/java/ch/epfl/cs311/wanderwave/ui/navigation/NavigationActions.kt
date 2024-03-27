@@ -5,12 +5,20 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 enum class Route(val routeString: String, val showBottomBar: Boolean) {
   LAUNCH("launch", false),
   LOGIN("login", false),
   MAIN("main", true),
-  TRACK_LIST("trackList", true)
+  TRACK_LIST("trackList", true);
+
+  companion object {
+    fun forRouteString(routeString: String): Route? {
+      return entries.firstOrNull { it.routeString == routeString }
+    }
+  }
 }
 
 // Top level destination
@@ -19,6 +27,9 @@ data class TopLevelDestination(val route: Route, val icon: ImageVector, val text
 class NavigationActions(navController: NavHostController) {
 
   private val navigationController = navController
+
+  private var _currentRouteFlow = MutableStateFlow(getCurrentRoute())
+  val currentRouteFlow: StateFlow<Route?> = _currentRouteFlow
 
   fun navigateToTopLevel(topLevelRoute: Route) {
     navigationController.navigate(topLevelRoute.routeString) {
@@ -32,10 +43,19 @@ class NavigationActions(navController: NavHostController) {
       // Restore state when reselecting a previously selected item
       restoreState = true
     }
+    _currentRouteFlow.value = topLevelRoute
+  }
+
+  fun getCurrentRoute(): Route? {
+    navigationController.currentDestination?.route?.let {
+      return Route.forRouteString(it)
+    }
+    return null
   }
 
   fun navigateTo(route: Route) {
     navigationController.navigate(route.routeString)
+    _currentRouteFlow.value = route
   }
 
   fun goBack() {
