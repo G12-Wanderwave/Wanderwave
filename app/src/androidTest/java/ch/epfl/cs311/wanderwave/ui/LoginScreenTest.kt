@@ -22,6 +22,7 @@ import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onCompose
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -81,17 +82,22 @@ class LoginScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
   fun spotifyLoginRunsIntent() = run {
     setup()
     val responseDummyIntent = Intent("responseDummy")
-    val requestDummyIntent = Intent("requestDummy")
     val result = Instrumentation.ActivityResult(123, responseDummyIntent)
     Intents.intending(anyIntent()).respondWith(result)
 
     mockkStatic(AuthorizationClient::class)
-    every { AuthorizationClient.createLoginActivityIntent(any(), any()) } returns requestDummyIntent
+    every { AuthorizationClient.createLoginActivityIntent(any(), any()) } returns
+        mockk(relaxed = true)
 
-    onComposeScreen<LoginScreen>(composeTestRule) { signInButton { performClick() } }
-    verify { mockViewModel.getAuthorizationRequest() }
+    onComposeScreen<LoginScreen>(composeTestRule) {
+      signInButton { performClick() }
+      verify { mockViewModel.getAuthorizationRequest() }
 
-    verify { mockViewModel.handleAuthorizationResponse(any()) }
+      Intents.intended(anyIntent())
+      Intents.assertNoUnverifiedIntents()
+
+      verify { mockViewModel.handleAuthorizationResponse(any()) }
+    }
   }
 
   @Test
