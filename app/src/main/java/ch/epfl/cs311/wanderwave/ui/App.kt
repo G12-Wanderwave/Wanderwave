@@ -76,7 +76,7 @@ fun AppScaffold(navController: NavHostController) {
               composable(Route.LOGOUT.routeString) { LogoutScreen(navActions, showSnackbar) }
               composable(Route.MAIN.routeString) { MainPlaceHolder(navActions) }
               composable(Route.TRACK_LIST.routeString) { TrackListScreen(showSnackbar) }
-              composable(Route.TRACK_LIST.routeString) { TrackListScreen() }
+              composable(Route.TRACK_LIST.routeString) { TrackListScreen(showSnackbar) }
               composable(Route.MAP.routeString) { MapScreen() }
             }
       }
