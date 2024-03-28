@@ -20,19 +20,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
-import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.ui.navigation.Route
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.navigation.Route
+import ch.epfl.cs311.wanderwave.ui.components.animated.utils.Lerp
+import ch.epfl.cs311.wanderwave.ui.theme.placeholderColor
 
 @Composable
 fun LoginScreenHeader(navigationActions: NavigationActions, modifier: Modifier) {
   val startColor = MaterialTheme.colorScheme.primary
-  val endColor = Color(0xFFE91E62)
-  val colorSpots = List(10) { i -> lerp(startColor, endColor, i / 9f) }
+  val endColor = placeholderColor
+  val colorSpots = List(10) { i -> Lerp().lerp(startColor, endColor, i / 9f) }
   FloatingActionButton(
       onClick = { navigationActions.navigateTo(Route.ABOUT) },
       containerColor = MaterialTheme.colorScheme.background,
-      modifier = Modifier.testTag("appIcon")) {
-        Column(modifier = modifier.padding(start = 47.dp, end = 47.dp)) {
+      modifier = Modifier.testTag("appIcon").padding(top = 30.dp)) {
+        Column(modifier = modifier.padding(start = 60.dp, end = 60.dp)) {
           Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             Icon(
                 painter = painterResource(id = R.drawable.info),
@@ -48,80 +50,21 @@ fun LoginScreenHeader(navigationActions: NavigationActions, modifier: Modifier) 
                     painter = painterResource(id = R.drawable.wanderwave_icon),
                     contentDescription = "app icon",
                     tint = colorSpots[0],
-                    modifier = Modifier.height(50.dp).testTag("appIcon"))
-
-                Text(
-                    text = "a",
-                    style = MaterialTheme.typography.displayLarge,
-                    color = colorSpots[1],
-                    textAlign = TextAlign.Center)
-                Text(
-                    text = "n",
-                    style = MaterialTheme.typography.displayLarge,
-                    color = colorSpots[2],
-                    textAlign = TextAlign.Center)
-                Text(
-                    text = "d",
-                    style = MaterialTheme.typography.displayLarge,
-                    color = colorSpots[3],
-                    textAlign = TextAlign.Center)
-                Text(
-                    text = "e",
-                    style = MaterialTheme.typography.displayLarge,
-                    color = colorSpots[4],
-                    textAlign = TextAlign.Center)
-                Text(
-                    text = "r",
-                    style = MaterialTheme.typography.displayLarge,
-                    color = colorSpots[5],
-                    textAlign = TextAlign.Center)
-                Text(
-                    text = "w",
-                    style = MaterialTheme.typography.displayLarge,
-                    color = colorSpots[6],
-                    textAlign = TextAlign.Center)
-                Text(
-                    text = "a",
-                    style = MaterialTheme.typography.displayLarge,
-                    color = colorSpots[7],
-                    textAlign = TextAlign.Center)
-                Text(
-                    text = "v",
-                    style = MaterialTheme.typography.displayLarge,
-                    color = colorSpots[8],
-                    textAlign = TextAlign.Center)
-                Text(
-                    text = "e",
-                    style = MaterialTheme.typography.displayLarge,
-                    color = colorSpots[9],
-                    textAlign = TextAlign.Center)
-              }
-          Row(
-              horizontalArrangement = Arrangement.Center,
-              verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(id = R.drawable.circle_icon),
-                    contentDescription = "Circle Icon",
-                    tint = MaterialTheme.colorScheme.primary)
-                LoginScreenPulse(modifier = Modifier)
-                Icon(
-                    painter = painterResource(id = R.drawable.wanderwave_icon),
-                    contentDescription = "Circle Icon",
-                    tint = Color(0xFFE91E62),
-                    modifier = Modifier.size(30.dp))
+                    modifier = Modifier.height(40.dp).testTag("appIcon"))
+                val anderwave: List<String> = listOf("a", "n", "d", "e", "r", "w", "a", "v", "e")
+                anderwave.forEachIndexed() { index, letter ->
+                  FillLogo(letter = letter, colorSpot = index, colorSpots = colorSpots)
+                }
               }
         }
       }
 }
 
-fun lerp(start: Color, stop: Color, fraction: Float): Color {
-  return Color(
-      red = lerp(start.red, stop.red, fraction),
-      green = lerp(start.green, stop.green, fraction),
-      blue = lerp(start.blue, stop.blue, fraction),
-      alpha = lerp(start.alpha, stop.alpha, fraction))
-}
-
-private fun lerp(start: Float, stop: Float, fraction: Float): Float {
-  return (1 - fraction) * start + fraction * stop
+@Composable
+private fun FillLogo(letter: String, colorSpot: Int, colorSpots: List<Color>) {
+  Text(
+      text = letter,
+      style = MaterialTheme.typography.displayMedium,
+      color = colorSpots[colorSpot],
+      textAlign = TextAlign.Center)
 }

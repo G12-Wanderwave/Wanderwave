@@ -3,11 +3,11 @@ package ch.epfl.cs311.wanderwave.ui.screens
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.about.AboutBackButton
 import ch.epfl.cs311.wanderwave.ui.components.about.AboutBody
 import ch.epfl.cs311.wanderwave.ui.components.about.AboutFooter
 import ch.epfl.cs311.wanderwave.ui.components.about.AboutHeader
-import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 
 @Composable
 fun AboutScreen(navigationActions: NavigationActions) {

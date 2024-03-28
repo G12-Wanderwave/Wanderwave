@@ -1,6 +1,7 @@
-package ch.epfl.cs311.wanderwave.ui.components.login
+package ch.epfl.cs311.wanderwave.ui.components.animated
 
 import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -20,35 +21,44 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun LoginScreenPulse(modifier: Modifier) {
+fun LoginScreenPulse(modifier: Modifier, reverse: Boolean) {
+  val startWidth = if (reverse) 15f else 230f
+  val endWidth = if (reverse) 230f else 15f
+
+  val startHeight = if (reverse) 15f else 1f
+  val endHeight = if (reverse) 1f else 15f
+
+  val startColor = if (reverse) MaterialTheme.colorScheme.primary else Color(0xFFE91E62)
+  val endColor = if (reverse) Color(0xFFE91E62) else MaterialTheme.colorScheme.primary
   val infiniteTransition = rememberInfiniteTransition(label = "")
   val width by
       infiniteTransition.animateFloat(
-          initialValue = 1f,
-          targetValue = 290f,
+          initialValue = startWidth,
+          targetValue = endWidth,
           animationSpec =
               infiniteRepeatable(
-                  animation = tween(1500, easing = LinearEasing), repeatMode = RepeatMode.Reverse),
+                  animation = tween(1500, easing = FastOutLinearInEasing),
+                  repeatMode = RepeatMode.Reverse),
           label = "")
   val height by
       infiniteTransition.animateFloat(
-          initialValue = 1f,
-          targetValue = 30f,
+          initialValue = startHeight,
+          targetValue = endHeight,
           animationSpec =
               infiniteRepeatable(
                   animation = tween(1500, easing = LinearEasing), repeatMode = RepeatMode.Reverse),
           label = "")
   val color by
       infiniteTransition.animateColor(
-          initialValue = MaterialTheme.colorScheme.primary,
-          targetValue = Color(0xFFE91E62),
+          initialValue = startColor,
+          targetValue = endColor,
           animationSpec =
               infiniteRepeatable(
-                  animation = tween(500, easing = LinearEasing), repeatMode = RepeatMode.Reverse),
+                  animation = tween(1500, easing = LinearEasing), repeatMode = RepeatMode.Reverse),
           label = "")
 
   Box(
-      modifier = modifier.height(5.dp),
+      modifier = modifier.height(20.dp),
       contentAlignment = Alignment.CenterStart,
   ) {
     Box(modifier = modifier.height(height.dp).width(width.dp).background(color))

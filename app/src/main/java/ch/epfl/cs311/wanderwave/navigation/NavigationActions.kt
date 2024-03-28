@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 enum class Route(val routeString: String, val showBottomBar: Boolean) {
   LOGIN("login", false),
+  ABOUT("about", false),
   MAIN("main", true),
   TRACK_LIST("trackList", true),
   MAP("map", true);
