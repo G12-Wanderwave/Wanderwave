@@ -20,8 +20,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
 @Composable
-fun TrackListScreen(showMessage: (String) -> Unit) {
-  val viewModel: TrackListViewModel = hiltViewModel()
+fun TrackListScreen(
+    showMessage: (String) -> Unit,
+    viewModel: TrackListViewModel = hiltViewModel()
+) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
   LaunchedEffect(uiState) { uiState.message?.let { message -> showMessage(message) } }
@@ -32,9 +34,11 @@ fun TrackListScreen(showMessage: (String) -> Unit) {
         val track = uiState.tracks[index]
 
         Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
-          TextButton(onClick = { viewModel.playTrack(track) }) {
-            Text(text = "${track.artist} - ${track.title}")
-          }
+          TextButton(
+              onClick = { viewModel.playTrack(track) },
+              modifier = Modifier.testTag("trackButton")) {
+                Text(text = "${track.artist} - ${track.title}")
+              }
           Divider()
         }
       }

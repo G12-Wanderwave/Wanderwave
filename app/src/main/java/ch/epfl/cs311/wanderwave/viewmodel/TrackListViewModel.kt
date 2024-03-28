@@ -21,8 +21,8 @@ constructor(
     private val spotifyController: SpotifyController
 ) : ViewModel() {
 
-  private val _uiState = MutableStateFlow(TrackListUiState(loading = true))
-  val uiState: StateFlow<TrackListUiState> = _uiState
+  private val _uiState = MutableStateFlow(UiState(loading = true))
+  val uiState: StateFlow<UiState> = _uiState
 
   init {
     observeTracks()
@@ -31,7 +31,7 @@ constructor(
   private fun observeTracks() {
     CoroutineScope(Dispatchers.IO).launch {
       repository.getAll().collect { tracks ->
-        _uiState.value = TrackListUiState(tracks = tracks, loading = false)
+        _uiState.value = UiState(tracks = tracks, loading = false)
       }
     }
   }
@@ -43,10 +43,10 @@ constructor(
       }
     }
   }
-}
 
-data class TrackListUiState(
-    val tracks: List<Track> = listOf(),
-    val loading: Boolean = false,
-    val message: String? = null
-)
+  data class UiState(
+      val tracks: List<Track> = listOf(),
+      val loading: Boolean = false,
+      val message: String? = null
+  )
+}
