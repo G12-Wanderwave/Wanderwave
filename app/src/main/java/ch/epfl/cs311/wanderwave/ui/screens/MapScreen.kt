@@ -39,26 +39,21 @@ fun MapScreen() {
 @SuppressLint("MissingPermission")
 @Composable
 fun LocationUpdatesScreen(onLocationChange: (LatLng) -> Unit) {
-  var permission by remember { mutableStateOf(false) }
+  var locationRequest : LocationRequest? by remember { mutableStateOf(null) }
   RequestLocationPermission(
-      onPermissionGranted = { permission = true },
+      onPermissionGranted = {
+        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, TimeUnit.SECONDS.toMillis(1)).build()
+      },
       onPermissionDenied = { /*TODO*/},
       onPermissionsRevoked = { /*TODO*/})
 
-  // The location request that defines the location updates
-  val priority =
-      if (permission) {
-        Priority.PRIORITY_HIGH_ACCURACY
-      } else {
-        Priority.PRIORITY_BALANCED_POWER_ACCURACY
-      }
-  val locationRequest = LocationRequest.Builder(priority, TimeUnit.SECONDS.toMillis(1)).build()
-
   // Only register the location updates effect when we have a request
-  LocationUpdatesEffect(locationRequest) { result ->
-    // For each result update the text
-    for (currentLocation in result.locations) {
-      onLocationChange(LatLng(currentLocation.latitude, currentLocation.longitude))
+if (locationRequest != null) {
+    LocationUpdatesEffect(locationRequest!!) { result ->
+      // For each result update the text
+      for (currentLocation in result.locations) {
+        onLocationChange(LatLng(currentLocation.latitude, currentLocation.longitude))
+      }
     }
   }
 }
