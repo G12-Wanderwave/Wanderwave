@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -30,8 +31,10 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,6 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_error
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_primary
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
@@ -58,39 +62,193 @@ const val MAX_NBR_CHAR_DESC = 35
 val INPUT_BOX_NAM_SIZE = 150.dp
 
 /**
- * This is the screen composable, which can either show the profile of the user and the chosen
- * songs, or it could show a view to modify the profile
+ * This is the screen composable which can either show the profile of the user or it can show a view
+ * to modify the profile. It also includes a toggle to switch between showing the "TOP SONGS" list
+ * or the "CHOSEN SONGS" list, as well as dialogs to add new tracks to the lists.
  *
- * @param viewModel the viewModel that will handle the profile *
- * @author Menzo Bouaissi
+ * @param viewModel the ViewModel that will handle the profile and song lists.
+ * @author Ayman Bakiri
  * @since 1.0
  * @last update 1.0
  */
 @Composable
 fun ProfileScreen(viewModel: ProfileViewModel) {
-  // Observe LiveData changes and convert them into state for Composable to react
   val currentProfileState by viewModel.profile.collectAsState()
-  val isInEditMode by viewModel.isInEditMode.collectAsState(false)
-  // If currentProfileState is null, do not proceed to render the UI
-  val currentProfile: Profile = currentProfileState ?: return
+  val songLists by viewModel.songLists.collectAsState()
+  var showDialog by remember { mutableStateOf(false) }
+  var dialogListType by remember { mutableStateOf("TOP SONGS") }
+  var isTopSongsListVisible by remember { mutableStateOf(true) }
+  val isInEditMode by viewModel.isInEditMode.collectAsState()
 
-  if (isInEditMode) {
-    EditableVisitCard(
-        profile = currentProfile,
-        onProfileChange = { updatedProfile ->
-          // Instead of changing local state, directly update the ViewModel
-          viewModel.updateProfile(updatedProfile)
-        },
-        viewModel = viewModel)
-  } else {
-    Column(modifier = Modifier.fillMaxSize().testTag("profileScreen")) {
+  val currentProfile: Profile = currentProfileState ?: return
+  LaunchedEffect(Unit) {
+    viewModel.createSpecificSongList("TOP_SONGS")
+    viewModel.createSpecificSongList("CHOSEN_SONGS")
+  }
+
+  Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    if (isInEditMode) {
+      EditableVisitCard(
+          profile = currentProfile,
+          onProfileChange = { updatedProfile -> viewModel.updateProfile(updatedProfile) },
+          viewModel = viewModel)
+    } else {
       Box(modifier = Modifier.fillMaxWidth()) {
         VisitCard(Modifier, currentProfile)
         ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
         ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create, viewModel)
       }
     }
+
+    // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
+    Button(onClick = { isTopSongsListVisible = !isTopSongsListVisible }) {
+      Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
+    }
+
+    // Conditional display based on the toggle button state
+    if (isTopSongsListVisible) {
+      // Assuming "TOP SONGS" list is correctly initialized
+      songLists
+          .firstOrNull { it.name == "TOP SONGS" }
+          ?.let { songList ->
+            if (songList.tracks.isNotEmpty()) {
+              Text("TOP SONGS")
+              TracksList(songList.tracks)
+            } else {
+              Text("The TOP SONGS List is empty")
+            }
+          }
+    } else {
+      // Assuming "CHOSEN SONGS" list is correctly initialized
+      songLists
+          .firstOrNull { it.name == "CHOSEN SONGS" }
+          ?.let { songList ->
+            if (songList.tracks.isNotEmpty()) {
+              Text("CHOSEN SONGS")
+              TracksList(songList.tracks)
+            } else {
+              Text("The CHOSEN SONGS List is empty")
+            }
+          }
+    }
+
+    // Buttons for adding tracks
+    Button(
+        onClick = {
+          showDialog = true
+          dialogListType = "TOP SONGS"
+        }) {
+          Text("Add Track to TOP SONGS List")
+        }
+
+    Button(
+        onClick = {
+          showDialog = true
+          dialogListType = "CHOSEN SONGS"
+        }) {
+          Text("Add Track to CHOSEN SONGS List")
+        }
+
+    // Show dialog for adding a new track and add the track to the appropriate list
+    if (showDialog) {
+      AddTrackDialog(
+          onAddTrack = { id, title, artist ->
+            viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
+            viewModel.addTrackToList(dialogListType, Track(id, title, artist))
+            showDialog = false
+          },
+          onDismiss = { showDialog = false },
+          initialTrackId = "",
+          initialTrackTitle = "",
+          initialTrackArtist = "")
+    }
   }
+}
+
+/**
+ * Composable that displays a list of tracks. Each track is represented by the TrackItem composable.
+ *
+ * @param tracks List of tracks to display.
+ * @author Ayman Bakiri
+ * @since 1.0
+ * @last update 1.0
+ */
+@Composable
+fun TracksList(tracks: List<Track>) {
+  tracks.forEach { track -> key(track.id) { TrackItem(track = track) } }
+}
+
+/**
+ * Composable that displays information for a single track, including its ID, title, and artist.
+ *
+ * @param track The track data to display.
+ * @author Ayman Bakiri
+ * @since 1.0
+ * @last update 1.0
+ */
+@Composable
+fun TrackItem(track: Track) {
+  Column(modifier = Modifier.padding(8.dp)) {
+    Text(text = "ID: ${track.id}", style = MaterialTheme.typography.bodyMedium)
+    Text(text = "Title: ${track.title}", style = MaterialTheme.typography.bodyMedium)
+    Text(text = "Artist: ${track.artist}", style = MaterialTheme.typography.bodyMedium)
+  }
+}
+
+/**
+ * Dialog composable that allows the user to add a new track by entering the track ID, title, and
+ * artist. On confirming, the track is added via the onAddTrack callback.
+ *
+ * @param onAddTrack Callback function to be invoked when the track is added.
+ * @param onDismiss Callback function to be invoked when the dialog is dismissed.
+ * @param initialTrackId Initial value for the track ID input field.
+ * @param initialTrackTitle Initial value for the track title input field.
+ * @param initialTrackArtist Initial value for the track artist input field.
+ * @author Ayman Bakiri
+ * @since 1.0
+ * @last update 1.0
+ */
+@Composable
+fun AddTrackDialog(
+    onAddTrack: (String, String, String) -> Unit,
+    onDismiss: () -> Unit,
+    initialTrackId: String,
+    initialTrackTitle: String,
+    initialTrackArtist: String,
+) {
+  var newTrackId by remember { mutableStateOf(initialTrackId) }
+  var newTrackTitle by remember { mutableStateOf(initialTrackTitle) }
+  var newTrackArtist by remember { mutableStateOf(initialTrackArtist) }
+
+  AlertDialog(
+      onDismissRequest = onDismiss,
+      title = { Text("Add New Track") },
+      text = {
+        Column {
+          OutlinedTextField(
+              value = newTrackId, onValueChange = { newTrackId = it }, label = { Text("Track ID") })
+          OutlinedTextField(
+              value = newTrackTitle,
+              onValueChange = { newTrackTitle = it },
+              label = { Text("Track Title") })
+          OutlinedTextField(
+              value = newTrackArtist,
+              onValueChange = { newTrackArtist = it },
+              label = { Text("Track Artist") })
+        }
+      },
+      confirmButton = {
+        Button(
+            onClick = {
+              onAddTrack(newTrackId, newTrackTitle, newTrackArtist)
+              newTrackId = "" // Resetting the state
+              newTrackTitle = ""
+              newTrackArtist = ""
+            }) {
+              Text("Add")
+            }
+      },
+      dismissButton = { Button(onClick = onDismiss) { Text("Cancel") } })
 }
 
 /**
