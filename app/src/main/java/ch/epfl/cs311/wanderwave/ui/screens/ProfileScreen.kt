@@ -101,7 +101,11 @@ fun ProfileScreen(viewModel: ProfileViewModel) {
     }
 
     // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
-    Button(onClick = { isTopSongsListVisible = !isTopSongsListVisible }) {
+    Button(onClick = { isTopSongsListVisible = !isTopSongsListVisible },
+        modifier = Modifier.testTag("toggleSongList")
+
+
+    ){
       Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
     }
 
@@ -137,7 +141,10 @@ fun ProfileScreen(viewModel: ProfileViewModel) {
         onClick = {
           showDialog = true
           dialogListType = "TOP SONGS"
-        }) {
+        },
+        modifier = Modifier.testTag("addTopSongs")
+
+    ) {
           Text("Add Track to TOP SONGS List")
         }
 
@@ -145,7 +152,9 @@ fun ProfileScreen(viewModel: ProfileViewModel) {
         onClick = {
           showDialog = true
           dialogListType = "CHOSEN SONGS"
-        }) {
+        },
+        modifier = Modifier.testTag("addChosenSongs")
+        ) {
           Text("Add Track to CHOSEN SONGS List")
         }
 
@@ -160,7 +169,10 @@ fun ProfileScreen(viewModel: ProfileViewModel) {
           onDismiss = { showDialog = false },
           initialTrackId = "",
           initialTrackTitle = "",
-          initialTrackArtist = "")
+          initialTrackArtist = "",
+          dialogTestTag = "addTrackDialog"
+      )
+
     }
   }
 }
@@ -188,7 +200,9 @@ fun TracksList(tracks: List<Track>) {
  */
 @Composable
 fun TrackItem(track: Track) {
-  Column(modifier = Modifier.padding(8.dp)) {
+  Column(modifier = Modifier
+      .padding(8.dp)
+      .testTag("trackItem_${track.id}")) {
     Text(text = "ID: ${track.id}", style = MaterialTheme.typography.bodyMedium)
     Text(text = "Title: ${track.title}", style = MaterialTheme.typography.bodyMedium)
     Text(text = "Artist: ${track.artist}", style = MaterialTheme.typography.bodyMedium)
@@ -215,6 +229,7 @@ fun AddTrackDialog(
     initialTrackId: String,
     initialTrackTitle: String,
     initialTrackArtist: String,
+    dialogTestTag: String
 ) {
   var newTrackId by remember { mutableStateOf(initialTrackId) }
   var newTrackTitle by remember { mutableStateOf(initialTrackTitle) }
@@ -225,16 +240,24 @@ fun AddTrackDialog(
       title = { Text("Add New Track") },
       text = {
         Column {
-          OutlinedTextField(
-              value = newTrackId, onValueChange = { newTrackId = it }, label = { Text("Track ID") })
-          OutlinedTextField(
-              value = newTrackTitle,
-              onValueChange = { newTrackTitle = it },
-              label = { Text("Track Title") })
-          OutlinedTextField(
-              value = newTrackArtist,
-              onValueChange = { newTrackArtist = it },
-              label = { Text("Track Artist") })
+            OutlinedTextField(
+                value = newTrackId,
+                onValueChange = { newTrackId = it },
+                label = { Text("Track ID") },
+                modifier = Modifier.testTag("trackIdInput")
+            )
+            OutlinedTextField(
+                value = newTrackTitle,
+                onValueChange = { newTrackTitle = it },
+                label = { Text("Track Title") },
+                modifier = Modifier.testTag("trackTitleInput")
+            )
+            OutlinedTextField(
+                value = newTrackArtist,
+                onValueChange = { newTrackArtist = it },
+                label = { Text("Track Artist") },
+                modifier = Modifier.testTag("trackArtistInput")
+            )
         }
       },
       confirmButton = {
@@ -244,11 +267,21 @@ fun AddTrackDialog(
               newTrackId = "" // Resetting the state
               newTrackTitle = ""
               newTrackArtist = ""
-            }) {
+            },
+            modifier = Modifier.testTag("confirmAddTrack")
+        ) {
               Text("Add")
             }
       },
-      dismissButton = { Button(onClick = onDismiss) { Text("Cancel") } })
+      dismissButton = { Button(onClick = onDismiss,
+          modifier = Modifier.testTag("cancelAddTrack")
+
+          ) { Text("Cancel")
+      }
+
+      },
+      modifier = Modifier.testTag(dialogTestTag)
+      )
 }
 
 /**
