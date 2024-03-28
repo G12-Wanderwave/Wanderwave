@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
-import ch.epfl.cs311.wanderwave.ui.components.animated.utils.lerp
+import ch.epfl.cs311.wanderwave.ui.components.utils.lerp
 import ch.epfl.cs311.wanderwave.ui.theme.placeholderColor
 
 @Composable

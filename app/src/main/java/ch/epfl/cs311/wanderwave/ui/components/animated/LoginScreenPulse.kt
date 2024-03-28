@@ -21,11 +21,11 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun LoginScreenPulse(startColor: Color, endColor: Color, reverse: Boolean) {
-  val startWidth = if (reverse) 15f else 230f
-  val endWidth = if (reverse) 230f else 15f
+  val startWidth = if (reverse) 0f else 230f
+  val endWidth = if (reverse) 230f else 0f
 
-  val startHeight = if (reverse) 18f else 1f
-  val endHeight = if (reverse) 1f else 18f
+  val startHeight = if (reverse) 18f else 3f
+  val endHeight = if (reverse) 3f else 18f
 
   val infiniteTransition = rememberInfiniteTransition(label = "")
   val width by

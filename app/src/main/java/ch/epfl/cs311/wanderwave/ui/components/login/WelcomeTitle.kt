@@ -50,10 +50,7 @@ fun WelcomeTitle(modifier: Modifier) {
                   painter = painterResource(id = R.drawable.hexagon),
                   contentDescription = stringResource(id = R.string.circle_icon),
                   tint = Color.Red)
-              LoginScreenPulse(
-                  startColor = Color.Red,
-                  endColor = MaterialTheme.colorScheme.primary,
-                  reverse = false)
+              LoginScreenPulse(startColor = Color.Red, endColor = Color.Magenta, reverse = false)
               Icon(
                   painter = painterResource(id = R.drawable.hexagon),
                   contentDescription = stringResource(id = R.string.circle_icon),
@@ -67,10 +64,7 @@ fun WelcomeTitle(modifier: Modifier) {
                   painter = painterResource(id = R.drawable.hexagon),
                   contentDescription = stringResource(id = R.string.circle_icon),
                   tint = Color.Green)
-              LoginScreenPulse(
-                  startColor = Color.Green,
-                  endColor = MaterialTheme.colorScheme.primary,
-                  reverse = false)
+              LoginScreenPulse(startColor = Color.Green, endColor = Color.Magenta, reverse = false)
               Icon(
                   painter = painterResource(id = R.drawable.hexagon),
                   contentDescription = stringResource(id = R.string.circle_icon),
@@ -84,10 +78,7 @@ fun WelcomeTitle(modifier: Modifier) {
                   painter = painterResource(id = R.drawable.hexagon),
                   contentDescription = stringResource(id = R.string.circle_icon),
                   tint = Color.Blue)
-              LoginScreenPulse(
-                  startColor = Color.Blue,
-                  endColor = MaterialTheme.colorScheme.primary,
-                  reverse = false)
+              LoginScreenPulse(startColor = Color.Blue, endColor = Color.Magenta, reverse = false)
               Icon(
                   painter = painterResource(id = R.drawable.hexagon),
                   contentDescription = stringResource(id = R.string.circle_icon),

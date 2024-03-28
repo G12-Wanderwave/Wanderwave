@@ -1,4 +1,4 @@
-package ch.epfl.cs311.wanderwave.ui.components.animated.utils
+package ch.epfl.cs311.wanderwave.ui.components.utils
 
 import androidx.compose.ui.graphics.Color
 
