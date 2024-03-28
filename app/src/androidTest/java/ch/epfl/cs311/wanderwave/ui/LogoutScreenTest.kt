@@ -28,31 +28,24 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class LogoutScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
-  @get:Rule
-  val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-  @get:Rule
-  val mockkRule = MockKRule(this)
+  @get:Rule val mockkRule = MockKRule(this)
 
-  @get:Rule
-  val intentsRule = IntentsRule()
+  @get:Rule val intentsRule = IntentsRule()
 
-  @RelaxedMockK
-  private lateinit var mockNavigationActions: NavigationActions
+  @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
-  @RelaxedMockK
-  private lateinit var mockViewModel: LogoutScreenViewModel
+  @RelaxedMockK private lateinit var mockViewModel: LogoutScreenViewModel
 
-  @RelaxedMockK
-  private lateinit var mockShowMessage: (String) -> Unit
+  @RelaxedMockK private lateinit var mockShowMessage: (String) -> Unit
 
   fun setup(uiState: LogoutScreenViewModel.UiState = LogoutScreenViewModel.UiState()) {
     every { mockViewModel.uiState } returns MutableStateFlow(uiState)
     every { mockViewModel.getAuthorizationRequest() } returns
         AuthorizationRequest.Builder(
-          "clientid", AuthorizationResponse.Type.TOKEN, "fake-scheme://callback"
-        )
-          .build()
+                "clientid", AuthorizationResponse.Type.TOKEN, "fake-scheme://callback")
+            .build()
     every { mockViewModel.handleAuthorizationResponse(any()) } returns Unit
     composeTestRule.setContent {
       LogoutScreen(mockNavigationActions, mockShowMessage, mockViewModel)
