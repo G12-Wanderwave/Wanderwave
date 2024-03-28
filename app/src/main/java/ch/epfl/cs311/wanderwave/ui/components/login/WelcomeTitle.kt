@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,7 +21,7 @@ fun WelcomeTitle(modifier: Modifier) {
   Column(
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = modifier.fillMaxWidth().padding(16.dp)) {
+      modifier = modifier.fillMaxWidth()) {
         Text(
             text = stringResource(id = R.string.welcome_title),
             style = MaterialTheme.typography.displayLarge,
