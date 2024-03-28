@@ -13,14 +13,12 @@ import ch.epfl.cs311.wanderwave.R
 
 @Composable
 fun AboutBackButton(onClick: () -> Unit) {
-    Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-        FloatingActionButton(
-            onClick = { onClick() }, containerColor = MaterialTheme.colorScheme.background
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.close_icon),
-                contentDescription = "Close Icon"
-            )
+  Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+    FloatingActionButton(
+        onClick = { onClick() }, containerColor = MaterialTheme.colorScheme.background) {
+          Icon(
+              painter = painterResource(id = R.drawable.close_icon),
+              contentDescription = "Close Icon")
         }
-    }
+  }
 }
