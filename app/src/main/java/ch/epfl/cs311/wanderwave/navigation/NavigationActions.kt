@@ -70,14 +70,11 @@ class NavigationActions(navController: NavHostController) {
 
   fun signIn() {
     navigationController.navigate(Route.MAIN.routeString) {
-      popUpTo(navigationController.graph.startDestinationId) {
-        inclusive = true
-      }
+      popUpTo(navigationController.graph.startDestinationId) { inclusive = true }
       launchSingleTop = true
     }
   }
 }
-
 
 val TOP_LEVEL_DESTINATIONS =
     listOf(

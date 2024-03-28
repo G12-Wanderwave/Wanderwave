@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import ch.epfl.cs311.wanderwave.ui.theme.placeholderColor
 
 @Composable
 fun LoginScreenPulse(modifier: Modifier, reverse: Boolean) {
@@ -29,7 +30,7 @@ fun LoginScreenPulse(modifier: Modifier, reverse: Boolean) {
   val endHeight = if (reverse) 1f else 15f
 
   val startColor = if (reverse) MaterialTheme.colorScheme.primary else Color(0xFFE91E62)
-  val endColor = if (reverse) Color(0xFFE91E62) else MaterialTheme.colorScheme.primary
+  val endColor = if (reverse) placeholderColor else MaterialTheme.colorScheme.primary
   val infiniteTransition = rememberInfiniteTransition(label = "")
   val width by
       infiniteTransition.animateFloat(

@@ -22,14 +22,14 @@ import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
-import ch.epfl.cs311.wanderwave.ui.components.animated.utils.Lerp
+import ch.epfl.cs311.wanderwave.ui.components.animated.utils.lerp
 import ch.epfl.cs311.wanderwave.ui.theme.placeholderColor
 
 @Composable
 fun LoginScreenHeader(navigationActions: NavigationActions, modifier: Modifier) {
   val startColor = MaterialTheme.colorScheme.primary
   val endColor = placeholderColor
-  val colorSpots = List(10) { i -> Lerp().lerp(startColor, endColor, i / 9f) }
+  val colorSpots = List(10) { i -> lerp(startColor, endColor, i / 9f) }
   FloatingActionButton(
       onClick = { navigationActions.navigateTo(Route.ABOUT) },
       containerColor = MaterialTheme.colorScheme.background,
@@ -40,7 +40,7 @@ fun LoginScreenHeader(navigationActions: NavigationActions, modifier: Modifier) 
                 painter = painterResource(id = R.drawable.info),
                 contentDescription = "Info Icon",
                 tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(40.dp))
+                modifier = Modifier.size(30.dp))
           }
           Row(
               horizontalArrangement = Arrangement.Center,
@@ -52,7 +52,7 @@ fun LoginScreenHeader(navigationActions: NavigationActions, modifier: Modifier) 
                     tint = colorSpots[0],
                     modifier = Modifier.height(40.dp).testTag("appIcon"))
                 val anderwave: List<String> = listOf("a", "n", "d", "e", "r", "w", "a", "v", "e")
-                anderwave.forEachIndexed() { index, letter ->
+                anderwave.forEachIndexed { index, letter ->
                   FillLogo(letter = letter, colorSpot = index, colorSpots = colorSpots)
                 }
               }

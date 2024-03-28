@@ -16,10 +16,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
+import ch.epfl.cs311.wanderwave.ui.theme.placeholderColor
 
 @Composable
 fun AnimatedIcon() {
@@ -37,7 +37,7 @@ fun AnimatedIcon() {
   val color by
       infiniteTransition.animateColor(
           initialValue = MaterialTheme.colorScheme.primary,
-          targetValue = Color(0xFFE91E62),
+          targetValue = placeholderColor,
           animationSpec =
               infiniteRepeatable(
                   animation = tween(1000, easing = LinearEasing), repeatMode = RepeatMode.Reverse),
