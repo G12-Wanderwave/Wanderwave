@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -21,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.ui.components.animated.AnimatedIcon
 import ch.epfl.cs311.wanderwave.ui.components.animated.LoginScreenPulse
-import ch.epfl.cs311.wanderwave.ui.theme.placeholderColor
 
 @Composable
 fun WelcomeTitle(modifier: Modifier) {
@@ -30,20 +30,6 @@ fun WelcomeTitle(modifier: Modifier) {
       horizontalAlignment = Alignment.CenterHorizontally,
       modifier = modifier.fillMaxWidth()) {
         AnimatedIcon()
-        Row(
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically) {
-              Icon(
-                  painter = painterResource(id = R.drawable.circle_icon),
-                  contentDescription = stringResource(id = R.string.circle_icon),
-                  tint = placeholderColor)
-              LoginScreenPulse(modifier = Modifier, reverse = true)
-              Icon(
-                  painter = painterResource(id = R.drawable.wanderwave_icon),
-                  contentDescription = stringResource(id = R.string.circle_icon),
-                  tint = MaterialTheme.colorScheme.primary,
-                  modifier = Modifier.size(25.dp))
-            }
         Text(
             text = stringResource(id = R.string.welcome_title),
             style = MaterialTheme.typography.displayLarge,
@@ -61,15 +47,52 @@ fun WelcomeTitle(modifier: Modifier) {
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically) {
               Icon(
-                  painter = painterResource(id = R.drawable.circle_icon),
+                  painter = painterResource(id = R.drawable.hexagon),
                   contentDescription = stringResource(id = R.string.circle_icon),
-                  tint = MaterialTheme.colorScheme.primary)
-              LoginScreenPulse(modifier = Modifier, reverse = false)
+                  tint = Color.Red)
+              LoginScreenPulse(
+                  startColor = Color.Red,
+                  endColor = MaterialTheme.colorScheme.primary,
+                  reverse = false)
               Icon(
-                  painter = painterResource(id = R.drawable.wanderwave_icon),
+                  painter = painterResource(id = R.drawable.hexagon),
                   contentDescription = stringResource(id = R.string.circle_icon),
-                  tint = placeholderColor,
-                  modifier = Modifier.size(25.dp))
+                  tint = Color.Red,
+                  modifier = Modifier.size(20.dp))
+            }
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically) {
+              Icon(
+                  painter = painterResource(id = R.drawable.hexagon),
+                  contentDescription = stringResource(id = R.string.circle_icon),
+                  tint = Color.Green)
+              LoginScreenPulse(
+                  startColor = Color.Green,
+                  endColor = MaterialTheme.colorScheme.primary,
+                  reverse = false)
+              Icon(
+                  painter = painterResource(id = R.drawable.hexagon),
+                  contentDescription = stringResource(id = R.string.circle_icon),
+                  tint = Color.Green,
+                  modifier = Modifier.size(20.dp))
+            }
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically) {
+              Icon(
+                  painter = painterResource(id = R.drawable.hexagon),
+                  contentDescription = stringResource(id = R.string.circle_icon),
+                  tint = Color.Blue)
+              LoginScreenPulse(
+                  startColor = Color.Blue,
+                  endColor = MaterialTheme.colorScheme.primary,
+                  reverse = false)
+              Icon(
+                  painter = painterResource(id = R.drawable.hexagon),
+                  contentDescription = stringResource(id = R.string.circle_icon),
+                  tint = Color.Blue,
+                  modifier = Modifier.size(20.dp))
             }
       }
 }

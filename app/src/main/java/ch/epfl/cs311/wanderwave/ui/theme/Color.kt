@@ -2,7 +2,7 @@ package ch.epfl.cs311.wanderwave.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val placeholderColor = Color(0xFFE91E62)
+val placeholderColor = Color(0xFFFF0000)
 val signInButtonColorPlaceHolder = Color(0xFFFFA500)
 val md_theme_light_primary = Color(0xFF00668A)
 val md_theme_light_onPrimary = Color(0xFFFFFFFF)

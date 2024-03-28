@@ -12,25 +12,21 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import ch.epfl.cs311.wanderwave.ui.theme.placeholderColor
 
 @Composable
-fun LoginScreenPulse(modifier: Modifier, reverse: Boolean) {
+fun LoginScreenPulse(startColor: Color, endColor: Color, reverse: Boolean) {
   val startWidth = if (reverse) 15f else 230f
   val endWidth = if (reverse) 230f else 15f
 
-  val startHeight = if (reverse) 15f else 1f
-  val endHeight = if (reverse) 1f else 15f
+  val startHeight = if (reverse) 18f else 1f
+  val endHeight = if (reverse) 1f else 18f
 
-  val startColor = if (reverse) MaterialTheme.colorScheme.primary else Color(0xFFE91E62)
-  val endColor = if (reverse) placeholderColor else MaterialTheme.colorScheme.primary
   val infiniteTransition = rememberInfiniteTransition(label = "")
   val width by
       infiniteTransition.animateFloat(
@@ -59,9 +55,9 @@ fun LoginScreenPulse(modifier: Modifier, reverse: Boolean) {
           label = "")
 
   Box(
-      modifier = modifier.height(20.dp),
+      modifier = Modifier.height(20.dp),
       contentAlignment = Alignment.CenterStart,
   ) {
-    Box(modifier = modifier.height(height.dp).width(width.dp).background(color))
+    Box(modifier = Modifier.height(height.dp).width(width.dp).background(color))
   }
 }
