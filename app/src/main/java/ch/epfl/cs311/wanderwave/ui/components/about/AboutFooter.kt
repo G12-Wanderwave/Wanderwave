@@ -16,7 +16,10 @@ fun AboutFooter(modifier: Modifier) {
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center,
       modifier = modifier.fillMaxWidth()) {
-        Text(text = "", style = MaterialTheme.typography.displayMedium)
-        Text(text = "", style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+        Text(text = "Milestone 1", style = MaterialTheme.typography.displayMedium)
+        Text(
+            text = "2024.04.12",
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center)
       }
 }

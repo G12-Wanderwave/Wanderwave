@@ -18,7 +18,7 @@ fun AboutHeader(modifier: Modifier) {
       modifier = modifier.fillMaxWidth()) {
         Text(text = "Wanderwave", style = MaterialTheme.typography.displayMedium)
         Text(
-            text = "v1.0",
+            text = "alpha v1.0",
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center)
       }

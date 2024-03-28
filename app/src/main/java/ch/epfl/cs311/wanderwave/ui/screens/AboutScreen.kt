@@ -14,7 +14,7 @@ fun AboutScreen(navigationActions: NavigationActions) {
   Column {
     AboutBackButton { navigationActions.goBack() }
     AboutHeader(modifier = Modifier.weight(1f))
-    AboutBody(modifier = Modifier.weight(1f))
+    AboutBody(modifier = Modifier.weight(4f))
     AboutFooter(modifier = Modifier.weight(1f))
   }
 }
