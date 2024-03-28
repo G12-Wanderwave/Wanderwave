@@ -16,11 +16,9 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 class SpotifyConnectScreenViewModelTest {
 
-  @get:Rule
-  val mockkRule = MockKRule(this)
+  @get:Rule val mockkRule = MockKRule(this)
 
-  @RelaxedMockK
-  private lateinit var mockSpotifyController: SpotifyController
+  @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
 
   fun setup(connectResult: SpotifyController.ConnectResult) {
     every { mockSpotifyController.connectRemote() } returns flowOf(connectResult)
