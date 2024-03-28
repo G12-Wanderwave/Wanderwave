@@ -15,12 +15,14 @@ import ch.epfl.cs311.wanderwave.viewmodel.LoginScreenViewModel
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
+import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.mockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
@@ -79,8 +81,12 @@ class LoginScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
   fun spotifyLoginRunsIntent() = run {
     setup()
     val responseDummyIntent = Intent("responseDummy")
+    val requestDummyIntent = Intent("requestDummy")
     val result = Instrumentation.ActivityResult(123, responseDummyIntent)
     Intents.intending(anyIntent()).respondWith(result)
+
+    mockkStatic(AuthorizationClient::class)
+    every { AuthorizationClient.createLoginActivityIntent(any(), any()) } returns requestDummyIntent
 
     onComposeScreen<LoginScreen>(composeTestRule) { signInButton { performClick() } }
     verify { mockViewModel.getAuthorizationRequest() }
