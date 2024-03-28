@@ -13,8 +13,8 @@ import kotlinx.coroutines.flow.StateFlow
 class LogoutScreenViewModel @Inject constructor(private val spotifyController: SpotifyController) :
     ViewModel() {
 
-  private var _uiState = MutableStateFlow(LogoutScreenUiState())
-  val uiState: StateFlow<LogoutScreenUiState> = _uiState
+  private var _uiState = MutableStateFlow(UiState())
+  val uiState: StateFlow<UiState> = _uiState
 
   fun getAuthorizationRequest(): AuthorizationRequest {
     return spotifyController.getLogoutRequest()
@@ -23,22 +23,21 @@ class LogoutScreenViewModel @Inject constructor(private val spotifyController: S
   fun handleAuthorizationResponse(response: AuthorizationResponse) {
     when (response.type) {
       AuthorizationResponse.Type.TOKEN -> {
-        _uiState.value = LogoutScreenUiState(hasResult = true, success = true)
+        _uiState.value = UiState(hasResult = true, success = true)
       }
       AuthorizationResponse.Type.ERROR -> {
         _uiState.value =
-            LogoutScreenUiState(
+            UiState(
                 hasResult = true, success = false, message = "Error logging out: ${response.error}")
       }
       else -> {
         _uiState.value =
-            LogoutScreenUiState(
-                hasResult = true, success = false, message = "User cancelled logout")
+            UiState(hasResult = true, success = false, message = "User cancelled logout")
       }
     }
   }
 
-  data class LogoutScreenUiState(
+  data class UiState(
       val hasResult: Boolean = false,
       val success: Boolean = false,
       val message: String? = null

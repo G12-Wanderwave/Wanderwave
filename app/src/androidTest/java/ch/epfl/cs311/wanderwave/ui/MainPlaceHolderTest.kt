@@ -40,6 +40,6 @@ class MainPlaceHolderTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCo
       }
     }
     // Verify that navigateTo is called with the correct argument
-    verify { mockNavigationActions.navigateToTopLevel(Route.LOGOUT) }
+    verify { mockNavigationActions.navigateTo(Route.LOGOUT) }
   }
 }

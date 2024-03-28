@@ -5,20 +5,23 @@ import android.content.ContextWrapper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
-import ch.epfl.cs311.wanderwave.ui.components.login.LoginScreenHeader
-import ch.epfl.cs311.wanderwave.ui.components.login.SignInButton
-import ch.epfl.cs311.wanderwave.ui.components.login.WelcomeTitle
 import ch.epfl.cs311.wanderwave.viewmodel.LogoutScreenViewModel
 import com.spotify.sdk.android.auth.AuthorizationClient
 
@@ -30,19 +33,6 @@ fun LogoutScreen(
 ) {
   val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-  LaunchedEffect(state) {
-    state.let {
-      if (it.hasResult) {
-        if (it.message != null) {
-          showMessage(it.message)
-        }
-        if (it.success) {
-          navigationActions.navigateToTopLevel(Route.LOGIN)
-        }
-      }
-    }
-  }
-
   val launcher =
       rememberLauncherForActivityResult(
           contract = ActivityResultContracts.StartActivityForResult()) {
@@ -51,16 +41,33 @@ fun LogoutScreen(
           }
   val context = LocalContext.current
 
-  Column(modifier = Modifier.testTag("loginScreen")) {
-    LoginScreenHeader(modifier = Modifier.weight(1.5f))
-    WelcomeTitle(modifier = Modifier.weight(4f))
-    SignInButton(modifier = Modifier.weight(1f)) {
-      val intent =
-          AuthorizationClient.createLoginActivityIntent(
-              context.getActivity(), viewModel.getAuthorizationRequest())
-      launcher.launch(intent)
+  LaunchedEffect(state) {
+    state.let {
+      if (it.hasResult) {
+        if (it.message != null) {
+          showMessage(it.message)
+        }
+        if (it.success) {
+          navigationActions.navigateTo(Route.LOGIN)
+        }
+      } else {
+
+        val intent =
+            AuthorizationClient.createLoginActivityIntent(
+                context.getActivity(), viewModel.getAuthorizationRequest())
+        launcher.launch(intent)
+      }
     }
   }
+
+  Box(
+      modifier = Modifier.fillMaxSize().testTag("logoutScreen"),
+      contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(
+            modifier = Modifier.width(64.dp).testTag("logoutProgressIndicator"),
+            color = MaterialTheme.colorScheme.secondary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant)
+      }
 }
 
 private fun Context.getActivity(): ComponentActivity? {

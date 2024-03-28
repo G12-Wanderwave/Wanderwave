@@ -65,6 +65,7 @@ class SpotifyController(private val context: Context) {
                 appRemote = spotifyAppRemote
                 println("Connected to Spotify App Remote")
                 trySend(ConnectResult.SUCCESS)
+                channel.close()
               }
 
               override fun onFailure(throwable: Throwable) {
@@ -72,6 +73,7 @@ class SpotifyController(private val context: Context) {
                   is NotLoggedInException -> trySend(ConnectResult.NOT_LOGGED_IN)
                   else -> trySend(ConnectResult.FAILED)
                 }
+                channel.close()
               }
             })
       }
