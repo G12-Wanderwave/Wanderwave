@@ -30,9 +30,10 @@ class NavigationActions(navController: NavHostController) {
   private var _currentRouteFlow = MutableStateFlow(getCurrentRoute())
   val currentRouteFlow: StateFlow<Route?> = _currentRouteFlow
 
+  // Handle user manually clicking the back button
   init {
     navController.addOnDestinationChangedListener { _, destination, _ ->
-      _currentRouteFlow.value = Route.forRouteString(destination.route ?: Route.LOGIN.routeString )
+      _currentRouteFlow.value = Route.forRouteString(destination.route ?: Route.LOGIN.routeString)
     }
   }
 
