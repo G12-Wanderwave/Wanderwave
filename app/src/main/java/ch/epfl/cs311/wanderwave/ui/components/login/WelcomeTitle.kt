@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -54,8 +53,7 @@ fun WelcomeTitle(modifier: Modifier) {
               Icon(
                   painter = painterResource(id = R.drawable.hexagon),
                   contentDescription = stringResource(id = R.string.circle_icon),
-                  tint = Color.Red,
-                  modifier = Modifier.size(20.dp))
+                  tint = Color.Red)
             }
         Row(
             horizontalArrangement = Arrangement.Start,
@@ -68,8 +66,7 @@ fun WelcomeTitle(modifier: Modifier) {
               Icon(
                   painter = painterResource(id = R.drawable.hexagon),
                   contentDescription = stringResource(id = R.string.circle_icon),
-                  tint = Color.Green,
-                  modifier = Modifier.size(20.dp))
+                  tint = Color.Green)
             }
         Row(
             horizontalArrangement = Arrangement.Start,
@@ -82,8 +79,7 @@ fun WelcomeTitle(modifier: Modifier) {
               Icon(
                   painter = painterResource(id = R.drawable.hexagon),
                   contentDescription = stringResource(id = R.string.circle_icon),
-                  tint = Color.Blue,
-                  modifier = Modifier.size(20.dp))
+                  tint = Color.Blue)
             }
       }
 }
