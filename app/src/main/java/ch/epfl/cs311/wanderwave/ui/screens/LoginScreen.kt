@@ -17,7 +17,7 @@ fun LoginScreen(navigationActions: NavigationActions) {
     // LoginScreenAnimation(modifier = Modifier.weight(3f))
     WelcomeTitle(modifier = Modifier.weight(4f))
     SignInButton(modifier = Modifier.weight(1f)) {
-      navigationActions.navigateToTopLevel(Route.MAIN)
+      navigationActions.signIn()
     }
   }
 }

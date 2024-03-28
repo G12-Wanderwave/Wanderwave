@@ -67,7 +67,17 @@ class NavigationActions(navController: NavHostController) {
   fun goBack() {
     navigationController.popBackStack()
   }
+
+  fun signIn() {
+    navigationController.navigate(Route.MAIN.routeString) {
+      popUpTo(navigationController.graph.startDestinationId) {
+        inclusive = true
+      }
+      launchSingleTop = true
+    }
+  }
 }
+
 
 val TOP_LEVEL_DESTINATIONS =
     listOf(
