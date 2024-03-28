@@ -9,7 +9,8 @@ import kotlinx.coroutines.flow.StateFlow
 enum class Route(val routeString: String, val showBottomBar: Boolean) {
   LOGIN("login", false),
   MAIN("main", true),
-  TRACK_LIST("trackList", true);
+  TRACK_LIST("trackList", true),
+  MAP("map", true);
 
   companion object {
     fun forRouteString(routeString: String): Route? {
@@ -66,4 +67,4 @@ val TOP_LEVEL_DESTINATIONS =
             route = Route.TRACK_LIST, iconId = R.drawable.tracklist, textId = R.string.trackList),
         // 0 is temporary, main will be removed later
         TopLevelDestination(route = Route.MAIN, iconId = 0, textId = R.string.main),
-    )
+        TopLevelDestination(route = Route.MAP, iconId = R.drawable.map, textId = R.string.map))

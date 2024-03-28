@@ -14,4 +14,5 @@ class AppBottomBarScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
   val bottomAppBarMainPlaceHolderButton = onNode {
     hasTestTag("bottomAppBarButton" + Route.MAIN.routeString)
   }
+  val mapScreenButton = onNode { hasTestTag("bottomAppBarButton" + Route.MAP.routeString) }
 }
