@@ -30,6 +30,12 @@ class NavigationActions(navController: NavHostController) {
   private var _currentRouteFlow = MutableStateFlow(getCurrentRoute())
   val currentRouteFlow: StateFlow<Route?> = _currentRouteFlow
 
+  init {
+    navController.addOnDestinationChangedListener { _, destination, _ ->
+      _currentRouteFlow.value = Route.forRouteString(destination.route ?: Route.LOGIN.routeString )
+    }
+  }
+
   fun navigateToTopLevel(topLevelRoute: Route) {
     navigationController.navigate(topLevelRoute.routeString) {
       // Pop up to the start destination of the graph to
