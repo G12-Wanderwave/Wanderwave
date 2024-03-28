@@ -35,12 +35,12 @@ fun WelcomeTitle(modifier: Modifier) {
             verticalAlignment = Alignment.CenterVertically) {
               Icon(
                   painter = painterResource(id = R.drawable.circle_icon),
-                  contentDescription = "Circle Icon",
+                  contentDescription = stringResource(id = R.string.circle_icon),
                   tint = placeholderColor)
               LoginScreenPulse(modifier = Modifier, reverse = true)
               Icon(
                   painter = painterResource(id = R.drawable.wanderwave_icon),
-                  contentDescription = "Circle Icon",
+                  contentDescription = stringResource(id = R.string.circle_icon),
                   tint = MaterialTheme.colorScheme.primary,
                   modifier = Modifier.size(25.dp))
             }
@@ -62,12 +62,12 @@ fun WelcomeTitle(modifier: Modifier) {
             verticalAlignment = Alignment.CenterVertically) {
               Icon(
                   painter = painterResource(id = R.drawable.circle_icon),
-                  contentDescription = "Circle Icon",
+                  contentDescription = stringResource(id = R.string.circle_icon),
                   tint = MaterialTheme.colorScheme.primary)
               LoginScreenPulse(modifier = Modifier, reverse = false)
               Icon(
                   painter = painterResource(id = R.drawable.wanderwave_icon),
-                  contentDescription = "Circle Icon",
+                  contentDescription = stringResource(id = R.string.circle_icon),
                   tint = placeholderColor,
                   modifier = Modifier.size(25.dp))
             }

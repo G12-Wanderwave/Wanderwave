@@ -6,4 +6,6 @@
     <string name="map">Map</string>
     <string name="main">Main</string>
     <string name="trackList">Track List</string>
+
+    <string name="circle_icon">Circle Icon</string>
 </resources>
