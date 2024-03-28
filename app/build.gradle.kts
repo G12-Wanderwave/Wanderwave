@@ -110,6 +110,9 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore:24.10.0")
     implementation("com.google.android.play:core-ktx:1.7.0")
     */
+
+    implementation(libs.maps.compose)
+
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
 
