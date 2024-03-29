@@ -86,94 +86,99 @@ fun ProfileScreen(viewModel: ProfileViewModel) {
     viewModel.createSpecificSongList("CHOSEN_SONGS")
   }
 
-  Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+  Column() {
     if (isInEditMode) {
       EditableVisitCard(
           profile = currentProfile,
           onProfileChange = { updatedProfile -> viewModel.updateProfile(updatedProfile) },
           viewModel = viewModel)
     } else {
-      Box(modifier = Modifier.fillMaxWidth()) {
-        VisitCard(Modifier, currentProfile)
-        ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
-        ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create, viewModel)
-      }
-    }
-
-    // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
-    Button(onClick = { isTopSongsListVisible = !isTopSongsListVisible },
-        modifier = Modifier.testTag("toggleSongList")
-
-
-    ){
-      Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
-    }
-
-    // Conditional display based on the toggle button state
-    if (isTopSongsListVisible) {
-      // Assuming "TOP SONGS" list is correctly initialized
-      songLists
-          .firstOrNull { it.name == "TOP SONGS" }
-          ?.let { songList ->
-            if (songList.tracks.isNotEmpty()) {
-              Text("TOP SONGS")
-              TracksList(songList.tracks)
-            } else {
-              Text("The TOP SONGS List is empty")
+        Column (modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)){
+            Box(modifier = Modifier.fillMaxWidth()) {
+                VisitCard(Modifier, currentProfile)
+                ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
+                ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create, viewModel)
             }
-          }
-    } else {
-      // Assuming "CHOSEN SONGS" list is correctly initialized
-      songLists
-          .firstOrNull { it.name == "CHOSEN SONGS" }
-          ?.let { songList ->
-            if (songList.tracks.isNotEmpty()) {
-              Text("CHOSEN SONGS")
-              TracksList(songList.tracks)
-            } else {
-              Text("The CHOSEN SONGS List is empty")
+
+            // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
+            Button(onClick = { isTopSongsListVisible = !isTopSongsListVisible },
+                modifier = Modifier.testTag("toggleSongList")
+
+
+            ){
+                Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
             }
-          }
+
+            // Conditional display based on the toggle button state
+            if (isTopSongsListVisible) {
+                // Assuming "TOP SONGS" list is correctly initialized
+                songLists
+                    .firstOrNull { it.name == "TOP SONGS" }
+                    ?.let { songList ->
+                        if (songList.tracks.isNotEmpty()) {
+                            Text("TOP SONGS")
+                            TracksList(songList.tracks)
+                        } else {
+                            Text("The TOP SONGS List is empty")
+                        }
+                    }
+            } else {
+                // Assuming "CHOSEN SONGS" list is correctly initialized
+                songLists
+                    .firstOrNull { it.name == "CHOSEN SONGS" }
+                    ?.let { songList ->
+                        if (songList.tracks.isNotEmpty()) {
+                            Text("CHOSEN SONGS")
+                            TracksList(songList.tracks)
+                        } else {
+                            Text("The CHOSEN SONGS List is empty")
+                        }
+                    }
+            }
+
+            // Buttons for adding tracks
+            Button(
+                onClick = {
+                    showDialog = true
+                    dialogListType = "TOP SONGS"
+                },
+                modifier = Modifier.testTag("addTopSongs")
+
+            ) {
+                Text("Add Track to TOP SONGS List")
+            }
+
+            Button(
+                onClick = {
+                    showDialog = true
+                    dialogListType = "CHOSEN SONGS"
+                },
+                modifier = Modifier.testTag("addChosenSongs")
+            ) {
+                Text("Add Track to CHOSEN SONGS List")
+            }
+
+            // Show dialog for adding a new track and add the track to the appropriate list
+            if (showDialog) {
+                AddTrackDialog(
+                    onAddTrack = { id, title, artist ->
+                        viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
+                        viewModel.addTrackToList(dialogListType, Track(id, title, artist))
+                        showDialog = false
+                    },
+                    onDismiss = { showDialog = false },
+                    initialTrackId = "",
+                    initialTrackTitle = "",
+                    initialTrackArtist = "",
+                    dialogTestTag = "addTrackDialog"
+                )
+
+            }
+        }
     }
 
-    // Buttons for adding tracks
-    Button(
-        onClick = {
-          showDialog = true
-          dialogListType = "TOP SONGS"
-        },
-        modifier = Modifier.testTag("addTopSongs")
-
-    ) {
-          Text("Add Track to TOP SONGS List")
-        }
-
-    Button(
-        onClick = {
-          showDialog = true
-          dialogListType = "CHOSEN SONGS"
-        },
-        modifier = Modifier.testTag("addChosenSongs")
-        ) {
-          Text("Add Track to CHOSEN SONGS List")
-        }
-
-    // Show dialog for adding a new track and add the track to the appropriate list
-    if (showDialog) {
-      AddTrackDialog(
-          onAddTrack = { id, title, artist ->
-            viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
-            viewModel.addTrackToList(dialogListType, Track(id, title, artist))
-            showDialog = false
-          },
-          onDismiss = { showDialog = false },
-          initialTrackId = "",
-          initialTrackTitle = "",
-          initialTrackArtist = "",
-          dialogTestTag = "addTrackDialog"
-      )
-
-    }
   }
 }
 
@@ -303,12 +308,12 @@ fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel) {
         viewModel.togglePublicMode()
       },
       modifier =
-          modifier
-              .graphicsLayer {
-                scaleX = SCALE_X
-                scaleY = SCALE_Y
-              }
-              .testTag("profileSwitch"),
+      modifier
+          .graphicsLayer {
+              scaleX = SCALE_X
+              scaleY = SCALE_Y
+          }
+          .testTag("profileSwitch"),
       colors =
           SwitchDefaults.colors(
               checkedThumbColor = MaterialTheme.colorScheme.primary,
@@ -337,7 +342,9 @@ fun ClickableIcon(
 ) {
 
   IconButton(
-      modifier = modifier.then(Modifier.size(24.dp)).testTag("clickableIcon"),
+      modifier = modifier
+          .then(Modifier.size(24.dp))
+          .testTag("clickableIcon"),
       onClick = { viewModel.toggleEditMode() }) {
         Icon(
             icon,
@@ -363,10 +370,10 @@ fun VisitCard(modifier: Modifier = Modifier, profile: Profile) {
   Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.testTag("visitCard")) {
     SelectImage(
         modifier =
-            modifier
-                .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
-                .size(width = 150.dp, height = 100.dp)
-                .testTag("profilePicture"),
+        modifier
+            .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
+            .size(width = 150.dp, height = 100.dp)
+            .testTag("profilePicture"),
         profile = profile)
 
     Column(
@@ -402,11 +409,12 @@ fun ImageSelection(profile: Profile, onImageChange: (Uri?) -> Unit) {
   Box(modifier = Modifier.fillMaxWidth()) {
     SelectImage(
         modifier =
-            Modifier.padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
-                .size(width = 150.dp, height = 100.dp)
-                .clickable { launcher.launch("image/*") }
-                .align(Alignment.Center)
-                .testTag("profilePicture"),
+        Modifier
+            .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
+            .size(width = 150.dp, height = 100.dp)
+            .clickable { launcher.launch("image/*") }
+            .align(Alignment.Center)
+            .testTag("profilePicture"),
         profile = profile)
   }
 }
@@ -441,29 +449,32 @@ fun EditableTextFields(
           OutlinedTextField(
               value = firstName,
               modifier =
-                  Modifier.height(IntrinsicSize.Min)
-                      .padding(horizontal = 8.dp)
-                      .width(INPUT_BOX_NAM_SIZE)
-                      .testTag("firstName"),
+              Modifier
+                  .height(IntrinsicSize.Min)
+                  .padding(horizontal = 8.dp)
+                  .width(INPUT_BOX_NAM_SIZE)
+                  .testTag("firstName"),
               onValueChange = onFirstNameChange,
               label = { Text("First Name") })
           OutlinedTextField(
               value = lastName,
               modifier =
-                  Modifier.height(IntrinsicSize.Min)
-                      .padding(horizontal = 8.dp)
-                      .width(INPUT_BOX_NAM_SIZE)
-                      .testTag("lastName"),
+              Modifier
+                  .height(IntrinsicSize.Min)
+                  .padding(horizontal = 8.dp)
+                  .width(INPUT_BOX_NAM_SIZE)
+                  .testTag("lastName"),
               onValueChange = onLastNameChange,
               label = { Text("Last Name") })
         }
         OutlinedTextField(
             value = description,
             modifier =
-                Modifier.height(IntrinsicSize.Min)
-                    .width(338.dp)
-                    .padding(horizontal = 8.dp)
-                    .testTag("description"),
+            Modifier
+                .height(IntrinsicSize.Min)
+                .width(338.dp)
+                .padding(horizontal = 8.dp)
+                .testTag("description"),
             onValueChange = onDescriptionChange,
             label = { Text("Description") })
       }
@@ -486,7 +497,9 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit) {
         Button(
             onClick = onSave,
             colors = ButtonDefaults.buttonColors(containerColor = md_theme_light_primary),
-            modifier = Modifier.width(100.dp).testTag("saveButton")) {
+            modifier = Modifier
+                .width(100.dp)
+                .testTag("saveButton")) {
               Text("Save")
               // TODO: Send the data to the server
             }
@@ -495,7 +508,9 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit) {
             onClick = onCancel,
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
             border = BorderStroke(1.dp, md_theme_light_error),
-            modifier = Modifier.width(100.dp).testTag("cancelButton")) {
+            modifier = Modifier
+                .width(100.dp)
+                .testTag("cancelButton")) {
               Text(text = "Cancel", color = md_theme_light_error)
             }
       }
