@@ -2,8 +2,6 @@ package ch.epfl.cs311.wanderwave.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val placeholderColor = Color(0xFFFF0000)
-
 val md_theme_light_primary = Color(0xFF00668A)
 val md_theme_light_onPrimary = Color(0xFFFFFFFF)
 val md_theme_light_primaryContainer = Color(0xFFC3E7FF)

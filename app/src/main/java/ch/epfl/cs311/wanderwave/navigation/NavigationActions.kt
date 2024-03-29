@@ -33,7 +33,12 @@ class NavigationActions(navController: NavHostController) {
   // Handle user manually clicking the back button
   init {
     navController.addOnDestinationChangedListener { _, destination, _ ->
-      _currentRouteFlow.value = Route.forRouteString(destination.route ?: Route.LOGIN.routeString)
+      _currentRouteFlow.value =
+          if (destination.route != null) {
+            Route.forRouteString(destination.route!!)
+          } else {
+            null
+          }
     }
   }
 

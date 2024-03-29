@@ -14,18 +14,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.ui.components.utils.lerp
-import ch.epfl.cs311.wanderwave.ui.theme.placeholderColor
 
 @Composable
 fun SignInButton(modifier: Modifier, onClick: () -> Unit) {
   val startColor = MaterialTheme.colorScheme.primary
-  val endColor = placeholderColor
+  val endColor = Color.Red
   val midColor = lerp(startColor, endColor, 3f / 9)
   Box(modifier = modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
     Button(

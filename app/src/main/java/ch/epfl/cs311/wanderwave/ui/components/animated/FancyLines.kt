@@ -9,18 +9,61 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import ch.epfl.cs311.wanderwave.R
 
 @Composable
-fun LoginScreenPulse(startColor: Color, endColor: Color, reverse: Boolean) {
+fun RGBFancyLines() {
+  Row(horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
+    Icon(
+        painter = painterResource(id = R.drawable.hexagon),
+        contentDescription = stringResource(id = R.string.hexagon),
+        tint = Color.Red)
+    FancyLines(startColor = Color.Red, endColor = Color.Magenta, reverse = false)
+    Icon(
+        painter = painterResource(id = R.drawable.hexagon),
+        contentDescription = stringResource(id = R.string.hexagon),
+        tint = Color.Red)
+  }
+  Row(horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
+    Icon(
+        painter = painterResource(id = R.drawable.hexagon),
+        contentDescription = stringResource(id = R.string.hexagon),
+        tint = Color.Green)
+    FancyLines(startColor = Color.Green, endColor = Color.Magenta, reverse = false)
+    Icon(
+        painter = painterResource(id = R.drawable.hexagon),
+        contentDescription = stringResource(id = R.string.hexagon),
+        tint = Color.Green)
+  }
+  Row(horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
+    Icon(
+        painter = painterResource(id = R.drawable.hexagon),
+        contentDescription = stringResource(id = R.string.hexagon),
+        tint = Color.Blue)
+    FancyLines(startColor = Color.Blue, endColor = Color.Magenta, reverse = false)
+    Icon(
+        painter = painterResource(id = R.drawable.hexagon),
+        contentDescription = stringResource(id = R.string.hexagon),
+        tint = Color.Blue)
+  }
+}
+
+@Composable
+fun FancyLines(startColor: Color, endColor: Color, reverse: Boolean) {
   val startWidth = if (reverse) 0f else 230f
   val endWidth = if (reverse) 230f else 0f
 
