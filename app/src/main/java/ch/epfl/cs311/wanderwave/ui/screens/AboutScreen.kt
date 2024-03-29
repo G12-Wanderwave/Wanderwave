@@ -41,7 +41,7 @@ fun AboutScreen(navigationActions: NavigationActions) {
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxWidth().weight(1f)) {
           Text(
-              text = stringResource(id = R.string.app_name),
+              text = stringResource(id = R.string.upper_case_app_name),
               style = MaterialTheme.typography.displayMedium)
           Text(
               text = BuildConfig.VERSION_NAME,
