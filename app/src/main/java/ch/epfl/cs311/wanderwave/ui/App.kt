@@ -24,7 +24,6 @@ import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
-import ch.epfl.cs311.wanderwave.ui.screens.LogoutScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
 import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
@@ -73,7 +72,6 @@ fun AppScaffold(navController: NavHostController) {
             modifier = Modifier.padding(innerPadding)) {
               composable(Route.SPOTIFY_CONNECT.routeString) { SpotifyConnectScreen(navActions) }
               composable(Route.LOGIN.routeString) { LoginScreen(navActions, showSnackbar) }
-              composable(Route.LOGOUT.routeString) { LogoutScreen(navActions, showSnackbar) }
               composable(Route.MAIN.routeString) { MainPlaceHolder(navActions) }
               composable(Route.TRACK_LIST.routeString) { TrackListScreen(showSnackbar) }
               composable(Route.TRACK_LIST.routeString) { TrackListScreen(showSnackbar) }
