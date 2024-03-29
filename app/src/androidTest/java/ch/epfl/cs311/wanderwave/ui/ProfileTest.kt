@@ -98,7 +98,6 @@ class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSup
     }
   }
 
-
   @Test
   fun canSeeTheScreen() = run {
     onComposeScreen<ProfileScreen>(composeTestRule) { profileScreen { assertIsDisplayed() } }
