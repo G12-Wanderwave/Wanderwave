@@ -32,6 +32,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -53,6 +54,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_error
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_primary
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.SongList
 import coil.compose.AsyncImage
 
 const val SCALE_X = 0.5f
@@ -68,6 +70,7 @@ val INPUT_BOX_NAM_SIZE = 150.dp
  *
  * @param viewModel the ViewModel that will handle the profile and song lists.
  * @author Ayman Bakiri
+ * @author Menzo Bouaissi
  * @since 1.0
  * @last update 1.0
  */
@@ -80,13 +83,12 @@ fun ProfileScreen(viewModel: ProfileViewModel) {
   var isTopSongsListVisible by remember { mutableStateOf(true) }
   val isInEditMode by viewModel.isInEditMode.collectAsState()
 
-  val currentProfile: Profile = currentProfileState ?: return
+  val currentProfile: Profile = currentProfileState
   LaunchedEffect(Unit) {
     viewModel.createSpecificSongList("TOP_SONGS")
     viewModel.createSpecificSongList("CHOSEN_SONGS")
   }
 
-  Column() {
     if (isInEditMode) {
       EditableVisitCard(
           profile = currentProfile,
@@ -102,85 +104,145 @@ fun ProfileScreen(viewModel: ProfileViewModel) {
                 ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create, viewModel)
             }
 
-            // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
-            Button(onClick = { isTopSongsListVisible = !isTopSongsListVisible },
-                modifier = Modifier.testTag("toggleSongList")
-
-
-            ){
-                Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
+            ToggleSongListButton(isTopSongsListVisible = isTopSongsListVisible) {
+                isTopSongsListVisible = !isTopSongsListVisible
             }
 
             // Conditional display based on the toggle button state
             if (isTopSongsListVisible) {
-                // Assuming "TOP SONGS" list is correctly initialized
-                songLists
-                    .firstOrNull { it.name == "TOP SONGS" }
-                    ?.let { songList ->
-                        if (songList.tracks.isNotEmpty()) {
-                            Text("TOP SONGS")
-                            TracksList(songList.tracks)
-                        } else {
-                            Text("The TOP SONGS List is empty")
-                        }
-                    }
+                DisplaySongList(songLists, "TOP SONGS")
             } else {
-                // Assuming "CHOSEN SONGS" list is correctly initialized
-                songLists
-                    .firstOrNull { it.name == "CHOSEN SONGS" }
-                    ?.let { songList ->
-                        if (songList.tracks.isNotEmpty()) {
-                            Text("CHOSEN SONGS")
-                            TracksList(songList.tracks)
-                        } else {
-                            Text("The CHOSEN SONGS List is empty")
-                        }
-                    }
+                DisplaySongList(songLists, "CHOSEN SONGS")
             }
 
-            // Buttons for adding tracks
-            Button(
-                onClick = {
+            AddTrackButtons(
+                onAddTopSongsClick = {
                     showDialog = true
                     dialogListType = "TOP SONGS"
                 },
-                modifier = Modifier.testTag("addTopSongs")
-
-            ) {
-                Text("Add Track to TOP SONGS List")
-            }
-
-            Button(
-                onClick = {
+                onAddChosenSongsClick = {
                     showDialog = true
                     dialogListType = "CHOSEN SONGS"
+                }
+            )
+
+            ShowAddTrackDialog(
+                showDialog = showDialog,
+                dialogListType = dialogListType,
+                onAddTrack = { id, title, artist ->
+                    viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
+                    viewModel.addTrackToList(dialogListType, Track(id, title, artist))
+                    showDialog = false
                 },
-                modifier = Modifier.testTag("addChosenSongs")
-            ) {
-                Text("Add Track to CHOSEN SONGS List")
-            }
+                onDismiss = { showDialog = false }
+            )
 
-            // Show dialog for adding a new track and add the track to the appropriate list
-            if (showDialog) {
-                AddTrackDialog(
-                    onAddTrack = { id, title, artist ->
-                        viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
-                        viewModel.addTrackToList(dialogListType, Track(id, title, artist))
-                        showDialog = false
-                    },
-                    onDismiss = { showDialog = false },
-                    initialTrackId = "",
-                    initialTrackTitle = "",
-                    initialTrackArtist = "",
-                    dialogTestTag = "addTrackDialog"
-                )
-
-            }
         }
     }
 
   }
+
+/**
+ *
+ * This composable displays a button that toggles between showing the "TOP SONGS" list and the
+ * "CHOSEN SONGS" list.
+ *
+ * @param isTopSongsListVisible Boolean value that determines which list is currently visible.
+ * @param onToggle Callback function that toggles the visibility of the lists.
+ * @author Ayman Bakiri
+ * @author Menzo Bouaissi (Refactoring)
+ * @since 1.0
+ * @last update 1.0
+ */
+@Composable
+fun ToggleSongListButton(isTopSongsListVisible: Boolean, onToggle: () -> Unit) {
+    Button(
+        onClick = onToggle,
+        modifier = Modifier.testTag("toggleSongList")
+    ) {
+        Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
+    }
 }
+
+/**
+ * This composable displays a list of songs based on the list name provided.
+ *
+ * @param songLists List of song lists to display.
+ * @poram listName Name of the list to display.
+ * @author Ayman Bakiri
+ * @author Menzo Bouaissi (Refactoring)
+ * @since 1.0
+ * @last update 1.0
+ */
+
+@Composable
+fun DisplaySongList(songLists: List<SongList>, listName: String) {
+    songLists.firstOrNull { it.name == listName }?.let { songList ->
+        if (songList.tracks.isNotEmpty()) {
+            Text(listName)
+            TracksList(songList.tracks)
+        } else {
+            Text("The $listName List is empty")
+        }
+    }
+}
+
+/**
+ * This composable displays two buttons that allow the user to add a track to either the "TOP SONGS"
+ * list or the "CHOSEN SONGS" list.
+ *
+ * @param onAddTopSongsClick Callback function to be invoked when the "Add Track to TOP SONGS List"
+ * button is clicked.
+ * @param onAddChosenSongsClick Callback function to be invoked when the "Add Track to CHOSEN SONGS
+ * List" button is clicked.
+ * @author Ayman Bakiri
+ * @author Menzo Bouaissi (Refactoring)
+ * @since 1.0
+ * @last update 1.0
+ */
+@Composable
+fun AddTrackButtons(onAddTopSongsClick: () -> Unit, onAddChosenSongsClick: () -> Unit) {
+    Button(onClick = onAddTopSongsClick, modifier = Modifier.testTag("addTopSongs")) {
+        Text("Add Track to TOP SONGS List")
+    }
+
+    Button(onClick = onAddChosenSongsClick, modifier = Modifier.testTag("addChosenSongs")) {
+        Text("Add Track to CHOSEN SONGS List")
+    }
+}
+
+/**
+ * This composable displays a dialog that allows the user to add a new track to a song list.
+ *
+ * @param showDialog Boolean value that determines whether the dialog should be displayed.
+ * @param dialogListType Name of the list to which the track will be added.
+ * @param onAddTrack Callback function to be invoked when the track is added.
+ * @param onDismiss Callback function to be invoked when the dialog is dismissed.
+ * @author Ayman Bakiri
+ * @author Menzo Bouaissi (Refactoring)
+ * @since 1.0
+ * @last update 1.0
+ */
+
+@Composable
+fun ShowAddTrackDialog(
+    showDialog: Boolean,
+    dialogListType: String,
+    onAddTrack: (id: String, title: String, artist: String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    if (showDialog) {
+        AddTrackDialog(
+            onAddTrack = onAddTrack,
+            onDismiss = onDismiss,
+            initialTrackId = "",
+            initialTrackTitle = "",
+            initialTrackArtist = "",
+            dialogTestTag = "addTrackDialog"
+        )
+    }
+}
+
 
 /**
  * Composable that displays a list of tracks. Each track is represented by the TrackItem composable.
@@ -269,6 +331,7 @@ fun AddTrackDialog(
         Button(
             onClick = {
               onAddTrack(newTrackId, newTrackTitle, newTrackArtist)
+                //TODO: Send the data to the server
               newTrackId = "" // Resetting the state
               newTrackTitle = ""
               newTrackArtist = ""
