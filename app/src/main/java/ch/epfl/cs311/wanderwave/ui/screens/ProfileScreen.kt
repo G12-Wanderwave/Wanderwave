@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -31,10 +30,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,11 +46,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Profile
-import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_error
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_primary
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
-import ch.epfl.cs311.wanderwave.viewmodel.SongList
 import coil.compose.AsyncImage
 
 const val SCALE_X = 0.5f
@@ -76,17 +71,9 @@ val INPUT_BOX_NAM_SIZE = 150.dp
 @Composable
 fun ProfileScreen(viewModel: ProfileViewModel) {
   val currentProfileState by viewModel.profile.collectAsState()
-  val songLists by viewModel.songLists.collectAsState()
-  var showDialog by remember { mutableStateOf(false) }
-  var dialogListType by remember { mutableStateOf("TOP SONGS") }
-  var isTopSongsListVisible by remember { mutableStateOf(true) }
   val isInEditMode by viewModel.isInEditMode.collectAsState()
 
   val currentProfile: Profile = currentProfileState
-  LaunchedEffect(Unit) {
-    viewModel.createSpecificSongList("TOP_SONGS")
-    viewModel.createSpecificSongList("CHOSEN_SONGS")
-  }
 
   if (isInEditMode) {
     EditableVisitCard(
@@ -94,242 +81,15 @@ fun ProfileScreen(viewModel: ProfileViewModel) {
         onProfileChange = { updatedProfile -> viewModel.updateProfile(updatedProfile) },
         viewModel = viewModel)
   } else {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen")){
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen")) {
       Box(modifier = Modifier.fillMaxWidth()) {
         VisitCard(Modifier, currentProfile)
         ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
         ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create, viewModel)
       }
-
-      ToggleSongListButton(isTopSongsListVisible = isTopSongsListVisible) {
-        isTopSongsListVisible = !isTopSongsListVisible
-      }
-
-      // Conditional display based on the toggle button state
-      if (isTopSongsListVisible) {
-        DisplaySongList(songLists, "TOP SONGS")
-      } else {
-        DisplaySongList(songLists, "CHOSEN SONGS")
-      }
-
-      AddTrackButtons(
-          onAddTopSongsClick = {
-            showDialog = true
-            dialogListType = "TOP SONGS"
-          },
-          onAddChosenSongsClick = {
-            showDialog = true
-            dialogListType = "CHOSEN SONGS"
-          })
-
-      ShowAddTrackDialog(
-          showDialog = showDialog,
-          dialogListType = dialogListType,
-          onAddTrack = { id, title, artist ->
-            viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
-            viewModel.addTrackToList(dialogListType, Track(id, title, artist))
-            showDialog = false
-          },
-          onDismiss = { showDialog = false })
     }
   }
 }
-
-/**
- * This composable displays a button that toggles between showing the "TOP SONGS" list and the
- * "CHOSEN SONGS" list.
- *
- * @param isTopSongsListVisible Boolean value that determines which list is currently visible.
- * @param onToggle Callback function that toggles the visibility of the lists.
- * @author Ayman Bakiri
- * @author Menzo Bouaissi (Refactoring)
- * @since 1.0
- * @last update 1.0
- */
-@Composable
-fun ToggleSongListButton(isTopSongsListVisible: Boolean, onToggle: () -> Unit) {
-  Button(onClick = onToggle, modifier = Modifier.testTag("toggleSongList")) {
-    Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
-  }
-}
-
-/**
- * This composable displays a list of songs based on the list name provided.
- *
- * @param songLists List of song lists to display.
- * @author Ayman Bakiri
- * @author Menzo Bouaissi (Refactoring)
- * @since 1.0
- * @poram listName Name of the list to display.
- * @last update 1.0
- */
-@Composable
-fun DisplaySongList(songLists: List<SongList>, listName: String) {
-  songLists
-      .firstOrNull { it.name == listName }
-      ?.let { songList ->
-        if (songList.tracks.isNotEmpty()) {
-          Text(listName)
-          TracksList(songList.tracks)
-        } else {
-          Text("The $listName List is empty")
-        }
-      }
-}
-
-/**
- * This composable displays two buttons that allow the user to add a track to either the "TOP SONGS"
- * list or the "CHOSEN SONGS" list.
- *
- * @param onAddTopSongsClick Callback function to be invoked when the "Add Track to TOP SONGS List"
- *   button is clicked.
- * @param onAddChosenSongsClick Callback function to be invoked when the "Add Track to CHOSEN SONGS
- *   List" button is clicked.
- * @author Ayman Bakiri
- * @author Menzo Bouaissi (Refactoring)
- * @since 1.0
- * @last update 1.0
- */
-@Composable
-fun AddTrackButtons(onAddTopSongsClick: () -> Unit, onAddChosenSongsClick: () -> Unit) {
-  Button(onClick = onAddTopSongsClick, modifier = Modifier.testTag("addTopSongs")) {
-    Text("Add Track to TOP SONGS List")
-  }
-
-  Button(onClick = onAddChosenSongsClick, modifier = Modifier.testTag("addChosenSongs")) {
-    Text("Add Track to CHOSEN SONGS List")
-  }
-}
-
-/**
- * This composable displays a dialog that allows the user to add a new track to a song list.
- *
- * @param showDialog Boolean value that determines whether the dialog should be displayed.
- * @param dialogListType Name of the list to which the track will be added.
- * @param onAddTrack Callback function to be invoked when the track is added.
- * @param onDismiss Callback function to be invoked when the dialog is dismissed.
- * @author Ayman Bakiri
- * @author Menzo Bouaissi (Refactoring)
- * @since 1.0
- * @last update 1.0
- */
-@Composable
-fun ShowAddTrackDialog(
-    showDialog: Boolean,
-    dialogListType: String,
-    onAddTrack: (id: String, title: String, artist: String) -> Unit,
-    onDismiss: () -> Unit
-) {
-  if (showDialog) {
-    AddTrackDialog(
-        onAddTrack = onAddTrack,
-        onDismiss = onDismiss,
-        initialTrackId = "",
-        initialTrackTitle = "",
-        initialTrackArtist = "",
-        dialogTestTag = "addTrackDialog")
-  }
-}
-
-/**
- * Composable that displays a list of tracks. Each track is represented by the TrackItem composable.
- *
- * @param tracks List of tracks to display.
- * @author Ayman Bakiri
- * @since 1.0
- * @last update 1.0
- */
-@Composable
-fun TracksList(tracks: List<Track>) {
-  tracks.forEach { track -> key(track.id) { TrackItem(track = track) } }
-}
-
-/**
- * Composable that displays information for a single track, including its ID, title, and artist.
- *
- * @param track The track data to display.
- * @author Ayman Bakiri
- * @since 1.0
- * @last update 1.0
- */
-@Composable
-fun TrackItem(track: Track) {
-  Column(modifier = Modifier.padding(8.dp).testTag("trackItem_${track.id}")) {
-    Text(text = "ID: ${track.id}", style = MaterialTheme.typography.bodyMedium)
-    Text(text = "Title: ${track.title}", style = MaterialTheme.typography.bodyMedium)
-    Text(text = "Artist: ${track.artist}", style = MaterialTheme.typography.bodyMedium)
-  }
-}
-
-/**
- * Dialog composable that allows the user to add a new track by entering the track ID, title, and
- * artist. On confirming, the track is added via the onAddTrack callback.
- *
- * @param onAddTrack Callback function to be invoked when the track is added.
- * @param onDismiss Callback function to be invoked when the dialog is dismissed.
- * @param initialTrackId Initial value for the track ID input field.
- * @param initialTrackTitle Initial value for the track title input field.
- * @param initialTrackArtist Initial value for the track artist input field.
- * @author Ayman Bakiri
- * @since 1.0
- * @last update 1.0
- */
-@Composable
-fun AddTrackDialog(
-    onAddTrack: (String, String, String) -> Unit,
-    onDismiss: () -> Unit,
-    initialTrackId: String,
-    initialTrackTitle: String,
-    initialTrackArtist: String,
-    dialogTestTag: String
-) {
-  var newTrackId by remember { mutableStateOf(initialTrackId) }
-  var newTrackTitle by remember { mutableStateOf(initialTrackTitle) }
-  var newTrackArtist by remember { mutableStateOf(initialTrackArtist) }
-
-  AlertDialog(
-      onDismissRequest = onDismiss,
-      title = { Text("Add New Track") },
-      text = {
-        Column {
-          OutlinedTextField(
-              value = newTrackId,
-              onValueChange = { newTrackId = it },
-              label = { Text("Track ID") },
-              modifier = Modifier.testTag("trackIdInput"))
-          OutlinedTextField(
-              value = newTrackTitle,
-              onValueChange = { newTrackTitle = it },
-              label = { Text("Track Title") },
-              modifier = Modifier.testTag("trackTitleInput"))
-          OutlinedTextField(
-              value = newTrackArtist,
-              onValueChange = { newTrackArtist = it },
-              label = { Text("Track Artist") },
-              modifier = Modifier.testTag("trackArtistInput"))
-        }
-      },
-      confirmButton = {
-        Button(
-            onClick = {
-              onAddTrack(newTrackId, newTrackTitle, newTrackArtist)
-              // TODO: Send the data to the server
-              newTrackId = "" // Resetting the state
-              newTrackTitle = ""
-              newTrackArtist = ""
-            },
-            modifier = Modifier.testTag("confirmAddTrack")) {
-              Text("Add")
-            }
-      },
-      dismissButton = {
-        Button(onClick = onDismiss, modifier = Modifier.testTag("cancelAddTrack")) {
-          Text("Cancel")
-        }
-      },
-      modifier = Modifier.testTag(dialogTestTag))
-}
-
 /**
  * This handle the logic behind the switch that can permit the user to switch to the anonymous mode
  *
