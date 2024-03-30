@@ -29,9 +29,6 @@ import androidx.navigation.compose.rememberNavController
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.ui.components.ClickableIcon
 import ch.epfl.cs311.wanderwave.ui.components.VisitCard
-import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.ui.navigation.Route
-import ch.epfl.cs311.wanderwave.ui.navigation.TopLevelDestination
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
