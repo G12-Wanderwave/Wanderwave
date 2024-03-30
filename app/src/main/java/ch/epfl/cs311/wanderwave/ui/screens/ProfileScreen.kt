@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,16 +20,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.ui.components.ClickableIcon
 import ch.epfl.cs311.wanderwave.ui.components.VisitCard
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
-import dagger.hilt.android.AndroidEntryPoint
 
 const val SCALE_X = 0.5f
 const val SCALE_Y = 0.5f
@@ -51,27 +44,28 @@ val INPUT_BOX_NAM_SIZE = 150.dp
  */
 @Composable
 fun ProfileScreen() {
-    val viewModel: ProfileViewModel = hiltViewModel()
-    val currentProfileState by viewModel.profile.collectAsState()
- val isInEditMode by viewModel.isInEditMode.collectAsState()
+  val viewModel: ProfileViewModel = hiltViewModel()
+  val currentProfileState by viewModel.profile.collectAsState()
+  val isInEditMode by viewModel.isInEditMode.collectAsState()
 
   val currentProfile: Profile = currentProfileState
 
-  if (isInEditMode) {//TODO: instead of doing this, we should have a navigation action to go to the edit profile screen
+  if (isInEditMode) { // TODO: instead of doing this, we should have a navigation action to go to
+                      // the edit profile screen
 
-      EditProfileScreen(
+    EditProfileScreen(
         profile = currentProfile,
         onProfileChange = { updatedProfile -> viewModel.updateProfile(updatedProfile) })
   } else {
 
-      Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen")) {
-          Box(modifier = Modifier.fillMaxWidth()) {
-              VisitCard(Modifier, currentProfile)
-              ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
-              ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create)
-          }
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen")) {
+      Box(modifier = Modifier.fillMaxWidth()) {
+        VisitCard(Modifier, currentProfile)
+        ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
+        ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create)
       }
     }
+  }
 }
 
 /**
@@ -83,35 +77,34 @@ fun ProfileScreen() {
  * @last update 1.0
  */
 @Composable
-fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel = hiltViewModel()){
-    // Determine the current public mode state
-    val isPublicMode by viewModel.isInPublicMode.collectAsState(false)
-    Switch(
-        checked = isPublicMode,
-        onCheckedChange = {
-            // When the switch is toggled, call viewModel's method to update the profile's public mode
-            viewModel.togglePublicMode()
-        },
-        modifier =
-        modifier
-            .graphicsLayer {
+fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel = hiltViewModel()) {
+  // Determine the current public mode state
+  val isPublicMode by viewModel.isInPublicMode.collectAsState(false)
+  Switch(
+      checked = isPublicMode,
+      onCheckedChange = {
+        // When the switch is toggled, call viewModel's method to update the profile's public mode
+        viewModel.togglePublicMode()
+      },
+      modifier =
+          modifier
+              .graphicsLayer {
                 scaleX = SCALE_X
                 scaleY = SCALE_Y
-            }
-            .testTag("profileSwitch"),
-        colors =
-        SwitchDefaults.colors(
-            checkedThumbColor = MaterialTheme.colorScheme.primary,
-            checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
-            uncheckedThumbColor = MaterialTheme.colorScheme.secondary,
-            uncheckedTrackColor = MaterialTheme.colorScheme.secondaryContainer,
-        ),
-    )
+              }
+              .testTag("profileSwitch"),
+      colors =
+          SwitchDefaults.colors(
+              checkedThumbColor = MaterialTheme.colorScheme.primary,
+              checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
+              uncheckedThumbColor = MaterialTheme.colorScheme.secondary,
+              uncheckedTrackColor = MaterialTheme.colorScheme.secondaryContainer,
+          ),
+  )
 }
-
 
 @Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
-    ProfileScreen()
+  ProfileScreen()
 }
