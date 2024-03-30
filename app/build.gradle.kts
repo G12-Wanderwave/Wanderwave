@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.cli.jvm.main
 
-gplugins {
+plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     //id("com.google.gms.google-services")
@@ -144,12 +144,6 @@ dependencies {
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.mockk.agent)
-
-
-    // Dependencies for using MockK in instrumented tests
-    androidTestImplementation("io.mockk:mockk:1.13.10")
-    androidTestImplementation("io.mockk:mockk-android:1.13.10")
-    androidTestImplementation("io.mockk:mockk-agent:1.13.10")
 
     // Dependencies for the photo part
     implementation("io.coil-kt:coil-compose:2.6.0")
