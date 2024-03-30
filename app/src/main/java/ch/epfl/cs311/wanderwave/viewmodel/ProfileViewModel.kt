@@ -3,12 +3,12 @@ package ch.epfl.cs311.wanderwave.viewmodel
 import androidx.lifecycle.ViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor() : ViewModel() {
+class ProfileViewModel @Inject constructor() : ViewModel(){
   private val _profile =
       MutableStateFlow(
           Profile(
@@ -37,4 +37,5 @@ class ProfileViewModel @Inject constructor() : ViewModel() {
   fun togglePublicMode() {
     _isInPublicMode.value = !_isInPublicMode.value
   }
+
 }

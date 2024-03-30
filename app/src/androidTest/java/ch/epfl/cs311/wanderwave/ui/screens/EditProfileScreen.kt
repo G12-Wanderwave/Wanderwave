@@ -8,9 +8,10 @@ class EditProfileScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
         semanticsProvider = semanticsProvider,
         viewBuilderAction = { hasTestTag("editProfileScreen") }) {
 
-  val inputFirstName = onNode { hasTestTag("firstName") }
-  val inputLastName = onNode { hasTestTag("lastName") }
-  val inputDescription = onNode { hasTestTag("description") }
-  val saveButton = onNode { hasTestTag("saveButton") }
-  val cancelButton = onNode { hasTestTag("cancelButton") }
-}
+    val inputFirstName = onNode { hasTestTag("firstName") }
+    val inputLastName = onNode { hasTestTag("lastName") }
+    val inputDescription = onNode { hasTestTag("description") }
+    val saveButton = onNode { hasTestTag("saveButton") }
+    val cancelButton = onNode { hasTestTag("cancelButton") }
+
+    }

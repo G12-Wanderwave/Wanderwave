@@ -19,55 +19,52 @@ import org.junit.runner.RunWith
 @HiltAndroidTest
 class EditProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
 
-  @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
-
-  @Before
-  fun setup() {
-    var profile =
-        Profile(
-            firstName = "My FirstName",
-            lastName = "My LastName",
-            description = "My Description",
-            numberOfLikes = 0,
-            isPublic = true,
-            profilePictureUri = null)
-    composeTestRule.setContent {
-      EditProfileScreen(
-          profile = profile, onProfileChange = { updatedProfile -> profile = updatedProfile })
+    @get:Rule
+    val composeTestRule = createAndroidComposeRule<TestActivity>()
+    @Before
+    fun setup() {
+        var profile =
+            Profile(
+                firstName = "My FirstName",
+                lastName = "My LastName",
+                description = "My Description",
+                numberOfLikes = 0,
+                isPublic = true,
+                profilePictureUri = null)
+        composeTestRule.setContent { EditProfileScreen(profile = profile, onProfileChange = {updatedProfile->profile= updatedProfile}) }
     }
-  }
 
-  @Test
-  fun profileScreeIsDisplay() = run {
-    ComposeScreen.onComposeScreen<EditProfileScreen>(composeTestRule) { assertIsDisplayed() }
-  }
-
-  @Test
-  fun editScreen() = run {
-    onComposeScreen<EditProfileScreen>(composeTestRule) {
-      inputFirstName {
-        performTextClearance()
-        assertIsDisplayed()
-        performTextInput("Declan")
-        assertTextContains("Declan")
-      }
-      inputLastName {
-        performTextClearance()
-        assertIsDisplayed()
-        performTextInput("Rice")
-        assertTextContains("Rice")
-      }
-      inputDescription {
-        performTextClearance()
-        assertIsDisplayed()
-        performTextInput("KDOT is back <3")
-        assertTextContains("KDOT is back <3")
-      }
-      cancelButton { assertIsDisplayed() }
-      saveButton {
-        assertIsDisplayed()
-        performClick()
-      }
+    @Test
+    fun profileScreeIsDisplay() = run {
+        ComposeScreen.onComposeScreen<EditProfileScreen>(composeTestRule) { assertIsDisplayed() }
     }
-  }
+
+    @Test
+    fun editScreen() = run {
+        onComposeScreen<EditProfileScreen>(composeTestRule) {
+            inputFirstName {
+                performTextClearance()
+                assertIsDisplayed()
+                performTextInput("Declan")
+                assertTextContains("Declan")
+            }
+            inputLastName {
+                performTextClearance()
+                assertIsDisplayed()
+                performTextInput("Rice")
+                assertTextContains("Rice")
+            }
+            inputDescription {
+                performTextClearance()
+                assertIsDisplayed()
+                performTextInput("KDOT is back <3")
+                assertTextContains("KDOT is back <3")
+            }
+            cancelButton { assertIsDisplayed() }
+            saveButton {
+                assertIsDisplayed()
+                performClick()
+            }
+        }
+    }
 }
