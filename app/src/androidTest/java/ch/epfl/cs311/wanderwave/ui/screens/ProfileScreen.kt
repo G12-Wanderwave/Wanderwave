@@ -12,11 +12,6 @@ class ProfileScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
   val visitCard = onNode { hasTestTag("visitCard") }
   val profileSwitch = onNode { hasTestTag("profileSwitch") }
   val clickableIcon = onNode { hasTestTag("clickableIcon") }
-  val inputFirstName = onNode { hasTestTag("firstName") }
-  val inputLastName = onNode { hasTestTag("lastName") }
-  val inputDescription = onNode { hasTestTag("description") }
-  val saveButton = onNode { hasTestTag("saveButton") }
-  val cancelButton = onNode { hasTestTag("cancelButton") }
 
   val outputFirstName = onNode { hasTestTag("outputFirstName") }
   val outputLastName = onNode { hasTestTag("outputLastName") }

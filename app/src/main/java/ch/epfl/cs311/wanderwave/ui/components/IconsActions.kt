@@ -32,15 +32,12 @@ import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 fun ClickableIcon(
     modifier: Modifier,
     icon: ImageVector,
-    navController: NavigationActions
 ) {
-
     IconButton(
         modifier = modifier.then(Modifier.size(24.dp))
             .testTag("clickableIcon"),
         onClick = {
-            navController.navigateTo(TOP_LEVEL_DESTINATIONS[3])//TODO: CHANGE THIS
-
+            //TODO: Add the navController to navigate to the edit profile screen
         }) {
         Icon(
             icon,

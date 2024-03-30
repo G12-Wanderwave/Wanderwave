@@ -1,20 +1,16 @@
 package ch.epfl.cs311.wanderwave.ui
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTextInput
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.model.repository.TrackRepositoryImpl
 import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
+import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
-import io.mockk.impl.annotations.RelaxedMockK
+import javax.inject.Inject
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -24,19 +20,15 @@ import org.junit.runner.RunWith
 @HiltAndroidTest
 class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
 
-  @get:Rule val composeTestRule = createComposeRule()
-
-  @RelaxedMockK
-  lateinit var mockNavActions: NavigationActions
-  @Composable
+  @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
   @Before
   fun setup() {
-    composeTestRule.setContent { ProfileScreen(navigationActions = mockNavActions) }
+    composeTestRule.setContent { ProfileScreen() }
   }
 
   @Test
-  fun canSeeTheScreen() = run {
-    onComposeScreen<ProfileScreen>(composeTestRule) { profileScreen { assertIsDisplayed() } }
+  fun profileScreeIsDisplay() = run {
+    onComposeScreen<ProfileScreen>(composeTestRule) { assertIsDisplayed() }
   }
 
   @Test
@@ -51,49 +43,30 @@ class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSup
     }
   }
 
+
   @Test
-  fun editScreen() = run {
+  fun everythingIsDisplayed() = run {
     onComposeScreen<ProfileScreen>(composeTestRule) {
-      clickableIcon {
+      visitCard.assertIsDisplayed()
+      profileScreen.assertIsDisplayed()
+        profileSwitch.assertIsDisplayed()
+          clickableIcon.assertIsDisplayed()
+            outputFirstName{
+              assertIsDisplayed()
+                assertTextContains("My FirstName")
+
+            }
+      outputDescription{
         assertIsDisplayed()
-        performClick()
+        assertTextContains("My Description")
+
       }
-      inputFirstName {
-        performTextClearance()
+      outputLastName{
         assertIsDisplayed()
-        performTextInput("Declan")
-        assertTextContains("Declan")
+        assertTextContains("My LastName")
+
       }
-      inputLastName {
-        performTextClearance()
-        assertIsDisplayed()
-        performTextInput("Rice")
-        assertTextContains("Rice")
-      }
-      inputDescription {
-        performTextClearance()
-        assertIsDisplayed()
-        performTextInput("KDOT is back <3")
-        assertTextContains("KDOT is back <3")
-      }
-      cancelButton { assertIsDisplayed() }
-      saveButton {
-        assertIsDisplayed()
-        performClick()
-      }
-      visitCard { assertIsDisplayed() }
-      outputFirstName {
-        assertIsDisplayed()
-        assertTextContains("Declan")
-      }
-      outputLastName {
-        assertIsDisplayed()
-        assertTextContains("Rice")
-      }
-      outputDescription {
-        assertIsDisplayed()
-        assertTextContains("KDOT is back <3")
-      }
+
     }
   }
 }

@@ -15,16 +15,75 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.ui.components.ImageSelection
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_error
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_primary
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
 
+/**
+ * Display the profile of the user, with the possibility to edit it
+ *
+ * @param profile the profile of the user
+ * @param onProfileChange enable to transmit the changed to the caller
+ * @param viewModel the viewModel that will handle the profile
+ * @author Menzo Bouaissi
+ * @since 1.0
+ * @last update 1.0
+ */
+@Composable
+fun EditProfileScreen(
+    profile: Profile,
+    onProfileChange: (Profile) -> Unit
+) {
+    val viewModel: ProfileViewModel = hiltViewModel()
+    val profile2 = profile.copy()
+    var firstName by remember { mutableStateOf(profile2.firstName) }
+    var lastName by remember { mutableStateOf(profile2.lastName) }
+    var description by remember { mutableStateOf(profile2.description) }
 
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.testTag("editProfileScreen")){
+        ImageSelection(profile = profile2, onImageChange = { uri -> profile2.profilePictureUri = uri })
+        EditableTextFields(
+            firstName = firstName,
+            lastName = lastName,
+            description = description,
+            onFirstNameChange = { newName ->
+                if (newName.length <= MAX_NBR_CHAR_NAMES) firstName = newName
+            },
+            onLastNameChange = { newName ->
+                if (newName.length <= MAX_NBR_CHAR_NAMES) lastName = newName
+            },
+            onDescriptionChange = { newDescription ->
+                if (newDescription.length <= MAX_NBR_CHAR_DESC) description = newDescription
+            })
+        Spacer(Modifier.padding(18.dp))
+        ActionButtons(
+            onSave = {
+                //TODO: navigation popBack
+                onProfileChange(
+                    profile.copy(
+                        firstName = firstName,
+                        lastName = lastName,
+                        description = description,
+                        profilePictureUri = profile2.profilePictureUri))
+            },
+            onCancel = {
+                //TODO: navigation popBack
+            })
+    }
+}
 
 /**
  * TextFields that can be edited, and modify the profile of the user
