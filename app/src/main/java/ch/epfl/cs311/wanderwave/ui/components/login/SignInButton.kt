@@ -7,30 +7,39 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
+import ch.epfl.cs311.wanderwave.ui.components.utils.lerp
 
 @Composable
 fun SignInButton(modifier: Modifier, onClick: () -> Unit) {
+  val startColor = MaterialTheme.colorScheme.primary
+  val endColor = Color.Red
+  val midColor = lerp(startColor, endColor, 3f / 9)
   Box(modifier = modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-    Button(onClick = { onClick() }, modifier = Modifier.testTag("signInButton")) {
-      Icon(
-          painter = painterResource(id = R.drawable.spotify_icon_rgb_black),
-          contentDescription = "Spotify Icon",
-          modifier = Modifier.height(27.dp))
-      Spacer(modifier = Modifier.width(12.dp))
-      Text(
-          text = stringResource(id = R.string.button_label),
-          style = MaterialTheme.typography.titleMedium)
-    }
+    Button(
+        onClick = { onClick() },
+        modifier = Modifier.testTag("signInButton"),
+        colors = ButtonDefaults.buttonColors(containerColor = midColor)) {
+          Icon(
+              painter = painterResource(id = R.drawable.spotify_icon_rgb_black),
+              contentDescription = "Spotify Icon",
+              modifier = Modifier.height(27.dp))
+          Spacer(modifier = Modifier.width(12.dp))
+          Text(
+              text = stringResource(id = R.string.button_label),
+              style = MaterialTheme.typography.titleMedium)
+        }
   }
 }

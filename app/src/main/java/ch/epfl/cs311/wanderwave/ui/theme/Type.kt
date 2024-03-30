@@ -37,6 +37,13 @@ val Typography =
                 fontSize = 50.sp,
                 lineHeight = 40.sp,
                 letterSpacing = 0.15.sp),
+        displayMedium =
+            TextStyle(
+                fontFamily = Ubuntu,
+                fontWeight = FontWeight.Bold,
+                fontSize = 35.sp,
+                lineHeight = 40.sp,
+                letterSpacing = 0.15.sp),
         bodyLarge =
             TextStyle(
                 fontFamily = Ubuntu,

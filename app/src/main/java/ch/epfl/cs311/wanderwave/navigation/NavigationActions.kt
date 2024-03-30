@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 enum class Route(val routeString: String, val showBottomBar: Boolean) {
   LOGIN("login", false),
   SPOTIFY_CONNECT("spotifyConnect", false),
+  ABOUT("about", false),
   MAIN("main", true),
   TRACK_LIST("trackList", true),
   MAP("map", true);
@@ -29,6 +30,18 @@ class NavigationActions(navController: NavHostController) {
 
   private var _currentRouteFlow = MutableStateFlow(getCurrentRoute())
   val currentRouteFlow: StateFlow<Route?> = _currentRouteFlow
+
+  // Handle user manually clicking the back button
+  init {
+    navController.addOnDestinationChangedListener { _, destination, _ ->
+      _currentRouteFlow.value =
+          if (destination.route != null) {
+            Route.forRouteString(destination.route!!)
+          } else {
+            null
+          }
+    }
+  }
 
   fun navigateToTopLevel(topLevelRoute: Route) {
     navigationController.navigate(topLevelRoute.routeString) {
@@ -59,6 +72,13 @@ class NavigationActions(navController: NavHostController) {
 
   fun goBack() {
     navigationController.popBackStack()
+  }
+
+  fun signIn() {
+    navigationController.navigate(Route.MAIN.routeString) {
+      popUpTo(navigationController.graph.startDestinationId) { inclusive = true }
+      launchSingleTop = true
+    }
   }
 }
 
