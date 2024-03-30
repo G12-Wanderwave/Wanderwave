@@ -1,17 +1,20 @@
 package ch.epfl.cs311.wanderwave.ui
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
-import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
+import io.mockk.impl.annotations.RelaxedMockK
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -23,11 +26,12 @@ class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSup
 
   @get:Rule val composeTestRule = createComposeRule()
 
+  @RelaxedMockK
+  lateinit var mockNavActions: NavigationActions
+  @Composable
   @Before
   fun setup() {
-
-    val vm = ProfileViewModel()
-    composeTestRule.setContent { ProfileScreen(vm) }
+    composeTestRule.setContent { ProfileScreen(navigationActions = mockNavActions) }
   }
 
   @Test
