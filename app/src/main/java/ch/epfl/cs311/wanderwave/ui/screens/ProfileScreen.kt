@@ -102,9 +102,3 @@ fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel = h
           ),
   )
 }
-
-@Preview(showBackground = true)
-@Composable
-fun ProfileScreenPreview() {
-  ProfileScreen()
-}
