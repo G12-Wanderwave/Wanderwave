@@ -1,5 +1,15 @@
 [versions]
-agp = "8.2.2"
+agp = "8.3.0"
+hiltNavigationCompose = "1.2.0"
+googleHiltAndroidCompiler = "2.49"
+hiltAndroidTestingVersion = "2.49"
+hiltAndroidCompilerVersion = "2.49"
+hiltAndroidTesting = "2.49"
+hiltAndroidCompiler = "2.49"
+hiltAndroid = "2.49"
+kaspressoAllureSupport = "1.4.3"
+kaspresso = "1.4.3"
+kaspressoComposeSupport = "1.4.1"
 kotlin = "1.9.0"
 coreKtx = "1.12.0"
 junit = "4.13.2"
@@ -10,9 +20,37 @@ activityCompose = "1.8.2"
 composeBom = "2023.08.00"
 lifecycleRuntimeCompose = "2.7.0"
 appcompat = "1.6.1"
+mapsCompose = "4.3.3"
+mockkAgent = "1.13.10"
+mockkAndroid = "1.13.10"
+mockk = "1.13.10"
+navigationCompose = "2.7.7"
+roomRuntime = "2.6.1"
+secretsGradlePlugin = "2.0.1"
+uiTestJunit4 = "1.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-espresso-intents = { module = "androidx.test.espresso:espresso-intents", version.ref = "espressoCore" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+google-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "googleHiltAndroidCompiler" }
+dagger-hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTestingVersion" }
+dagger-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompilerVersion" }
+hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTesting" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+kaspresso-allure-support = { module = "com.kaspersky.android-components:kaspresso-allure-support", version.ref = "kaspressoAllureSupport" }
+kaspresso = { module = "com.kaspersky.android-components:kaspresso", version.ref = "kaspresso" }
+kaspresso-compose-support = { module = "com.kaspersky.android-components:kaspresso-compose-support", version.ref = "kaspressoComposeSupport" }
+maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
+mockk-agent = { module = "io.mockk:mockk-agent", version.ref = "mockkAgent" }
+mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockkAndroid" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -28,6 +66,7 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "uiTestJunit4" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
