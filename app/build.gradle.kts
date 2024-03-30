@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.cli.jvm.main
 
-plugins {
+gplugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     //id("com.google.gms.google-services")
