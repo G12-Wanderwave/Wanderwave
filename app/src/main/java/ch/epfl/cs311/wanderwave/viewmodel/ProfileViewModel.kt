@@ -26,7 +26,7 @@ class ProfileViewModel @Inject constructor() : ViewModel() {
   private val _isInPublicMode = MutableStateFlow(false)
   val isInPublicMode: StateFlow<Boolean> = _isInPublicMode
 
-   fun updateProfile(updatedProfile: Profile) {
+  fun updateProfile(updatedProfile: Profile) {
     _profile.value = updatedProfile
   }
 
