@@ -1,9 +1,19 @@
 <resources>
     <string name="app_name">wanderwave</string>
+    <string name="upper_case_app_name">Wanderwave</string>
+
+    <string name="milestone_number">Milestone 1</string>
+    <string name="milestone_date">2024.04.12</string>
+
     <string name="welcome_title">Welcome</string>
     <string name="welcome_subtitle">Ready to discover new music?</string>
     <string name="button_label">Sign-in with Spotify</string>
+
     <string name="map">Map</string>
     <string name="main">Main</string>
     <string name="trackList">Track List</string>
+
+
+    <string name="hexagon">Hexagon</string>
+    <string name="developed_by">Developed by</string>
 </resources>
