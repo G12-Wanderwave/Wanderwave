@@ -59,14 +59,13 @@ fun SelectImage(modifier: Modifier, profile: Profile) {
  */
 @Composable
 fun ImageSelection(profile: Profile, onImageChange: (Uri?) -> Unit) {
-  var imageUri by remember { mutableStateOf<Uri?>(null) }
+  //var imageUri by remember { mutableStateOf<Uri?>(null) }
   val launcher =
       rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri?
         ->
-        imageUri = uri
+        if (uri!= null) profile.copy(profilePictureUri = uri)
         onImageChange(uri)
       }
-  if (imageUri != null) profile.copy(profilePictureUri = imageUri)
   Box(modifier = Modifier.fillMaxWidth()) {
     SelectImage(
         modifier =
