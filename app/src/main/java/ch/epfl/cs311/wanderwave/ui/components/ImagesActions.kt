@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,11 +57,11 @@ fun SelectImage(modifier: Modifier, profile: Profile) {
  */
 @Composable
 fun ImageSelection(profile: Profile, onImageChange: (Uri?) -> Unit) {
-  //var imageUri by remember { mutableStateOf<Uri?>(null) }
+  // var imageUri by remember { mutableStateOf<Uri?>(null) }
   val launcher =
       rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri?
         ->
-        if (uri!= null) profile.copy(profilePictureUri = uri)
+        if (uri != null) profile.copy(profilePictureUri = uri)
         onImageChange(uri)
       }
   Box(modifier = Modifier.fillMaxWidth()) {
