@@ -1,4 +1,4 @@
-package ch.epfl.cs311.wanderwave.ui.components.tracklist
+package ch.epfl.cs311.wanderwave.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
@@ -32,7 +33,7 @@ fun MiniPlayer(
     onPauseClick: () -> Unit,
     progress: Float
 ) {
-  Column {
+  Column(modifier = Modifier.testTag("miniPlayer")) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -43,15 +44,16 @@ fun MiniPlayer(
           Box(modifier = Modifier.weight(1f).background(Color.Black)) {}
 
           Column(
-              horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(4f)) {
-                ScrollingTitle(
-                    title = "Some Chords",
-                    isPlaying = isPlaying,
-                    modifier = Modifier.clickable { onTitleClick() })
+              horizontalAlignment = Alignment.CenterHorizontally,
+              modifier =
+                  Modifier.weight(4f)
+                      .clickable { onTitleClick() }
+                      .testTag("miniPlayerTitleButton")) {
+                ScrollingTitle(title = "Betty (Get Money)", isPlaying = isPlaying)
               }
 
           IconButton(
-              modifier = Modifier.weight(1f),
+              modifier = Modifier.weight(1f).testTag("playPauseButton"),
               onClick = {
                 if (!isPlaying) {
                   onPlayClick()

@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.navigation.Route
-import ch.epfl.cs311.wanderwave.ui.components.tracklist.MiniPlayer
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import javax.inject.Singleton
 import kotlinx.coroutines.delay
@@ -116,7 +115,8 @@ fun SurroundWithMiniPlayer(currentRouteState: Route?, screen: @Composable () -> 
       scaffoldState =
           BottomSheetScaffoldState(
               bottomSheetState = sheetState, snackbarHostState = SnackbarHostState()),
-      sheetPeekHeight = if (currentRouteState != Route.LOGIN) 144.dp else 0.dp) {
+      sheetPeekHeight =
+          if (currentRouteState != Route.LOGIN && currentRouteState != null) 144.dp else 0.dp) {
         screen()
       }
 }

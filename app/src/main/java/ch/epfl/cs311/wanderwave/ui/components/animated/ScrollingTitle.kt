@@ -60,7 +60,7 @@ fun ScrollingTitle(title: String, isPlaying: Boolean, modifier: Modifier = Modif
               .onSizeChanged { boxWidth.floatValue = it.width.toFloat() },
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.SpaceAround) {
-        Text(text = "deadmau5", style = MaterialTheme.typography.bodyLarge)
+        Text(text = "Yung Gravy", style = MaterialTheme.typography.bodyLarge)
         Text(
             text = title,
             modifier =
