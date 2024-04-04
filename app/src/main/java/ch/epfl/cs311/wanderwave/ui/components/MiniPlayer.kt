@@ -37,10 +37,7 @@ fun MiniPlayer(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier =
-            Modifier.height(60.dp)
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background)) {
+        modifier = Modifier.height(60.dp).fillMaxWidth()) {
           Box(modifier = Modifier.weight(1f).background(Color.Black)) {}
 
           Column(
@@ -49,7 +46,7 @@ fun MiniPlayer(
                   Modifier.weight(4f)
                       .clickable { onTitleClick() }
                       .testTag("miniPlayerTitleButton")) {
-                ScrollingTitle(title = "Betty (Get Money)", isPlaying = isPlaying)
+                ScrollingTitle(artist = "Travis Scott", title = "STARGAZING", isPlaying = isPlaying)
               }
 
           IconButton(

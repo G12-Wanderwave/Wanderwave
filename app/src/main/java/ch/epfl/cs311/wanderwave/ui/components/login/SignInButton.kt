@@ -20,18 +20,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
-import ch.epfl.cs311.wanderwave.ui.components.utils.lerp
 
 @Composable
 fun SignInButton(modifier: Modifier, onClick: () -> Unit) {
-  val startColor = MaterialTheme.colorScheme.primary
-  val endColor = Color.Red
-  val midColor = lerp(startColor, endColor, 3f / 9)
   Box(modifier = modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
     Button(
         onClick = { onClick() },
         modifier = Modifier.testTag("signInButton"),
-        colors = ButtonDefaults.buttonColors(containerColor = midColor)) {
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1DB954))) {
           Icon(
               painter = painterResource(id = R.drawable.spotify_icon_rgb_black),
               contentDescription = "Spotify Icon",

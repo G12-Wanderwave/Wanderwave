@@ -28,7 +28,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ScrollingTitle(title: String, isPlaying: Boolean, modifier: Modifier = Modifier) {
+fun ScrollingTitle(
+    artist: String,
+    title: String,
+    isPlaying: Boolean,
+    modifier: Modifier = Modifier
+) {
   val infiniteTransition = rememberInfiniteTransition(label = "")
   val boxWidth = remember { mutableFloatStateOf(0f) }
   val xPosition =
@@ -45,7 +50,7 @@ fun ScrollingTitle(title: String, isPlaying: Boolean, modifier: Modifier = Modif
           colors =
               listOf(
                   Color.Transparent,
-                  if (!isPlaying) MaterialTheme.colorScheme.primary.copy(alpha = .35f)
+                  if (!isPlaying) MaterialTheme.colorScheme.primary.copy(alpha = .25f)
                   else Color(0xFF1DB954).copy(alpha = .35f),
                   Color.Transparent),
           startX = 0f,
@@ -60,12 +65,16 @@ fun ScrollingTitle(title: String, isPlaying: Boolean, modifier: Modifier = Modif
               .onSizeChanged { boxWidth.floatValue = it.width.toFloat() },
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.SpaceAround) {
-        Text(text = "Yung Gravy", style = MaterialTheme.typography.bodyLarge)
+        Text(
+            text = artist,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground)
         Text(
             text = title,
             modifier =
                 modifier.graphicsLayer(translationX = if (isPlaying) xPosition.value else 0f),
             textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onBackground,
             maxLines = 2)
       }
 }

@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -60,7 +61,8 @@ fun AppScaffold(navController: NavHostController) {
           NavHost(
               navController = navController,
               startDestination = Route.LOGIN.routeString,
-              modifier = Modifier.padding(innerPadding)) {
+              modifier =
+                  Modifier.padding(innerPadding).background(MaterialTheme.colorScheme.background)) {
                 composable(Route.LOGIN.routeString) { LoginScreen(navActions) }
                 composable(Route.ABOUT.routeString) { AboutScreen(navActions) }
                 composable(Route.MAIN.routeString) { MainPlaceHolder(navActions) }
