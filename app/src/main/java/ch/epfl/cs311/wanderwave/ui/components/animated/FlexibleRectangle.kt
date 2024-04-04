@@ -36,38 +36,29 @@ fun FlexibleRectangle(
     isPlaying: Boolean = true,
     easing: Easing = LinearEasing,
     repeatMode: RepeatMode = RepeatMode.Reverse,
-    reverse: Boolean = false
 ) {
   val done = remember { mutableStateOf(false) }
-  val startW = if (reverse) endWidth else startWidth
-  val endW = if (reverse) startWidth else endWidth
-
-  val startH = if (reverse) endHeight else startHeight
-  val endH = if (reverse) startHeight else endHeight
-
-  val startC = if (reverse) endColor else startColor
-  val endC = if (reverse) startColor else endColor
   val infiniteTransition = rememberInfiniteTransition(label = "")
   val width by
       infiniteTransition.animateFloat(
-          initialValue = startW,
-          targetValue = endW,
+          initialValue = startWidth,
+          targetValue = endWidth,
           animationSpec =
               infiniteRepeatable(
                   animation = tween(durationMillis, easing = easing), repeatMode = repeatMode),
           label = "")
   val height by
       infiniteTransition.animateFloat(
-          initialValue = startH,
-          targetValue = endH,
+          initialValue = startHeight,
+          targetValue = endHeight,
           animationSpec =
               infiniteRepeatable(
                   animation = tween(durationMillis, easing = easing), repeatMode = repeatMode),
           label = "")
   val color by
       infiniteTransition.animateColor(
-          initialValue = startC,
-          targetValue = endC,
+          initialValue = startColor,
+          targetValue = endColor,
           animationSpec =
               infiniteRepeatable(
                   animation = tween(durationMillis, easing = easing), repeatMode = repeatMode),
@@ -84,11 +75,11 @@ fun FlexibleRectangle(
           break
         }
       }
-    } else {}
+    }
   }
 
   if (done.value && isFiredOnce) {
-    Box(modifier = modifier.height(endH.dp).width(endW.dp).background(endColor))
+    Box(modifier = modifier.height(endHeight.dp).width(endWidth.dp).background(endColor))
   } else if (isPlaying) {
     Box(modifier = modifier.height(height.dp).width(width.dp).background(color))
   } else {

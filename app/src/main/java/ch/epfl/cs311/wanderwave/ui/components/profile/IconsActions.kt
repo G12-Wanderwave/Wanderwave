@@ -25,10 +25,7 @@ fun ClickableIcon(
     icon: ImageVector,
 ) {
   IconButton(
-      modifier = modifier.then(Modifier.size(24.dp)).testTag("clickableIcon"),
-      onClick = {
-        // TODO: Add the navController to navigate to the edit profile screen
-      }) {
+      modifier = modifier.then(Modifier.size(24.dp)).testTag("clickableIcon"), onClick = {}) {
         Icon(icon, contentDescription = "Edit", modifier = modifier)
       }
 }

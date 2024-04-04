@@ -53,7 +53,9 @@ fun SurroundWithMiniPlayer(currentRouteState: Route?, screen: @Composable () -> 
     when (sheetState.currentValue) {
       SheetValue.Expanded -> viewModel.expand()
       SheetValue.PartiallyExpanded -> viewModel.collapse()
-      else -> {}
+      else -> {
+        viewModel.collapse()
+      }
     }
   }
 

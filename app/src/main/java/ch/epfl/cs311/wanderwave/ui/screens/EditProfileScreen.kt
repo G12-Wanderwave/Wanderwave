@@ -24,12 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.ui.components.profile.ImageSelection
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_error
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_primary
-import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
 /**
  * Display the profile of the user, with the possibility to edit it
@@ -43,7 +41,6 @@ import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
  */
 @Composable
 fun EditProfileScreen(profile: Profile, onProfileChange: (Profile) -> Unit) {
-  val viewModel: ProfileViewModel = hiltViewModel()
   val profile2 = profile.copy()
   var firstName by remember { mutableStateOf(profile2.firstName) }
   var lastName by remember { mutableStateOf(profile2.lastName) }
@@ -70,7 +67,6 @@ fun EditProfileScreen(profile: Profile, onProfileChange: (Profile) -> Unit) {
         Spacer(Modifier.padding(18.dp))
         ActionButtons(
             onSave = {
-              // TODO: navigation popBack
               onProfileChange(
                   profile.copy(
                       firstName = firstName,
@@ -78,9 +74,7 @@ fun EditProfileScreen(profile: Profile, onProfileChange: (Profile) -> Unit) {
                       description = description,
                       profilePictureUri = profile2.profilePictureUri))
             },
-            onCancel = {
-              // TODO: navigation popBack
-            })
+            onCancel = {})
       }
 }
 
@@ -161,7 +155,6 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit) {
             colors = ButtonDefaults.buttonColors(containerColor = md_theme_light_primary),
             modifier = Modifier.width(100.dp).testTag("saveButton")) {
               Text("Save")
-              // TODO: Send the data to the server
             }
         Spacer(modifier = Modifier.width(8.dp))
         Button(
