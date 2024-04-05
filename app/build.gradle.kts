@@ -93,6 +93,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.ui.test.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -149,7 +150,7 @@ dependencies {
     androidTestImplementation(libs.mockk.agent)
 
     // Dependencies for the photo part
-    implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation(libs.coil.compose)
 }
 kapt {
     correctErrorTypes = true
