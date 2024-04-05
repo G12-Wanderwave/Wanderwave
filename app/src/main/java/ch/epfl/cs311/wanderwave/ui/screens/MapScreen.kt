@@ -5,13 +5,19 @@ import android.annotation.SuppressLint
 import android.os.Looper
 import androidx.annotation.RequiresPermission
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import ch.epfl.cs311.wanderwave.ui.permissions.RequestLocationPermission
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -27,61 +33,68 @@ import java.util.concurrent.TimeUnit
 @Composable
 @Preview
 fun MapScreen() {
-  var location by remember { mutableStateOf<LatLng?>(null) }
-  LocationUpdatesScreen { location = it }
+  val viewModel: MapViewModel = hiltViewModel()
+  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+  LocationUpdatesScreen(viewModel = viewModel)
   GoogleMap {
-    if (location != null) {
-      Marker(state = MarkerState(position = location!!))
+    if (uiState.userLocation != null) {
+      Marker(state = MarkerState(position = uiState.userLocation!!))
     }
   }
 }
 
 @SuppressLint("MissingPermission")
 @Composable
-fun LocationUpdatesScreen(onLocationChange: (LatLng) -> Unit) {
-  var locationRequest : LocationRequest? by remember { mutableStateOf(null) }
+fun LocationUpdatesScreen(viewModel: MapViewModel) {
+  val context = LocalContext.current
   RequestLocationPermission(
       onPermissionGranted = {
-        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, TimeUnit.SECONDS.toMillis(1)).build()
+        val locationRequest = LocationRequest.Builder(
+          Priority.PRIORITY_HIGH_ACCURACY,
+          TimeUnit.SECONDS.toMillis(1)
+        ).build()
+        viewModel.requestLocationUpdates(context, locationRequest)
       },
       onPermissionDenied = { /*TODO*/},
       onPermissionsRevoked = { /*TODO*/})
+}
 
-  // Only register the location updates effect when we have a request
-if (locationRequest != null) {
-    LocationUpdatesEffect(locationRequest!!) { result ->
-      // For each result update the text
-      for (currentLocation in result.locations) {
-        onLocationChange(LatLng(currentLocation.latitude, currentLocation.longitude))
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun RequestLocationPermission(
+  onPermissionGranted: () -> Unit,
+  onPermissionDenied: () -> Unit,
+  onPermissionsRevoked: () -> Unit
+) {
+  // Initialize the state for managing multiple location permissions.
+  val permissionState =
+    rememberMultiplePermissionsState(
+      listOf(
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+      ))
+
+  LaunchedEffect(key1 = permissionState) {
+    // Check if all previously granted permissions are revoked.
+    val allPermissionsRevoked =
+      permissionState.permissions.size == permissionState.revokedPermissions.size
+
+    // Filter permissions that need to be requested.
+    val permissionsToRequest = permissionState.permissions.filter { !it.status.isGranted }
+
+    // If there are permissions to request, launch the permission request.
+    if (permissionsToRequest.isNotEmpty()) permissionState.launchMultiplePermissionRequest()
+
+    // Execute callbacks based on permission status.
+    if (allPermissionsRevoked) {
+      onPermissionsRevoked()
+    } else {
+      if (permissionState.allPermissionsGranted) {
+        onPermissionGranted()
+      } else {
+        onPermissionDenied()
       }
     }
   }
-}
-
-/**
- * An effect that request location updates based on the provided request and ensures that the
- * updates are added and removed whenever the composable enters or exists the composition.
- */
-@RequiresPermission(
-    anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
-)
-@Composable
-fun LocationUpdatesEffect(
-    locationRequest: LocationRequest,
-    onUpdate: (result: LocationResult) -> Unit,
-) {
-  val context = LocalContext.current
-
-  val locationClient = LocationServices.getFusedLocationProviderClient(context)
-  val locationCallback: LocationCallback =
-      object : LocationCallback() {
-        override fun onLocationResult(result: LocationResult) {
-          onUpdate(result)
-        }
-      }
-  locationClient.requestLocationUpdates(
-      locationRequest,
-      locationCallback,
-      Looper.getMainLooper(),
-  )
 }
