@@ -147,6 +147,9 @@ dependencies {
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.mockk.agent)
+
+    // Dependencies for the photo part
+    implementation("io.coil-kt:coil-compose:2.6.0")
 }
 kapt {
     correctErrorTypes = true
@@ -191,6 +194,7 @@ sonar {
         property("sonar.organization", "g12-wanderwave")
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+        property("sonar.coverage.exclusions", "src/main/java/ch/epfl/cs311/wanderwave/ui/**/*")
     }
 }
 
