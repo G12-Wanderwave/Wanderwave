@@ -1,10 +1,9 @@
 package ch.epfl.cs311.wanderwave.ui
 
+import android.Manifest
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.uiautomator.UiDevice
-import androidx.test.uiautomator.UiSelector
+import androidx.test.rule.GrantPermissionRule
 import ch.epfl.cs311.wanderwave.MainActivity
 import ch.epfl.cs311.wanderwave.ui.screens.AppBottomBarScreen
 import ch.epfl.cs311.wanderwave.ui.screens.AppScreen
@@ -38,17 +37,18 @@ class AppTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport
     onComposeScreen<TrackListScreen>(composeTestRule) { assertIsDisplayed() }
   }
 
+  @get:Rule
+  val permissionRule: GrantPermissionRule =
+      GrantPermissionRule.grant(
+          Manifest.permission.ACCESS_COARSE_LOCATION,
+          Manifest.permission.ACCESS_FINE_LOCATION,
+      )
+
   @Test
   fun canNavigateToMapScreen() = run {
     onComposeScreen<LoginScreen>(composeTestRule) { signInButton.performClick() }
     onComposeScreen<MainPlaceHolder>(composeTestRule) { assertIsDisplayed() }
     onComposeScreen<AppBottomBarScreen>(composeTestRule) { mapScreenButton.performClick() }
-
-    val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-    val allowButton = device.findObject(UiSelector().text("Allow"))
-    if (allowButton.exists()) {
-      allowButton.click()
-    }
     onComposeScreen<MapScreen>(composeTestRule) { assertIsDisplayed() }
   }
 }
