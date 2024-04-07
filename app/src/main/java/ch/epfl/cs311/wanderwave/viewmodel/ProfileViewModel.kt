@@ -4,14 +4,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+
 @HiltViewModel
-class ProfileViewModel @Inject constructor() : ViewModel() {
+class ProfileViewModel @Inject constructor(private val repository: ProfileRepositoryImpl) :
+  ViewModel() {
 
   private val _profile =
       MutableStateFlow(
@@ -50,7 +53,7 @@ class ProfileViewModel @Inject constructor() : ViewModel() {
     profileConnection.isUidExisting(profile.spotifyUid) { isExisting, fetchedProfile ->
       if (isExisting) {
 
-        _profile.value = fetchedProfile
+        _profile.value = fetchedProfile ?: profile
         // update profile on the local database
         viewModelScope.launch { repository.insert(fetchedProfile!!) }
       } else {

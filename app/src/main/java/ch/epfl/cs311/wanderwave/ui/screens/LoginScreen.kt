@@ -8,6 +8,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.navigation.Route
+import ch.epfl.cs311.wanderwave.navigation.TOP_LEVEL_DESTINATIONS
 import ch.epfl.cs311.wanderwave.ui.components.login.LoginAppLogo
 import ch.epfl.cs311.wanderwave.ui.components.login.SignInButton
 import ch.epfl.cs311.wanderwave.ui.components.login.WelcomeTitle
@@ -32,7 +34,7 @@ fun LoginScreen(navigationActions: NavigationActions) {
               firebaseUid = "123",
               profilePictureUri = null)
       profileViewModel.fetchProfile(profile)
-      navigationActions.navigateTo(TOP_LEVEL_DESTINATIONS.first { it.route == Route.MAIN })
+      navigationActions.signIn()
     }
 
     SignInButton(modifier = Modifier.weight(1f)) { navigationActions.signIn() }
