@@ -1,4 +1,4 @@
-package ch.epfl.cs311.wanderwave.ui.components
+package ch.epfl.cs311.wanderwave.ui.components.player
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

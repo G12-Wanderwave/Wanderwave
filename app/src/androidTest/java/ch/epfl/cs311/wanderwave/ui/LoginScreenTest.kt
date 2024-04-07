@@ -1,13 +1,14 @@
 package ch.epfl.cs311.wanderwave.ui
 
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
+import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -17,10 +18,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class LoginScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
-  @get:Rule val composeTestRule = createComposeRule()
-
   @get:Rule val mockkRule = MockKRule(this)
+
+  @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
 
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 

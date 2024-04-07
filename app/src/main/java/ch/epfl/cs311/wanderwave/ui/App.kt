@@ -21,7 +21,7 @@ import androidx.navigation.compose.composable
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
-import ch.epfl.cs311.wanderwave.ui.components.SurroundWithMiniPlayer
+import ch.epfl.cs311.wanderwave.ui.components.player.SurroundWithMiniPlayer
 import ch.epfl.cs311.wanderwave.ui.screens.AboutScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
@@ -66,9 +66,7 @@ fun AppScaffold(navController: NavHostController) {
                 composable(Route.LOGIN.routeString) { LoginScreen(navActions) }
                 composable(Route.ABOUT.routeString) { AboutScreen(navActions) }
                 composable(Route.MAIN.routeString) { MainPlaceHolder(navActions) }
-
                 composable(Route.TRACK_LIST.routeString) { TrackListScreen() }
-
                 composable(Route.MAP.routeString) { MapScreen() }
               }
         }

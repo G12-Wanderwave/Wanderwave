@@ -49,7 +49,7 @@ fun ProfileScreen() {
 
   val currentProfile: Profile = currentProfileState
 
-  if (isInEditMode) {
+  if (isInEditMode) { // TODO: instead of doing this, we should have a navigation action to go to
     // the edit profile screen
 
     EditProfileScreen(

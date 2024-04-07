@@ -1,4 +1,4 @@
-package ch.epfl.cs311.wanderwave.ui.components
+package ch.epfl.cs311.wanderwave.ui.components.player
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing

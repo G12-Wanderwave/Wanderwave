@@ -40,7 +40,7 @@ fun LoginAppLogo(modifier: Modifier) {
                   modifier = Modifier.height(40.dp).testTag("appIcon"))
               val anderwave: List<String> = listOf("a", "n", "d", "e", "r", "w", "a", "v", "e")
               anderwave.forEachIndexed { index, letter ->
-                FillLogo(letter = letter, colorSpots[index + 1])
+                FillLogo(letter = letter, color = colorSpots[index + 1])
               }
             }
       }
