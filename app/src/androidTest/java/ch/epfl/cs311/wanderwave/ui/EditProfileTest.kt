@@ -30,7 +30,9 @@ class EditProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
             description = "My Description",
             numberOfLikes = 0,
             isPublic = true,
-            profilePictureUri = null)
+            profilePictureUri = null,
+            firebaseUid = "My Firebase UID",
+            spotifyUid = "My Spotify UID")
     composeTestRule.setContent {
       EditProfileScreen(
           profile = profile, onProfileChange = { updatedProfile -> profile = updatedProfile })
