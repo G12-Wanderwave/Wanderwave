@@ -42,12 +42,12 @@ fun DisplayBeacons(beacons: List<Beacon>) {
 
   // Add a marker for each beacon
   //source for the icon: https://www.svgrepo.com/svg/448258/waypoint
-  val customIcon = BitmapDescriptorFactory.fromResource(R.drawable.waypoint)
+  // val customIcon = BitmapDescriptorFactory.fromResource(R.drawable.waypoint)
   beacons.forEach() {
     Marker(
       state = MarkerState(position = it.location.toLatLng()),
       title = it.id,
-      icon = customIcon,
+      // icon = customIcon,
     )
   }
 }
