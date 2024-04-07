@@ -14,12 +14,15 @@ class ProfileConnection : FirebaseConnectionInt<Profile, Profile> {
   private val db = FirebaseFirestore.getInstance()
 
   fun isUidExisting(spotifyUid: String, callback: (Boolean, Profile?) -> Unit) {
+    Log.d("ProfileConnection", "Checking if Spotify UID exists in Firestore...")
     db.collection("users")
         .whereEqualTo("spotifyUid", spotifyUid)
         .get()
         .addOnSuccessListener { documents ->
+          Log.d("Firestore", "DocumentSnapshot data: ${documents.documents}")
           val isExisting = documents.size() > 0
           callback(isExisting, if (isExisting) documentToItem(documents.documents[0]) else null)
+
         }
         .addOnFailureListener { exception ->
           Log.w("Firestore", "Error getting documents: ", exception)

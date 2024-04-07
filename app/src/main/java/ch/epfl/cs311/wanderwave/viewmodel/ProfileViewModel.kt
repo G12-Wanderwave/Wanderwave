@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Profile
@@ -49,17 +50,16 @@ class ProfileViewModel @Inject constructor(private val repository: ProfileReposi
     // TODO : fetch profile from Spotify
     // _profile.value = spotifyConnection.getProfile()....
     // Fetch profile from Firestore if it doesn't exist, create it
-
+    Log.d("ProfileViewModel", "Fetching profile from Firestore...")
     profileConnection.isUidExisting(profile.spotifyUid) { isExisting, fetchedProfile ->
       if (isExisting) {
-
         _profile.value = fetchedProfile ?: profile
         // update profile on the local database
         viewModelScope.launch { repository.insert(fetchedProfile!!) }
       } else {
         val newProfile = profile
         profileConnection.addItem(newProfile)
-        viewModelScope.launch { repository.insert(fetchedProfile!!) }
+        viewModelScope.launch { repository.insert(newProfile) }
         _profile.value = newProfile
       }
     }

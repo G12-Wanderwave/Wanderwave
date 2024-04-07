@@ -30,13 +30,11 @@ fun LoginScreen(navigationActions: NavigationActions) {
               description = "I am a wanderer",
               numberOfLikes = 0,
               isPublic = true,
-              spotifyUid = "123",
-              firebaseUid = "123",
+              spotifyUid = "1234",
+              firebaseUid = "1234",
               profilePictureUri = null)
       profileViewModel.fetchProfile(profile)
       navigationActions.signIn()
     }
-
-    SignInButton(modifier = Modifier.weight(1f)) { navigationActions.signIn() }
   }
 }
