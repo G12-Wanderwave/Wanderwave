@@ -16,8 +16,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import ch.epfl.cs311.wanderwave.R
+import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMapOptions
@@ -33,45 +36,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 
-/*
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.fragment_map) // Make sure this is your layout file
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
-    }
-
-    override fun onMapReady(googleMap: GoogleMap) {
-        // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        googleMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
-    }
-}
-*/
+@Preview
 @Composable
-fun MapScreen(viewModel: MapViewModel = MapViewModel()) {
-  //GoogleMap()
+fun MapScreen() {
   val context = LocalContext.current
-  val mapId = stringResource(id = R.string.map_id) // Your map ID
   val isMapReady = remember { mutableStateOf(false) }
-
+  val viewModel: MapViewModel = hiltViewModel()
   val googleMapState = viewModel.googleMapState.collectAsState().value
   Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
     AndroidView(
         factory = { ctx ->
-          // Initialize the GoogleMapOptions with your map ID
-          //val options = GoogleMapOptions().mapId(mapId)
           MapView(ctx).apply {
             onCreate(Bundle())
-            onResume() // Remember to manage the full lifecycle as mentioned previously
+            onResume() 
             getMapAsync { googleMap ->
-
               viewModel.setGoogleMap(googleMap)
               isMapReady.value = true
               googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style))
@@ -84,22 +62,15 @@ fun MapScreen(viewModel: MapViewModel = MapViewModel()) {
       CircularProgressIndicator()
     } else {
       googleMapState?.let { googleMap ->
-        val sydney = LatLng(46.518831258 , 6.559331096)
-        googleMap.addMarker(MarkerOptions().position(sydney).title("Marker at EPFL"))
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        val epfl = LatLng(46.518831258 , 6.559331096)
+        googleMap.addMarker(MarkerOptions().position(epfl).title("Marker at EPFL"))
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(epfl))
       }
     }
   }
 }
 
-class MapViewModel : ViewModel() {
-  private var _googleMapState = MutableStateFlow<GoogleMap?>(null)
-  val googleMapState: StateFlow<GoogleMap?> = _googleMapState
 
-  fun setGoogleMap(googleMap: GoogleMap) {
-    _googleMapState.value = googleMap
-  }
-}
 
 
 //class MyMapActivity : AppCompatActivity(), OnMapReadyCallback {
