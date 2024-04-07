@@ -1,6 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui
 
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
@@ -20,21 +20,16 @@ import org.junit.runner.RunWith
 @HiltAndroidTest
 class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
 
-  @get:Rule val composeTestRule = createComposeRule()
-
-  @get:Rule val mockkRule = MockKRule(this)
-
-  @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
+  @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
 
   @Before
   fun setup() {
-
-    composeTestRule.setContent { ProfileScreen(mockNavigationActions) }
+    composeTestRule.setContent { ProfileScreen() }
   }
 
   @Test
-  fun canSeeTheScreen() = run {
-    onComposeScreen<ProfileScreen>(composeTestRule) { profileScreen { assertIsDisplayed() } }
+  fun profileScreeIsDisplay() = run {
+    onComposeScreen<ProfileScreen>(composeTestRule) { assertIsDisplayed() }
   }
 
   @Test
@@ -50,47 +45,23 @@ class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSup
   }
 
   @Test
-  fun editScreen() = run {
+  fun everythingIsDisplayed() = run {
     onComposeScreen<ProfileScreen>(composeTestRule) {
-      clickableIcon {
-        assertIsDisplayed()
-        performClick()
-      }
-      inputFirstName {
-        performTextClearance()
-        assertIsDisplayed()
-        performTextInput("Declan")
-        assertTextContains("Declan")
-      }
-      inputLastName {
-        performTextClearance()
-        assertIsDisplayed()
-        performTextInput("Rice")
-        assertTextContains("Rice")
-      }
-      inputDescription {
-        performTextClearance()
-        assertIsDisplayed()
-        performTextInput("KDOT is back <3")
-        assertTextContains("KDOT is back <3")
-      }
-      cancelButton { assertIsDisplayed() }
-      saveButton {
-        assertIsDisplayed()
-        performClick()
-      }
-      visitCard { assertIsDisplayed() }
+      visitCard.assertIsDisplayed()
+      profileScreen.assertIsDisplayed()
+      profileSwitch.assertIsDisplayed()
+      clickableIcon.assertIsDisplayed()
       outputFirstName {
         assertIsDisplayed()
-        assertTextContains("Declan")
-      }
-      outputLastName {
-        assertIsDisplayed()
-        assertTextContains("Rice")
+        assertTextContains("My FirstName")
       }
       outputDescription {
         assertIsDisplayed()
-        assertTextContains("KDOT is back <3")
+        assertTextContains("My Description")
+      }
+      outputLastName {
+        assertIsDisplayed()
+        assertTextContains("My LastName")
       }
     }
   }

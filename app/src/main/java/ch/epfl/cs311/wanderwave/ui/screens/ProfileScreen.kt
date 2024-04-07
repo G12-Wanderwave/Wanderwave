@@ -1,56 +1,29 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Profile
-import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_error
-import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_primary
+import ch.epfl.cs311.wanderwave.ui.components.ClickableIcon
+import ch.epfl.cs311.wanderwave.ui.components.VisitCard
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
-import coil.compose.AsyncImage
 
 const val SCALE_X = 0.5f
 const val SCALE_Y = 0.5f
@@ -59,37 +32,37 @@ const val MAX_NBR_CHAR_DESC = 35
 val INPUT_BOX_NAM_SIZE = 150.dp
 
 /**
- * This is the screen composable, which can either show the profile of the user and the chosen
- * songs, or it could show a view to modify the profile
+ * This is the screen composable which can either show the profile of the user or it can show a view
+ * to modify the profile. It also includes a toggle to switch between showing the "TOP SONGS" list
+ * or the "CHOSEN SONGS" list, as well as dialogs to add new tracks to the lists.
  *
- * @param viewModel the viewModel that will handle the profile *
+ * @param viewModel the ViewModel that will handle the profile and song lists.
+ * @author Ayman Bakiri
  * @author Menzo Bouaissi
  * @since 1.0
  * @last update 1.0
  */
 @Composable
-fun ProfileScreen(navAction: NavigationActions, viewModel: ProfileViewModel = hiltViewModel()) {
-  // Observe LiveData changes and convert them into state for Composable to react
-  val currentProfileState by viewModel.profile.observeAsState()
-  val isInEditMode by viewModel.isInEditMode.observeAsState(false)
+fun ProfileScreen(navAction: NavigationActions, ) {
+  val viewModel: ProfileViewModel = hiltViewModel()
+  val currentProfileState by viewModel.profile.collectAsState()
+  val isInEditMode by viewModel.isInEditMode.collectAsState()
 
-  // If currentProfileState is null, do not proceed to render the UI
-  val currentProfile: Profile = currentProfileState ?: return
+  val currentProfile: Profile = currentProfileState
 
-  if (isInEditMode) {
-    EditableVisitCard(
+  if (isInEditMode) { // TODO: instead of doing this, we should have a navigation action to go to
+    // the edit profile screen
+
+    EditProfileScreen(
         profile = currentProfile,
-        onProfileChange = { updatedProfile ->
-          // Instead of changing local state, directly update the ViewModel
-          viewModel.updateProfile(updatedProfile)
-        },
-        viewModel = viewModel)
+        onProfileChange = { updatedProfile -> viewModel.updateProfile(updatedProfile) })
   } else {
-    Column(modifier = Modifier.fillMaxSize().testTag("profileScreen")) {
+
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen")) {
       Box(modifier = Modifier.fillMaxWidth()) {
         VisitCard(Modifier, currentProfile)
         ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
-        ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create, viewModel)
+        ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create)
       }
     }
   }
@@ -104,13 +77,9 @@ fun ProfileScreen(navAction: NavigationActions, viewModel: ProfileViewModel = hi
  * @last update 1.0
  */
 @Composable
-fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel) {
-  // Observe the whole profile as state
-  val profile by viewModel.profile.observeAsState()
-
+fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel = hiltViewModel()) {
   // Determine the current public mode state
-  val isPublicMode by viewModel.isInPublicMode.observeAsState(false)
-
+  val isPublicMode by viewModel.isInPublicMode.collectAsState(false)
   Switch(
       checked = isPublicMode,
       onCheckedChange = {

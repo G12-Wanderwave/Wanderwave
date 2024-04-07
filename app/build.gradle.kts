@@ -47,7 +47,6 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -79,13 +78,8 @@ android {
             merges += "META-INF/LICENSE.md"
             merges += "META-INF/LICENSE-notice.md"
         }
-    }
-
-    testOptions {
-        packagingOptions {
-            jniLibs {
-                useLegacyPackaging = true
-            }
+        jniLibs {
+            useLegacyPackaging = true
         }
     }
 }
@@ -111,53 +105,52 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation("androidx.room:room-runtime:2.6.1")
-    kapt("androidx.room:room-compiler:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
+    implementation(libs.androidx.room.runtime)
+    kapt(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
 
     implementation("com.google.firebase:firebase-core:17.0.0")
     implementation("com.google.firebase:firebase-database-ktx:20.3.0")
     implementation("com.google.firebase:firebase-firestore:24.10.0")
     implementation("com.google.android.play:core-ktx:1.7.0")
+    */
 
-    implementation("com.google.dagger:hilt-android:2.49")
-    kapt("com.google.dagger:hilt-android-compiler:2.49")
+    implementation(libs.maps.compose)
 
-    androidTestImplementation("com.google.dagger:hilt-android-testing:2.49")
-    kaptAndroidTest("com.google.dagger:hilt-android-compiler:2.49")
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
 
-    testImplementation("com.google.dagger:hilt-android-testing:2.49")
-    kaptTest("com.google.dagger:hilt-android-compiler:2.49")
+    androidTestImplementation(libs.hilt.android.testing)
+    kaptAndroidTest(libs.dagger.hilt.android.compiler)
 
-    implementation("androidx.navigation:navigation-compose:2.6.0-rc01")
+    testImplementation(libs.dagger.hilt.android.testing)
+    kaptTest(libs.google.hilt.android.compiler)
+
+    implementation(libs.androidx.navigation.compose)
     // Hilt Navigation Compose library for injecting ViewModels in Compose
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation(libs.androidx.hilt.navigation.compose)
 
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.4.0")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.ui.test.junit4)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
 
-    androidTestImplementation("com.kaspersky.android-components:kaspresso:1.4.3")
+    androidTestImplementation(libs.kaspresso)
     // Allure support
-    androidTestImplementation("com.kaspersky.android-components:kaspresso-allure-support:1.4.3")
+    androidTestImplementation(libs.kaspresso.allure.support)
     // Jetpack Compose support
-    androidTestImplementation("com.kaspersky.android-components:kaspresso-compose-support:1.4.1")
+    androidTestImplementation(libs.kaspresso.compose.support)
 
     // Dependency for using Intents in instrumented tests
-    androidTestImplementation("androidx.test.espresso:espresso-intents:3.5.1")
+    androidTestImplementation(libs.androidx.espresso.intents)
 
     // Dependencies for using MockK in instrumented tests
-    androidTestImplementation("io.mockk:mockk:1.13.10")
-    androidTestImplementation("io.mockk:mockk-android:1.13.10")
-    androidTestImplementation("io.mockk:mockk-agent:1.13.10")
+    androidTestImplementation(libs.mockk)
+    androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.mockk.agent)
 
     // Dependencies for the photo part
     implementation("io.coil-kt:coil-compose:2.6.0")
-
-    // Dependencies for the Observable part
-    implementation("androidx.compose.runtime:runtime-livedata:1.0.0-alpha07")
 }
 kapt {
     correctErrorTypes = true
@@ -172,25 +165,25 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
     }
 
     val fileFilter = listOf(
-            "**/R.class",
-            "**/R$*.class",
-            "**/BuildConfig.*",
-            "**/Manifest*.*",
-            "**/*Test*.*",
-            "android/**/*.*",
-            "**/*Hilt*.*",  // Exclude Hilt generated code
-            "hilt_aggregated_deps/**",  // Exclude Hilt generated code
-            "**/*_Factory.class",  // Exclude Hilt generated code
-            "**/*_MembersInjector.class",  // Exclude Hilt generated code
+        "**/R.class",
+        "**/R$*.class",
+        "**/BuildConfig.*",
+        "**/Manifest*.*",
+        "**/*Test*.*",
+        "android/**/*.*",
+        "**/*Hilt*.*",  // Exclude Hilt generated code
+        "hilt_aggregated_deps/**",  // Exclude Hilt generated code
+        "**/*_Factory.class",  // Exclude Hilt generated code
+        "**/*_MembersInjector.class",  // Exclude Hilt generated code
     )
-    val debugTree = fileTree("${project.buildDir}/tmp/kotlin-classes/debug") {
+    val debugTree = fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
         exclude(fileFilter)
     }
     val mainSrc = "${project.projectDir}/src/main/java"
 
     sourceDirectories.setFrom(files(mainSrc))
     classDirectories.setFrom(files(debugTree))
-    executionData.setFrom(fileTree(project.buildDir) {
+    executionData.setFrom(fileTree(project.layout.buildDirectory.get()) {
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
@@ -202,6 +195,7 @@ sonar {
         property("sonar.organization", "g12-wanderwave")
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+        property("sonar.coverage.exclusions", "src/main/java/ch/epfl/cs311/wanderwave/ui/**/*")
     }
 }
 

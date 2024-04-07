@@ -6,20 +6,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
-import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.ui.navigation.Route
-import ch.epfl.cs311.wanderwave.ui.screens.LaunchScreen
+import ch.epfl.cs311.wanderwave.ui.screens.AboutScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
+import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
 import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
@@ -38,23 +43,33 @@ fun App(navController: NavHostController) {
 
 @Composable
 fun AppScaffold(navController: NavHostController) {
-  val navBackStackEntry by navController.currentBackStackEntryAsState()
-  val currentRoute = navBackStackEntry?.destination?.route
   val navActions = NavigationActions(navController)
 
   val profileViewModel: ProfileViewModel = hiltViewModel()
+  var showBottomBar by remember { mutableStateOf(false) }
 
-  Scaffold(bottomBar = { AppBottomBar(navActions = navActions, currentRoute = currentRoute) }) {
-      innerPadding ->
-    NavHost(
-        navController = navController,
-        startDestination = Route.LAUNCH,
-        modifier = Modifier.padding(innerPadding)) {
-          composable(Route.LAUNCH) { LaunchScreen(navActions) }
-          composable(Route.LOGIN) { LoginScreen(navActions) }
-          composable(Route.MAIN) { MainPlaceHolder(navActions) }
-          composable(Route.TRACK_LIST) { TrackListScreen() }
-          composable(Route.PROFILE_SCREEN) { ProfileScreen(navActions, profileViewModel) }
+  val currentRouteState by navActions.currentRouteFlow.collectAsStateWithLifecycle()
+
+  LaunchedEffect(currentRouteState) { showBottomBar = currentRouteState?.showBottomBar ?: false }
+
+  Scaffold(
+      bottomBar = {
+        if (showBottomBar) {
+          AppBottomBar(
+              navActions = navActions,
+          )
         }
-  }
+      }) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = Route.LOGIN.routeString,
+            modifier = Modifier.padding(innerPadding)) {
+              composable(Route.LOGIN.routeString) { LoginScreen(navActions) }
+              composable(Route.ABOUT.routeString) { AboutScreen(navActions) }
+              composable(Route.MAIN.routeString) { MainPlaceHolder(navActions) }
+              composable(Route.TRACK_LIST.routeString) { TrackListScreen() }
+              composable(Route.MAP.routeString) { MapScreen() }
+              composable(Route.PROFILE_SCREEN) { ProfileScreen(navActions, profileViewModel) }
+        }
+      }
 }

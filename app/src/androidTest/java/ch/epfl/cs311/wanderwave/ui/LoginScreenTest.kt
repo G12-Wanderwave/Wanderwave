@@ -3,7 +3,7 @@ package ch.epfl.cs311.wanderwave.ui
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso

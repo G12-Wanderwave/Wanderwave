@@ -2,11 +2,12 @@ package ch.epfl.cs311.wanderwave.ui
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
-import ch.epfl.cs311.wanderwave.ui.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.ui.navigation.Route
-import ch.epfl.cs311.wanderwave.ui.navigation.TOP_LEVEL_DESTINATIONS
 import ch.epfl.cs311.wanderwave.ui.screens.AppBottomBarScreen
+import ch.epfl.cs311.wanderwave.ui.screens.LaunchScreen
+import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -29,7 +30,7 @@ class AppBottomBarTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
 
   @Before
   fun setup() {
-    composeTestRule.setContent { AppBottomBar(mockNavigationActions, Route.MAIN) }
+    composeTestRule.setContent { AppBottomBar(mockNavigationActions) }
   }
 
   @Test
@@ -40,18 +41,23 @@ class AppBottomBarTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
       bottomAppBarMainPlaceHolderButton {
         assertIsDisplayed()
         performClick()
-        verify {
-          mockNavigationActions.navigateTo(TOP_LEVEL_DESTINATIONS.first { it.route == Route.MAIN })
-        }
+        verify { mockNavigationActions.navigateToTopLevel(Route.MAIN) }
       }
       bottomAppBarTrackListButton {
         assertIsDisplayed()
         performClick()
-        verify {
-          mockNavigationActions.navigateTo(
-              TOP_LEVEL_DESTINATIONS.first { it.route == Route.TRACK_LIST })
-        }
+        verify { mockNavigationActions.navigateToTopLevel(Route.TRACK_LIST) }
       }
     }
+  }
+
+  @Test
+  fun appBottomBarIsNotDisplayedOnLoginScreen() = run {
+    onComposeScreen<LoginScreen>(composeTestRule) { assertDoesNotExist() }
+  }
+
+  @Test
+  fun appBottomBarIsNotDisplayedOnLaunchScreen() = run {
+    onComposeScreen<LaunchScreen>(composeTestRule) { assertDoesNotExist() }
   }
 }
