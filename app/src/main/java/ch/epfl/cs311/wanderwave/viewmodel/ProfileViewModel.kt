@@ -80,5 +80,6 @@ class ProfileViewModel @Inject constructor(private val repository: ProfileReposi
         _profile.value = newProfile
       }
     }
+    profileConnection.getItem(profile.spotifyUid)
   }
 }
