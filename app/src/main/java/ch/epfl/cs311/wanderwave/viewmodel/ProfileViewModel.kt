@@ -11,6 +11,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import okhttp3.internal.wait
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(private val repository: ProfileRepositoryImpl) :
@@ -66,12 +67,12 @@ class ProfileViewModel @Inject constructor(private val repository: ProfileReposi
         // update profile on the local database
         viewModelScope.launch {
           val localProfile = repository.getProfile()
-          if (localProfile == null) {
-            repository.insert(fetchedProfile!!)
-          } else {
-            repository.delete()
+          localProfile.collect {fetchedLocalProfile ->
+            if (fetchedLocalProfile != fetchedProfile) {
+              repository.delete()
+              repository.insert(fetchedProfile!!)
+            }
           }
-          repository.insert(fetchedProfile!!)
         }
       } else {
         val newProfile = profile
