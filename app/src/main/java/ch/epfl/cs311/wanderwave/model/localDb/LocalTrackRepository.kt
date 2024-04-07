@@ -1,4 +1,4 @@
-package ch.epfl.cs311.wanderwave.model.local
+package ch.epfl.cs311.wanderwave.model.localDb
 
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository

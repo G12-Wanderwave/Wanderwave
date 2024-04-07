@@ -1,4 +1,4 @@
-package ch.epfl.cs311.wanderwave.model.local
+package ch.epfl.cs311.wanderwave.model.localDb
 
 import androidx.room.Dao
 import androidx.room.Query
