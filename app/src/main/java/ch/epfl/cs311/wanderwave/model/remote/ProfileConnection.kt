@@ -4,19 +4,12 @@ import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.onEach
 
-class ProfileConnection : FirebaseConnectionInt<Profile, Profile>{
-
-  init {}
+class ProfileConnection : FirebaseConnectionInt<Profile, Profile> {
 
   override val collectionName: String = "users"
 
-  override val getItemId = { profile:Profile -> profile.firebaseUid }
-
-
+  override val getItemId = { profile: Profile -> profile.firebaseUid }
 
   private val db = FirebaseFirestore.getInstance()
 
@@ -55,15 +48,15 @@ class ProfileConnection : FirebaseConnectionInt<Profile, Profile>{
 
   override fun itemToHash(profile: Profile): HashMap<String, Any> {
     val profileMap: HashMap<String, Any> =
-      hashMapOf(
-        "firstName" to profile.firstName,
-        "lastName" to profile.lastName,
-        "description" to profile.description,
-        "numberOfLikes" to profile.numberOfLikes,
-        "spotifyUid" to profile.spotifyUid,
-        "firebaseUid" to profile.firebaseUid,
-        "isPublic" to profile.isPublic,
-        "profilePictureUri" to (profile.profilePictureUri?.toString() ?: ""))
+        hashMapOf(
+            "firstName" to profile.firstName,
+            "lastName" to profile.lastName,
+            "description" to profile.description,
+            "numberOfLikes" to profile.numberOfLikes,
+            "spotifyUid" to profile.spotifyUid,
+            "firebaseUid" to profile.firebaseUid,
+            "isPublic" to profile.isPublic,
+            "profilePictureUri" to (profile.profilePictureUri?.toString() ?: ""))
     return profileMap
   }
 }

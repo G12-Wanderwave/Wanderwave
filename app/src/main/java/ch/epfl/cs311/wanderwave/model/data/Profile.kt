@@ -11,5 +11,4 @@ data class Profile(
     var profilePictureUri: Uri? = null,
     var spotifyUid: String,
     var firebaseUid: String,
-
 )

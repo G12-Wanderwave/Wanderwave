@@ -13,20 +13,20 @@ interface FirebaseConnectionInt<T, U> {
 
   val getItemId: (T) -> String
 
-  private val db : FirebaseFirestore
+  private val db: FirebaseFirestore
     get() = FirebaseFirestore.getInstance()
 
   fun documentToItem(document: DocumentSnapshot): T
 
   fun itemToHash(item: T): HashMap<String, Any>
 
-  fun addItem(item: T){
+  fun addItem(item: T) {
     val itemMap = itemToHash(item)
 
     db.collection(collectionName)
-    .add(itemMap)
-    .addOnFailureListener { e -> Log.e("Firestore", "Error adding document: ", e) }
-    .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully added!") }
+        .add(itemMap)
+        .addOnFailureListener { e -> Log.e("Firestore", "Error adding document: ", e) }
+        .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully added!") }
   }
 
   fun updateItem(item: T) {
@@ -34,35 +34,32 @@ interface FirebaseConnectionInt<T, U> {
     val itemMap = itemToHash(item)
 
     db.collection(collectionName)
-      .document(itemId)
-      .set(itemMap) // Use set to update the document
-      .addOnFailureListener { e -> Log.e("Firestore", "Error updating document: ", e) }
-      .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully updated!") }
+        .document(itemId)
+        .set(itemMap) // Use set to update the document
+        .addOnFailureListener { e -> Log.e("Firestore", "Error updating document: ", e) }
+        .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully updated!") }
   }
 
   fun deleteItem(item: T) {
     val itemId = getItemId(item)
 
-    db.collection(collectionName)
-      .document(itemId)
-      .delete()
-      .addOnFailureListener { e -> Log.e("Firestore", "Error deleting document: ", e) }
+    db.collection(collectionName).document(itemId).delete().addOnFailureListener { e ->
+      Log.e("Firestore", "Error deleting document: ", e)
+    }
   }
-
-
 
   fun getItem(itemId: String): Flow<T> {
     val dataFlow = MutableStateFlow<T?>(null)
     db.collection(collectionName)
-      .document(itemId)
-      .get()
-      .addOnSuccessListener { document ->
-        if (document != null && document.data != null) {
-          val item = documentToItem(document)
-          dataFlow.value = item
+        .document(itemId)
+        .get()
+        .addOnSuccessListener { document ->
+          if (document != null && document.data != null) {
+            val item = documentToItem(document)
+            dataFlow.value = item
+          }
         }
-      }
-      .addOnFailureListener { e -> Log.e("Firestore", "Error getting document: ", e) }
+        .addOnFailureListener { e -> Log.e("Firestore", "Error getting document: ", e) }
 
     return dataFlow.mapNotNull { it }
   }
