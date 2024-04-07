@@ -1,22 +1,15 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Profile
-import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
-import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.launch
 
-@HiltViewModelimport dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor() @Inject constructor(private val repository: ProfileRepositoryImpl) :
-    ViewModel() {
+class ProfileViewModel @Inject constructor() : ViewModel() {
 
   private val _profile =
       MutableStateFlow(
@@ -28,6 +21,7 @@ class ProfileViewModel @Inject constructor() @Inject constructor(private val rep
               isPublic = true,
               spotifyUid = "My Spotify UID",
               firebaseUid = "My Firebase UID",
+
               profilePictureUri = null))
   val profile: StateFlow<Profile> = _profile
 
@@ -37,7 +31,9 @@ class ProfileViewModel @Inject constructor() @Inject constructor(private val rep
   private val _isInPublicMode = MutableStateFlow(false)
   val isInPublicMode: StateFlow<Boolean> = _isInPublicMode
 
+
   val profileConnection = ProfileConnection()
+
 
   fun updateProfile(updatedProfile: Profile) {
     _profile.value = updatedProfile
@@ -86,4 +82,5 @@ class ProfileViewModel @Inject constructor() @Inject constructor(private val rep
       }
     }
   }
+
 }

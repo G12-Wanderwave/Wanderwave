@@ -6,12 +6,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
-import androidx.hilt.navigation.compose.hiltViewModel
-import ch.epfl.cs311.wanderwave.model.data.Profile
+
 import ch.epfl.cs311.wanderwave.ui.components.login.LoginAppLogo
 import ch.epfl.cs311.wanderwave.ui.components.login.SignInButton
 import ch.epfl.cs311.wanderwave.ui.components.login.WelcomeTitle
-import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
 @Composable
 fun LoginScreen(navigationActions: NavigationActions) {
@@ -34,6 +32,7 @@ fun LoginScreen(navigationActions: NavigationActions) {
       profileViewModel.fetchProfile(profile)
       navigationActions.navigateTo(TOP_LEVEL_DESTINATIONS.first { it.route == Route.MAIN })
     }
+
     SignInButton(modifier = Modifier.weight(1f)) { navigationActions.signIn() }
   }
 }

@@ -13,7 +13,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -25,7 +24,6 @@ import ch.epfl.cs311.wanderwave.ui.screens.AboutScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
-import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
@@ -44,8 +42,6 @@ fun App(navController: NavHostController) {
 @Composable
 fun AppScaffold(navController: NavHostController) {
   val navActions = NavigationActions(navController)
-
-  val profileViewModel: ProfileViewModel = hiltViewModel()
   var showBottomBar by remember { mutableStateOf(false) }
 
   val currentRouteState by navActions.currentRouteFlow.collectAsStateWithLifecycle()
@@ -69,7 +65,6 @@ fun AppScaffold(navController: NavHostController) {
               composable(Route.MAIN.routeString) { MainPlaceHolder(navActions) }
               composable(Route.TRACK_LIST.routeString) { TrackListScreen() }
               composable(Route.MAP.routeString) { MapScreen() }
-              composable(Route.PROFILE_SCREEN) { ProfileScreen(navActions, profileViewModel) }
-        }
+
       }
 }
