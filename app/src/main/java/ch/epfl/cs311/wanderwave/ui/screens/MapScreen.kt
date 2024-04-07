@@ -2,8 +2,11 @@ package ch.epfl.cs311.wanderwave.ui.screens
 
 import android.Manifest
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -31,9 +34,12 @@ fun MapScreen() {
     if (permissionsToRequest.isNotEmpty()) permissionState.launchMultiplePermissionRequest()
   }
 
-  GoogleMap(
-      properties =
-          MapProperties(
-              isMyLocationEnabled = permissionState.allPermissionsGranted,
-          )) {}
+  Column(modifier = Modifier.testTag("mapScreen")) {
+    GoogleMap(
+        properties =
+            MapProperties(
+                isMyLocationEnabled = permissionState.allPermissionsGranted,
+            ),
+    ) {}
+  }
 }

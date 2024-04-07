@@ -7,5 +7,5 @@ class MapScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
     ComposeScreen<MapScreen>(
         semanticsProvider = semanticsProvider, viewBuilderAction = { hasTestTag("mapScreen") }) {
 
-  val locationMarker = onNode { hasTestTag("locationMarker") }
+  val googleMap = onNode { hasTestTag("googleMap") }
 }
