@@ -81,6 +81,6 @@ class ProfileViewModel @Inject constructor(private val repository: ProfileReposi
       }
     }
     // TODO : get rid of this line
-    profileConnection.getItem(profile.spotifyUid)
+    profileConnection.getItem(profile.spotifyUid).let { Log.d("Firebase", it.toString()) }
   }
 }
