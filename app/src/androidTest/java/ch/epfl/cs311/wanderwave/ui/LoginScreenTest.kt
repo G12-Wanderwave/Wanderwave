@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.ui
 
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -20,15 +21,16 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @HiltAndroidTest
 class LoginScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
-  @get:Rule val composeTestRule = createComposeRule()
-
   @get:Rule val mockkRule = MockKRule(this)
+
+  @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
 
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
   @Before
   fun setup() {
     composeTestRule.setContent { LoginScreen(mockNavigationActions) }
+
   }
 
   @Test

@@ -29,6 +29,7 @@ roomRuntime = "2.6.1"
 secretsGradlePlugin = "2.0.1"
 uiTestJunit4 = "1.4.0"
 firebaseFirestoreKtx = "24.11.0"
+navigationTesting = "2.7.7"
 
 
 [libraries]
@@ -71,6 +72,7 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 
 ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "uiTestJunit4" }
+androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

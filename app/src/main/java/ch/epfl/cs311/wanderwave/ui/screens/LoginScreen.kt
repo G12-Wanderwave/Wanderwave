@@ -12,10 +12,13 @@ import ch.epfl.cs311.wanderwave.ui.components.login.LoginAppLogo
 import ch.epfl.cs311.wanderwave.ui.components.login.SignInButton
 import ch.epfl.cs311.wanderwave.ui.components.login.WelcomeTitle
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 @Composable
 fun LoginScreen(navigationActions: NavigationActions) {
   val profileViewModel: ProfileViewModel = hiltViewModel()
+
   Column(modifier = Modifier.testTag("loginScreen")) {
     LoginAppLogo(modifier = Modifier.weight(1f))
     WelcomeTitle(modifier = Modifier.weight(4f))
