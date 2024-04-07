@@ -40,10 +40,13 @@ class ProfileViewModel @Inject constructor(private val repository: ProfileReposi
   fun updateProfile(updatedProfile: Profile) {
     _profile.value = updatedProfile
     profileConnection.updateItem(updatedProfile)
+    viewModelScope.launch { repository.delete()
+      repository.insert(_profile.value) }
   }
 
   fun deleteProfile() {
     profileConnection.deleteItem(_profile.value)
+    viewModelScope.launch { repository.delete() }
   }
 
   fun togglePublicMode() {
