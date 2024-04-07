@@ -20,12 +20,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
+import ch.epfl.cs311.wanderwave.ui.components.animated.ColorRange
 import ch.epfl.cs311.wanderwave.ui.components.animated.FlexibleRectangle
+import ch.epfl.cs311.wanderwave.ui.components.animated.RectangleConstraints
+import ch.epfl.cs311.wanderwave.ui.theme.orange
+import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 
 @Composable
 fun PlayerDragHandle() {
   BoxWithConstraints {
     val boxWidth = this.maxWidth
+    val mainRectangleConstraints =
+        RectangleConstraints(
+            startWidth = 12f, startHeight = 12f, endWidth = boxWidth.value - 20f, endHeight = 3f)
+    val trailingRectangleConstraints =
+        RectangleConstraints(
+            startWidth = 0f, startHeight = 1f, endWidth = boxWidth.value, endHeight = 3f)
+    val trailingColorRange =
+        ColorRange(startColor = Color.White, endColor = MaterialTheme.colorScheme.background)
     Column(
         modifier =
             Modifier.height(63.dp)
@@ -42,14 +54,11 @@ fun PlayerDragHandle() {
                 modifier = Modifier.width(12.dp),
                 tint = MaterialTheme.colorScheme.primary)
             FlexibleRectangle(
-                startWidth = 12f,
-                endWidth = boxWidth.value - 20f,
-                startHeight = 12f,
-                endHeight = 3f,
-                startColor = Color(0xFF1DB954),
-                endColor = MaterialTheme.colorScheme.primary,
+                rectangleConstraints = mainRectangleConstraints,
+                colorRange =
+                    ColorRange(
+                        startColor = spotify_green, endColor = MaterialTheme.colorScheme.primary),
                 durationMillis = 5000,
-                isFiredOnce = false,
                 easing = LinearOutSlowInEasing)
             Icon(
                 painter = painterResource(id = R.drawable.wanderwave_icon),
@@ -58,14 +67,9 @@ fun PlayerDragHandle() {
                 tint = MaterialTheme.colorScheme.primary)
           }
           FlexibleRectangle(
-              startWidth = 0f,
-              endWidth = boxWidth.value,
-              startHeight = 1f,
-              endHeight = 3f,
-              startColor = Color.White,
-              endColor = MaterialTheme.colorScheme.background,
+              rectangleConstraints = trailingRectangleConstraints,
+              colorRange = trailingColorRange,
               durationMillis = 10000,
-              isFiredOnce = false,
               easing = LinearEasing,
               repeatMode = RepeatMode.Restart)
           Row(verticalAlignment = Alignment.CenterVertically) {
@@ -73,32 +77,22 @@ fun PlayerDragHandle() {
                 painter = painterResource(id = R.drawable.stop_icon),
                 contentDescription = "Stop icon",
                 modifier = Modifier.width(12.dp),
-                tint = Color(0xFFFFA500))
+                tint = orange)
             FlexibleRectangle(
-                startWidth = 12f,
-                endWidth = boxWidth.value - 20f,
-                startHeight = 12f,
-                endHeight = 3f,
-                startColor = Color(0xFF1DB954),
-                endColor = Color(0xFFFFA500),
+                rectangleConstraints = mainRectangleConstraints,
+                colorRange = ColorRange(startColor = spotify_green, endColor = orange),
                 durationMillis = 4000,
-                isFiredOnce = false,
                 easing = LinearOutSlowInEasing)
             Icon(
                 painter = painterResource(id = R.drawable.wanderwave_icon),
                 contentDescription = "Orange Wanderwave icon",
                 modifier = Modifier.width(9.dp),
-                tint = Color(0xFFFFA500))
+                tint = orange)
           }
           FlexibleRectangle(
-              startWidth = 0f,
-              endWidth = boxWidth.value,
-              startHeight = 1f,
-              endHeight = 3f,
-              startColor = Color.White,
-              endColor = MaterialTheme.colorScheme.background,
+              rectangleConstraints = trailingRectangleConstraints,
+              colorRange = trailingColorRange,
               durationMillis = 8000,
-              isFiredOnce = false,
               easing = LinearEasing,
               repeatMode = RepeatMode.Restart)
           Row(verticalAlignment = Alignment.CenterVertically) {
@@ -108,14 +102,9 @@ fun PlayerDragHandle() {
                 modifier = Modifier.width(12.dp),
                 tint = Color.Red)
             FlexibleRectangle(
-                startWidth = 12f,
-                endWidth = boxWidth.value - 20f,
-                startHeight = 12f,
-                endHeight = 3f,
-                startColor = Color(0xFF1DB954),
-                endColor = Color.Red,
+                rectangleConstraints = mainRectangleConstraints,
+                colorRange = ColorRange(startColor = spotify_green, endColor = Color.Red),
                 durationMillis = 3000,
-                isFiredOnce = false,
                 easing = LinearOutSlowInEasing)
             Icon(
                 painter = painterResource(id = R.drawable.wanderwave_icon),
@@ -124,14 +113,9 @@ fun PlayerDragHandle() {
                 tint = Color.Red)
           }
           FlexibleRectangle(
-              startWidth = 0f,
-              endWidth = boxWidth.value,
-              startHeight = 1f,
-              endHeight = 3f,
-              startColor = Color.White,
-              endColor = MaterialTheme.colorScheme.background,
+              rectangleConstraints = trailingRectangleConstraints,
+              colorRange = trailingColorRange,
               durationMillis = 6000,
-              isFiredOnce = false,
               easing = LinearEasing,
               repeatMode = RepeatMode.Restart)
         }

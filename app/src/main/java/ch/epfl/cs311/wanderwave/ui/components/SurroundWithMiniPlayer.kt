@@ -14,11 +14,13 @@ import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.navigation.Route
+import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
+import ch.epfl.cs311.wanderwave.viewmodel.TrackListUiState
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import javax.inject.Singleton
 import kotlinx.coroutines.delay
@@ -42,34 +46,9 @@ fun SurroundWithMiniPlayer(currentRouteState: Route?, screen: @Composable () -> 
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   val sheetState = rememberStandardBottomSheetState(initialValue = SheetValue.PartiallyExpanded)
   val progress = remember { mutableFloatStateOf(0f) }
-  LaunchedEffect(uiState.expanded) {
-    if (uiState.expanded) {
-      sheetState.expand()
-    } else {
-      sheetState.partialExpand()
-    }
-  }
-  LaunchedEffect(sheetState.currentValue) {
-    when (sheetState.currentValue) {
-      SheetValue.Expanded -> viewModel.expand()
-      SheetValue.PartiallyExpanded -> viewModel.collapse()
-      else -> {
-        viewModel.collapse()
-      }
-    }
-  }
+  HandleSheetStateChanges(sheetState = sheetState, uiState = uiState, viewModel = viewModel)
 
-  LaunchedEffect(uiState.isPlaying) {
-    if (uiState.isPlaying) {
-      while (true) {
-        delay(1000L) // delay for 1 second
-        progress.floatValue += 0.01f // increment progress by 1%
-        if (progress.floatValue >= 1f) {
-          progress.floatValue = 0f // reset progress when it reaches 100%
-        }
-      }
-    }
-  }
+  HandleProgressChanges(uiState = uiState, progress = progress)
 
   BottomSheetScaffold(
       sheetContent = {
@@ -102,7 +81,7 @@ fun SurroundWithMiniPlayer(currentRouteState: Route?, screen: @Composable () -> 
               modifier =
                   Modifier.background(
                           if (!uiState.isPlaying) MaterialTheme.colorScheme.primary
-                          else Color(0xFF1DB954))
+                          else spotify_green)
                       .fillMaxWidth()
                       .height(2.dp)
                       .clickable {}) {}
@@ -115,4 +94,46 @@ fun SurroundWithMiniPlayer(currentRouteState: Route?, screen: @Composable () -> 
           if (currentRouteState != Route.LOGIN && currentRouteState != null) 144.dp else 0.dp) {
         screen()
       }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HandleSheetStateChanges(
+    sheetState: SheetState,
+    uiState: TrackListUiState,
+    viewModel: TrackListViewModel
+) {
+  LaunchedEffect(uiState.expanded) {
+    if (uiState.expanded) {
+      sheetState.expand()
+    } else {
+      sheetState.partialExpand()
+    }
+  }
+
+  LaunchedEffect(sheetState.currentValue) {
+    when (sheetState.currentValue) {
+      SheetValue.Expanded -> viewModel.expand()
+      SheetValue.PartiallyExpanded -> viewModel.collapse()
+      else -> {
+        viewModel.collapse()
+      }
+    }
+  }
+}
+
+// A placeholder
+@Composable
+fun HandleProgressChanges(uiState: TrackListUiState, progress: MutableFloatState) {
+  LaunchedEffect(uiState.isPlaying) {
+    if (uiState.isPlaying) {
+      while (true) {
+        delay(1000L)
+        progress.floatValue += 0.01f
+        if (progress.floatValue >= 1f) {
+          progress.floatValue = 0f
+        }
+      }
+    }
+  }
 }

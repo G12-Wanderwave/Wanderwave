@@ -38,36 +38,57 @@ fun MiniPlayer(
         modifier = Modifier.height(60.dp).fillMaxWidth()) {
           Box(modifier = Modifier.weight(1f).background(Color.Black)) {}
 
-          Column(
-              horizontalAlignment = Alignment.CenterHorizontally,
-              modifier =
-                  Modifier.weight(4f)
-                      .clickable { onTitleClick() }
-                      .testTag("miniPlayerTitleButton")) {
-                ScrollingTitle(artist = "Travis Scott", title = "STARGAZING", isPlaying = isPlaying)
-              }
+          MiniPlayerTitle(modifier = Modifier.weight(4f), isPlaying = isPlaying) { onTitleClick() }
 
-          IconButton(
-              modifier = Modifier.weight(1f).testTag("playPauseButton"),
-              onClick = {
-                if (!isPlaying) {
-                  onPlayClick()
-                } else {
-                  onPauseClick()
-                }
-              }) {
-                Icon(
-                    painter =
-                        if (isPlaying) painterResource(id = R.drawable.pause_icon)
-                        else painterResource(id = R.drawable.play_icon),
-                    contentDescription = "Play Pause Icons",
-                    tint = if (isPlaying) Color(0xFF1DB954) else MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(if (isPlaying) 30.dp else 50.dp))
-              }
+          PlayPauseButton(
+              modifier = Modifier.weight(1f),
+              isPlaying = isPlaying,
+              onPlayClick = onPlayClick,
+              onPauseClick = onPauseClick)
         }
-    Box(modifier = Modifier.fillMaxWidth().height(2.dp), contentAlignment = Alignment.BottomStart) {
-      LinearProgressIndicator(
-          progress = progress, modifier = Modifier.fillMaxWidth(), color = Color.White)
-    }
+    ProgressBar(progress = progress)
+  }
+}
+
+@Composable
+fun MiniPlayerTitle(modifier: Modifier, isPlaying: Boolean, onTitleClick: () -> Unit) {
+  Column(
+      horizontalAlignment = Alignment.CenterHorizontally,
+      modifier = modifier.clickable { onTitleClick() }.testTag("miniPlayerTitleButton")) {
+        ScrollingTitle(artist = "Travis Scott", title = "STARGAZING", isPlaying = isPlaying)
+      }
+}
+
+@Composable
+fun PlayPauseButton(
+    modifier: Modifier,
+    isPlaying: Boolean,
+    onPlayClick: () -> Unit,
+    onPauseClick: () -> Unit
+) {
+  IconButton(
+      modifier = modifier.testTag("playPauseButton"),
+      onClick = {
+        if (!isPlaying) {
+          onPlayClick()
+        } else {
+          onPauseClick()
+        }
+      }) {
+        Icon(
+            painter =
+                if (isPlaying) painterResource(id = R.drawable.pause_icon)
+                else painterResource(id = R.drawable.play_icon),
+            contentDescription = "Play Pause Icons",
+            tint = if (isPlaying) Color(0xFF1DB954) else MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(if (isPlaying) 30.dp else 50.dp))
+      }
+}
+
+@Composable
+fun ProgressBar(progress: Float) {
+  Box(modifier = Modifier.fillMaxWidth().height(2.dp), contentAlignment = Alignment.BottomStart) {
+    LinearProgressIndicator(
+        progress = progress, modifier = Modifier.fillMaxWidth(), color = Color.White)
   }
 }
