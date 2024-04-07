@@ -14,6 +14,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MapViewModel @Inject constructor(private val repository: BeaconRepository) :
   ViewModel() {
+    
 
   private val _uiState = MutableStateFlow(BeaconListUiState(loading = true))
   val uiState: StateFlow<BeaconListUiState> = _uiState
