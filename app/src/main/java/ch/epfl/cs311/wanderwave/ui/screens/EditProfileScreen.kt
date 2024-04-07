@@ -80,8 +80,8 @@ fun EditProfileScreen(profile: Profile, onProfileChange: (Profile) -> Unit) {
                   )
               onProfileChange(
                   profileCopy) // Is this really how we should do ? Shouldn't we use the viewModel ?
-                               // I'll leave it here for now, I think we should have the navigation
-                               // actions as a parameter, not the onProfileChange
+              // I'll leave it here for now, I think we should have the navigation
+              // actions as a parameter, not the onProfileChange
               viewModel.updateProfile(profileCopy)
             },
             onCancel = {
