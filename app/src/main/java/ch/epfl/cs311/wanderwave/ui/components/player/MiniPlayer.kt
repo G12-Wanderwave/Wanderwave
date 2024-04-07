@@ -22,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.ui.components.animated.ScrollingTitle
+import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 
 @Composable
 fun MiniPlayer(
@@ -80,7 +81,7 @@ fun PlayPauseButton(
                 if (isPlaying) painterResource(id = R.drawable.pause_icon)
                 else painterResource(id = R.drawable.play_icon),
             contentDescription = "Play Pause Icons",
-            tint = if (isPlaying) Color(0xFF1DB954) else MaterialTheme.colorScheme.primary,
+            tint = if (isPlaying) spotify_green else MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(if (isPlaying) 30.dp else 50.dp))
       }
 }

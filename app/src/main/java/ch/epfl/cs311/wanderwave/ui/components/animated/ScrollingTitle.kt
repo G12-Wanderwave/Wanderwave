@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 
 @Composable
 fun ScrollingTitle(
@@ -51,7 +52,7 @@ fun ScrollingTitle(
               listOf(
                   Color.Transparent,
                   if (!isPlaying) MaterialTheme.colorScheme.primary.copy(alpha = .25f)
-                  else Color(0xFF1DB954).copy(alpha = .35f),
+                  else spotify_green.copy(alpha = .35f),
                   Color.Transparent),
           startX = 0f,
           endX = boxWidth.floatValue)
