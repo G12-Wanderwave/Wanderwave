@@ -2,7 +2,6 @@ package ch.epfl.cs311.wanderwave.ui
 
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
@@ -30,7 +29,6 @@ class LoginScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
   @Before
   fun setup() {
     composeTestRule.setContent { LoginScreen(mockNavigationActions) }
-
   }
 
   @Test
