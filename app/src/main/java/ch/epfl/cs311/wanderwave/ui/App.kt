@@ -26,7 +26,6 @@ import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
-import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
 @Composable
 fun App(navController: NavHostController) {
@@ -65,6 +64,6 @@ fun AppScaffold(navController: NavHostController) {
               composable(Route.MAIN.routeString) { MainPlaceHolder(navActions) }
               composable(Route.TRACK_LIST.routeString) { TrackListScreen() }
               composable(Route.MAP.routeString) { MapScreen() }
-
+            }
       }
 }

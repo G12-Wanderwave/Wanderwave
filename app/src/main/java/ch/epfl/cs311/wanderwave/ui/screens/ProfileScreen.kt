@@ -42,6 +42,7 @@ val INPUT_BOX_NAM_SIZE = 150.dp
  * @last update 1.0
  */
 @Composable
+fun ProfileScreen() {
   val viewModel: ProfileViewModel = hiltViewModel()
   val currentProfileState by viewModel.profile.collectAsState()
   val isInEditMode by viewModel.isInEditMode.collectAsState()
@@ -100,4 +101,3 @@ fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel = h
           ),
   )
 }
-
