@@ -64,7 +64,15 @@ class ProfileViewModel @Inject constructor(private val repository: ProfileReposi
       if (isExisting) {
         _profile.value = fetchedProfile ?: profile
         // update profile on the local database
-        viewModelScope.launch { repository.insert(fetchedProfile!!) }
+        viewModelScope.launch {
+          val localProfile = repository.getProfile()
+          if (localProfile == null) {
+            repository.insert(fetchedProfile!!)
+          } else {
+            repository.delete()
+          }
+          repository.insert(fetchedProfile!!)
+        }
       } else {
         val newProfile = profile
         profileConnection.addItem(newProfile)
