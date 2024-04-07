@@ -1,4 +1,4 @@
-package ch.epfl.cs311.wanderwave.model.firebase
+package ch.epfl.cs311.wanderwave.model.remote
 
 import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Profile
@@ -8,9 +8,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.onEach
 
-class FirebaseConnection {
+class ProfileConnection : FirebaseConnectionInt<Profile, Profile>{
 
   init {}
+
+  override val collectionName: String = "users"
+
+  override fun getItemId: Profile { (profile:Profile){
+    
+  }
 
   private val db = FirebaseFirestore.getInstance()
 
@@ -47,8 +53,22 @@ class FirebaseConnection {
         isPublic = isPublic)
   }
 
+  fun profileToHash(profile: Profile): HashMap<String, Any> {
+    val profileMap: HashMap<String, Any> =
+      hashMapOf(
+        "firstName" to profile.firstName,
+        "lastName" to profile.lastName,
+        "description" to profile.description,
+        "numberOfLikes" to profile.numberOfLikes,
+        "spotifyUid" to profile.spotifyUid,
+        "firebaseUid" to profile.firebaseUid,
+        "isPublic" to profile.isPublic,
+        "profilePictureUri" to (profile.profilePictureUri?.toString() ?: ""))
+    return profileMap
+  }
+
   // obtain a Profile
-  fun getProfile(uid: String): Flow<Profile> {
+  override fun getItem(uid: String): Flow<Profile> {
     Log.d("Firestore", "Fetching profile from Firestore...")
     val profile = MutableStateFlow(Profile("", "", "", 0, false, null, "", ""))
     db.collection("profiles")
@@ -64,37 +84,22 @@ class FirebaseConnection {
         }
         .addOnFailureListener { e -> Log.e("Firestore", "Error getting document: ", e) }
     //  Log.d("Firestore", "Fetched profile from Firestore: $profile")
-    return profile.onEach { _profile ->
-      Log.d("Firestore", "Fetched profile from Firestore: $_profile")
-    }
+    return profile
   }
 
-  fun profileToHash(profile: Profile): HashMap<String, Any> {
-    val profileMap: HashMap<String, Any> =
-        hashMapOf(
-            "firstName" to profile.firstName,
-            "lastName" to profile.lastName,
-            "description" to profile.description,
-            "numberOfLikes" to profile.numberOfLikes,
-            "spotifyUid" to profile.spotifyUid,
-            "firebaseUid" to profile.firebaseUid,
-            "isPublic" to profile.isPublic,
-            "profilePictureUri" to (profile.profilePictureUri?.toString() ?: ""))
-    return profileMap
-  }
 
-  fun addProfile(profile: Profile) {
+
+  override fun addItem(profile: Profile) {
     val profileMap = profileToHash(profile)
 
     db.collection("users")
-        .document(profile.firebaseUid)
-        .set(profileMap)
+        .add(profileMap)
         .addOnFailureListener { e -> Log.e("Firestore", "Error adding document: ", e) }
         .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully added!") }
   }
 
   // Update stored todos
-  fun updateProfile(profile: Profile) {
+  override fun updateItem(profile: Profile) {
     val uid = profile.firebaseUid
 
     val profileMap = profileToHash(profile)
@@ -107,7 +112,7 @@ class FirebaseConnection {
   }
 
   // Remove todos from the database
-  fun deleteProfile(profile: Profile) {
+  override fun deleteItem(profile: Profile) {
     db.collection("users").document(profile.firebaseUid).delete().addOnFailureListener { e ->
       Log.e("Firestore", "Error deleting document: ", e)
     }

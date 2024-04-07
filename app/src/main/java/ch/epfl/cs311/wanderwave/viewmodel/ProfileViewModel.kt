@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Profile
-import ch.epfl.cs311.wanderwave.model.firebase.FirebaseConnection
+import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -34,7 +34,7 @@ class ProfileViewModel @Inject constructor(private val repository: ProfileReposi
   private val _isInPublicMode = MutableLiveData(false)
   val isInPublicMode: LiveData<Boolean> = _isInPublicMode
 
-  val firebaseConnection = FirebaseConnection()
+  val profileConnection = ProfileConnection()
 
   fun toggleEditMode() {
     _isInEditMode.value = !(_isInEditMode.value ?: false)
@@ -53,7 +53,7 @@ class ProfileViewModel @Inject constructor(private val repository: ProfileReposi
     // _profile.value = spotifyConnection.getProfile()....
     // Fetch profile from Firestore if it doesn't exist, create it
 
-    firebaseConnection.isUidExisting(profile.spotifyUid) { isExisting, fetchedProfile ->
+    profileConnection.isUidExisting(profile.spotifyUid) { isExisting, fetchedProfile ->
       if (isExisting) {
 
         _profile.value = fetchedProfile
@@ -61,7 +61,7 @@ class ProfileViewModel @Inject constructor(private val repository: ProfileReposi
         viewModelScope.launch { repository.insert(fetchedProfile!!) }
       } else {
         val newProfile = profile
-        firebaseConnection.addProfile(newProfile)
+        profileConnection.addItem(newProfile)
         viewModelScope.launch { repository.insert(fetchedProfile!!) }
         _profile.value = newProfile
       }
