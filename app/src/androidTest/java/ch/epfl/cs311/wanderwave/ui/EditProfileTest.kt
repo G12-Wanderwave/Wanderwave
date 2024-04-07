@@ -72,4 +72,14 @@ class EditProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
       }
     }
   }
+
+  @Test
+  fun deleteProfile() = run {
+    onComposeScreen<EditProfileScreen>(composeTestRule) {
+      deleteButton {
+        assertIsDisplayed()
+        performClick()
+      }
+    }
+  }
 }
