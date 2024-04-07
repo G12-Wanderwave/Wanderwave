@@ -77,7 +77,7 @@ fun EditProfileScreen(profile: Profile, onProfileChange: (Profile) -> Unit) {
                       lastName = lastName,
                       description = description,
                       profilePictureUri = profile2.profilePictureUri,
-                    ))
+                  ))
             },
             onCancel = {
               // TODO: navigation popBack
