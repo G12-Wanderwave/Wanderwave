@@ -14,9 +14,9 @@ class ProfileConnection : FirebaseConnectionInt<Profile, Profile>{
 
   override val collectionName: String = "users"
 
-  override fun getItemId: Profile { (profile:Profile){
-    
-  }
+  override val getItemId = { profile:Profile -> profile.firebaseUid }
+
+
 
   private val db = FirebaseFirestore.getInstance()
 
@@ -26,7 +26,7 @@ class ProfileConnection : FirebaseConnectionInt<Profile, Profile>{
         .get()
         .addOnSuccessListener { documents ->
           val isExisting = documents.size() > 0
-          callback(isExisting, if (isExisting) documentToProfile(documents.documents[0]) else null)
+          callback(isExisting, if (isExisting) documentToItem(documents.documents[0]) else null)
         }
         .addOnFailureListener { exception ->
           Log.w("Firestore", "Error getting documents: ", exception)
@@ -35,7 +35,7 @@ class ProfileConnection : FirebaseConnectionInt<Profile, Profile>{
   }
 
   // Document to Profile
-  private fun documentToProfile(document: DocumentSnapshot): Profile {
+  override fun documentToItem(document: DocumentSnapshot): Profile {
     val uid = document.id
     val spotifyUid = document.getString("spotifyUid") ?: ""
     val firstname = document.getString("firstname") ?: "Untitled"
@@ -53,7 +53,7 @@ class ProfileConnection : FirebaseConnectionInt<Profile, Profile>{
         isPublic = isPublic)
   }
 
-  fun profileToHash(profile: Profile): HashMap<String, Any> {
+  override fun itemToHash(profile: Profile): HashMap<String, Any> {
     val profileMap: HashMap<String, Any> =
       hashMapOf(
         "firstName" to profile.firstName,
@@ -76,7 +76,7 @@ class ProfileConnection : FirebaseConnectionInt<Profile, Profile>{
         .get()
         .addOnSuccessListener { document ->
           if (document != null && document.data != null) {
-            val _profile = documentToProfile(document) // You need to implement this function
+            val _profile = documentToItem(document) // You need to implement this function
             profile.tryEmit(_profile)
           } else {
             Log.d("Firestore", "No such Profile document")
@@ -90,7 +90,7 @@ class ProfileConnection : FirebaseConnectionInt<Profile, Profile>{
 
 
   override fun addItem(profile: Profile) {
-    val profileMap = profileToHash(profile)
+    val profileMap = itemToHash(profile)
 
     db.collection("users")
         .add(profileMap)
@@ -102,7 +102,7 @@ class ProfileConnection : FirebaseConnectionInt<Profile, Profile>{
   override fun updateItem(profile: Profile) {
     val uid = profile.firebaseUid
 
-    val profileMap = profileToHash(profile)
+    val profileMap = itemToHash(profile)
 
     db.collection("users")
         .document(uid)
