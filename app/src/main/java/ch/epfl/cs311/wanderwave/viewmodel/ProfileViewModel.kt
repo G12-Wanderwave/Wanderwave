@@ -1,11 +1,14 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor() : ViewModel() {
@@ -37,26 +40,6 @@ class ProfileViewModel @Inject constructor() : ViewModel() {
 
   fun togglePublicMode() {
     _isInPublicMode.value = !_isInPublicMode.value
-  }
-
-  fun fetchProfile(profile: Profile) {
-    // TODO : fetch profile from Spotify
-    // _profile.value = spotifyConnection.getProfile()....
-    // Fetch profile from Firestore if it doesn't exist, create it
-
-    profileConnection.isUidExisting(profile.spotifyUid) { isExisting, fetchedProfile ->
-      if (isExisting) {
-
-        _profile.value = fetchedProfile
-        // update profile on the local database
-        viewModelScope.launch { repository.insert(fetchedProfile!!) }
-      } else {
-        val newProfile = profile
-        profileConnection.addItem(newProfile)
-        viewModelScope.launch { repository.insert(fetchedProfile!!) }
-        _profile.value = newProfile
-      }
-    }
   }
 
   fun fetchProfile(profile: Profile) {
