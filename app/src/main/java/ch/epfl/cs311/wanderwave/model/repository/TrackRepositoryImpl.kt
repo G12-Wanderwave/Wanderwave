@@ -1,7 +1,7 @@
 package ch.epfl.cs311.wanderwave.model.repository
 
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.localDb.LocalTrackRepository
+import ch.epfl.cs311.wanderwave.model.local.LocalTrackRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 

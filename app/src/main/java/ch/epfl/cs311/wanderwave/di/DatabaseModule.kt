@@ -2,7 +2,7 @@ package ch.epfl.cs311.wanderwave.di
 
 import android.content.Context
 import androidx.room.Room
-import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
+import ch.epfl.cs311.wanderwave.model.local.AppDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

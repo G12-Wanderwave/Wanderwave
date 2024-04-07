@@ -8,7 +8,5 @@ data class Profile(
     var description: String,
     var numberOfLikes: Int,
     var isPublic: Boolean,
-    var profilePictureUri: Uri? = null,
-    var spotifyUid: String,
-    var firebaseUid: String,
+    var profilePictureUri: Uri? = null
 )

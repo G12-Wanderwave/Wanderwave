@@ -13,9 +13,6 @@ plugins {
 
     // handling secrets.properties
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
-
-    // google firebase
-    id("com.google.gms.google-services")
 }
 
 android {
@@ -96,7 +93,6 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.appcompat)
-    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -109,11 +105,11 @@ dependencies {
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
 
-    implementation("com.google.firebase:firebase-core:17.0.0")
+    /*
     implementation("com.google.firebase:firebase-database-ktx:20.3.0")
     implementation("com.google.firebase:firebase-firestore:24.10.0")
     implementation("com.google.android.play:core-ktx:1.7.0")
-
+    */
 
     implementation(libs.maps.compose)
 

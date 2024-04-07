@@ -5,8 +5,6 @@ plugins {
 
     // Dagger Hilt plugin, used for dependency injection
     id("com.google.dagger.hilt.android") version "2.49" apply false
-    id("com.google.gms.google-services") version "4.4.0" apply false
-
 }
 
 buildscript {
