@@ -12,10 +12,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-
 @HiltViewModel
 class ProfileViewModel @Inject constructor(private val repository: ProfileRepositoryImpl) :
-  ViewModel() {
+    ViewModel() {
 
   private val _profile =
       MutableStateFlow(

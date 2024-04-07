@@ -22,7 +22,6 @@ class ProfileConnection : FirebaseConnectionInt<Profile, Profile> {
           Log.d("Firestore", "DocumentSnapshot data: ${documents.documents}")
           val isExisting = documents.size() > 0
           callback(isExisting, if (isExisting) documentToItem(documents.documents[0]) else null)
-
         }
         .addOnFailureListener { exception ->
           Log.w("Firestore", "Error getting documents: ", exception)
