@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,7 +36,7 @@ fun TrackListScreen(
           TrackListItem(
               track = track,
               selected = track == uiState.selectedTrack,
-              onClick = {viewModel.playTrack(track)})
+              onClick = { viewModel.playTrack(track) })
 
           Divider()
         }

@@ -31,7 +31,6 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import javax.inject.Singleton
@@ -51,9 +50,7 @@ fun SurroundWithMiniPlayer(displayPlayer: Boolean, screen: @Composable () -> Uni
 
   BottomSheetScaffold(
       sheetContent = {
-        if (!uiState.expanded &&
-            sheetState.hasPartiallyExpandedState &&
-            displayPlayer) {
+        if (!uiState.expanded && sheetState.hasPartiallyExpandedState && displayPlayer) {
           MiniPlayer(
               isPlaying = uiState.isPlaying,
               onTitleClick = { viewModel.expand() },
@@ -73,9 +70,7 @@ fun SurroundWithMiniPlayer(displayPlayer: Boolean, screen: @Composable () -> Uni
       sheetShape = RectangleShape,
       sheetContainerColor = MaterialTheme.colorScheme.background.copy(alpha = .85f),
       sheetDragHandle = {
-        if (!uiState.expanded &&
-            sheetState.hasPartiallyExpandedState &&
-            displayPlayer) {
+        if (!uiState.expanded && sheetState.hasPartiallyExpandedState && displayPlayer) {
           Column(
               modifier =
                   Modifier.background(
@@ -89,8 +84,7 @@ fun SurroundWithMiniPlayer(displayPlayer: Boolean, screen: @Composable () -> Uni
       scaffoldState =
           BottomSheetScaffoldState(
               bottomSheetState = sheetState, snackbarHostState = SnackbarHostState()),
-      sheetPeekHeight =
-          if (displayPlayer) 144.dp else 0.dp) {
+      sheetPeekHeight = if (displayPlayer) 144.dp else 0.dp) {
         screen()
       }
 }
