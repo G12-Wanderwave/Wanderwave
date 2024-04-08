@@ -57,38 +57,3 @@ fun MapScreen() {
     }
   }
 }
-
-// class MyMapActivity : AppCompatActivity(), OnMapReadyCallback {
-//  private var mMap: GoogleMap? = null
-//
-//  override fun onCreate(savedInstanceState: Bundle?) {
-//    super.onCreate(savedInstanceState)
-//    setContentView(R.layout.fragment_map) // Ensure this is your activity's layout
-//
-//    // Instantiate a MapFragment using GoogleMapOptions
-//    val mapFragment = MapFragment.newInstance(
-//      GoogleMapOptions()
-//        .mapId(resources.getString(R.string.map_id)) // Ensure you have a map_id in your
-// strings.xml
-//    )
-//
-//    // Add the MapFragment to the Activity
-//    fragmentManager.beginTransaction().add(R.id.map_container, mapFragment).commit()
-//
-//    // Set this activity as the callback for when the map is ready
-//    mapFragment.getMapAsync(this)
-//  }
-//
-//  override fun onMapReady(googleMap: GoogleMap) {
-//    mMap = googleMap
-//
-//    // Customize the map with a custom map style
-//    //googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.style_json)) //
-// Assuming you have a style_json in res/raw
-//
-//    // Add a marker in Sydney and move the camera
-//    val sydney = LatLng(-34.858, 151.211)
-//    mMap?.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-//    mMap?.moveCamera(CameraUpdateFactory.newLatLng(sydney))
-//  }
-// }
