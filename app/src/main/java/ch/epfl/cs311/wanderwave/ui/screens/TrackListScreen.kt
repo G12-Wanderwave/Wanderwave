@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackListItem
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
 @Composable
@@ -34,11 +35,11 @@ fun TrackListScreen(
         val track = uiState.tracks[index]
 
         Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
-          TextButton(
-              onClick = { viewModel.playTrack(track) },
-              modifier = Modifier.testTag("trackButton")) {
-                Text(text = "${track.artist} - ${track.title}")
-              }
+          TrackListItem(
+              track = track,
+              selected = track == uiState.selectedTrack,
+              onClick = {viewModel.playTrack(track)})
+
           Divider()
         }
       }

@@ -1,6 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -10,8 +10,7 @@ import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 
 @Composable
 fun MainPlaceHolder(navigationActions: NavigationActions) {
-  Row(modifier = Modifier.testTag("mainPlaceHolderScreen")) {
-    Text(text = "MainPlaceHolder")
-    Button(onClick = {}, modifier = Modifier.testTag("signOutButton")) { Text(text = "Sign Out") }
+  Column(modifier = Modifier.testTag("mainPlaceHolderScreen")) {
+    AboutScreen(navigationActions = navigationActions)
   }
 }
