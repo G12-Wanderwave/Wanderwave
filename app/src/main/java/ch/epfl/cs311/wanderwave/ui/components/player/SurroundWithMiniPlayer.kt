@@ -40,7 +40,7 @@ import kotlinx.coroutines.delay
 @Singleton
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SurroundWithMiniPlayer(currentRouteState: Route?, screen: @Composable () -> Unit) {
+fun SurroundWithMiniPlayer(displayPlayer: Boolean, screen: @Composable () -> Unit) {
   val viewModel: TrackListViewModel = hiltViewModel()
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   val sheetState = rememberStandardBottomSheetState(initialValue = SheetValue.PartiallyExpanded)
@@ -53,7 +53,7 @@ fun SurroundWithMiniPlayer(currentRouteState: Route?, screen: @Composable () -> 
       sheetContent = {
         if (!uiState.expanded &&
             sheetState.hasPartiallyExpandedState &&
-            currentRouteState != Route.LOGIN) {
+            displayPlayer) {
           MiniPlayer(
               isPlaying = uiState.isPlaying,
               onTitleClick = { viewModel.expand() },
@@ -75,7 +75,7 @@ fun SurroundWithMiniPlayer(currentRouteState: Route?, screen: @Composable () -> 
       sheetDragHandle = {
         if (!uiState.expanded &&
             sheetState.hasPartiallyExpandedState &&
-            currentRouteState != Route.LOGIN) {
+            displayPlayer) {
           Column(
               modifier =
                   Modifier.background(
@@ -90,7 +90,7 @@ fun SurroundWithMiniPlayer(currentRouteState: Route?, screen: @Composable () -> 
           BottomSheetScaffoldState(
               bottomSheetState = sheetState, snackbarHostState = SnackbarHostState()),
       sheetPeekHeight =
-          if (currentRouteState != Route.LOGIN && currentRouteState != null) 144.dp else 0.dp) {
+          if (displayPlayer) 144.dp else 0.dp) {
         screen()
       }
 }

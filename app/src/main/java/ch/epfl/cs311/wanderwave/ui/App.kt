@@ -68,7 +68,7 @@ fun AppScaffold(navController: NavHostController) {
           )
         }
       }) { innerPadding ->
-        SurroundWithMiniPlayer(currentRouteState = currentRouteState) {
+        SurroundWithMiniPlayer(showBottomBar) {
           NavHost(
               navController = navController,
               startDestination = Route.SPOTIFY_CONNECT.routeString,
