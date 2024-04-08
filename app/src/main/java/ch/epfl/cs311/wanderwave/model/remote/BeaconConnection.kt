@@ -40,6 +40,11 @@ class BeaconConnection : FirebaseConnectionInt<Beacon, Beacon> {
     trackConnection.addItemsIfNotExist(item.tracks)
   }
 
+  override fun addItemWithId(item: Beacon) {
+    super.addItemWithId(item)
+    trackConnection.addItemsIfNotExist(item.tracks)
+  }
+
   override fun updateItem(item: Beacon) {
     super.updateItem(item)
     trackConnection.addItemsIfNotExist(item.tracks)
