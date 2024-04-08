@@ -4,11 +4,13 @@ import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.local.BeaconEntity
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import junit.framework.TestCase.assertEquals
 import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -37,6 +39,19 @@ class BeaconConnectionTest {
     assert(beaconViewModel.beacon != null)
     // assert if the beaconConnection is not null
     assert(beaconViewModel.beaconConnection != null)
+  }
+
+  @Test
+  fun beaconEntityIsCorrectlyInitialized() {
+    val id = "testId"
+    val latitude = 1.0
+    val longitude = 1.0
+
+    val beaconEntity = BeaconEntity(id, latitude, longitude)
+
+    assertEquals(id, beaconEntity.id)
+    assertEquals(latitude, beaconEntity.latitude, 0.0)
+    assertEquals(longitude, beaconEntity.longitude, 0.0)
   }
 
   @Test
