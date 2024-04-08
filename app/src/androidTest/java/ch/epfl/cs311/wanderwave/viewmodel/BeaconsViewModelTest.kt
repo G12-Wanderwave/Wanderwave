@@ -34,7 +34,6 @@ class BeaconConnectionTest {
 
       beaconConnection.addItemWithId(beacon)
 
-
       val retrievedBeacon = beaconConnection.getItem("testBeacon").first()
       Log.d("Firestore", "$retrievedBeacon $beacon")
       assert(beacon == retrievedBeacon)
