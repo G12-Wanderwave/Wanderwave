@@ -3,6 +3,8 @@ package ch.epfl.cs311.wanderwave.ui.screens
 import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,6 +35,13 @@ fun LoginScreen(navigationActions: NavigationActions) {
   val profileViewModel: ProfileViewModel = hiltViewModel()
 
   Column(modifier = Modifier.testTag("loginScreen")) {
+
+    val beaconConnection: BeaconConnection = BeaconConnection()
+    val beaconState = beaconConnection.getItem("EmSELs5dY9UsPyyrNvIX").collectAsState(initial = null)
+
+    beaconState.value?.tracks?.forEach { track ->
+      Text(text = "Track title: ${track.title}, Artist: ${track.artist}")
+    }
     LoginAppLogo(modifier = Modifier.weight(1f))
     WelcomeTitle(modifier = Modifier.weight(4f))
     SignInButton(modifier = Modifier.weight(1f)) {
@@ -52,8 +61,6 @@ fun LoginScreen(navigationActions: NavigationActions) {
       navigationActions.signIn()
     }
 
-    val beaconConnection: BeaconConnection = BeaconConnection()
-    val beaconState = beaconConnection.getItem("EmSELs5dY9UsPyyrNvIX").collectAsState(initial = null)
     // TODO : all for testing, to be deleted before PR
     Button(onClick = {
       val db = FirebaseFirestore.getInstance()
@@ -90,5 +97,8 @@ fun LoginScreen(navigationActions: NavigationActions) {
     }, modifier = Modifier.fillMaxWidth()) {
       Text(text = "Test Button")
     }
+
+
+    
   }
 }
