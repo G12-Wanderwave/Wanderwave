@@ -15,21 +15,23 @@ data class Profile(
 )
 
 fun DocumentSnapshot.toProfile(): Profile {
-  val defaultProfile = Profile(
-      firstName = "",
-      lastName = "",
-      description = "",
-      numberOfLikes = 0,
-      isPublic = false,
-      profilePictureUri = null,
-      spotifyUid = "",
-      firebaseUid = "")
+  val defaultProfile =
+      Profile(
+          firstName = "",
+          lastName = "",
+          description = "",
+          numberOfLikes = 0,
+          isPublic = false,
+          profilePictureUri = null,
+          spotifyUid = "",
+          firebaseUid = "")
   val firstName = getString("firstName") ?: return defaultProfile
   val lastName = getString("lastName") ?: return defaultProfile
   val description = getString("description") ?: return defaultProfile
   val numberOfLikes = getLong("numberOfLikes")?.toInt() ?: return defaultProfile
   val isPublic = getBoolean("isPublic") ?: return defaultProfile
-  val profilePictureUri = getString("profilePictureUri").let { Uri.parse(it) } ?: return defaultProfile
+  val profilePictureUri =
+      getString("profilePictureUri").let { Uri.parse(it) } ?: return defaultProfile
   val spotifyUid = getString("spotifyUid") ?: return defaultProfile
   val firebaseUid = getString("firebaseUid") ?: return defaultProfile
 
