@@ -5,6 +5,10 @@ import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
+import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
+import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.junit4.MockKRule
 import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -12,15 +16,27 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 class BeaconConnectionTest {
-
+  @get:Rule val mockkRule = MockKRule(this)
   private lateinit var beaconConnection: BeaconConnection
+  private lateinit var beaconViewModel: BeaconViewModel
+  @RelaxedMockK private lateinit var repository: ProfileRepositoryImpl
 
   @Before
   fun setup() {
-    beaconConnection = BeaconConnection()
+    beaconViewModel = BeaconViewModel(repository)
+    beaconConnection = beaconViewModel.beaconConnection
+  }
+
+  @Test
+  fun testViewModelBasicsVariables() {
+    // assert if the beacon is not null
+    assert(beaconViewModel.beacon != null)
+    // assert if the beaconConnection is not null
+    assert(beaconViewModel.beaconConnection != null)
   }
 
   @Test
