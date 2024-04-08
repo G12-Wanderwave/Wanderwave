@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.flow
 
 class TrackConnection : FirebaseConnectionInt<Track, Track> {
 
+  // THe goal is to have the Id of the firebase document to match the id of the spotify track
+
   override val collectionName: String = "tracks"
 
   override val getItemId = { track: Track -> track.id }
@@ -32,7 +34,19 @@ class TrackConnection : FirebaseConnectionInt<Track, Track> {
 
   fun addList(tracks: List<Track>) {
     tracks.forEach { track ->
-      addItem(track)
+      addItemWithId(track)
     }
+  }
+
+  fun addItemsIfNotExist(tracks: List<Track>) {
+    // The goal of this function is to add only if the spotify id of the track is not already in the database, for now I just check the normal ID
+    tracks.forEach { track ->
+        db.collection(collectionName).whereEqualTo("id", track.id).get()
+            .addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.isEmpty) {
+                    addItemWithId(track)
+                }
+            }
+      }
   }
 }

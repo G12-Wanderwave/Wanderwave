@@ -16,6 +16,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.login.LoginAppLogo
@@ -37,7 +38,7 @@ fun LoginScreen(navigationActions: NavigationActions) {
   Column(modifier = Modifier.testTag("loginScreen")) {
 
     val beaconConnection: BeaconConnection = BeaconConnection()
-    val beaconState = beaconConnection.getItem("EmSELs5dY9UsPyyrNvIX").collectAsState(initial = null)
+    val beaconState = beaconConnection.getItem("JtUAJaS2VqW6oLX5l7i4").collectAsState(initial = null)
 
    
     LoginAppLogo(modifier = Modifier.weight(1f))
@@ -63,15 +64,16 @@ fun LoginScreen(navigationActions: NavigationActions) {
     Button(onClick = {
       val db = FirebaseFirestore.getInstance()
 
-      val beacon: Beacon = Beacon(id = "12345", location = Location(12.0, 12.0, "srilanka"), tracks = listOf())
+      val beacon: Beacon = Beacon(id = "12345", location = Location(12.0, 12.0, "srilanka"), tracks = listOf(
+        Track(title = "Track 1", artist = "Artist 1", id = "1"),
+        Track(title = "Track 2", artist = "Artist 2", id = "2"),
+        Track(title = "Track 3", artist = "Artist 3", id = "3"),
+      ))
 
       Log.d("Firestore", "Test Beacon: ${beaconState.value}")
       Log.d("Firestore", "Test Beacon tracks: ${beaconState.value?.tracks}")
 
-      // db.collection("beacons")
-      //   .add(beacon)
-      //   .addOnFailureListener { e -> Log.e("Firestore", "Error adding document: ", e) }
-      //   .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully added!") }
+      beaconConnection.addItem(beacon)
 
       // val dataFlow = MutableStateFlow(null)
       // db.collection("beacons")

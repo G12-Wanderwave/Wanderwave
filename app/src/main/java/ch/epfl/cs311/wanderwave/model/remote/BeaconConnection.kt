@@ -18,6 +18,8 @@ class BeaconConnection : FirebaseConnectionInt<Beacon, Beacon> {
 
   override val getItemId = { beacon: Beacon -> beacon.id }
 
+  val trackConnection = TrackConnection()
+
   private val db = FirebaseFirestore.getInstance()
 
   // Document to Beacon
@@ -29,13 +31,22 @@ class BeaconConnection : FirebaseConnectionInt<Beacon, Beacon> {
     val name = locationMap?.get("name") as? String ?: ""
     val location = Location(latitude, longitude,name)
 
-    val trackRefs = document.get("tracks") as? List<DocumentReference>
     val tracks = listOf<Track>()
 
     return Beacon(
         id = id,
         location = location,
         tracks = tracks)
+  }
+
+  override fun addItem(item: Beacon) {
+    super.addItem(item)
+    trackConnection.addItemsIfNotExist(item.tracks)
+  }
+
+  override fun updateItem(item: Beacon) {
+    super.updateItem(item)
+    trackConnection.addItemsIfNotExist(item.tracks)
   }
 
   override fun getItem(itemId: String): Flow<Beacon> {
@@ -78,7 +89,7 @@ class BeaconConnection : FirebaseConnectionInt<Beacon, Beacon> {
         hashMapOf(
             "id" to beacon.id,
             "location" to hashMapOf("latitude" to beacon.location.latitude, "longitude" to beacon.location.longitude, "name" to beacon.location.name),
-            "tracks" to beacon.tracks.map { it.toHash() })
+            "tracks" to beacon.tracks.map { track -> db.collection(trackConnection.collectionName).document(track.id) })
     return beaconMap
   }
 }

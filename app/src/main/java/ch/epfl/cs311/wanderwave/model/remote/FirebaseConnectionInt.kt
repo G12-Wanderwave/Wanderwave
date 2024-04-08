@@ -29,6 +29,17 @@ interface FirebaseConnectionInt<T, U> {
         .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully added!") }
   }
 
+  fun addItemWithId(item: T) {
+    val itemId = getItemId(item)
+    val itemMap = itemToHash(item)
+
+    db.collection(collectionName)
+        .document(itemId)
+        .set(itemMap)
+        .addOnFailureListener { e -> Log.e("Firestore", "Error adding document: ", e) }
+        .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully added!") }
+  }
+
   fun updateItem(item: T) {
     val itemId = getItemId(item)
     val itemMap = itemToHash(item)
