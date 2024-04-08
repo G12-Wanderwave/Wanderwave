@@ -92,4 +92,7 @@ val md_theme_dark_scrim = Color(0xFF000000)
 // val md_theme_dark_outlineVariant = Color(0xFF41484D)
 // val md_theme_dark_scrim = Color(0xFF000000)
 
+val spotify_green = Color(0xFF1DB954)
+val orange = Color(0xFFFFA500)
+
 val seed = Color(0xFF008BBB)

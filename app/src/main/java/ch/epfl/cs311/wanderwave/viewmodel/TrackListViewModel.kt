@@ -29,6 +29,30 @@ class TrackListViewModel @Inject constructor(private val repository: TrackReposi
       }
     }
   }
+
+  fun collapse() {
+    _uiState.value = _uiState.value.copy(expanded = false)
+  }
+
+  fun expand() {
+    _uiState.value = _uiState.value.copy(expanded = true)
+  }
+
+  fun play() {
+    _uiState.value = _uiState.value.copy(isPlaying = true)
+  }
+
+  fun pause() {
+    _uiState.value = _uiState.value.copy(isPlaying = false, currentMillis = 1000)
+  }
 }
 
-data class TrackListUiState(val tracks: List<Track> = listOf(), val loading: Boolean = false)
+data class TrackListUiState(
+    val tracks: List<Track> = listOf(),
+    val loading: Boolean = false,
+    val selectedTrack: Track? = null,
+    val isPlaying: Boolean = false,
+    val currentMillis: Int = 0,
+    val expanded: Boolean = false,
+    val progress: Float = 0f
+)

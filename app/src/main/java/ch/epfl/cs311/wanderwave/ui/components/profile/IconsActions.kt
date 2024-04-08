@@ -1,4 +1,4 @@
-package ch.epfl.cs311.wanderwave.ui.components
+package ch.epfl.cs311.wanderwave.ui.components.profile
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
