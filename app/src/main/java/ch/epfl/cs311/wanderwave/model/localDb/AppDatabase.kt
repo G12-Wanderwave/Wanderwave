@@ -9,7 +9,7 @@ import ch.epfl.cs311.wanderwave.model.local.BeaconEntity
 abstract class AppDatabase : RoomDatabase() {
   abstract fun trackDao(): TrackDao
 
-  abstract fun beaconDao(): BeaconDao
-
   abstract fun profileDao(): ProfileDao
+
+  abstract fun beaconDao(): BeaconDao
 }
