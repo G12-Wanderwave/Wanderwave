@@ -81,6 +81,4 @@ interface FirebaseConnectionInt<T, U> {
 
     return dataFlow.mapNotNull { it }
   }
-
-
 }
