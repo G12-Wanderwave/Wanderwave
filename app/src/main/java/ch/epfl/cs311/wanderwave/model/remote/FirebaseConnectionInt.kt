@@ -48,6 +48,8 @@ interface FirebaseConnectionInt<T, U> {
     }
   }
 
+  fun getItem(item: T): Flow<T> = getItem(getItemId(item))
+
   fun getItem(itemId: String): Flow<T> {
     val dataFlow = MutableStateFlow<T?>(null)
     db.collection(collectionName)

@@ -13,6 +13,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.login.LoginAppLogo
 import ch.epfl.cs311.wanderwave.ui.components.login.SignInButton
@@ -20,7 +21,10 @@ import ch.epfl.cs311.wanderwave.ui.components.login.WelcomeTitle
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(navigationActions: NavigationActions) {
@@ -50,29 +54,40 @@ fun LoginScreen(navigationActions: NavigationActions) {
     Button(onClick = {
       val db = FirebaseFirestore.getInstance()
 
-      val beacon: Beacon = Beacon(id = "1234", location = Location(12.0, 12.0, "srilanka"), tracks = listOf())
+      val beacon: Beacon = Beacon(id = "12345", location = Location(12.0, 12.0, "srilanka"), tracks = listOf())
+
+      val beaconConnection: BeaconConnection = BeaconConnection()
+
+      CoroutineScope(Dispatchers.Main).launch {
+        beaconConnection.getItem("EmSELs5dY9UsPyyrNvIX").collect { beacon ->
+          Log.d("Firestore", "Test Beacon: $beacon")
+          Log.d("Firestore", "Test Beacon ID: ${beacon?.tracks}")
+        }
+      }
+
+
 
       // db.collection("beacons")
       //   .add(beacon)
       //   .addOnFailureListener { e -> Log.e("Firestore", "Error adding document: ", e) }
       //   .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully added!") }
 
-      val dataFlow = MutableStateFlow(null)
-      db.collection("beacons")
-        .document("EmSELs5dY9UsPyyrNvIX")
-        .get()
-        .addOnSuccessListener { document ->
-          if (document != null && document.data != null) {
-            val trackRefs = document.get("tracks") as? List<DocumentReference>
-            trackRefs?.forEach { trackRef ->
-                trackRef.get().addOnSuccessListener { trackDocument ->
-                    val trackData = trackDocument.data
-                    Log.d("Firestore", "Track data: $trackData")
-                }
-            }
-          }
-        }
-        .addOnFailureListener { e -> Log.e("Firestore", "Error getting document: ", e) }
+      // val dataFlow = MutableStateFlow(null)
+      // db.collection("beacons")
+      //   .document("EmSELs5dY9UsPyyrNvIX")
+      //   .get()
+      //   .addOnSuccessListener { document ->
+      //     if (document != null && document.data != null) {
+      //       val trackRefs = document.get("tracks") as? List<DocumentReference>
+      //       trackRefs?.forEach { trackRef ->
+      //           trackRef.get().addOnSuccessListener { trackDocument ->
+      //               val trackData = trackDocument.data
+      //               Log.d("Firestore", "Track data: $trackData")
+      //           }
+      //       }
+      //     }
+      //   }
+      //   .addOnFailureListener { e -> Log.e("Firestore", "Error getting document: ", e) }
 
     }, modifier = Modifier.fillMaxWidth()) {
       Text(text = "Test Button")
