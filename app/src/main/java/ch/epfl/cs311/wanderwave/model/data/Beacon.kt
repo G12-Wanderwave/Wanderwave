@@ -1,5 +1,8 @@
 package ch.epfl.cs311.wanderwave.model.data
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+
 data class Beacon(
 
   /** GUID of the beacon */
@@ -9,5 +12,6 @@ data class Beacon(
   val location: Location,
 
   /** List of tracks that are broadcast from the beacon */
-  val tracks: List<Track> = listOf(),
+  /** Don't know if it's a good thing to use flows here, but as the tracks are red asynchronously, it might be useful */
+  val tracks: List<Track> = listOf<Track>(),
 )

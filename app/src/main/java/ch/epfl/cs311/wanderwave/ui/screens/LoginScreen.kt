@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -24,6 +25,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
@@ -50,20 +52,16 @@ fun LoginScreen(navigationActions: NavigationActions) {
       navigationActions.signIn()
     }
 
+    val beaconConnection: BeaconConnection = BeaconConnection()
+    val beaconState = beaconConnection.getItem("EmSELs5dY9UsPyyrNvIX").collectAsState(initial = null)
     // TODO : all for testing, to be deleted before PR
     Button(onClick = {
       val db = FirebaseFirestore.getInstance()
 
       val beacon: Beacon = Beacon(id = "12345", location = Location(12.0, 12.0, "srilanka"), tracks = listOf())
 
-      val beaconConnection: BeaconConnection = BeaconConnection()
-
-      CoroutineScope(Dispatchers.Main).launch {
-        beaconConnection.getItem("EmSELs5dY9UsPyyrNvIX").collect { beacon ->
-          Log.d("Firestore", "Test Beacon: $beacon")
-          Log.d("Firestore", "Test Beacon ID: ${beacon?.tracks}")
-        }
-      }
+      Log.d("Firestore", "Test Beacon: ${beaconState.value}")
+      Log.d("Firestore", "Test Beacon tracks: ${beaconState.value?.tracks}")
 
 
 
