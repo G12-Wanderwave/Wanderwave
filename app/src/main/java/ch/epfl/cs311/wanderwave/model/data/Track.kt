@@ -24,10 +24,10 @@ data class Track(
 }
 
 
-fun DocumentSnapshot.toTrack(): Track? {
-    val id = getString("id") ?: return null
-    val title = getString("title") ?: return null
-    val artist = getString("artist") ?: return null
+fun DocumentSnapshot.toTrack(): Track {
+    val id = getString("id") ?: return Track("", "", "")
+    val title = getString("title") ?: return Track("", "", "")
+    val artist = getString("artist") ?: return Track("", "", "")
 
     return Track(id, title, artist)
 }

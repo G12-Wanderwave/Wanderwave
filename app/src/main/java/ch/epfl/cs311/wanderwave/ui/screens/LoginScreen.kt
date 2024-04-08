@@ -39,9 +39,7 @@ fun LoginScreen(navigationActions: NavigationActions) {
     val beaconConnection: BeaconConnection = BeaconConnection()
     val beaconState = beaconConnection.getItem("EmSELs5dY9UsPyyrNvIX").collectAsState(initial = null)
 
-    beaconState.value?.tracks?.forEach { track ->
-      Text(text = "Track title: ${track.title}, Artist: ${track.artist}")
-    }
+   
     LoginAppLogo(modifier = Modifier.weight(1f))
     WelcomeTitle(modifier = Modifier.weight(4f))
     SignInButton(modifier = Modifier.weight(1f)) {
@@ -69,8 +67,6 @@ fun LoginScreen(navigationActions: NavigationActions) {
 
       Log.d("Firestore", "Test Beacon: ${beaconState.value}")
       Log.d("Firestore", "Test Beacon tracks: ${beaconState.value?.tracks}")
-
-
 
       // db.collection("beacons")
       //   .add(beacon)
