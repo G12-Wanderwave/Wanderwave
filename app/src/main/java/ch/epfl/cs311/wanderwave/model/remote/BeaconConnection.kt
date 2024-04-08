@@ -47,12 +47,16 @@ class BeaconConnection : FirebaseConnectionInt<Beacon, Beacon> {
 
   override fun getItem(itemId: String): Flow<Beacon> {
     val dataFlow = MutableStateFlow<Beacon?>(null)
+
     db.collection(collectionName)
         .document(itemId)
         .get()
         .addOnSuccessListener { document ->
+          Log.d("Firestore", "Document: $document")
+          Log.d("Firestore", "test : ${document.data}")
           if (document != null && document.data != null) {
             val beacon = documentToItem(document)
+            Log.d("Firestore", "Beacon: $beacon")
             val trackRefs = document.get("tracks") as? List<DocumentReference>
             val tracks = mutableListOf<Track>()
             trackRefs?.forEach { trackRef ->
@@ -70,12 +74,16 @@ class BeaconConnection : FirebaseConnectionInt<Beacon, Beacon> {
                 }
                 val updatedBeacon = beacon.copy(tracks = tracks)
                 dataFlow.value = updatedBeacon
-                Log.d("Firestore", "Updated Beacon: $updatedBeacon")
               }
             }
+          } else {
+            dataFlow.value = null
           }
         }
-        .addOnFailureListener { e -> Log.e("Firestore", "Error getting document: ", e) }
+        .addOnFailureListener { e ->
+          dataFlow.value = null
+          Log.e("Firestore", "Error getting document: ", e)
+        }
 
     return dataFlow.filterNotNull()
   }

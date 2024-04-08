@@ -53,10 +53,15 @@ interface FirebaseConnectionInt<T, U> {
 
   fun deleteItem(item: T) {
     val itemId = getItemId(item)
+    deleteItem(itemId)
+  }
 
-    db.collection(collectionName).document(itemId).delete().addOnFailureListener { e ->
-      Log.e("Firestore", "Error deleting document: ", e)
-    }
+  fun deleteItem(itemId: String) {
+    db.collection(collectionName)
+        .document(itemId)
+        .delete()
+        .addOnFailureListener { e -> Log.e("Firestore", "Error deleting document: ", e) }
+        .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully deleted!") }
   }
 
   fun getItem(item: T): Flow<T> = getItem(getItemId(item))
@@ -76,4 +81,6 @@ interface FirebaseConnectionInt<T, U> {
 
     return dataFlow.mapNotNull { it }
   }
+
+
 }
