@@ -7,12 +7,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -20,9 +26,15 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
 import ch.epfl.cs311.wanderwave.ui.components.profile.ClickableIcon
+import ch.epfl.cs311.wanderwave.ui.components.profile.TracksList
 import ch.epfl.cs311.wanderwave.ui.components.profile.VisitCard
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
+
+
+
 
 const val SCALE_X = 0.5f
 const val SCALE_Y = 0.5f
@@ -42,29 +54,109 @@ val INPUT_BOX_NAM_SIZE = 150.dp
  * @last update 1.0
  */
 @Composable
-fun ProfileScreen() {
-  val viewModel: ProfileViewModel = hiltViewModel()
-  val currentProfileState by viewModel.profile.collectAsState()
-  val isInEditMode by viewModel.isInEditMode.collectAsState()
+fun ProfileScreen(viewModel: ProfileViewModel) {
+    val currentProfileState by viewModel.profile.collectAsState()
+    val songLists by viewModel.songLists.collectAsState()
+    var showDialog by remember { mutableStateOf(false) }
+    var dialogListType by remember { mutableStateOf("TOP SONGS") }
+    var isTopSongsListVisible by remember { mutableStateOf(true) }
+    val isInEditMode by viewModel.isInEditMode.collectAsState()
 
-  val currentProfile: Profile = currentProfileState
-
-  if (isInEditMode) { // TODO: instead of doing this, we should have a navigation action to go to
-    // the edit profile screen
-
-    EditProfileScreen(
-        profile = currentProfile,
-        onProfileChange = { updatedProfile -> viewModel.updateProfile(updatedProfile) })
-  } else {
-
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen")) {
-      Box(modifier = Modifier.fillMaxWidth()) {
-        VisitCard(Modifier, currentProfile)
-        ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
-        ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create)
-      }
+    val currentProfile: Profile = currentProfileState ?: return
+    LaunchedEffect(Unit) {
+        viewModel.createSpecificSongList("TOP_SONGS")
+        viewModel.createSpecificSongList("CHOSEN_SONGS")
     }
-  }
+
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        if (isInEditMode) {
+            //EditableVisitCard(
+              //  profile = currentProfile,
+                //onProfileChange = { updatedProfile -> viewModel.updateProfile(updatedProfile) },
+                //viewModel = viewModel)
+        } else {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                VisitCard(Modifier, currentProfile)
+                ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
+                ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create)
+            }
+        }
+
+        // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
+        Button(onClick = { isTopSongsListVisible = !isTopSongsListVisible },
+            modifier = Modifier.testTag("toggleSongList")
+
+
+        ){
+            Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
+        }
+
+        // Conditional display based on the toggle button state
+        if (isTopSongsListVisible) {
+            // Assuming "TOP SONGS" list is correctly initialized
+            songLists
+                .firstOrNull { it.name == "TOP SONGS" }
+                ?.let { songList ->
+                    if (songList.tracks.isNotEmpty()) {
+                        Text("TOP SONGS")
+                        TracksList(songList.tracks)
+                    } else {
+                        Text("The TOP SONGS List is empty")
+                    }
+                }
+        } else {
+            // Assuming "CHOSEN SONGS" list is correctly initialized
+            songLists
+                .firstOrNull { it.name == "CHOSEN SONGS" }
+                ?.let { songList ->
+                    if (songList.tracks.isNotEmpty()) {
+                        Text("CHOSEN SONGS")
+                        TracksList(songList.tracks)
+                    } else {
+                        Text("The CHOSEN SONGS List is empty")
+                    }
+                }
+        }
+
+        // Buttons for adding tracks
+        Button(
+            onClick = {
+                showDialog = true
+                dialogListType = "TOP SONGS"
+            },
+            modifier = Modifier.testTag("addTopSongs")
+
+        ) {
+            Text("Add Track to TOP SONGS List")
+        }
+
+        Button(
+            onClick = {
+                showDialog = true
+                dialogListType = "CHOSEN SONGS"
+            },
+            modifier = Modifier.testTag("addChosenSongs")
+        ) {
+            Text("Add Track to CHOSEN SONGS List")
+        }
+
+        // Show dialog for adding a new track and add the track to the appropriate list
+        if (showDialog) {
+            AddTrackDialog(
+                onAddTrack = { id, title, artist ->
+                    viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
+                    viewModel.addTrackToList(dialogListType, Track(id, title, artist))
+                    showDialog = false
+                },
+                onDismiss = { showDialog = false },
+                initialTrackId = "",
+                initialTrackTitle = "",
+                initialTrackArtist = "",
+                dialogTestTag = "addTrackDialog"
+            )
+
+        }
+    }
 }
 
 /**

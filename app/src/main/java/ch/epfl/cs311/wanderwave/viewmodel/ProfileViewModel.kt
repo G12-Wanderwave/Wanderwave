@@ -11,7 +11,13 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import ch.epfl.cs311.wanderwave.model.data.Track
 
+
+
+
+// Define a simple class for a song list
+data class SongList(val name: String, val tracks: MutableList<Track> = mutableListOf())
 @HiltViewModel
 class ProfileViewModel @Inject constructor(private val repository: ProfileRepositoryImpl) :
     ViewModel() {
@@ -34,6 +40,40 @@ class ProfileViewModel @Inject constructor(private val repository: ProfileReposi
 
   private val _isInPublicMode = MutableStateFlow(false)
   val isInPublicMode: StateFlow<Boolean> = _isInPublicMode
+
+  // Add a state for managing song lists
+  private val _songLists = MutableStateFlow<List<SongList>>(emptyList())
+  val songLists: StateFlow<List<SongList>> = _songLists
+
+  fun createSpecificSongList(listType: String) {
+    val listName =
+      when (listType) {
+        "TOP_SONGS" -> "TOP SONGS"
+        "CHOSEN_SONGS" -> "CHOSEN SONGS"
+        else -> return // Or handle error/invalid type
+      }
+    // Check if the list already exists
+    val existingList = _songLists.value.firstOrNull { it.name == listName }
+    if (existingList == null) {
+      // Add new list if it doesn't exist
+      _songLists.value = _songLists.value + SongList(listName)
+    }
+    // Do nothing if the list already exists
+  }
+
+  // Function to add a track to a song list
+
+  fun addTrackToList(listName: String, track: Track) {
+    val updatedLists =
+      _songLists.value.map { list ->
+        if (list.name == listName) {
+          list.copy(tracks = ArrayList(list.tracks).apply { add(track) })
+        } else {
+          list
+        }
+      }
+    _songLists.value = updatedLists
+  }
 
   val profileConnection = ProfileConnection()
 
