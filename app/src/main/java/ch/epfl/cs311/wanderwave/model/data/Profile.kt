@@ -14,15 +14,24 @@ data class Profile(
     var firebaseUid: String,
 )
 
-fun DocumentSnapshot.toProfile(): Profile? {
-  val firstName = getString("firstName") ?: return null
-  val lastName = getString("lastName") ?: return null
-  val description = getString("description") ?: return null
-  val numberOfLikes = getLong("numberOfLikes")?.toInt() ?: return null
-  val isPublic = getBoolean("isPublic") ?: return null
-  val profilePictureUri = getString("profilePictureUri").let { Uri.parse(it) } ?: return null
-  val spotifyUid = getString("spotifyUid") ?: return null
-  val firebaseUid = getString("firebaseUid") ?: return null
+fun DocumentSnapshot.toProfile(): Profile {
+  val defaultProfile = Profile(
+      firstName = "",
+      lastName = "",
+      description = "",
+      numberOfLikes = 0,
+      isPublic = false,
+      profilePictureUri = null,
+      spotifyUid = "",
+      firebaseUid = "")
+  val firstName = getString("firstName") ?: return defaultProfile
+  val lastName = getString("lastName") ?: return defaultProfile
+  val description = getString("description") ?: return defaultProfile
+  val numberOfLikes = getLong("numberOfLikes")?.toInt() ?: return defaultProfile
+  val isPublic = getBoolean("isPublic") ?: return defaultProfile
+  val profilePictureUri = getString("profilePictureUri").let { Uri.parse(it) } ?: return defaultProfile
+  val spotifyUid = getString("spotifyUid") ?: return defaultProfile
+  val firebaseUid = getString("firebaseUid") ?: return defaultProfile
 
   return Profile(
       firstName = firstName,
