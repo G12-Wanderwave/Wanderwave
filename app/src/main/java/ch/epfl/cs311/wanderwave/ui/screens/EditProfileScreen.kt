@@ -26,7 +26,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
-import ch.epfl.cs311.wanderwave.ui.components.ImageSelection
+import ch.epfl.cs311.wanderwave.ui.components.profile.ImageSelection
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_error
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_primary
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel

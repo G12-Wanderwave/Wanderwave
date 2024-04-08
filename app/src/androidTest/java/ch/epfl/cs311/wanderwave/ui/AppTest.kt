@@ -9,6 +9,7 @@ import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
+import ch.epfl.cs311.wanderwave.ui.screens.components.MiniPlayerScreen
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -26,13 +27,19 @@ class AppTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport
   fun appIsDisplayed() = run { onComposeScreen<AppScreen>(composeTestRule) { assertIsDisplayed() } }
 
   @Test
-  fun canNavigateFromLoginToMainToTrackList() = run {
+  fun canNavigateFromLoginToMainToTrackListThenInteractWithMiniPlayer() = run {
     onComposeScreen<LoginScreen>(composeTestRule) { signInButton.performClick() }
     onComposeScreen<MainPlaceHolder>(composeTestRule) { assertIsDisplayed() }
     onComposeScreen<AppBottomBarScreen>(composeTestRule) {
       bottomAppBarTrackListButton.performClick()
     }
     onComposeScreen<TrackListScreen>(composeTestRule) { assertIsDisplayed() }
+    onComposeScreen<MiniPlayerScreen>(composeTestRule) {
+      assertIsDisplayed()
+      playPauseButton.performClick()
+      playPauseButton.performClick()
+      miniPlayerTitleButton.performClick()
+    }
   }
 
   @Test
