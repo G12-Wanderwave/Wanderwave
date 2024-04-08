@@ -4,12 +4,12 @@ import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import javax.inject.Inject
 
-class LocalBeaconRepository @Inject constructor(private val database: AppDatabase)
-  : BeaconRepository {
+class LocalBeaconRepository @Inject constructor(private val database: AppDatabase) :
+    BeaconRepository {
 
   private val beaconDao = database.beaconDao()
 
