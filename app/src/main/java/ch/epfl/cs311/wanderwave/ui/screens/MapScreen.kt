@@ -11,8 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -37,7 +35,8 @@ fun needToRequestPermissions(permissionState: MultiplePermissionsState): Boolean
   return permissionState.permissions.any { !it.status.isGranted }
 }
 
-@RequiresPermission(allOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION])
+@RequiresPermission(
+    allOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION])
 fun getLastKnownLocation(context: Context): LatLng? {
   val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
   var location: Location? = null
@@ -69,15 +68,15 @@ fun MapScreen() {
     permissionState.launchMultiplePermissionRequest()
   }
 
-  val cameraPositionState: CameraPositionState = rememberCameraPositionState() { }
+  val cameraPositionState: CameraPositionState = rememberCameraPositionState() {}
 
   GoogleMap(
-    modifier = Modifier.testTag("mapScreen"),
-    properties =
-    MapProperties(
-      isMyLocationEnabled = permissionState.allPermissionsGranted,
-    ),
-    cameraPositionState = cameraPositionState,
+      modifier = Modifier.testTag("mapScreen"),
+      properties =
+          MapProperties(
+              isMyLocationEnabled = permissionState.allPermissionsGranted,
+          ),
+      cameraPositionState = cameraPositionState,
   ) {}
 
   if (needToRequestPermissions(permissionState)) {
@@ -92,8 +91,8 @@ fun MapScreen() {
         })
   } else {
     val location = getLastKnownLocation(LocalContext.current)
-    cameraPositionState.move(CameraUpdateFactory.newCameraPosition(
-        CameraPosition.fromLatLngZoom(location ?: LatLng(0.0, 0.0), 15f)
-    ))
+    cameraPositionState.move(
+        CameraUpdateFactory.newCameraPosition(
+            CameraPosition.fromLatLngZoom(location ?: LatLng(0.0, 0.0), 15f)))
   }
 }
