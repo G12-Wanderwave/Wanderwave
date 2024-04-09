@@ -1,4 +1,6 @@
 
+package ch.epfl.cs311.wanderwave.ui.components
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
