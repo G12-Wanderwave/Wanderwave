@@ -34,6 +34,7 @@ fun MapScreen() {
               Manifest.permission.ACCESS_COARSE_LOCATION,
               Manifest.permission.ACCESS_FINE_LOCATION,
           ))
+
   fun onAlertDismissed() {
     permissionState.launchMultiplePermissionRequest()
   }
@@ -43,8 +44,13 @@ fun MapScreen() {
         title = { Text(stringResource(id = R.string.permission_request_title)) },
         text = { Text(text = stringResource(id = R.string.permission_request_text_location)) },
         onDismissRequest = { onAlertDismissed() },
-        confirmButton = { TextButton(onClick = { onAlertDismissed() }) { Text("I understand") } })
+        confirmButton = {
+          TextButton(onClick = { onAlertDismissed() }) {
+            Text(stringResource(id = R.string.permission_request_confirm_button))
+          }
+        })
   }
+
   GoogleMap(
       modifier = Modifier.testTag("mapScreen"),
       properties =
