@@ -9,6 +9,9 @@ import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.firestore.DocumentSnapshot
+import io.mockk.MockKAnnotations
+import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import junit.framework.TestCase.assertEquals
@@ -28,10 +31,26 @@ class BeaconConnectionTest {
   private lateinit var beaconViewModel: BeaconViewModel
   @RelaxedMockK private lateinit var repository: ProfileRepositoryImpl
 
+  @RelaxedMockK private lateinit var documentTrack: DocumentSnapshot
+
   @Before
   fun setup() {
     beaconViewModel = BeaconViewModel(repository)
     beaconConnection = beaconViewModel.beaconConnection
+
+    MockKAnnotations.init(this)
+
+    // Set up the document mock to return some tracks
+    every { documentTrack.id } returns "someId"
+    every { documentTrack["title"] } returns "someTitle"
+    every { documentTrack["artist"] } returns "someArtist"
+    // Set up the documentTrack mock to return some beacons
+    every { documentTrack.exists() } returns true
+    every { documentTrack.get("location") } returns mapOf(
+        "latitude" to 1.0,
+        "longitude" to 1.0,
+        "name" to "Test Location"
+    )
   }
 
   @Test
@@ -40,6 +59,19 @@ class BeaconConnectionTest {
     assert(beaconViewModel.beacon != null)
     // assert if the beaconConnection is not null
     assert(beaconViewModel.beaconConnection != null)
+
+    val hashMap = beaconViewModel.beacon.value.toHashMap()
+    // assert if the beacon is not null
+    assert(beaconViewModel.beacon.value != null)
+    // assert if the beacon is not null
+    assert(hashMap != null)
+  }
+
+  @Test
+  fun documentSnapshotToItem() {
+    val beacon = Beacon.from(documentTrack)
+    // assert if the beacon is not null
+    assert(beacon != null)
   }
 
   @Test
