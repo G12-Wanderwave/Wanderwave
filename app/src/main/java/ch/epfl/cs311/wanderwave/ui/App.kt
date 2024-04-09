@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui
 
+import AppBottomBar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -22,7 +23,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
-import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
+
 import ch.epfl.cs311.wanderwave.ui.components.player.SurroundWithMiniPlayer
 import ch.epfl.cs311.wanderwave.ui.screens.AboutScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
