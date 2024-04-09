@@ -47,7 +47,7 @@ class BeaconConnectionTest {
     val location = Location(1.0, 1.0, "Test Location")
     val latLng: LatLng = location.toLatLng()
     val hashMap: HashMap<String, Any> = location.toHashMap()
-
+    // test location behaviour
     assertEquals(1.0, location.latitude)
     assertEquals(1.0, location.longitude)
     assertEquals("Test Location", location.name)
