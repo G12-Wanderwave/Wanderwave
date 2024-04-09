@@ -17,14 +17,15 @@ data class Profile(
     fun from(documentSnapshot: DocumentSnapshot): Profile? {
       if (documentSnapshot.exists()) {
         return Profile(
-          firstName = documentSnapshot.getString("firstName") ?: "",
-          lastName = documentSnapshot.getString("lastName") ?: "",
-          description = documentSnapshot.getString("description") ?: "",
-          numberOfLikes = documentSnapshot.getLong("numberOfLikes")?.toInt() ?: 0,
-          isPublic = documentSnapshot.getBoolean("isPublic") ?: false,
-          profilePictureUri = documentSnapshot.getString("profilePictureUri")?.let { Uri.parse(it) },
-          spotifyUid = documentSnapshot.getString("spotifyUid") ?: "",
-          firebaseUid = documentSnapshot.getString("firebaseUid") ?: "",
+            firstName = documentSnapshot.getString("firstName") ?: "",
+            lastName = documentSnapshot.getString("lastName") ?: "",
+            description = documentSnapshot.getString("description") ?: "",
+            numberOfLikes = documentSnapshot.getLong("numberOfLikes")?.toInt() ?: 0,
+            isPublic = documentSnapshot.getBoolean("isPublic") ?: false,
+            profilePictureUri =
+                documentSnapshot.getString("profilePictureUri")?.let { Uri.parse(it) },
+            spotifyUid = documentSnapshot.getString("spotifyUid") ?: "",
+            firebaseUid = documentSnapshot.getString("firebaseUid") ?: "",
         )
       } else {
         return null

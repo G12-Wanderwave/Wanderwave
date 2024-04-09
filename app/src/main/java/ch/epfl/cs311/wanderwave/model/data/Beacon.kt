@@ -12,12 +12,9 @@ data class Beacon(
 
     /** List of tracks that are broadcast from the beacon */
     val tracks: List<Track> = listOf<Track>(),
-){
+) {
   fun toHashMap(): HashMap<String, Any> {
-    return hashMapOf(
-        "id" to id,
-        "location" to location.toHashMap(),
-        "tracks" to listOf<Track>())
+    return hashMapOf("id" to id, "location" to location.toHashMap(), "tracks" to listOf<Track>())
   }
 
   companion object {

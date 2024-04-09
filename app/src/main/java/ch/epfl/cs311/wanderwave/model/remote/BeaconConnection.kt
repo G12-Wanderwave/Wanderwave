@@ -48,22 +48,20 @@ class BeaconConnection : FirebaseConnection<Beacon, Beacon> {
         .get()
         .addOnSuccessListener { document ->
           if (document != null && document.data != null) {
-            documentToItem(document)?.let{
-              beacon ->
-                val trackRefs = document.get("tracks") as? List<DocumentReference>
-                val tracks = mutableListOf<Track>()
-                trackRefs?.forEach { trackRef ->
-                  trackRef.get().addOnSuccessListener { trackDocument ->
-                    val trackData = trackDocument.data
-                    if (trackData != null) {
-                      Track.from(trackDocument)?.let { tracks.add(it) }
-                    }
-                    val updatedBeacon = beacon.copy(tracks = tracks)
-                    dataFlow.value = updatedBeacon
+            documentToItem(document)?.let { beacon ->
+              val trackRefs = document.get("tracks") as? List<DocumentReference>
+              val tracks = mutableListOf<Track>()
+              trackRefs?.forEach { trackRef ->
+                trackRef.get().addOnSuccessListener { trackDocument ->
+                  val trackData = trackDocument.data
+                  if (trackData != null) {
+                    Track.from(trackDocument)?.let { tracks.add(it) }
                   }
+                  val updatedBeacon = beacon.copy(tracks = tracks)
+                  dataFlow.value = updatedBeacon
                 }
+              }
             }
-
           } else {
             dataFlow.value = null
           }
