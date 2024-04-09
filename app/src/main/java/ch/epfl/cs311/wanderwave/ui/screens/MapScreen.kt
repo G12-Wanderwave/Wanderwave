@@ -72,7 +72,7 @@ fun MapScreen() {
   }
 
   val cameraPositionState: CameraPositionState = rememberCameraPositionState() {}
-  var mapIsLoaded = remember { mutableStateOf(false) }
+  val mapIsLoaded = remember { mutableStateOf(false) }
 
   GoogleMap(
       modifier = Modifier.testTag("mapScreen"),
@@ -81,8 +81,7 @@ fun MapScreen() {
               isMyLocationEnabled = permissionState.allPermissionsGranted,
           ),
       cameraPositionState = cameraPositionState,
-      onMapLoaded = { mapIsLoaded.value = true }
-  ) {}
+      onMapLoaded = { mapIsLoaded.value = true }) {}
 
   if (needToRequestPermissions(permissionState)) {
     AlertDialog(
@@ -98,8 +97,8 @@ fun MapScreen() {
     val location = getLastKnownLocation(LocalContext.current)
     LaunchedEffect(!needToRequestPermissions(permissionState), mapIsLoaded.value) {
       cameraPositionState.move(
-        CameraUpdateFactory.newCameraPosition(
-          CameraPosition.fromLatLngZoom(location ?: LatLng(0.0, 0.0), 15f)))
+          CameraUpdateFactory.newCameraPosition(
+              CameraPosition.fromLatLngZoom(location ?: LatLng(0.0, 0.0), 15f)))
     }
   }
 }
