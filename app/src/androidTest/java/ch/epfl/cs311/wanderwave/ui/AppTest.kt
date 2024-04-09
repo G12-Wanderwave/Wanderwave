@@ -8,6 +8,7 @@ import ch.epfl.cs311.wanderwave.ui.screens.AppScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
+import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.screens.components.MiniPlayerScreen
 import com.kaspersky.components.composesupport.config.withComposeSupport
@@ -48,5 +49,14 @@ class AppTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport
     onComposeScreen<MainPlaceHolder>(composeTestRule) { assertIsDisplayed() }
     onComposeScreen<AppBottomBarScreen>(composeTestRule) { mapScreenButton.performClick() }
     onComposeScreen<MapScreen>(composeTestRule) { assertIsDisplayed() }
+  }
+
+  @Test
+  fun canNavigateToProfileScreen() = run {
+    onComposeScreen<LoginScreen>(composeTestRule) { signInButton.performClick() }
+    onComposeScreen<MainPlaceHolder>(composeTestRule) {
+      assertIsDisplayed()
+      profileButton.performClick()}
+    onComposeScreen<ProfileScreen>(composeTestRule) { assertIsDisplayed() }
   }
 }

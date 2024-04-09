@@ -128,7 +128,8 @@ fun ProfileButton(modifier: Modifier = Modifier, viewModel: ProfileViewModel = h
     Box(modifier = modifier
         .clickable { navActions.navigateTo(Route.PROFILE) }
         .background(Color.Transparent)
-        .padding(16.dp))
+        .padding(16.dp)
+        .testTag("profileButton"))
       {
       SelectImage(
         modifier = Modifier
