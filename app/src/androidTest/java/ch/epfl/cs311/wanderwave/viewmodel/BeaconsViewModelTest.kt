@@ -57,7 +57,6 @@ class BeaconConnectionTest {
     every { document.getString("profilePictureUri") } returns "https://example.com/profile.jpg"
     every { document.getString("spotifyUid") } returns "TestSpotifyUid"
     every { document.getString("firebaseUid") } returns "TestFirebaseUid"
-
   }
 
   @Test
@@ -115,7 +114,6 @@ class BeaconConnectionTest {
     // assert if the track is null
     assert(track2 == null)
   }
-
 
   @Test
   fun basicVariablesLocation() {
