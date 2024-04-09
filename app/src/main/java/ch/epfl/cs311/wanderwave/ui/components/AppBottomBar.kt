@@ -19,18 +19,23 @@ import ch.epfl.cs311.wanderwave.navigation.TOP_LEVEL_DESTINATIONS
 
 @Composable
 fun AppBottomBar(navActions: NavigationActions) {
-  Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.testTag("appBottomBar")) {
-    BottomAppBar(
-        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface),
-    ) {
+
+  BottomAppBar(
+    modifier = Modifier
+      .fillMaxWidth()
+      .background(MaterialTheme.colorScheme.surface),
+  ) {
+    Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.testTag("appBottomBar")) {
       for (destination in TOP_LEVEL_DESTINATIONS) {
         Button(
-            onClick = { navActions.navigateToTopLevel(destination.route) },
-            modifier =
-                Modifier.padding(8.dp)
-                    .testTag("bottomAppBarButton" + destination.route.routeString)) {
-              Text(text = stringResource(id = destination.textId))
-            }
+          onClick = { navActions.navigateToTopLevel(destination.route) },
+          modifier =
+          Modifier
+            .padding(8.dp)
+            .testTag("bottomAppBarButton" + destination.route.routeString)
+        ) {
+          Text(text = stringResource(id = destination.textId))
+        }
       }
     }
   }
