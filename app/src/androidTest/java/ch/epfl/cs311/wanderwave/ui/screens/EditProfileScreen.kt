@@ -13,4 +13,5 @@ class EditProfileScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
   val inputDescription = onNode { hasTestTag("description") }
   val saveButton = onNode { hasTestTag("saveButton") }
   val cancelButton = onNode { hasTestTag("cancelButton") }
+  val deleteButton = onNode { hasTestTag("deleteButton") }
 }

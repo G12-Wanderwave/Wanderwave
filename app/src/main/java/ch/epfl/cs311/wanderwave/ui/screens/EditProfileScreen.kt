@@ -26,7 +26,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
-import ch.epfl.cs311.wanderwave.ui.components.ImageSelection
+import ch.epfl.cs311.wanderwave.ui.components.profile.ImageSelection
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_error
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_primary
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
@@ -71,16 +71,31 @@ fun EditProfileScreen(profile: Profile, onProfileChange: (Profile) -> Unit) {
         ActionButtons(
             onSave = {
               // TODO: navigation popBack
-              onProfileChange(
+              val profileCopy =
                   profile.copy(
                       firstName = firstName,
                       lastName = lastName,
                       description = description,
-                      profilePictureUri = profile2.profilePictureUri))
+                      profilePictureUri = profile2.profilePictureUri,
+                  )
+              onProfileChange(
+                  profileCopy) // Is this really how we should do ? Shouldn't we use the viewModel ?
+              // I'll leave it here for now, I think we should have the navigation
+              // actions as a parameter, not the onProfileChange
+              viewModel.updateProfile(profileCopy)
             },
             onCancel = {
               // TODO: navigation popBack
             })
+
+        Spacer(Modifier.padding(18.dp))
+        Button(
+            onClick = { viewModel.deleteProfile() },
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+            border = BorderStroke(1.dp, md_theme_light_error),
+            modifier = Modifier.width(100.dp).testTag("deleteButton")) {
+              Text(text = "Delete profile", color = md_theme_light_error)
+            }
       }
 }
 
