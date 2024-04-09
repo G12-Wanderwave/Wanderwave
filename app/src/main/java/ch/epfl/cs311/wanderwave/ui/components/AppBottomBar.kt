@@ -25,6 +25,21 @@ val trackListIcon: ImageVector = Icons.Default.List
 val mainIcon: ImageVector = Icons.Default.Home
 val mapIcon: ImageVector = Icons.Default.LocationOn
 
+
+/**
+ * This Composable function represents the bottom navigation bar of the app. It utilizes a BottomAppBar
+ * to display three navigation icons evenly spaced across the bar. The icons serve as navigation buttons
+ * for 'Track List', 'Main', and 'Map' destinations within the app. This Composable also utilizes the
+ * NavigationActions class to handle the navigation logic when an icon is clicked.
+ *
+ * @param navActions The NavigationActions object that contains the navigation logic for navigating
+ *                   between the top-level destinations.
+ * @author Ayman Bakiri
+ * @author Clarence Linden
+ *
+ * @since 1.0
+ * @last update 1.0
+ */
 @Composable
 fun AppBottomBar(navActions: NavigationActions) {
   BottomAppBar(
