@@ -4,17 +4,22 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -57,7 +62,8 @@ fun ProfileScreen(navActions: NavigationActions) {
 
   val currentProfile: Profile = currentProfileState
 
-  Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen")) {
+  Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
+      horizontalAlignment = Alignment.CenterHorizontally) {
       Box(modifier = Modifier.fillMaxWidth()) {
           VisitCard(Modifier, currentProfile)
           ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
@@ -65,6 +71,8 @@ fun ProfileScreen(navActions: NavigationActions) {
               navActions.navigateTo(Route.EDIT_PROFILE)
           })
       }
+      Spacer(modifier = Modifier.height(300.dp))
+      SignOutButton(modifier = Modifier, navActions = navActions)
   }
 }
 
@@ -87,12 +95,12 @@ fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel = h
         viewModel.togglePublicMode()
       },
       modifier =
-          modifier
-              .graphicsLayer {
-                scaleX = SCALE_X
-                scaleY = SCALE_Y
-              }
-              .testTag("profileSwitch"),
+      modifier
+          .graphicsLayer {
+              scaleX = SCALE_X
+              scaleY = SCALE_Y
+          }
+          .testTag("profileSwitch"),
       colors =
           SwitchDefaults.colors(
               checkedThumbColor = MaterialTheme.colorScheme.primary,
@@ -109,20 +117,27 @@ fun ProfileButton(modifier: Modifier = Modifier, viewModel: ProfileViewModel = h
   val currentProfile: Profile = currentProfileState
 
   if(navActions.getCurrentRoute() == Route.MAIN) {
-    Box(modifier = modifier.clickable { navActions.navigateTo(Route.PROFILE) }
-                           .background(Color.Transparent)
-                           .padding(16.dp))
-
+    Box(modifier = modifier
+        .clickable { navActions.navigateTo(Route.PROFILE) }
+        .background(Color.Transparent)
+        .padding(16.dp))
       {
       SelectImage(
-        modifier = Modifier.clip(CircleShape)
-                           .size(50.dp),
+        modifier = Modifier
+            .clip(CircleShape)
+            .size(50.dp),
         profile = currentProfile
       )
     }
-
   }
+}
 
-
-
+@Composable
+fun SignOutButton(modifier: Modifier, navActions: NavigationActions){
+    //TODO: Implement actual user sign out
+    Button(
+        onClick = { navActions.navigateToTopLevel(Route.LOGIN) },
+        modifier = Modifier.testTag("signOutButton")) {
+          Text(text = "Sign Out")
+        }
 }

@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.profile.ImageSelection
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_error
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_primary
@@ -72,7 +73,6 @@ fun EditProfileScreen(navActions: NavigationActions) {
         Spacer(Modifier.padding(18.dp))
         ActionButtons(
             onSave = {
-              // TODO: navigation popBack
               val profileCopy =
                   profile.copy(
                       firstName = firstName,
@@ -80,20 +80,18 @@ fun EditProfileScreen(navActions: NavigationActions) {
                       description = description,
                       profilePictureUri = profile2.profilePictureUri,
                   )
-//              onProfileChange(
-//                  profileCopy) // Is this really how we should do ? Shouldn't we use the viewModel ?
-//              // I'll leave it here for now, I think we should have the navigation
-//              // actions as a parameter, not the onProfileChange
-                //Modified it to use the viewModel
+
               viewModel.updateProfile(profileCopy)
+              navActions.navigateToTopLevel(Route.PROFILE)
             },
             onCancel = {
-              // TODO: navigation popBack
+              navActions.navigateToTopLevel(Route.PROFILE)
             })
 
         Spacer(Modifier.padding(18.dp))
         Button(
-            onClick = { viewModel.deleteProfile() },
+            onClick = { viewModel.deleteProfile()
+                        navActions.navigateToTopLevel(Route.LOGIN)},
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
             border = BorderStroke(1.dp, md_theme_light_error),
             modifier = Modifier.width(100.dp).testTag("deleteButton")) {

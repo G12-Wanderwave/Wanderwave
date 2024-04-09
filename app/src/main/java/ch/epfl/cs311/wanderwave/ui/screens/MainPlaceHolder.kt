@@ -9,13 +9,8 @@ import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 @Composable
 fun MainPlaceHolder(navigationActions: NavigationActions) {
   Column(modifier = Modifier.testTag("mainPlaceHolderScreen")) {
-      ProfileButton(navActions = navigationActions)
-      //TODO: move to profile screen
-//    Button(
-//        onClick = { navigationActions.navigateToTopLevel(Route.LOGIN) },
-//        modifier = Modifier.testTag("signOutButton")) {
-//          Text(text = "Sign Out")
-//        }
+    ProfileButton(navActions = navigationActions)
+
     AboutScreen(navigationActions = navigationActions)
   }
 }
