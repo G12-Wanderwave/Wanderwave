@@ -6,4 +6,7 @@ import io.github.kakaocup.compose.node.element.ComposeScreen
 class TrackListScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
     ComposeScreen<TrackListScreen>(
         semanticsProvider = semanticsProvider,
-        viewBuilderAction = { hasTestTag("trackListScreen") })
+        viewBuilderAction = { hasTestTag("trackListScreen") }) {
+
+  val trackButton = onNode { hasTestTag("trackButton") }
+}
