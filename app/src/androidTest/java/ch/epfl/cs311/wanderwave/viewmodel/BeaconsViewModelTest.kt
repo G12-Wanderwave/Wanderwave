@@ -75,6 +75,8 @@ class BeaconConnectionTest {
 
   @Test
   fun documentSnapshotToBeacon() {
+    every { document.exists() } returns true
+
     val beacon = Beacon.from(document)
     // assert if the beacon is not null
     assert(beacon != null)
@@ -89,6 +91,7 @@ class BeaconConnectionTest {
 
   @Test
   fun documentSnapshotToProfile() {
+    every { document.exists() } returns true
     val profile = Profile.from(document)
     // assert if the profile is not null
     assert(profile != null)
@@ -103,6 +106,7 @@ class BeaconConnectionTest {
 
   @Test
   fun DocumentSnapshotToTrack() {
+    every { document.exists() } returns true
     val track = Track.from(document)
     // assert if the track is not null
     assert(track != null)
