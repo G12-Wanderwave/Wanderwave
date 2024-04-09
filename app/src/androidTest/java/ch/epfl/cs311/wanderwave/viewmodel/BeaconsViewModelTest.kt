@@ -8,6 +8,7 @@ import ch.epfl.cs311.wanderwave.model.local.BeaconEntity
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
+import com.google.android.gms.maps.model.LatLng
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import junit.framework.TestCase.assertEquals
@@ -39,6 +40,22 @@ class BeaconConnectionTest {
     assert(beaconViewModel.beacon != null)
     // assert if the beaconConnection is not null
     assert(beaconViewModel.beaconConnection != null)
+  }
+
+  @Test
+  fun basicVariablesLocation() {
+    val location = Location(1.0, 1.0, "Test Location")
+    val latLng: LatLng = location.toLatLng()
+    val hashMap: HashMap<String, Any> = location.toHashMap()
+
+    assertEquals(1.0, location.latitude)
+    assertEquals(1.0, location.longitude)
+    assertEquals("Test Location", location.name)
+    assertEquals(1.0, latLng.latitude)
+    assertEquals(1.0, latLng.longitude)
+    assertEquals(1.0, hashMap["latitude"])
+    assertEquals(1.0, hashMap["longitude"])
+    assertEquals("Test Location", hashMap["name"])
   }
 
   @Test
