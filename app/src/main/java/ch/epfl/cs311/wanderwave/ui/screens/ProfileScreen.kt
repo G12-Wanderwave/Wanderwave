@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
@@ -111,11 +110,20 @@ fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel = h
   )
 }
 
+/**
+ * Creates a button using the user's profile picture to access their profile
+ *
+ * @param modifier to apply any needed modifiers to the button
+ * @param viewModel to get the profile
+ * @param navActions to navigate to and from the profile editor
+ * @author Imade Bouhamria
+ */
 @Composable
 fun ProfileButton(modifier: Modifier = Modifier, viewModel: ProfileViewModel = hiltViewModel(), navActions: NavigationActions) {
   val currentProfileState by viewModel.profile.collectAsState()
   val currentProfile: Profile = currentProfileState
 
+  //Display the button only when on the main screen TODO: Also from Map ?
   if(navActions.getCurrentRoute() == Route.MAIN) {
     Box(modifier = modifier
         .clickable { navActions.navigateTo(Route.PROFILE) }
@@ -132,12 +140,19 @@ fun ProfileButton(modifier: Modifier = Modifier, viewModel: ProfileViewModel = h
   }
 }
 
+/**
+ * This is the sign out button that will allow the user to sign out
+ *
+ * @param modifier the modifier to be applied to the Button
+ * @param navActions to be able to navigate back to the login screen
+ * @author Imade Bouhamria
+ */
 @Composable
 fun SignOutButton(modifier: Modifier, navActions: NavigationActions){
     //TODO: Implement actual user sign out
     Button(
         onClick = { navActions.navigateToTopLevel(Route.LOGIN) },
-        modifier = Modifier.testTag("signOutButton")) {
+        modifier = modifier.testTag("signOutButton")) {
           Text(text = "Sign Out")
         }
 }
