@@ -51,28 +51,20 @@ val INPUT_BOX_NAM_SIZE = 150.dp
  * @last update 1.0
  */
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(navActions: NavigationActions) {
   val viewModel: ProfileViewModel = hiltViewModel()
   val currentProfileState by viewModel.profile.collectAsState()
-  val isInEditMode by viewModel.isInEditMode.collectAsState()
 
   val currentProfile: Profile = currentProfileState
 
-  if (isInEditMode) { // TODO: instead of doing this, we should have a navigation action to go to
-    // the edit profile screen
-
-    EditProfileScreen(
-        profile = currentProfile,
-        onProfileChange = { updatedProfile -> viewModel.updateProfile(updatedProfile) })
-  } else {
-
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen")) {
+  Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen")) {
       Box(modifier = Modifier.fillMaxWidth()) {
-        VisitCard(Modifier, currentProfile)
-        ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
-        ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create)
+          VisitCard(Modifier, currentProfile)
+          ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
+          ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create, onClick = {
+              navActions.navigateTo(Route.EDIT_PROFILE)
+          })
       }
-    }
   }
 }
 
@@ -116,21 +108,20 @@ fun ProfileButton(modifier: Modifier = Modifier, viewModel: ProfileViewModel = h
   val currentProfileState by viewModel.profile.collectAsState()
   val currentProfile: Profile = currentProfileState
 
+  if(navActions.getCurrentRoute() == Route.MAIN) {
+    Box(modifier = modifier.clickable { navActions.navigateTo(Route.PROFILE) }
+                           .background(Color.Transparent)
+                           .padding(16.dp))
 
-    if(navActions.getCurrentRoute() == Route.MAIN) {
-      Box(modifier = modifier.clickable { navActions.navigateTo(Route.PROFILE) }
-                             .background(Color.Transparent)
-                             .padding(16.dp))
-
-        {
-        SelectImage(
-          modifier = Modifier.clip(CircleShape)
-                             .size(50.dp),
-          profile = currentProfile
-        )
-      }
-
+      {
+      SelectImage(
+        modifier = Modifier.clip(CircleShape)
+                           .size(50.dp),
+        profile = currentProfile
+      )
     }
+
+  }
 
 
 
