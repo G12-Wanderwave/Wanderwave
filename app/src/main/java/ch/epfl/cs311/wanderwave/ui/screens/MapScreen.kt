@@ -13,18 +13,16 @@ import com.google.maps.android.compose.MarkerState
 @Composable
 @Preview
 fun MapScreen() {
-  //TODO: Replace with actual data once implemented
-  val mockBeacons = listOf<Beacon>(
-    Beacon("INM" , Location(46.51857556996283, 6.5631609607190775)),
-    Beacon("BC"  , Location(46.51857417773428, 6.5619195033506434)),
-    Beacon("STCC", Location(46.52298529087412, 6.564644391110982 )),
-    Beacon("RLC" , Location(46.51846723837138, 6.568149323030634 )))
+  // TODO: Replace with actual data once implemented
+  val mockBeacons =
+      listOf<Beacon>(
+          Beacon("INM", Location(46.51857556996283, 6.5631609607190775)),
+          Beacon("BC", Location(46.51857417773428, 6.5619195033506434)),
+          Beacon("STCC", Location(46.52298529087412, 6.564644391110982)),
+          Beacon("RLC", Location(46.51846723837138, 6.568149323030634)))
 
-  GoogleMap(modifier = Modifier.testTag("mapScreen")){
-    DisplayBeacons(beacons = mockBeacons)
-  }
+  GoogleMap(modifier = Modifier.testTag("mapScreen")) { DisplayBeacons(beacons = mockBeacons) }
 }
-
 
 /**
  * This is a Composable function that displays the beacons on the map. It takes a list of beacons as
@@ -37,8 +35,8 @@ fun DisplayBeacons(beacons: List<Beacon>) {
   // Add a marker for each beacon
   beacons.forEach() {
     Marker(
-      state = MarkerState(position = it.location.toLatLng()),
-      title = it.id,
+        state = MarkerState(position = it.location.toLatLng()),
+        title = it.id,
     )
   }
 }
