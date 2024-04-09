@@ -29,11 +29,9 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
 import ch.epfl.cs311.wanderwave.ui.components.profile.ClickableIcon
-import ch.epfl.cs311.wanderwave.ui.components.profile.TracksList
+import ch.epfl.cs311.wanderwave.ui.components.profile.SongsListDisplay
 import ch.epfl.cs311.wanderwave.ui.components.profile.VisitCard
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
-
-
 
 
 const val SCALE_X = 0.5f
@@ -70,92 +68,70 @@ fun ProfileScreen(viewModel: ProfileViewModel) {
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         if (isInEditMode) {
-            //EditableVisitCard(
-              //  profile = currentProfile,
-                //onProfileChange = { updatedProfile -> viewModel.updateProfile(updatedProfile) },
-                //viewModel = viewModel)
+            EditProfileScreen(
+                profile = currentProfile,
+                onProfileChange = { updatedProfile -> viewModel.updateProfile(updatedProfile) })
         } else {
             Box(modifier = Modifier.fillMaxWidth()) {
                 VisitCard(Modifier, currentProfile)
                 ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
                 ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create)
             }
-        }
 
-        // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
-        Button(onClick = { isTopSongsListVisible = !isTopSongsListVisible },
-            modifier = Modifier.testTag("toggleSongList")
+            // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
+            Button(onClick = { isTopSongsListVisible = !isTopSongsListVisible },
+                modifier = Modifier.testTag("toggleSongList")
 
 
-        ){
-            Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
-        }
+            ){
+                Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
+            }
 
-        // Conditional display based on the toggle button state
-        if (isTopSongsListVisible) {
-            // Assuming "TOP SONGS" list is correctly initialized
-            songLists
-                .firstOrNull { it.name == "TOP SONGS" }
-                ?.let { songList ->
-                    if (songList.tracks.isNotEmpty()) {
-                        Text("TOP SONGS")
-                        TracksList(songList.tracks)
-                    } else {
-                        Text("The TOP SONGS List is empty")
-                    }
-                }
-        } else {
-            // Assuming "CHOSEN SONGS" list is correctly initialized
-            songLists
-                .firstOrNull { it.name == "CHOSEN SONGS" }
-                ?.let { songList ->
-                    if (songList.tracks.isNotEmpty()) {
-                        Text("CHOSEN SONGS")
-                        TracksList(songList.tracks)
-                    } else {
-                        Text("The CHOSEN SONGS List is empty")
-                    }
-                }
-        }
+            // Call the SongsListDisplay function
+            SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
 
-        // Buttons for adding tracks
-        Button(
-            onClick = {
-                showDialog = true
-                dialogListType = "TOP SONGS"
-            },
-            modifier = Modifier.testTag("addTopSongs")
-
-        ) {
-            Text("Add Track to TOP SONGS List")
-        }
-
-        Button(
-            onClick = {
-                showDialog = true
-                dialogListType = "CHOSEN SONGS"
-            },
-            modifier = Modifier.testTag("addChosenSongs")
-        ) {
-            Text("Add Track to CHOSEN SONGS List")
-        }
-
-        // Show dialog for adding a new track and add the track to the appropriate list
-        if (showDialog) {
-            AddTrackDialog(
-                onAddTrack = { id, title, artist ->
-                    viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
-                    viewModel.addTrackToList(dialogListType, Track(id, title, artist))
-                    showDialog = false
+            // Buttons for adding tracks to top songs lists
+            Button(
+                onClick = {
+                    showDialog = true
+                    dialogListType = "TOP SONGS"
                 },
-                onDismiss = { showDialog = false },
-                initialTrackId = "",
-                initialTrackTitle = "",
-                initialTrackArtist = "",
-                dialogTestTag = "addTrackDialog"
-            )
+                modifier = Modifier.testTag("addTopSongs")
+
+            ) {
+                Text("Add Track to TOP SONGS List")
+            }
+
+            // Buttons for adding tracks to chosen songs list
+            Button(
+                onClick = {
+                    showDialog = true
+                    dialogListType = "CHOSEN SONGS"
+                },
+                modifier = Modifier.testTag("addChosenSongs")
+            ) {
+                Text("Add Track to CHOSEN SONGS List")
+            }
+
+            // Show dialog for adding a new track and add the track to the appropriate list
+            if (showDialog) {
+                AddTrackDialog(
+                    onAddTrack = { id, title, artist ->
+                        viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
+                        viewModel.addTrackToList(dialogListType, Track(id, title, artist))
+                        showDialog = false
+                    },
+                    onDismiss = { showDialog = false },
+                    initialTrackId = "",
+                    initialTrackTitle = "",
+                    initialTrackArtist = "",
+                    dialogTestTag = "addTrackDialog"
+                )
+
+            }
 
         }
+
     }
 }
 
@@ -193,3 +169,8 @@ fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel = h
           ),
   )
 }
+
+
+
+
+

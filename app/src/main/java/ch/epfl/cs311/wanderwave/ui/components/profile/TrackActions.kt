@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.model.data.Track
-
+import ch.epfl.cs311.wanderwave.viewmodel.SongList
 
 
 /**
@@ -126,4 +126,41 @@ fun AddTrackDialog(
         },
         modifier = Modifier.testTag(dialogTestTag)
     )
+}
+
+/**
+ * Displays either the "TOP SONGS" or "CHOSEN SONGS" list based on a toggle.
+ *
+ * @param songLists List of song lists including "TOP SONGS" and "CHOSEN SONGS".
+ * @param isTopSongsListVisible Boolean state to toggle between showing "TOP SONGS" or "CHOSEN SONGS".
+ *  * @author Ayman Bakiri
+ *  * @since 1.0
+ *  * @last update 1.0
+ */
+@Composable
+fun SongsListDisplay(
+    songLists: List<SongList>,
+    isTopSongsListVisible: Boolean
+) {
+    if (isTopSongsListVisible) {
+        songLists.firstOrNull { it.name == "TOP SONGS" }
+            ?.let { songList ->
+                if (songList.tracks.isNotEmpty()) {
+                    Text("TOP SONGS")
+                    TracksList(songList.tracks)
+                } else {
+                    Text("The TOP SONGS List is empty")
+                }
+            }
+    } else {
+        songLists.firstOrNull { it.name == "CHOSEN SONGS" }
+            ?.let { songList ->
+                if (songList.tracks.isNotEmpty()) {
+                    Text("CHOSEN SONGS")
+                    TracksList(songList.tracks)
+                } else {
+                    Text("The CHOSEN SONGS List is empty")
+                }
+            }
+    }
 }
