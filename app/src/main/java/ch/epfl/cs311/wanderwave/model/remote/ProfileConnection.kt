@@ -2,11 +2,10 @@ package ch.epfl.cs311.wanderwave.model.remote
 
 import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Profile
-import ch.epfl.cs311.wanderwave.model.data.toProfile
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
-class ProfileConnection : FirebaseConnectionInt<Profile, Profile> {
+class ProfileConnection : FirebaseConnection<Profile, Profile> {
 
   override val collectionName: String = "users"
 
@@ -31,8 +30,8 @@ class ProfileConnection : FirebaseConnectionInt<Profile, Profile> {
   }
 
   // Document to Profile
-  override fun documentToItem(document: DocumentSnapshot): Profile {
-    return document.toProfile()
+  override fun documentToItem(document: DocumentSnapshot): Profile? {
+    return Profile.from(document)
   }
 
   override fun itemToHash(profile: Profile): HashMap<String, Any> {

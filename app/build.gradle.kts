@@ -1,5 +1,3 @@
-import java.util.Properties
-
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -17,8 +15,6 @@ plugins {
     // google firebase
     id("com.google.gms.google-services")
 }
-
-
 
 android {
     namespace = "ch.epfl.cs311.wanderwave"
@@ -115,7 +111,6 @@ dependencies {
     implementation("com.google.firebase:firebase-database-ktx:20.3.0")
     implementation("com.google.firebase:firebase-firestore:24.10.0")
     implementation("com.google.android.play:core-ktx:1.7.0")
-
 
     implementation(libs.maps.compose)
 

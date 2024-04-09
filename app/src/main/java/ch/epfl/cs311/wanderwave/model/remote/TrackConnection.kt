@@ -1,11 +1,10 @@
 package ch.epfl.cs311.wanderwave.model.remote
 
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.data.toTrack
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
-class TrackConnection : FirebaseConnectionInt<Track, Track> {
+class TrackConnection : FirebaseConnection<Track, Track> {
 
   // THe goal is to have the Id of the firebase document to match the id of the spotify track
 
@@ -16,12 +15,12 @@ class TrackConnection : FirebaseConnectionInt<Track, Track> {
   private val db = FirebaseFirestore.getInstance()
 
   // Document to Track
-  override fun documentToItem(document: DocumentSnapshot): Track {
-    return document.toTrack()
+  override fun documentToItem(document: DocumentSnapshot): Track? {
+    return Track.from(document)
   }
 
   override fun itemToHash(track: Track): HashMap<String, Any> {
-    return track.toHash()
+    return track.toHashMao()
   }
 
   fun addList(tracks: List<Track>) {

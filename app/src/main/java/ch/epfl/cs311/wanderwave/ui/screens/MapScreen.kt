@@ -23,7 +23,6 @@ import com.google.maps.android.compose.MarkerState
 fun MapScreen() {
   val viewModel: MapViewModel = hiltViewModel()
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-  // addMockBeacons()
   GoogleMap(modifier = Modifier.testTag("mapScreen")) { DisplayBeacons(uiState.beacons) }
 }
 
@@ -45,28 +44,5 @@ fun DisplayBeacons(beacons: List<Beacon>) {
         title = it.id,
         // icon = customIcon,
     )
-  }
-}
-
-fun addMockBeacons() {
-  val db = Firebase.firestore
-  val collection = db.collection("beacons")
-
-  val latitudes = listOf(46.51857556996283, 46.51857417773428, 46.52298529087412, 46.51846723837138)
-  val longitudes =
-      listOf(6.5631609607190775, 6.5619195033506434, 6.564644391110982, 6.568149323030634)
-  val names = listOf("INM", "BC", "STCC", "RLC")
-
-  for (i in 0..4) {
-    val beacon = BeaconEntity(names[i], latitudes[i], longitudes[i])
-    val beaconDoc =
-        hashMapOf(
-            "name" to beacon.id, "latitude" to beacon.latitude, "longitude" to beacon.longitude)
-    collection
-        .add(beaconDoc)
-        .addOnSuccessListener { documentReference ->
-          Log.d(ContentValues.TAG, "DocumentSnapshot written with ID: ${documentReference.id}")
-        }
-        .addOnFailureListener { e -> Log.w(ContentValues.TAG, "Error adding document", e) }
   }
 }

@@ -13,15 +13,20 @@ data class Track(
     /** Artist of the track */
     val artist: String,
 ) {
-  fun toHash(): HashMap<String, Any> {
+  fun toHashMao(): HashMap<String, Any> {
     return hashMapOf("id" to id, "title" to title, "artist" to artist)
   }
-}
 
-fun DocumentSnapshot.toTrack(): Track {
-  val id = getString("id") ?: return Track("", "", "")
-  val title = getString("title") ?: return Track("", "", "")
-  val artist = getString("artist") ?: return Track("", "", "")
-
-  return Track(id, title, artist)
+  companion object {
+    fun from(document: DocumentSnapshot): Track? {
+      return if (document.exists()) {
+        Track(
+            id = document.id,
+            title = document.getString("title") ?: "",
+            artist = document.getString("artist") ?: "")
+      } else {
+        null
+      }
+    }
+  }
 }
