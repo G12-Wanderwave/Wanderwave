@@ -10,7 +10,10 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -69,6 +72,7 @@ fun MapScreen() {
   }
 
   val cameraPositionState: CameraPositionState = rememberCameraPositionState() {}
+  var mapIsLoaded = remember { mutableStateOf(false) }
 
   GoogleMap(
       modifier = Modifier.testTag("mapScreen"),
@@ -77,6 +81,7 @@ fun MapScreen() {
               isMyLocationEnabled = permissionState.allPermissionsGranted,
           ),
       cameraPositionState = cameraPositionState,
+      onMapLoaded = { mapIsLoaded.value = true }
   ) {}
 
   if (needToRequestPermissions(permissionState)) {
@@ -91,8 +96,10 @@ fun MapScreen() {
         })
   } else {
     val location = getLastKnownLocation(LocalContext.current)
-    cameraPositionState.move(
+    LaunchedEffect(!needToRequestPermissions(permissionState), mapIsLoaded.value) {
+      cameraPositionState.move(
         CameraUpdateFactory.newCameraPosition(
-            CameraPosition.fromLatLngZoom(location ?: LatLng(0.0, 0.0), 15f)))
+          CameraPosition.fromLatLngZoom(location ?: LatLng(0.0, 0.0), 15f)))
+    }
   }
 }
