@@ -48,6 +48,11 @@ class AppBottomBarTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
         performClick()
         verify { mockNavigationActions.navigateToTopLevel(Route.TRACK_LIST) }
       }
+      mapScreenButton {
+        assertIsDisplayed()
+        performClick()
+        verify { mockNavigationActions.navigateToTopLevel(Route.MAP) }
+      }
     }
   }
 
