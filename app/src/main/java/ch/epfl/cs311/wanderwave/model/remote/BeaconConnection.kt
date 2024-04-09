@@ -47,8 +47,6 @@ class BeaconConnection : FirebaseConnection<Beacon, Beacon> {
         .document(itemId)
         .get()
         .addOnSuccessListener { document ->
-          Log.d("Firestore", "Document: $document")
-          Log.d("Firestore", "test : ${document.data}")
           if (document != null && document.data != null) {
             documentToItem(document)?.let{
               beacon ->
