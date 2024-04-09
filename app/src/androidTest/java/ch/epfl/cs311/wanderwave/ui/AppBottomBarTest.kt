@@ -1,10 +1,10 @@
 package ch.epfl.cs311.wanderwave.ui
 
-import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
+import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
 import ch.epfl.cs311.wanderwave.ui.screens.AppBottomBarScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LaunchScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
