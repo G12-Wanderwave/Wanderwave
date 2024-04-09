@@ -23,8 +23,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class AppTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
 
-  @get:Rule
-  val composeTestRule = createAndroidComposeRule<MainActivity>()
+  @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
 
   @Test
   fun appIsDisplayed() = run { onComposeScreen<AppScreen>(composeTestRule) { assertIsDisplayed() } }
@@ -55,7 +54,6 @@ class AppTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport
       mapScreenButton.performClick()
     }
     onComposeScreen<MapScreen>(composeTestRule) { assertIsDisplayed() }
-
 
     fun appStartsAtConnectSpotifyScreen() = run {
       onComposeScreen<SpotifyConnectScreen>(composeTestRule) { isDisplayed() }
