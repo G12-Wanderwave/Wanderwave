@@ -46,11 +46,8 @@ class BeaconConnectionTest {
     every { documentTrack["artist"] } returns "someArtist"
     // Set up the documentTrack mock to return some beacons
     every { documentTrack.exists() } returns true
-    every { documentTrack.get("location") } returns mapOf(
-        "latitude" to 1.0,
-        "longitude" to 1.0,
-        "name" to "Test Location"
-    )
+    every { documentTrack.get("location") } returns
+        mapOf("latitude" to 1.0, "longitude" to 1.0, "name" to "Test Location")
   }
 
   @Test
