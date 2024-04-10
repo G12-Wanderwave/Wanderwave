@@ -74,7 +74,7 @@ class BeaconConnection : FirebaseConnection<Beacon, Beacon> {
     return dataFlow.filterNotNull()
   }
 
-  override fun itemToHash(beacon: Beacon): HashMap<String, Any> {
+  override fun itemToMap(beacon: Beacon): Map<String, Any> {
     val beaconMap: HashMap<String, Any> =
         hashMapOf(
             "id" to beacon.id,

@@ -18,10 +18,10 @@ interface FirebaseConnection<T, U> {
 
   fun documentToItem(document: DocumentSnapshot): T?
 
-  fun itemToHash(item: T): HashMap<String, Any>
+  fun itemToMap(item: T): Map<String, Any>
 
   fun addItem(item: T) {
-    val itemMap = itemToHash(item)
+    val itemMap = itemToMap(item)
 
     db.collection(collectionName)
         .add(itemMap)
@@ -31,7 +31,7 @@ interface FirebaseConnection<T, U> {
 
   fun addItemWithId(item: T) {
     val itemId = getItemId(item)
-    val itemMap = itemToHash(item)
+    val itemMap = itemToMap(item)
 
     db.collection(collectionName)
         .document(itemId)
@@ -42,7 +42,7 @@ interface FirebaseConnection<T, U> {
 
   fun updateItem(item: T) {
     val itemId = getItemId(item)
-    val itemMap = itemToHash(item)
+    val itemMap = itemToMap(item)
 
     db.collection(collectionName)
         .document(itemId)

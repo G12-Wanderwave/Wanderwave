@@ -19,7 +19,7 @@ class TrackConnection : FirebaseConnection<Track, Track> {
     return Track.from(document)
   }
 
-  override fun itemToHash(track: Track): HashMap<String, Any> {
+  override fun itemToMap(track: Track): Map<String, Any> {
     return track.toMap()
   }
 

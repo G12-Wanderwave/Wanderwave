@@ -34,7 +34,7 @@ class ProfileConnection : FirebaseConnection<Profile, Profile> {
     return Profile.from(document)
   }
 
-  override fun itemToHash(profile: Profile): HashMap<String, Any> {
+  override fun itemToMap(profile: Profile): Map<String, Any> {
     val profileMap: HashMap<String, Any> =
         hashMapOf(
             "firstName" to profile.firstName,
