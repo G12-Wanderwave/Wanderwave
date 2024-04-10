@@ -13,7 +13,7 @@ import org.junit.Before
 import org.junit.Test
 
 class TrackConnectionTest {
-
+  // backend testing of the track connection
   private lateinit var trackConnection: TrackConnection
 
   @Before
