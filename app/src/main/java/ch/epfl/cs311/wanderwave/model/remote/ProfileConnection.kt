@@ -5,13 +5,14 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
-class ProfileConnection : FirebaseConnectionInt<Profile, Profile> {
+class ProfileConnection(private val database: FirebaseFirestore? = null) :
+    FirebaseConnection<Profile, Profile>() {
 
   override val collectionName: String = "users"
 
   override val getItemId = { profile: Profile -> profile.firebaseUid }
 
-  private val db = FirebaseFirestore.getInstance()
+  override val db = database ?: super.db
 
   fun isUidExisting(spotifyUid: String, callback: (Boolean, Profile?) -> Unit) {
     Log.d("ProfileConnection", "Checking if Spotify UID exists in Firestore...")
@@ -30,25 +31,11 @@ class ProfileConnection : FirebaseConnectionInt<Profile, Profile> {
   }
 
   // Document to Profile
-  override fun documentToItem(document: DocumentSnapshot): Profile {
-    val uid = document.id
-    val spotifyUid = document.getString("spotifyUid") ?: ""
-    val firstname = document.getString("firstname") ?: "Untitled"
-    val lastname = document.getString("lastname") ?: "Untitled"
-    val description = document.getString("description") ?: "No description"
-    val numberOfLikes = document.getLong("numberOfLikes")?.toInt() ?: 0
-    val isPublic = document.getBoolean("isPublic") ?: false
-    return Profile(
-        firstName = firstname,
-        lastName = lastname,
-        description = description,
-        firebaseUid = uid,
-        spotifyUid = spotifyUid,
-        numberOfLikes = numberOfLikes,
-        isPublic = isPublic)
+  override fun documentToItem(document: DocumentSnapshot): Profile? {
+    return Profile.from(document)
   }
 
-  override fun itemToHash(profile: Profile): HashMap<String, Any> {
+  override fun itemToMap(profile: Profile): Map<String, Any> {
     val profileMap: HashMap<String, Any> =
         hashMapOf(
             "firstName" to profile.firstName,
