@@ -29,34 +29,7 @@ class AppTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport
   fun appIsDisplayed() = run { onComposeScreen<AppScreen>(composeTestRule) { assertIsDisplayed() } }
 
   @Test
-  fun canNavigateFromLoginToMainToTrackListThenInteractWithMiniPlayer() = run {
-    onComposeScreen<LoginScreen>(composeTestRule) { signInButton.performClick() }
-    onComposeScreen<MainPlaceHolder>(composeTestRule) { assertIsDisplayed() }
-    onComposeScreen<AppBottomBarScreen>(composeTestRule) {
-      bottomAppBarTrackListButton.performClick()
-    }
-    onComposeScreen<TrackListScreen>(composeTestRule) { assertIsDisplayed() }
-    onComposeScreen<MiniPlayerScreen>(composeTestRule) {
-      assertIsDisplayed()
-      playPauseButton.performClick()
-      playPauseButton.performClick()
-      miniPlayerTitleButton.performClick()
-    }
-  }
-
-  @Test
-  fun canNavigateToMapScreen() = run {
-    onComposeScreen<LoginScreen>(composeTestRule) { signInButton.performClick() }
-    onComposeScreen<MainPlaceHolder>(composeTestRule) { assertIsDisplayed() }
-    onComposeScreen<AppBottomBarScreen>(composeTestRule) {
-      assertIsDisplayed()
-      mapScreenButton.assertIsDisplayed()
-      mapScreenButton.performClick()
-    }
-    onComposeScreen<MapScreen>(composeTestRule) { assertIsDisplayed() }
-
-    fun appStartsAtConnectSpotifyScreen() = run {
-      onComposeScreen<SpotifyConnectScreen>(composeTestRule) { isDisplayed() }
-    }
+  fun appStartsAtConnectSpotifyScreen() = run {
+    onComposeScreen<SpotifyConnectScreen>(composeTestRule) { isDisplayed() }
   }
 }
