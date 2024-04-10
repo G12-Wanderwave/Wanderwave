@@ -1,7 +1,6 @@
 package ch.epfl.cs311.wanderwave.model
 
 import ch.epfl.cs311.wanderwave.model.local.BeaconEntity
-import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -13,13 +12,9 @@ import org.junit.Test
 class LocalRepositoryTest {
 
   @get:Rule val mockkRule = MockKRule(this)
-  private lateinit var beaconConnection: BeaconConnection
   @RelaxedMockK private lateinit var repository: ProfileRepositoryImpl
 
-  @Before
-  fun setup() {
-    beaconConnection = BeaconConnection()
-  }
+  @Before fun setup() {}
 
   @Test
   fun beaconEntityIsCorrectlyInitialized() {

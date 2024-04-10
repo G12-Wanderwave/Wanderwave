@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackListItem
-import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
 @Composable
 fun TrackListScreen(
