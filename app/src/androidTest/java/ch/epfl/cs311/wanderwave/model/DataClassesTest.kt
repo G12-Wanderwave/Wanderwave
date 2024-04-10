@@ -105,6 +105,37 @@ class DataClassesTest {
   }
 
   @Test
+  fun documentToBeaconExistWithNullValues() {
+    every { document.exists() } returns true
+    every { document.get("location") } returns null
+
+    val beacon = Beacon.from(document)
+    // assert if the beacon is not null
+    assert(beacon != null)
+    // assert if the beacon has the default values
+    assertEquals(Location(0.0, 0.0), beacon!!.location)
+
+    every { document.get("location") } returns
+        mapOf("latitude" to null, "longitude" to null, "name" to null)
+
+    assertEquals(Location(0.0, 0.0), beacon!!.location)
+  }
+
+  @Test
+  fun beaconToMap() {
+    val location = Location(1.0, 1.0, "Test Location")
+    val beacon = Beacon("Test Id", location, listOf())
+    val beaconMap: Map<String, Any> = beacon.toMap()
+    // test beacon behaviour
+    assertEquals("Test Id", beacon.id)
+    assertEquals(location, beacon.location)
+    assertEquals(listOf<Track>(), beacon.tracks)
+    assertEquals("Test Id", beaconMap["id"])
+    assertEquals(location.toMap(), beaconMap["location"])
+    assertEquals(listOf<Track>(), beaconMap["tracks"])
+  }
+
+  @Test
   fun basicVariablesLocation() {
     val location = Location(1.0, 1.0, "Test Location")
     val latLng: LatLng = location.toLatLng()

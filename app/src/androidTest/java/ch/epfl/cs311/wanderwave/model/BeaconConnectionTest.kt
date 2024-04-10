@@ -5,6 +5,8 @@ import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import io.mockk.MockKAnnotations
+import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.flow.first
@@ -21,8 +23,11 @@ public class BeaconConnectionTest {
   @get:Rule val mockkRule = MockKRule(this)
   private lateinit var beaconConnection: BeaconConnection
 
+  @RelaxedMockK private lateinit var beaconConnectionMock: BeaconConnection
+
   @Before
   fun setup() {
+    MockKAnnotations.init(this)
     beaconConnection = BeaconConnection()
   }
 
@@ -41,6 +46,36 @@ public class BeaconConnectionTest {
       Log.d("Firestore", "$retrievedBeacon $beacon")
       assert(beacon == retrievedBeacon)
     }
+  }
+
+  @Test
+  fun testAddItem() = runBlocking {
+    // Mock data
+    val beacon =
+        Beacon(
+            id = "testBeacon",
+            location = Location(1.0, 1.0, "Test Location"),
+            tracks = listOf(Track("testTrack", "Test Title", "Test Artist")))
+
+    // Call the function under test
+    beaconConnection.addItem(beacon)
+
+    // No verification is needed for interactions with the real object
+  }
+
+  @Test
+  fun testUpdateItem() = runBlocking {
+    // Mock data
+    val beacon =
+        Beacon(
+            id = "testBeacon",
+            location = Location(1.0, 1.0, "Test Location"),
+            tracks = listOf(Track("testTrack", "Test Title", "Test Artist")))
+
+    // Call the function under test
+    beaconConnection.updateItem(beacon)
+
+    // No verification is needed for interactions with the real object
   }
 
   // If someone knows how to deal with the flow already being null and how to test it, please let me
