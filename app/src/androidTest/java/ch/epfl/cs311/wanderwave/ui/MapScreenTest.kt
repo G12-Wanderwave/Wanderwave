@@ -27,7 +27,7 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   @Test
   fun map_is_display_and_not_circular() = run {
     ComposeScreen.onComposeScreen<MapScreen>(composeTestRule) {
-      circularProgressIndicator { assertIsNotDisplayed() }
+      circularProgressIndicator { assertIsNotDisplayed() } // This line is the difference
       map { assertIsDisplayed() }
     }
   }
