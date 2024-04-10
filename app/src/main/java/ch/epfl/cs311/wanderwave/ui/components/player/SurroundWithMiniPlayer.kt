@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
+import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import javax.inject.Singleton
 import kotlinx.coroutines.delay
 
