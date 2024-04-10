@@ -72,7 +72,6 @@ fun ProfileScreen() {
           onProfileChange = { updatedProfile -> viewModel.updateProfile(updatedProfile) })
     } else {
       Box(modifier = Modifier.fillMaxWidth()) {
-
         VisitCard(Modifier, currentProfile)
         ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
         ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create)
