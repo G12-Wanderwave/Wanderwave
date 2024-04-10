@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "227203172943",
+    "project_id": "wanderwave-95743",
+    "storage_bucket": "wanderwave-95743.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:227203172943:android:f09fb208811e323c57b83a",
+        "android_client_info": {
+          "package_name": "ch.epfl.cs311.wanderwave"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "227203172943-no0j2ijha48ef9n8hblletrjtpi6p714.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCj5GD6TVIZMjn6snBb4VkjhpeuQwPp18M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "227203172943-no0j2ijha48ef9n8hblletrjtpi6p714.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,5 +1,5 @@
 [versions]
-agp = "8.3.0"
+agp = "8.3.1"
 hiltNavigationCompose = "1.2.0"
 googleHiltAndroidCompiler = "2.49"
 hiltAndroidTestingVersion = "2.49"
@@ -10,6 +10,8 @@ hiltAndroid = "2.49"
 kaspressoAllureSupport = "1.4.3"
 kaspresso = "1.4.3"
 kaspressoComposeSupport = "1.4.1"
+auth = "2.1.0"
+gson = "2.10.1"
 kotlin = "1.9.0"
 coreKtx = "1.12.0"
 junit = "4.13.2"
@@ -17,7 +19,7 @@ junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 lifecycleRuntimeKtx = "2.7.0"
 activityCompose = "1.8.2"
-composeBom = "2023.08.00"
+composeBom = "2024.03.00"
 lifecycleRuntimeCompose = "2.7.0"
 appcompat = "1.6.1"
 mapsCompose = "4.3.3"
@@ -28,6 +30,9 @@ navigationCompose = "2.7.7"
 roomRuntime = "2.6.1"
 secretsGradlePlugin = "2.0.1"
 uiTestJunit4 = "1.4.0"
+firebaseFirestoreKtx = "24.11.0"
+navigationTesting = "2.7.7"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -51,6 +56,8 @@ mockk-agent = { module = "io.mockk:mockk-agent", version.ref = "mockkAgent" }
 mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockkAndroid" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
+spotify-auth = { module = "com.spotify.android:auth", version.ref = "auth" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -66,7 +73,10 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
+
 ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "uiTestJunit4" }
+androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
