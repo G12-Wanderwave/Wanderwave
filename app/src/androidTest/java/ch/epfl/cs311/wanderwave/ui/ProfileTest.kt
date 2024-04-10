@@ -10,6 +10,7 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
 import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.junit4.MockKRule
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -20,6 +21,8 @@ import org.junit.runner.RunWith
 class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
 
   @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
+
+  @get:Rule val mockkRule = MockKRule(this)
 
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
