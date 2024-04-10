@@ -29,15 +29,7 @@ class MainPlaceHolderTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCo
   }
 
   @Test
-  fun mainPlaceHolderIsDisplayedAndSignOutButtonClickNavigatesToLogin() = run {
-    onComposeScreen<MainPlaceHolder>(composeTestRule) {
-      assertIsDisplayed()
-      //      signOutButton {
-      //        assertIsDisplayed()
-      //        performClick()
-      //      }
-    }
-    // Verify that navigateTo is called with the correct argument
-    //    verify { mockNavigationActions.navigateToTopLevel(Route.LOGIN) }
+  fun mainPlaceHolderIsDisplayed() = run {
+    onComposeScreen<MainPlaceHolder>(composeTestRule) { assertIsDisplayed() }
   }
 }
