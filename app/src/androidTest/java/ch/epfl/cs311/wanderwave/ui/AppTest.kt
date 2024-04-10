@@ -7,10 +7,7 @@ import ch.epfl.cs311.wanderwave.MainActivity
 import ch.epfl.cs311.wanderwave.ui.screens.AppScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
-import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
 import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
-import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
-import ch.epfl.cs311.wanderwave.ui.screens.components.MiniPlayerScreen
 import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
