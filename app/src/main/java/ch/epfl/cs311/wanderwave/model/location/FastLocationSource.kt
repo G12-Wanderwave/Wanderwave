@@ -16,8 +16,8 @@ class FastLocationSource(private val context: Context) : LocationSource, Locatio
 
   @RequiresApi(Build.VERSION_CODES.S)
   @RequiresPermission(
-    allOf =
-    [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION])
+      allOf =
+          [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION])
   override fun activate(onLocationChangedListener: LocationSource.OnLocationChangedListener) {
     listener = onLocationChangedListener
     locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager

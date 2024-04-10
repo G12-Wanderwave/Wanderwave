@@ -4,10 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Location
-import android.location.LocationListener
 import android.location.LocationManager
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -23,18 +20,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.LocationSource
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
@@ -83,9 +77,7 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
   val mapIsLoaded = remember { mutableStateOf(false) }
 
   DisposableEffect(Unit) {
-    onDispose {
-      viewModel.cameraPosition.value = cameraPositionState.position
-    }
+    onDispose { viewModel.cameraPosition.value = cameraPositionState.position }
   }
 
   GoogleMap(
@@ -118,14 +110,12 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
       if (location != null && mapIsLoaded.value) {
         val cameraPosition = viewModel.cameraPosition.value
         if (cameraPosition != null) {
-          cameraPositionState.move(
-            CameraUpdateFactory.newCameraPosition(cameraPosition))
+          cameraPositionState.move(CameraUpdateFactory.newCameraPosition(cameraPosition))
         } else {
           cameraPositionState.move(
-            CameraUpdateFactory.newCameraPosition(CameraPosition.fromLatLngZoom(location, 15f)))
+              CameraUpdateFactory.newCameraPosition(CameraPosition.fromLatLngZoom(location, 15f)))
         }
       }
     }
   }
 }
-
