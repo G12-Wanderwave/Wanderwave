@@ -6,7 +6,6 @@ import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
-import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import kotlin.system.measureTimeMillis
@@ -23,13 +22,11 @@ public class BeaconConnectionTest {
 
   @get:Rule val mockkRule = MockKRule(this)
   private lateinit var beaconConnection: BeaconConnection
-  private lateinit var beaconViewModel: BeaconViewModel
   @RelaxedMockK private lateinit var repository: ProfileRepositoryImpl
 
   @Before
   fun setup() {
-    beaconViewModel = BeaconViewModel(repository)
-    beaconConnection = beaconViewModel.beaconConnection
+    beaconConnection = BeaconConnection()
   }
 
   @Test
