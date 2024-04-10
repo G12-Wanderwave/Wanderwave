@@ -23,6 +23,13 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 
+/**
+ * A screen that displays a map if loaded, else display a CircularProgressIndicator.
+ *
+ * @author Menzo Bouaissi
+ * @since 1.0
+ * @last update 1.0
+ */
 @Preview
 @Composable
 fun MapScreen() {
