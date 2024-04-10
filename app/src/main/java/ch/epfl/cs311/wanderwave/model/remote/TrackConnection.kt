@@ -2,8 +2,9 @@ package ch.epfl.cs311.wanderwave.model.remote
 
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 
-class TrackConnection : FirebaseConnection<Track, Track>() {
+class TrackConnection(private val database: FirebaseFirestore? = null) : FirebaseConnection<Track, Track>() {
 
   // THe goal is to have the Id of the firebase document to match the id of the spotify track
 
@@ -11,7 +12,7 @@ class TrackConnection : FirebaseConnection<Track, Track>() {
 
   override val getItemId = { track: Track -> track.id }
 
-  // private val db = FirebaseFirestore.getInstance()
+  override val db = database ?: super.db
 
   // Document to Track
   override fun documentToItem(document: DocumentSnapshot): Track? {

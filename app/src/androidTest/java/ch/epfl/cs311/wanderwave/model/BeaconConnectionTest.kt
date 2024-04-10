@@ -22,7 +22,6 @@ public class BeaconConnectionTest {
 
   @get:Rule val mockkRule = MockKRule(this)
   private lateinit var beaconConnection: BeaconConnection
-  @RelaxedMockK private lateinit var repository: ProfileRepositoryImpl
 
   @Before
   fun setup() {
