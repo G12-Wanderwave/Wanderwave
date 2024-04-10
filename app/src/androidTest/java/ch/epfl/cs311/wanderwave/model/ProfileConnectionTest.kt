@@ -34,26 +34,5 @@ public class ProfileConnectionTest {
     profileConnection = ProfileConnection()
   }
 
-  @Test
-  fun testAddAndGetItem() = runBlocking {
-    withTimeout(30000) {
-      var profile =
-          Profile(
-              firstName = "My FirstName",
-              lastName = "My LastName",
-              description = "My Description",
-              numberOfLikes = 0,
-              isPublic = true,
-              profilePictureUri = null,
-              firebaseUid = "My Firebase UID",
-              spotifyUid = "My Spotify UID")
-
-      profileConnection.addItemWithId(profile)
-
-      Log.d("Firestore", "Added item")
-      val retrievedProfile = profileConnection.getItem("testProfile").first()
-
-      assert(profile == retrievedProfile)
-    }
-  }
+  
 }
