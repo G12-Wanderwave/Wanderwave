@@ -23,7 +23,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
+import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
@@ -63,7 +65,7 @@ fun getLastKnownLocation(context: Context): LatLng? {
 @SuppressLint("MissingPermission")
 @Composable
 @Preview
-fun MapScreen() {
+fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
   val permissionState =
       rememberMultiplePermissionsState(
           listOf(
@@ -78,14 +80,13 @@ fun MapScreen() {
   val cameraPositionState: CameraPositionState = rememberCameraPositionState() {}
   val mapIsLoaded = remember { mutableStateOf(false) }
 
-  val locationSource = CustomLocationSource(LocalContext.current)
   GoogleMap(
       modifier = Modifier.testTag("mapScreen"),
       properties =
           MapProperties(
               isMyLocationEnabled = permissionState.allPermissionsGranted,
           ),
-      locationSource = locationSource,
+      locationSource = viewModel.locationSource,
       cameraPositionState = cameraPositionState,
       onMapLoaded = { mapIsLoaded.value = true }) {}
 
@@ -110,29 +111,3 @@ fun MapScreen() {
   }
 }
 
-class CustomLocationSource(private val context: Context) : LocationSource, LocationListener {
-  private var listener: LocationSource.OnLocationChangedListener? = null
-  private var locationManager: LocationManager? = null
-
-  @RequiresApi(Build.VERSION_CODES.S)
-  @RequiresPermission(
-      allOf =
-          [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION])
-  override fun activate(onLocationChangedListener: LocationSource.OnLocationChangedListener) {
-    listener = onLocationChangedListener
-    locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    println("Location source activated. Providers: ${locationManager?.allProviders}")
-    locationManager?.requestLocationUpdates(LocationManager.FUSED_PROVIDER, 0, 0f, this)
-  }
-
-  override fun deactivate() {
-    locationManager?.removeUpdates(this)
-    locationManager = null
-    listener = null
-  }
-
-  override fun onLocationChanged(location: Location) {
-    println("Location changed: $location")
-    listener?.onLocationChanged(location)
-  }
-}

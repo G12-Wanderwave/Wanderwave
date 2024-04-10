@@ -4,15 +4,22 @@ import android.Manifest
 import android.content.Context
 import android.location.Location
 import android.location.LocationManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
+import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
+import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit4.MockKRule
+import io.mockk.mockk
+import io.mockk.mockkObject
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -22,6 +29,10 @@ import org.junit.runner.RunWith
 class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
 
   @get:Rule val composeTestRule = createComposeRule()
+
+  @get:Rule val mockkRule = MockKRule(this)
+
+  private lateinit var mockViewModel: MapViewModel
 
   @get:Rule
   val permissionRule: GrantPermissionRule =
@@ -37,7 +48,10 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
 
   @Before
   fun setup() {
-    composeTestRule.setContent { MapScreen() }
+    composeTestRule.setContent {
+      val viewModel = MapViewModel(FastLocationSource(LocalContext.current))
+      MapScreen(viewModel)
+    }
 
     val location =
         Location(LocationManager.GPS_PROVIDER).apply {
