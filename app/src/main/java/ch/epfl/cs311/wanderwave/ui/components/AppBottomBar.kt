@@ -40,14 +40,14 @@ val mapIcon: ImageVector = Icons.Default.LocationOn
 @Composable
 fun AppBottomBar(navActions: NavigationActions) {
   BottomAppBar(
-      modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface),
+      modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).testTag("appBottomBar"),
   ) {
     // Assumes TOP_LEVEL_DESTINATIONS are in the order of Track List, Main, and Map for indexing
     IconButton(
         onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[0].route) },
         modifier =
             Modifier.weight(1f) // Spread the icons evenly across the BottomAppBar
-                .testTag("bottomAppBarIconTrackList")) {
+                .testTag("bottomAppBarTrackListButton")) {
           Icon(
               trackListIcon,
               contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[0].textId))
@@ -57,7 +57,7 @@ fun AppBottomBar(navActions: NavigationActions) {
 
     IconButton(
         onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[1].route) },
-        modifier = Modifier.weight(1f).testTag("bottomAppBarIconMain")) {
+        modifier = Modifier.weight(1f).testTag("bottomAppBarMainPlaceHolderButton")) {
           Icon(mainIcon, contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[1].textId))
         }
 
@@ -65,7 +65,7 @@ fun AppBottomBar(navActions: NavigationActions) {
 
     IconButton(
         onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[2].route) },
-        modifier = Modifier.weight(1f).testTag("bottomAppBarIconMap")) {
+        modifier = Modifier.weight(1f).testTag("bottomAppBarMapButton")) {
           Icon(mapIcon, contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[2].textId))
         }
   }
