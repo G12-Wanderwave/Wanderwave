@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.ui
 import android.Manifest
 import android.content.Context
 import android.location.Location
+import android.location.LocationListener
 import android.location.LocationManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -11,14 +12,19 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.navigation.Route
+import ch.epfl.cs311.wanderwave.ui.screens.AppScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
+import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
+import com.google.android.gms.maps.LocationSource
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.verify
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -32,6 +38,8 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   @get:Rule val mockkRule = MockKRule(this)
 
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
+
+  @RelaxedMockK private lateinit var mockMapViewModel: MapViewModel
 
   @get:Rule
   val permissionRule: GrantPermissionRule =
@@ -48,8 +56,7 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   @Before
   fun setup() {
     composeTestRule.setContent {
-      val viewModel = MapViewModel(FastLocationSource(LocalContext.current))
-      MapScreen(mockNavigationActions, viewModel)
+      MapScreen(mockNavigationActions, mockMapViewModel)
     }
 
     val location =
@@ -70,5 +77,13 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   @Test
   fun launchingMapScreenDoesNotThrowError() = run {
     onComposeScreen<MapScreen>(composeTestRule) { assertIsDisplayed() }
+  }
+
+  @Test
+  fun locationCallbackIsCalled() = run {
+    val viewModel = mockMapViewModel
+    verify {
+      viewModel.locationSource
+    }
   }
 }
