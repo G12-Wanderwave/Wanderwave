@@ -63,6 +63,32 @@ class DataClassesTest {
   }
 
   @Test
+  fun documentToProfileExistWithNullValues() {
+    every { document.exists() } returns true
+    every { document.getString("firstName") } returns null
+    every { document.getString("lastName") } returns null
+    every { document.getString("description") } returns null
+    every { document.getLong("numberOfLikes") } returns null
+    every { document.getBoolean("isPublic") } returns null
+    every { document.getString("profilePictureUri") } returns null
+    every { document.getString("spotifyUid") } returns null
+    every { document.getString("firebaseUid") } returns null
+
+    val profile = Profile.from(document)
+    // assert if the profile is not null
+    assert(profile != null)
+    // assert if the profile has the default values
+    assertEquals("", profile!!.firstName)
+    assertEquals("", profile.lastName)
+    assertEquals("", profile.description)
+    assertEquals(0, profile.numberOfLikes)
+    assertEquals(false, profile.isPublic)
+    assertEquals(null, profile.profilePictureUri)
+    assertEquals("", profile.spotifyUid)
+    assertEquals("", profile.firebaseUid)
+  }
+
+  @Test
   fun documentSnapshotToBeacon() {
     every { document.exists() } returns true
 
