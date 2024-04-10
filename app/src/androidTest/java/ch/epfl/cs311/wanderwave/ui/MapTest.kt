@@ -27,11 +27,4 @@ class MapTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport
   @Test
   fun mapIsDisplayed() = run { onComposeScreen<MapScreen>(composeTestRule) { assertIsDisplayed() } }
 
-  @Test
-  fun beaconsAreDisplayed() = run {
-    onComposeScreen<MapScreen>(composeTestRule) {
-      // Note: There is unfortunately no way to check whether markers are displayed on the map
-      // due to the way GoogleMaps handles them.
-    }
-  }
 }
