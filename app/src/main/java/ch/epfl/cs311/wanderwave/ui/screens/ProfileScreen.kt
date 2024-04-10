@@ -65,13 +65,14 @@ fun ProfileScreen() {
     viewModel.createSpecificSongList("CHOSEN_SONGS")
   }
 
-  Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+  Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen")) {
     if (isInEditMode) {
       EditProfileScreen(
           profile = currentProfile,
           onProfileChange = { updatedProfile -> viewModel.updateProfile(updatedProfile) })
     } else {
       Box(modifier = Modifier.fillMaxWidth()) {
+
         VisitCard(Modifier, currentProfile)
         ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
         ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create)
