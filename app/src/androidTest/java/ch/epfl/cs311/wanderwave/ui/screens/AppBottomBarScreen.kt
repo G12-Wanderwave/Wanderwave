@@ -7,7 +7,7 @@ class AppBottomBarScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
     ComposeScreen<AppBottomBarScreen>(
         semanticsProvider = semanticsProvider, viewBuilderAction = { hasTestTag("appBottomBar") }) {
 
-  val bottomAppBarTrackListButton = onNode { hasTestTag("bottomAppBarButton") }
-  val bottomAppBarMainPlaceHolderButton = onNode { hasTestTag("bottomAppBarButton") }
-  val mapScreenButton = onNode { hasTestTag("bottomAppBarButton") }
+  val bottomAppBarTrackListButton = onNode { hasTestTag("bottomAppBarTrackListButton") }
+  val bottomAppBarMainPlaceHolderButton = onNode { hasTestTag("bottomAppBarMainPlaceHolderButton") }
+  val mapScreenButton = onNode { hasTestTag("bottomAppBarMapButton") }
 }
