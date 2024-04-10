@@ -17,7 +17,7 @@ import org.junit.Rule
 import org.junit.Test
 
 class DataClassesTest {
-
+  // Testing of all the data classes, I think it's better to test them all together
   @get:Rule val mockkRule = MockKRule(this)
   private lateinit var beaconConnection: BeaconConnection
 
