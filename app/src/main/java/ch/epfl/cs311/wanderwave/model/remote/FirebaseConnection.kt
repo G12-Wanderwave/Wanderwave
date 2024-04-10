@@ -7,20 +7,19 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.mapNotNull
 
-interface FirebaseConnection<T, U> {
+abstract class FirebaseConnection<T, U> {
 
-  val collectionName: String
+  abstract val collectionName: String
 
-  val getItemId: (T) -> String
+  abstract val getItemId: (T) -> String
 
-  private val db: FirebaseFirestore
-    get() = FirebaseFirestore.getInstance()
+  private val db = FirebaseFirestore.getInstance()
 
-  fun documentToItem(document: DocumentSnapshot): T?
+  abstract fun documentToItem(document: DocumentSnapshot): T?
 
-  fun itemToMap(item: T): Map<String, Any>
+  abstract fun itemToMap(item: T): Map<String, Any>
 
-  fun addItem(item: T) {
+  open fun addItem(item: T) {
     val itemMap = itemToMap(item)
 
     db.collection(collectionName)
@@ -29,7 +28,7 @@ interface FirebaseConnection<T, U> {
         .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully added!") }
   }
 
-  fun addItemWithId(item: T) {
+  open fun addItemWithId(item: T) {
     val itemId = getItemId(item)
     val itemMap = itemToMap(item)
 
@@ -40,7 +39,7 @@ interface FirebaseConnection<T, U> {
         .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully added!") }
   }
 
-  fun updateItem(item: T) {
+  open fun updateItem(item: T) {
     val itemId = getItemId(item)
     val itemMap = itemToMap(item)
 
@@ -51,12 +50,12 @@ interface FirebaseConnection<T, U> {
         .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully updated!") }
   }
 
-  fun deleteItem(item: T) {
+  open fun deleteItem(item: T) {
     val itemId = getItemId(item)
     deleteItem(itemId)
   }
 
-  fun deleteItem(itemId: String) {
+  open fun deleteItem(itemId: String) {
     db.collection(collectionName)
         .document(itemId)
         .delete()
@@ -64,9 +63,9 @@ interface FirebaseConnection<T, U> {
         .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully deleted!") }
   }
 
-  fun getItem(item: T): Flow<T> = getItem(getItemId(item))
+  open fun getItem(item: T): Flow<T> = getItem(getItemId(item))
 
-  fun getItem(itemId: String): Flow<T> {
+  open fun getItem(itemId: String): Flow<T> {
     val dataFlow = MutableStateFlow<T?>(null)
     db.collection(collectionName)
         .document(itemId)

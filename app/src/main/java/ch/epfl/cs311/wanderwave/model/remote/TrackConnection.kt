@@ -4,7 +4,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
-class TrackConnection : FirebaseConnection<Track, Track> {
+class TrackConnection : FirebaseConnection<Track, Track>() {
 
   // THe goal is to have the Id of the firebase document to match the id of the spotify track
 
