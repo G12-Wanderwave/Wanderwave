@@ -1,15 +1,9 @@
 package ch.epfl.cs311.wanderwave.model
 
-import android.util.Log
-import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import io.mockk.junit4.MockKRule
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
-import org.junit.Test
 
 /*
 public constructor Profile(
@@ -33,6 +27,4 @@ public class ProfileConnectionTest {
   fun setup() {
     profileConnection = ProfileConnection()
   }
-
-  
 }
