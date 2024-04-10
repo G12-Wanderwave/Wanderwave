@@ -15,7 +15,6 @@ abstract class FirebaseConnection<T, U> {
 
   val db = FirebaseFirestore.getInstance()
 
-
   abstract fun documentToItem(document: DocumentSnapshot): T?
 
   abstract fun itemToMap(item: T): Map<String, Any>

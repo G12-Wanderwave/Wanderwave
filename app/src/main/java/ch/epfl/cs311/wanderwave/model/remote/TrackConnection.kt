@@ -2,7 +2,6 @@ package ch.epfl.cs311.wanderwave.model.remote
 
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
 
 class TrackConnection : FirebaseConnection<Track, Track>() {
 

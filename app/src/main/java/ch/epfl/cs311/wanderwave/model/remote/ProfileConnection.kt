@@ -3,7 +3,6 @@ package ch.epfl.cs311.wanderwave.model.remote
 import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
 
 class ProfileConnection : FirebaseConnection<Profile, Profile>() {
 
