@@ -13,7 +13,8 @@ abstract class FirebaseConnection<T, U> {
 
   abstract val getItemId: (T) -> String
 
-  private val db = FirebaseFirestore.getInstance()
+  val db = FirebaseFirestore.getInstance()
+
 
   abstract fun documentToItem(document: DocumentSnapshot): T?
 

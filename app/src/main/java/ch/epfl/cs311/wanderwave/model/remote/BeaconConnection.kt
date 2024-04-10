@@ -18,7 +18,7 @@ class BeaconConnection : FirebaseConnection<Beacon, Beacon>() {
 
   val trackConnection = TrackConnection()
 
-  private val db = FirebaseFirestore.getInstance()
+  // private val db = FirebaseFirestore.getInstance()
 
   // Document to Beacon
   override fun documentToItem(document: DocumentSnapshot): Beacon? {

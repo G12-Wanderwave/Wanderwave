@@ -11,7 +11,7 @@ class ProfileConnection : FirebaseConnection<Profile, Profile>() {
 
   override val getItemId = { profile: Profile -> profile.firebaseUid }
 
-  private val db = FirebaseFirestore.getInstance()
+  // private val db = FirebaseFirestore.getInstance()
 
   fun isUidExisting(spotifyUid: String, callback: (Boolean, Profile?) -> Unit) {
     Log.d("ProfileConnection", "Checking if Spotify UID exists in Firestore...")

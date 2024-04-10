@@ -12,7 +12,7 @@ class TrackConnection : FirebaseConnection<Track, Track>() {
 
   override val getItemId = { track: Track -> track.id }
 
-  private val db = FirebaseFirestore.getInstance()
+  // private val db = FirebaseFirestore.getInstance()
 
   // Document to Track
   override fun documentToItem(document: DocumentSnapshot): Track? {
