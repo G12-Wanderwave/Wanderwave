@@ -7,7 +7,6 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepositoryImpl
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
-import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase

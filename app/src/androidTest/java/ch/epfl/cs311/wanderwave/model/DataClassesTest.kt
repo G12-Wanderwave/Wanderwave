@@ -5,8 +5,6 @@ import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
-import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
-import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.DocumentSnapshot
 import io.mockk.MockKAnnotations
@@ -22,15 +20,12 @@ class DataClassesTest {
 
   @get:Rule val mockkRule = MockKRule(this)
   private lateinit var beaconConnection: BeaconConnection
-  private lateinit var beaconViewModel: BeaconViewModel
-  @RelaxedMockK private lateinit var repository: ProfileRepositoryImpl
 
   @RelaxedMockK private lateinit var document: DocumentSnapshot
 
   @Before
   fun setup() {
-    beaconViewModel = BeaconViewModel(repository)
-    beaconConnection = beaconViewModel.beaconConnection
+    beaconConnection = BeaconConnection()
 
     MockKAnnotations.init(this)
 
