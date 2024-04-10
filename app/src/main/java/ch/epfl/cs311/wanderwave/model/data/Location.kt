@@ -16,7 +16,7 @@ data class Location(
     return LatLng(latitude, longitude)
   }
 
-  fun toHashMap(): HashMap<String, Any> {
+  fun toMap(): Map<String, Any> {
     return hashMapOf("latitude" to latitude, "longitude" to longitude, "name" to name)
   }
 }

@@ -20,7 +20,7 @@ class TrackConnection : FirebaseConnection<Track, Track> {
   }
 
   override fun itemToHash(track: Track): HashMap<String, Any> {
-    return track.toHashMao()
+    return track.toMap()
   }
 
   fun addList(tracks: List<Track>) {

@@ -1,18 +1,25 @@
-package ch.epfl.cs311.wanderwave.ui
+package ch.epfl.cs311.wanderwave.model
 
+import ch.epfl.cs311.wanderwave.model.data.Beacon
+import ch.epfl.cs311.wanderwave.model.data.Location
+import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.DocumentSnapshot
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class BeaconConnectionTest {
+class DataClassesTest {
+
   @get:Rule val mockkRule = MockKRule(this)
   private lateinit var beaconConnection: BeaconConnection
   private lateinit var beaconViewModel: BeaconViewModel
@@ -46,16 +53,64 @@ class BeaconConnectionTest {
   }
 
   @Test
-  fun testViewModelBasicsVariables() {
-    // assert if the beacon is not null
-    assert(beaconViewModel.beacon != null)
-    // assert if the beaconConnection is not null
-    assert(beaconViewModel.beaconConnection != null)
+  fun documentSnapshotToProfile() {
+    every { document.exists() } returns true
+    val profile = Profile.from(document)
+    // assert if the profile is not null
+    assert(profile != null)
 
-    val hashMap = beaconViewModel.beacon.value.toMap()
+    every { document.exists() } returns false
+
+    val profile2 = Profile.from(document)
+
+    // assert if the profile is null
+    assert(profile2 == null)
+  }
+
+  @Test
+  fun documentSnapshotToBeacon() {
+    every { document.exists() } returns true
+
+    val beacon = Beacon.from(document)
     // assert if the beacon is not null
-    assert(beaconViewModel.beacon.value != null)
-    // assert if the beacon is not null
-    assert(hashMap != null)
+    assert(beacon != null)
+
+    every { document.exists() } returns false
+
+    val beacon2 = Beacon.from(document)
+
+    // assert if the beacon is null
+    assert(beacon2 == null)
+  }
+
+  @Test
+  fun basicVariablesLocation() {
+    val location = Location(1.0, 1.0, "Test Location")
+    val latLng: LatLng = location.toLatLng()
+    val hashMap: HashMap<String, Any> = location.toMap()
+    // test location behaviour
+    assertEquals(1.0, location.latitude)
+    assertEquals(1.0, location.longitude)
+    assertEquals("Test Location", location.name)
+    assertEquals(1.0, latLng.latitude)
+    assertEquals(1.0, latLng.longitude)
+    assertEquals(1.0, hashMap["latitude"])
+    assertEquals(1.0, hashMap["longitude"])
+    assertEquals("Test Location", hashMap["name"])
+  }
+
+  @Test
+  fun DocumentSnapshotToTrack() {
+    every { document.exists() } returns true
+    val track = Track.from(document)
+    // assert if the track is not null
+    assert(track != null)
+
+    every { document.exists() } returns false
+
+    val track2 = Track.from(document)
+
+    // assert if the track is null
+    assert(track2 == null)
   }
 }

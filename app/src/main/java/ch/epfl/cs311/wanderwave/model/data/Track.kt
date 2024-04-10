@@ -13,7 +13,7 @@ data class Track(
     /** Artist of the track */
     val artist: String,
 ) {
-  fun toHashMao(): HashMap<String, Any> {
+  fun toMap(): Map<String, Any> {
     return hashMapOf("id" to id, "title" to title, "artist" to artist)
   }
 

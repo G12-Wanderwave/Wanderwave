@@ -1,4 +1,4 @@
-package ch.epfl.cs311.wanderwave.ui
+package ch.epfl.cs311.wanderwave.model
 
 import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Track
