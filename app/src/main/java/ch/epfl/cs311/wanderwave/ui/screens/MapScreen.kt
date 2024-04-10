@@ -13,6 +13,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +26,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
@@ -64,8 +67,7 @@ fun getLastKnownLocation(context: Context): LatLng? {
 @OptIn(ExperimentalPermissionsApi::class)
 @SuppressLint("MissingPermission")
 @Composable
-@Preview
-fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
+fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hiltViewModel()) {
   val permissionState =
       rememberMultiplePermissionsState(
           listOf(
@@ -80,6 +82,12 @@ fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
   val cameraPositionState: CameraPositionState = rememberCameraPositionState() {}
   val mapIsLoaded = remember { mutableStateOf(false) }
 
+  DisposableEffect(Unit) {
+    onDispose {
+      viewModel.cameraPosition.value = cameraPositionState.position
+    }
+  }
+
   GoogleMap(
       modifier = Modifier.testTag("mapScreen"),
       properties =
@@ -88,7 +96,10 @@ fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
           ),
       locationSource = viewModel.locationSource,
       cameraPositionState = cameraPositionState,
-      onMapLoaded = { mapIsLoaded.value = true }) {}
+      onMapLoaded = {
+        println("Map is loaded!")
+        mapIsLoaded.value = true
+      }) {}
 
   if (needToRequestPermissions(permissionState)) {
     AlertDialog(
@@ -102,10 +113,17 @@ fun MapScreen(viewModel: MapViewModel = hiltViewModel()) {
         })
   } else {
     val location = getLastKnownLocation(LocalContext.current)
-    LaunchedEffect(location, mapIsLoaded) {
+
+    LaunchedEffect(location != null, mapIsLoaded.value) {
       if (location != null && mapIsLoaded.value) {
-        cameraPositionState.move(
+        val cameraPosition = viewModel.cameraPosition.value
+        if (cameraPosition != null) {
+          cameraPositionState.move(
+            CameraUpdateFactory.newCameraPosition(cameraPosition))
+        } else {
+          cameraPositionState.move(
             CameraUpdateFactory.newCameraPosition(CameraPosition.fromLatLngZoom(location, 15f)))
+        }
       }
     }
   }

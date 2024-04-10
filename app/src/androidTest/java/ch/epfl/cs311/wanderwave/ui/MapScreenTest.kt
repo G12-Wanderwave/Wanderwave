@@ -10,6 +10,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import com.kaspersky.components.composesupport.config.withComposeSupport
@@ -17,6 +18,7 @@ import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
 import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -32,7 +34,7 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
 
   @get:Rule val mockkRule = MockKRule(this)
 
-  private lateinit var mockViewModel: MapViewModel
+  @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
   @get:Rule
   val permissionRule: GrantPermissionRule =
@@ -50,7 +52,7 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   fun setup() {
     composeTestRule.setContent {
       val viewModel = MapViewModel(FastLocationSource(LocalContext.current))
-      MapScreen(viewModel)
+      MapScreen(mockNavigationActions, viewModel)
     }
 
     val location =
