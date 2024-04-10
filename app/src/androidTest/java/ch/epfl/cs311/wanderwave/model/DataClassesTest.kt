@@ -87,16 +87,16 @@ class DataClassesTest {
   fun basicVariablesLocation() {
     val location = Location(1.0, 1.0, "Test Location")
     val latLng: LatLng = location.toLatLng()
-    val hashMap: HashMap<String, Any> = location.toMap()
+    val locationMap: Map<String, Any> = location.toMap()
     // test location behaviour
     assertEquals(1.0, location.latitude)
     assertEquals(1.0, location.longitude)
     assertEquals("Test Location", location.name)
     assertEquals(1.0, latLng.latitude)
     assertEquals(1.0, latLng.longitude)
-    assertEquals(1.0, hashMap["latitude"])
-    assertEquals(1.0, hashMap["longitude"])
-    assertEquals("Test Location", hashMap["name"])
+    assertEquals(1.0, locationMap["latitude"])
+    assertEquals(1.0, locationMap["longitude"])
+    assertEquals("Test Location", locationMap["name"])
   }
 
   @Test
