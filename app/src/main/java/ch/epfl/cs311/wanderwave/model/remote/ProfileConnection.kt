@@ -5,7 +5,8 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
-class ProfileConnection(private val database: FirebaseFirestore? = null) : FirebaseConnection<Profile, Profile>() {
+class ProfileConnection(private val database: FirebaseFirestore? = null) :
+    FirebaseConnection<Profile, Profile>() {
 
   override val collectionName: String = "users"
 

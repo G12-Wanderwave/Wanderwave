@@ -5,8 +5,6 @@ import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
-import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
-import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.flow.first

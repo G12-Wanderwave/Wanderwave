@@ -10,7 +10,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 
-class BeaconConnection(private val database: FirebaseFirestore? = null) : FirebaseConnection<Beacon, Beacon>() {
+class BeaconConnection(private val database: FirebaseFirestore? = null) :
+    FirebaseConnection<Beacon, Beacon>() {
 
   override val collectionName: String = "beacons"
 
