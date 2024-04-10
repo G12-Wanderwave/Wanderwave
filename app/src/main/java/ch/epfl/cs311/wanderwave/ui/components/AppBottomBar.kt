@@ -40,34 +40,37 @@ val mapIcon: ImageVector = Icons.Default.LocationOn
  */
 @Composable
 fun AppBottomBar(navActions: NavigationActions) {
-    BottomAppBar(
-        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).testTag("appBottomBar"),
-    ) {
-        // Assumes TOP_LEVEL_DESTINATIONS are in the order of Track List, Main, and Map for indexing
-        IconButton(
-            onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[0].route) },
-            modifier =
+  BottomAppBar(
+      modifier =
+          Modifier.fillMaxWidth()
+              .background(MaterialTheme.colorScheme.surface)
+              .testTag("appBottomBar"),
+  ) {
+    // Assumes TOP_LEVEL_DESTINATIONS are in the order of Track List, Main, and Map for indexing
+    IconButton(
+        onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[0].route) },
+        modifier =
             Modifier.weight(1f) // Spread the icons evenly across the BottomAppBar
                 .testTag("bottomAppBarButton" + Route.TRACK_LIST.routeString)) {
-            Icon(
-                trackListIcon,
-                contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[0].textId))
+          Icon(
+              trackListIcon,
+              contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[0].textId))
         }
 
-        Spacer(Modifier.weight(1f)) // Spacer for centering the middle icon
+    Spacer(Modifier.weight(1f)) // Spacer for centering the middle icon
 
-        IconButton(
-            onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[1].route) },
-            modifier = Modifier.weight(1f).testTag("bottomAppBarButton" + Route.MAIN.routeString)) {
-            Icon(mainIcon, contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[1].textId))
+    IconButton(
+        onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[1].route) },
+        modifier = Modifier.weight(1f).testTag("bottomAppBarButton" + Route.MAIN.routeString)) {
+          Icon(mainIcon, contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[1].textId))
         }
 
-        Spacer(Modifier.weight(1f)) // Spacer for centering the middle icon
+    Spacer(Modifier.weight(1f)) // Spacer for centering the middle icon
 
-        IconButton(
-            onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[2].route) },
-            modifier = Modifier.weight(1f).testTag("bottomAppBarButton" + Route.MAP.routeString)) {
-            Icon(mapIcon, contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[2].textId))
+    IconButton(
+        onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[2].route) },
+        modifier = Modifier.weight(1f).testTag("bottomAppBarButton" + Route.MAP.routeString)) {
+          Icon(mapIcon, contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[2].textId))
         }
-    }
+  }
 }
