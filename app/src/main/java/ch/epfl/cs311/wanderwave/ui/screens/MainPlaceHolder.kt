@@ -10,7 +10,6 @@ import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 fun MainPlaceHolder(navigationActions: NavigationActions) {
   Column(modifier = Modifier.testTag("mainPlaceHolderScreen")) {
     ProfileButton(navActions = navigationActions)
-
     AboutScreen(navigationActions = navigationActions)
   }
 }
