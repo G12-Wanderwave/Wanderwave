@@ -56,7 +56,8 @@ class AppTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport
     onComposeScreen<LoginScreen>(composeTestRule) { signInButton.performClick() }
     onComposeScreen<MainPlaceHolder>(composeTestRule) {
       assertIsDisplayed()
-      profileButton.performClick()}
+      profileButton.performClick()
+    }
     onComposeScreen<ProfileScreen>(composeTestRule) { assertIsDisplayed() }
   }
 }

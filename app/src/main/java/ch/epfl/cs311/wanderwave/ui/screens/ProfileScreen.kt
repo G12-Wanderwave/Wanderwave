@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material3.Button
@@ -28,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -61,18 +61,20 @@ fun ProfileScreen(navActions: NavigationActions) {
 
   val currentProfile: Profile = currentProfileState
 
-  Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
+  Column(
+      modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
-      Box(modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.fillMaxWidth()) {
           VisitCard(Modifier, currentProfile)
           ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
-          ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create, onClick = {
-              navActions.navigateTo(Route.EDIT_PROFILE)
-          })
+          ClickableIcon(
+              Modifier.align(Alignment.BottomEnd),
+              Icons.Filled.Create,
+              onClick = { navActions.navigateTo(Route.EDIT_PROFILE) })
+        }
+        Spacer(modifier = Modifier.height(300.dp))
+        SignOutButton(modifier = Modifier, navActions = navActions)
       }
-      Spacer(modifier = Modifier.height(300.dp))
-      SignOutButton(modifier = Modifier, navActions = navActions)
-  }
 }
 
 /**
@@ -94,12 +96,12 @@ fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel = h
         viewModel.togglePublicMode()
       },
       modifier =
-      modifier
-          .graphicsLayer {
-              scaleX = SCALE_X
-              scaleY = SCALE_Y
-          }
-          .testTag("profileSwitch"),
+          modifier
+              .graphicsLayer {
+                scaleX = SCALE_X
+                scaleY = SCALE_Y
+              }
+              .testTag("profileSwitch"),
       colors =
           SwitchDefaults.colors(
               checkedThumbColor = MaterialTheme.colorScheme.primary,
@@ -119,25 +121,25 @@ fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel = h
  * @author Imade Bouhamria
  */
 @Composable
-fun ProfileButton(modifier: Modifier = Modifier, viewModel: ProfileViewModel = hiltViewModel(), navActions: NavigationActions) {
+fun ProfileButton(
+    modifier: Modifier = Modifier,
+    viewModel: ProfileViewModel = hiltViewModel(),
+    navActions: NavigationActions
+) {
   val currentProfileState by viewModel.profile.collectAsState()
   val currentProfile: Profile = currentProfileState
 
-  //Display the button only when on the main screen TODO: Also from Map ?
-  if(navActions.getCurrentRoute() == Route.MAIN) {
-    Box(modifier = modifier
-        .clickable { navActions.navigateTo(Route.PROFILE) }
-        .background(Color.Transparent)
-        .padding(16.dp)
-        .testTag("profileButton"))
-      {
-      SelectImage(
-        modifier = Modifier
-            .clip(CircleShape)
-            .size(50.dp),
-        profile = currentProfile
-      )
-    }
+  // Display the button only when on the main screen TODO: Also from Map ?
+  if (navActions.getCurrentRoute() == Route.MAIN) {
+    Box(
+        modifier =
+            modifier
+                .clickable { navActions.navigateTo(Route.PROFILE) }
+                .background(Color.Transparent)
+                .padding(16.dp)
+                .testTag("profileButton")) {
+          SelectImage(modifier = Modifier.clip(CircleShape).size(50.dp), profile = currentProfile)
+        }
   }
 }
 
@@ -149,11 +151,11 @@ fun ProfileButton(modifier: Modifier = Modifier, viewModel: ProfileViewModel = h
  * @author Imade Bouhamria
  */
 @Composable
-fun SignOutButton(modifier: Modifier, navActions: NavigationActions){
-    //TODO: Implement actual user sign out
-    Button(
-        onClick = { navActions.navigateToTopLevel(Route.LOGIN) },
-        modifier = modifier.testTag("signOutButton")) {
-          Text(text = "Sign Out")
-        }
+fun SignOutButton(modifier: Modifier, navActions: NavigationActions) {
+  // TODO: Implement actual user sign out
+  Button(
+      onClick = { navActions.navigateToTopLevel(Route.LOGIN) },
+      modifier = modifier.testTag("signOutButton")) {
+        Text(text = "Sign Out")
+      }
 }

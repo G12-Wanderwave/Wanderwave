@@ -20,14 +20,10 @@ import androidx.compose.ui.unit.dp
  * @last update 1.0
  */
 @Composable
-fun ClickableIcon(
-    modifier: Modifier,
-    icon: ImageVector,
-    onClick: () -> Unit
-) {
+fun ClickableIcon(modifier: Modifier, icon: ImageVector, onClick: () -> Unit) {
   IconButton(
       modifier = modifier.then(Modifier.size(24.dp)).testTag("clickableIcon"),
-      onClick = {onClick()}) {
+      onClick = { onClick() }) {
         Icon(icon, contentDescription = "Edit", modifier = modifier)
       }
 }

@@ -26,12 +26,9 @@ class EditProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
 
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
-
   @Before
   fun setup() {
-    composeTestRule.setContent {
-      EditProfileScreen(mockNavigationActions)
-    }
+    composeTestRule.setContent { EditProfileScreen(mockNavigationActions) }
   }
 
   @Test
@@ -90,6 +87,4 @@ class EditProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
       }
     }
   }
-
-
 }

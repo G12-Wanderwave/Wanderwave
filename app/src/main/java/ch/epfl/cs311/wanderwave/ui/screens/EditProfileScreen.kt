@@ -84,14 +84,14 @@ fun EditProfileScreen(navActions: NavigationActions) {
               viewModel.updateProfile(profileCopy)
               navActions.navigateToTopLevel(Route.PROFILE)
             },
-            onCancel = {
-              navActions.navigateToTopLevel(Route.PROFILE)
-            })
+            onCancel = { navActions.navigateToTopLevel(Route.PROFILE) })
 
         Spacer(Modifier.padding(18.dp))
         Button(
-            onClick = { viewModel.deleteProfile()
-                        navActions.navigateToTopLevel(Route.LOGIN)},
+            onClick = {
+              viewModel.deleteProfile()
+              navActions.navigateToTopLevel(Route.LOGIN)
+            },
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
             border = BorderStroke(1.dp, md_theme_light_error),
             modifier = Modifier.width(100.dp).testTag("deleteButton")) {

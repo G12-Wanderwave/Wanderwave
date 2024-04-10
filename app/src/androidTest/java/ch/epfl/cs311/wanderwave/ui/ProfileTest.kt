@@ -21,8 +21,7 @@ class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSup
 
   @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
 
-  @RelaxedMockK
-  private lateinit var mockNavigationActions: NavigationActions
+  @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
   @Before
   fun setup() {
