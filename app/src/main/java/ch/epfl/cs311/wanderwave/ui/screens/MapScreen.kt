@@ -101,9 +101,11 @@ fun MapScreen() {
         })
   } else {
     val location = getLastKnownLocation(LocalContext.current)
-    LaunchedEffect(location != null, mapIsLoaded.value) {
-      cameraPositionState.move(
-          CameraUpdateFactory.newCameraPosition(CameraPosition.fromLatLngZoom(location!!, 15f)))
+    LaunchedEffect(location, mapIsLoaded) {
+      if (location != null && mapIsLoaded.value) {
+        cameraPositionState.move(
+            CameraUpdateFactory.newCameraPosition(CameraPosition.fromLatLngZoom(location, 15f)))
+      }
     }
   }
 }

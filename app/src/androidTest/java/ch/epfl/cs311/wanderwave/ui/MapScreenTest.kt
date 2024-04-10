@@ -12,6 +12,7 @@ import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
+import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -53,5 +54,8 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
     }
   }
 
-  @Test fun dummyTest() = run {}
+  @Test
+  fun launchingMapScreenDoesNotThrowError() = run {
+    onComposeScreen<MapScreen>(composeTestRule) { assertIsDisplayed() }
+  }
 }
