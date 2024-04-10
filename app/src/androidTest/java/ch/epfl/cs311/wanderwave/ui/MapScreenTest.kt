@@ -3,21 +3,14 @@ package ch.epfl.cs311.wanderwave.ui
 import android.Manifest
 import android.content.Context
 import android.location.Location
-import android.location.LocationListener
 import android.location.LocationManager
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
-import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.navigation.Route
-import ch.epfl.cs311.wanderwave.ui.screens.AppScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
-import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
-import com.google.android.gms.maps.LocationSource
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -55,9 +48,7 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
 
   @Before
   fun setup() {
-    composeTestRule.setContent {
-      MapScreen(mockNavigationActions, mockMapViewModel)
-    }
+    composeTestRule.setContent { MapScreen(mockNavigationActions, mockMapViewModel) }
 
     val location =
         Location(LocationManager.GPS_PROVIDER).apply {
@@ -82,8 +73,6 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   @Test
   fun locationCallbackIsCalled() = run {
     val viewModel = mockMapViewModel
-    verify {
-      viewModel.locationSource
-    }
+    verify { viewModel.locationSource }
   }
 }
