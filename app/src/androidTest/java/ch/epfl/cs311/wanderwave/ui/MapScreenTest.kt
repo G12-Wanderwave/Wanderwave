@@ -10,7 +10,11 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
+import ch.epfl.cs311.wanderwave.model.local.BeaconDao
+import ch.epfl.cs311.wanderwave.model.local.LocalBeaconRepository
+import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
+import ch.epfl.cs311.wanderwave.model.repository.BeaconRepositoryImpl
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
@@ -20,6 +24,7 @@ import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
+import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -40,6 +45,14 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
   @RelaxedMockK private lateinit var mockMapViewModel: MapViewModel
+
+  @RelaxedMockK private lateinit var beaconDao: BeaconDao
+
+  private lateinit var beaconLocalRepository: LocalBeaconRepository
+  @RelaxedMockK private lateinit var beaconLocalRepositoryMock: LocalBeaconRepository
+
+  private lateinit var beaconRepository: BeaconRepositoryImpl
+  private lateinit var beaconRepositoryMock: BeaconRepositoryImpl
 
   @get:Rule
   val permissionRule: GrantPermissionRule =
@@ -63,6 +76,18 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
 
   @Before
   fun setup() {
+    MockKAnnotations.init(this)
+
+    // Mocking the AppDatabase and providing the mocked beaconDao
+    val database = mockk<AppDatabase>()
+    every { database.beaconDao() } returns beaconDao
+
+    // Creating the repository with the mocked database
+    beaconLocalRepository = LocalBeaconRepository(database)
+
+    beaconRepository = BeaconRepositoryImpl(beaconLocalRepository)
+    beaconRepositoryMock = BeaconRepositoryImpl(beaconLocalRepositoryMock)
+
     composeTestRule.setContent { MapScreen(mockNavigationActions, mockMapViewModel) }
 
     try {

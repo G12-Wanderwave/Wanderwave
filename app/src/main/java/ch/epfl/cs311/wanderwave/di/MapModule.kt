@@ -1,7 +1,10 @@
 package ch.epfl.cs311.wanderwave.di
 
 import android.content.Context
+import ch.epfl.cs311.wanderwave.model.local.LocalBeaconRepository
+import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
+import ch.epfl.cs311.wanderwave.model.repository.BeaconRepositoryImpl
 import com.google.android.gms.maps.LocationSource
 import dagger.Module
 import dagger.Provides
@@ -16,7 +19,7 @@ object MapModule {
 
   @Provides
   @Singleton
-  fun provideMapController(@ApplicationContext context: Context): LocationSource {
+  fun provideLocationSource(@ApplicationContext context: Context): LocationSource {
     return FastLocationSource(context)
   }
 }

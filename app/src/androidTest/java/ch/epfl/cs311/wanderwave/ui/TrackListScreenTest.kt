@@ -8,79 +8,102 @@ import ch.epfl.cs311.wanderwave.model.repository.TrackRepositoryImpl
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
-import com.kaspersky.components.composesupport.config.withComposeSupport
-import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
-import io.mockk.called
+import io.mockk.Called
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class TrackListScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
+class TrackListScreenTest : TestCase() {
+
+  private val testDispatcher = TestCoroutineDispatcher()
 
   @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
 
+  @get:Rule val mockkRule = MockKRule(this)
   @RelaxedMockK lateinit var mockTrackRepositoryImpl: TrackRepositoryImpl
 
-  @get:Rule val mockkRule = MockKRule(this)
+  @RelaxedMockK lateinit var mockSpotifyController: SpotifyController
 
-  @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
+  @RelaxedMockK lateinit var mockShowMessage: (String) -> Unit
 
-  @RelaxedMockK private lateinit var mockShowMessage: (String) -> Unit
+  @Before
+  fun setup() {
+    Dispatchers.setMain(testDispatcher)
+  }
 
-  fun setup(result: Boolean) {
+  @After
+  fun tearDown() {
+    Dispatchers.resetMain()
+    testDispatcher.cleanupTestCoroutines()
+  }
+
+  private fun setupViewModel(result: Boolean) {
     every { mockTrackRepositoryImpl.getAll() } returns
         flowOf(listOf(Track("id1", "title1", "artist1")))
     every { mockSpotifyController.playTrack(any()) } returns flowOf(result)
+
     val viewModel = TrackListViewModel(mockTrackRepositoryImpl, mockSpotifyController)
+
     composeTestRule.setContent { TrackListScreen(mockShowMessage, viewModel) }
   }
 
   @Test
-  fun trackListScreenIsDisplayed() = run {
-    setup(true)
-    onComposeScreen<TrackListScreen>(composeTestRule) {
-      assertIsDisplayed()
+  fun trackListScreenIsDisplayed() =
+      testDispatcher.runBlockingTest {
+        setupViewModel(true)
+        onComposeScreen<TrackListScreen>(composeTestRule) {
+          assertIsDisplayed()
 
-      trackButton {
-        assertIsDisplayed()
-        assert(hasClickAction())
+          trackButton {
+            assertIsDisplayed()
+            assert(hasClickAction())
+          }
+        }
       }
-    }
-  }
 
   @Test
-  fun tappingTrackPlaysIt() = run {
-    setup(true)
-    onComposeScreen<TrackListScreen>(composeTestRule) {
-      trackButton {
-        assertIsDisplayed()
-        performClick()
+  fun tappingTrackPlaysIt() =
+      testDispatcher.runBlockingTest {
+        setupViewModel(true)
+        onComposeScreen<TrackListScreen>(composeTestRule) {
+          trackButton {
+            assertIsDisplayed()
+            performClick()
+          }
+          advanceUntilIdle()
+          verify { mockSpotifyController.playTrack(any()) }
+          coVerify { mockShowMessage wasNot Called }
+        }
       }
-      verify { mockSpotifyController.playTrack(any()) }
-      coVerify { mockShowMessage wasNot called }
-    }
-  }
 
   @Test
-  fun failedToPlayTrackDisplaysMessage() = run {
-    setup(false)
-    onComposeScreen<TrackListScreen>(composeTestRule) {
-      trackButton {
-        assertIsDisplayed()
-        performClick()
+  fun failedToPlayTrackDisplaysMessage() =
+      testDispatcher.runBlockingTest {
+        setupViewModel(false)
+        onComposeScreen<TrackListScreen>(composeTestRule) {
+          trackButton {
+            assertIsDisplayed()
+            performClick()
+          }
+          advanceUntilIdle()
+          verify { mockSpotifyController.playTrack(any()) }
+        }
       }
-      verify { mockSpotifyController.playTrack(any()) }
-      // coVerify { mockShowMessage(any()) }
-
-    }
-  }
 }

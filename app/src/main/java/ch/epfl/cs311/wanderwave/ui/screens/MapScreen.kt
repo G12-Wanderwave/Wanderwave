@@ -8,6 +8,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -15,8 +17,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
@@ -33,6 +37,8 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.maps.android.compose.Marker
 
 @OptIn(ExperimentalPermissionsApi::class)
 fun needToRequestPermissions(permissionState: MultiplePermissionsState): Boolean {
@@ -63,13 +69,13 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
   if (permissionState.allPermissionsGranted) {
     WanderwaveGoogleMap(
         cameraPositionState,
-        viewModel.locationSource,
+        viewModel,
         onMapLoaded = {
           println("Map is loaded!")
           mapIsLoaded.value = true
         })
   } else {
-    WanderwaveGoogleMap(cameraPositionState)
+    WanderwaveGoogleMap(cameraPositionState, viewModel)
   }
 
   if (needToRequestPermissions(permissionState)) {
@@ -86,22 +92,23 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
 }
 
 @Composable
-fun WanderwaveGoogleMap(cameraPositionState: CameraPositionState) {
+fun WanderwaveGoogleMap(cameraPositionState: CameraPositionState, viewModel: MapViewModel) {
   val context = LocalContext.current
   GoogleMap(
       modifier = Modifier.testTag("mapScreen"),
       properties =
           MapProperties(
               mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)),
+      cameraPositionState = cameraPositionState
   ) {
-    MapContent()
+    MapContent(viewModel)
   }
 }
 
 @Composable
 fun WanderwaveGoogleMap(
     cameraPositionState: CameraPositionState,
-    locationSource: LocationSource,
+    viewModel: MapViewModel,
     onMapLoaded: () -> Unit
 ) {
   val context = LocalContext.current
@@ -111,17 +118,19 @@ fun WanderwaveGoogleMap(
           MapProperties(
               isMyLocationEnabled = true,
               mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)),
-      locationSource = locationSource,
+      locationSource = viewModel.locationSource,
       cameraPositionState = cameraPositionState,
       onMapLoaded = onMapLoaded) {
-        MapContent()
+        MapContent(viewModel)
       }
 }
 
 @Composable
-fun MapContent() {
+fun MapContent(viewModel: MapViewModel) {
   val epfl = LatLng(46.518831258, 6.559331096)
+  val beacons = viewModel.uiState.collectAsStateWithLifecycle().value.beacons
   Marker(state = MarkerState(position = epfl), title = "Marker at EPFL")
+  DisplayBeacons(beacons = beacons)
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -151,6 +160,28 @@ fun moveCamera(
     cameraPositionState.move(CameraUpdateFactory.newCameraPosition(currentCameraPosition))
   } else {
     cameraPositionState.move(
-        CameraUpdateFactory.newCameraPosition(CameraPosition.fromLatLngZoom(location, 15f)))
+      CameraUpdateFactory.newCameraPosition(CameraPosition.fromLatLngZoom(location, 15f))
+    )
+
+  }
+}
+/**
+ * This is a Composable function that displays the beacons on the map. It takes a list of beacons as
+ * input and adds a marker for each beacon on the map.
+ *
+ * @param beacons The list of beacons to be displayed on the map.
+ */
+@Composable
+fun DisplayBeacons(beacons: List<Beacon>) {
+
+  // Add a marker for each beacon
+  // source for the icon: https://www.svgrepo.com/svg/448258/waypoint
+  // val customIcon = BitmapDescriptorFactory.fromResource(R.drawable.waypoint)
+  beacons.forEach() {
+    Marker(
+        state = MarkerState(position = it.location.toLatLng()),
+        title = it.id,
+        // icon = customIcon,
+    )
   }
 }

@@ -25,9 +25,11 @@ import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
 import ch.epfl.cs311.wanderwave.ui.components.player.SurroundWithMiniPlayer
 import ch.epfl.cs311.wanderwave.ui.screens.AboutScreen
+import ch.epfl.cs311.wanderwave.ui.screens.EditProfileScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
+import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
 import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
@@ -79,6 +81,8 @@ fun AppScaffold(navController: NavHostController) {
                 composable(Route.MAIN.routeString) { MainPlaceHolder(navActions) }
                 composable(Route.TRACK_LIST.routeString) { TrackListScreen(showSnackbar) }
                 composable(Route.MAP.routeString) { MapScreen(navActions) }
+                composable(Route.PROFILE.routeString) { ProfileScreen(navActions) }
+                composable(Route.EDIT_PROFILE.routeString) { EditProfileScreen(navActions) }
               }
         }
       }
