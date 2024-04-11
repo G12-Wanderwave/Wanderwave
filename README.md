@@ -6,7 +6,7 @@
 ## Group members
 Tsogt Baigalmaa
 Ayman Bakiri
-Menzo Bouaïssi
+Menzo Bouaissi
 Imade Bouhamria
 Clarence Joannis Linden
 Jonas Michael Rindlisbacher
@@ -100,5 +100,9 @@ As a tourism office, I want to create a more immersive experience for visitors b
 
 As a history passionate tourist, I want to discover historical songs by showing some context (text, image, or time period)
 
+## Architecture Diagram
 
+The following is the architecture diagram of our application
+
+![architecture diagram](architectureDiagram.png)
 
