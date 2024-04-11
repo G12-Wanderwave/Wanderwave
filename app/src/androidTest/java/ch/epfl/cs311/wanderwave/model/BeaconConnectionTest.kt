@@ -28,7 +28,7 @@ public class BeaconConnectionTest {
 
   @Test
   fun testAddAndGetItem() = runBlocking {
-    withTimeout(30000) { // Timeout after 5000 milliseconds (20 seconds)
+    withTimeout(30000) { // Increase the timeout to 30 seconds
       val beacon =
           Beacon(
               id = "testBeacon",
