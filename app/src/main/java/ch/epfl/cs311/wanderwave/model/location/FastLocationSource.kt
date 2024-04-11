@@ -14,7 +14,7 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.LocationSource
 
 class FastLocationSource(private val context: Context) : LocationSource, LocationListener {
-  private var listener: LocationSource.OnLocationChangedListener? = null
+  var listener: LocationSource.OnLocationChangedListener? = null
   private var locationClient: FusedLocationProviderClient? = null
 
   @RequiresApi(Build.VERSION_CODES.S)

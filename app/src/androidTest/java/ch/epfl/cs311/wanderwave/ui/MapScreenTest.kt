@@ -52,7 +52,6 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   private lateinit var beaconLocalRepository: LocalBeaconRepository
   @RelaxedMockK private lateinit var beaconLocalRepositoryMock: LocalBeaconRepository
 
-  private lateinit var beaconRepository: BeaconRepositoryImpl
   private lateinit var beaconRepositoryMock: BeaconRepositoryImpl
 
   @get:Rule
@@ -108,6 +107,13 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   fun locationSourceCallsActivate() = run {
     val viewModel = mockMapViewModel
     verify { viewModel.locationSource.activate(any()) }
+  }
+
+  @Test
+  fun listenerIsNullAfterDeactivate() = run {
+    val locationSource = FastLocationSource(context)
+    locationSource.deactivate()
+    assert(locationSource.listener == null)
   }
 
   @Test
