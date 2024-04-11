@@ -24,9 +24,9 @@ import com.spotify.sdk.android.auth.AuthorizationClient
 
 @Composable
 fun LoginScreen(
-  navigationActions: NavigationActions,
-  showMessage: (String) -> Unit,
-  viewModel: LoginScreenViewModel = hiltViewModel()
+    navigationActions: NavigationActions,
+    showMessage: (String) -> Unit,
+    viewModel: LoginScreenViewModel = hiltViewModel()
 ) {
   val state by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -44,23 +44,20 @@ fun LoginScreen(
   }
 
   val launcher =
-    rememberLauncherForActivityResult(
-      contract = ActivityResultContracts.StartActivityForResult()) {
-      val response = AuthorizationClient.getResponse(it.resultCode, it.data)
-      viewModel.handleAuthorizationResponse(response)
-    }
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.StartActivityForResult()) {
+            val response = AuthorizationClient.getResponse(it.resultCode, it.data)
+            viewModel.handleAuthorizationResponse(response)
+          }
   val context = LocalContext.current
-
 
   Column(modifier = Modifier.testTag("loginScreen")) {
     LoginAppLogo(modifier = Modifier.weight(1f))
     WelcomeTitle(modifier = Modifier.weight(4f))
     SignInButton(modifier = Modifier.weight(1f)) {
-
-
       val intent =
-        AuthorizationClient.createLoginActivityIntent(
-          context.getActivity(), viewModel.getAuthorizationRequest())
+          AuthorizationClient.createLoginActivityIntent(
+              context.getActivity(), viewModel.getAuthorizationRequest())
       launcher.launch(intent)
     }
   }
@@ -76,4 +73,3 @@ private fun Context.getActivity(): ComponentActivity? {
   }
   return null
 }
-

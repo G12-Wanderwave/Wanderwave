@@ -23,20 +23,19 @@ import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 
 @Composable
 fun SignInButton(modifier: Modifier, onClick: () -> Unit) {
-    Box(modifier = modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-        Button(
-            onClick = { onClick() },
-            modifier = Modifier.testTag("signInButton"),
-            colors = ButtonDefaults.buttonColors(containerColor = spotify_green)) {
-            Icon(
-                painter = painterResource(id = R.drawable.spotify_icon_rgb_black),
-                contentDescription = "Spotify Icon",
-                modifier = Modifier.height(27.dp))
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = stringResource(id = R.string.button_label),
-                style = MaterialTheme.typography.titleMedium)
+  Box(modifier = modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+    Button(
+        onClick = { onClick() },
+        modifier = Modifier.testTag("signInButton"),
+        colors = ButtonDefaults.buttonColors(containerColor = spotify_green)) {
+          Icon(
+              painter = painterResource(id = R.drawable.spotify_icon_rgb_black),
+              contentDescription = "Spotify Icon",
+              modifier = Modifier.height(27.dp))
+          Spacer(modifier = Modifier.width(12.dp))
+          Text(
+              text = stringResource(id = R.string.button_label),
+              style = MaterialTheme.typography.titleMedium)
         }
-    }
+  }
 }
-
