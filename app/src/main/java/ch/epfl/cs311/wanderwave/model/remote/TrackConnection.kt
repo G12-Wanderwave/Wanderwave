@@ -24,10 +24,6 @@ class TrackConnection(private val database: FirebaseFirestore? = null) :
     return track.toMap()
   }
 
-  fun addList(tracks: List<Track>) {
-    tracks.forEach { track -> addItemWithId(track) }
-  }
-
   fun addItemsIfNotExist(tracks: List<Track>) {
     // The goal of this function is to add only if the spotify id of the track is not already in the
     // database, for now I just check the normal ID

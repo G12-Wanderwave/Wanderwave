@@ -21,8 +21,6 @@ class BeaconConnection(private val database: FirebaseFirestore? = null) :
 
   override val db = database ?: super.db
 
-  // private val db = FirebaseFirestore.getInstance()
-
   // Document to Beacon
   override fun documentToItem(document: DocumentSnapshot): Beacon? {
     return Beacon.from(document)
@@ -81,11 +79,7 @@ class BeaconConnection(private val database: FirebaseFirestore? = null) :
     val beaconMap: HashMap<String, Any> =
         hashMapOf(
             "id" to beacon.id,
-            "location" to
-                hashMapOf(
-                    "latitude" to beacon.location.latitude,
-                    "longitude" to beacon.location.longitude,
-                    "name" to beacon.location.name),
+            "location" to beacon.location.toMap(),
             "tracks" to
                 beacon.tracks.map { track ->
                   db.collection(trackConnection.collectionName).document(track.id)
