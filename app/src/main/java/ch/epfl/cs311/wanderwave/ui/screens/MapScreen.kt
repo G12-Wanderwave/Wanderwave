@@ -2,10 +2,6 @@ package ch.epfl.cs311.wanderwave.ui.screens
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Context
-import android.location.Location
-import android.location.LocationManager
-import androidx.annotation.RequiresPermission
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -27,6 +23,7 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.LocationSource
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
@@ -42,28 +39,13 @@ fun needToRequestPermissions(permissionState: MultiplePermissionsState): Boolean
   return permissionState.permissions.any { !it.status.isGranted }
 }
 
-@RequiresPermission(
-    allOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION])
-fun getLastKnownLocation(context: Context): LatLng? {
-  val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-  var location: Location? = null
-
-  // Get the best last known location from either GPS or Network provider
-  val providers = locationManager.getProviders(true)
-  for (provider in providers) {
-    val l = locationManager.getLastKnownLocation(provider) ?: continue
-    if (location == null || l.accuracy < location.accuracy) {
-      location = l
-    }
-  }
-  return location?.let { LatLng(it.latitude, it.longitude) }
-}
-
 @OptIn(ExperimentalPermissionsApi::class)
 @SuppressLint("MissingPermission")
 @Composable
 fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hiltViewModel()) {
   val context = LocalContext.current
+  val cameraPositionState: CameraPositionState = rememberCameraPositionState {}
+  val mapIsLoaded = remember { mutableStateOf(false) }
 
   val permissionState =
       rememberMultiplePermissionsState(
@@ -72,56 +54,103 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
               Manifest.permission.ACCESS_FINE_LOCATION,
           ))
 
-  fun onAlertDismissed() {
-    permissionState.launchMultiplePermissionRequest()
-  }
-
-  val cameraPositionState: CameraPositionState = rememberCameraPositionState {}
-  val mapIsLoaded = remember { mutableStateOf(false) }
-
+  // remember the camera position when navigating away
   DisposableEffect(Unit) {
     onDispose { viewModel.cameraPosition.value = cameraPositionState.position }
   }
 
+  // if we have permission, show the location, otherwise show the map without location
+  if (permissionState.allPermissionsGranted) {
+    WanderwaveGoogleMap(
+        cameraPositionState,
+        viewModel.locationSource,
+        onMapLoaded = {
+          println("Map is loaded!")
+          mapIsLoaded.value = true
+        })
+  } else {
+    WanderwaveGoogleMap(cameraPositionState)
+  }
+
+  if (needToRequestPermissions(permissionState)) {
+    AskForPermissions(permissionState)
+  } else {
+    // if we have location permissions, move the camera to the last known location **once**
+    val location = viewModel.getLastKnownLocation(context)
+    LaunchedEffect(location != null, mapIsLoaded.value) {
+      if (location != null && mapIsLoaded.value) {
+        moveCamera(cameraPositionState, location, viewModel.cameraPosition.value)
+      }
+    }
+  }
+}
+
+@Composable
+fun WanderwaveGoogleMap(cameraPositionState: CameraPositionState) {
+  val context = LocalContext.current
   GoogleMap(
       modifier = Modifier.testTag("mapScreen"),
       properties =
           MapProperties(
-              isMyLocationEnabled = permissionState.allPermissionsGranted,
               mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)),
-      locationSource = viewModel.locationSource,
+  ) {
+    MapContent()
+  }
+}
+
+@Composable
+fun WanderwaveGoogleMap(
+    cameraPositionState: CameraPositionState,
+    locationSource: LocationSource,
+    onMapLoaded: () -> Unit
+) {
+  val context = LocalContext.current
+  GoogleMap(
+      modifier = Modifier.testTag("mapScreen"),
+      properties =
+          MapProperties(
+              isMyLocationEnabled = true,
+              mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)),
+      locationSource = locationSource,
       cameraPositionState = cameraPositionState,
-      onMapLoaded = {
-        println("Map is loaded!")
-        mapIsLoaded.value = true
-      }) {
-        val epfl = LatLng(46.518831258, 6.559331096)
-        Marker(state = MarkerState(position = epfl), title = "Marker at EPFL")
+      onMapLoaded = onMapLoaded) {
+        MapContent()
       }
+}
 
-  if (needToRequestPermissions(permissionState)) {
-    AlertDialog(
-        title = { Text(stringResource(id = R.string.permission_request_title)) },
-        text = { Text(text = stringResource(id = R.string.permission_request_text_location)) },
-        onDismissRequest = { onAlertDismissed() },
-        confirmButton = {
-          TextButton(onClick = { onAlertDismissed() }) {
-            Text(stringResource(id = R.string.permission_request_confirm_button))
-          }
-        })
-  } else {
-    val location = getLastKnownLocation(LocalContext.current)
+@Composable
+fun MapContent() {
+  val epfl = LatLng(46.518831258, 6.559331096)
+  Marker(state = MarkerState(position = epfl), title = "Marker at EPFL")
+}
 
-    LaunchedEffect(location != null, mapIsLoaded.value) {
-      if (location != null && mapIsLoaded.value) {
-        val cameraPosition = viewModel.cameraPosition.value
-        if (cameraPosition != null) {
-          cameraPositionState.move(CameraUpdateFactory.newCameraPosition(cameraPosition))
-        } else {
-          cameraPositionState.move(
-              CameraUpdateFactory.newCameraPosition(CameraPosition.fromLatLngZoom(location, 15f)))
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun AskForPermissions(permissionState: MultiplePermissionsState) {
+  fun onAlertDismissed() {
+    permissionState.launchMultiplePermissionRequest()
+  }
+
+  AlertDialog(
+      title = { Text(stringResource(id = R.string.permission_request_title)) },
+      text = { Text(text = stringResource(id = R.string.permission_request_text_location)) },
+      onDismissRequest = { onAlertDismissed() },
+      confirmButton = {
+        TextButton(onClick = { onAlertDismissed() }) {
+          Text(stringResource(id = R.string.permission_request_confirm_button))
         }
-      }
-    }
+      })
+}
+
+fun moveCamera(
+    cameraPositionState: CameraPositionState,
+    location: LatLng,
+    currentCameraPosition: CameraPosition?
+) {
+  if (currentCameraPosition != null) {
+    cameraPositionState.move(CameraUpdateFactory.newCameraPosition(currentCameraPosition))
+  } else {
+    cameraPositionState.move(
+        CameraUpdateFactory.newCameraPosition(CameraPosition.fromLatLngZoom(location, 15f)))
   }
 }
