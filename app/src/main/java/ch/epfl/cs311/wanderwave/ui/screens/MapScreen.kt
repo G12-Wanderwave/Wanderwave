@@ -1,5 +1,11 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
+import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.ktx.model.markerOptions
+
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
@@ -62,6 +68,8 @@ fun getLastKnownLocation(context: Context): LatLng? {
 @SuppressLint("MissingPermission")
 @Composable
 fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hiltViewModel()) {
+  val context = LocalContext.current
+
   val permissionState =
       rememberMultiplePermissionsState(
           listOf(
@@ -85,13 +93,23 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
       properties =
           MapProperties(
               isMyLocationEnabled = permissionState.allPermissionsGranted,
+              mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)
           ),
+
       locationSource = viewModel.locationSource,
       cameraPositionState = cameraPositionState,
       onMapLoaded = {
         println("Map is loaded!")
         mapIsLoaded.value = true
-      }) {}
+      }) {
+    val epfl = LatLng(46.518831258, 6.559331096)
+    Marker(
+      state = MarkerState(
+        position = epfl
+      ),
+      title = "Marker at EPFL"
+    )
+  }
 
   if (needToRequestPermissions(permissionState)) {
     AlertDialog(

@@ -6,6 +6,7 @@ import io.github.kakaocup.compose.node.element.ComposeScreen
 class MapScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
     ComposeScreen<MapScreen>(
         semanticsProvider = semanticsProvider, viewBuilderAction = { hasTestTag("mapScreen") }) {
-
   val googleMap = onNode { hasTestTag("googleMap") }
+  val circularProgressIndicator = onNode { hasTestTag("CircularProgressIndicator") }
+  val map = onNode { hasTestTag("map") }
 }

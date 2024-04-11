@@ -17,6 +17,7 @@ import com.google.android.gms.maps.LocationSource
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
+import io.github.kakaocup.compose.node.element.ComposeScreen
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -103,5 +104,13 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
     source.activate(mockListener)
     source.onLocationChanged(location)
     verify { mockListener.onLocationChanged(any()) }
+  }
+
+  @Test
+  fun map_is_display_and_not_circular() = run {
+    ComposeScreen.onComposeScreen<MapScreen>(composeTestRule) {
+      circularProgressIndicator { assertIsNotDisplayed() } // This line is the difference
+      map { assertIsDisplayed() }
+    }
   }
 }

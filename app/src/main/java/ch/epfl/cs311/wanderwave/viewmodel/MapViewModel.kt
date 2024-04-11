@@ -1,5 +1,7 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import com.google.android.gms.maps.GoogleMap
+
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.LocationSource
