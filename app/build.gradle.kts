@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.cli.jvm.main
-
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -106,7 +104,8 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
+  androidTestImplementation("org.testng:testng:6.9.6")
+  debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.spotify.auth)
@@ -121,7 +120,6 @@ dependencies {
     implementation("com.google.firebase:firebase-database-ktx:20.3.0")
     implementation("com.google.firebase:firebase-firestore:24.10.0")
     implementation("com.google.android.play:core-ktx:1.7.0")
-
 
     implementation(libs.maps.compose)
 
@@ -160,6 +158,12 @@ dependencies {
 
     // Dependencies for the photo part
     implementation("io.coil-kt:coil-compose:2.6.0")
+    androidTestImplementation("io.mockk:mockk:1.13.10")
+    androidTestImplementation("io.mockk:mockk-android:1.13.10")
+    androidTestImplementation("io.mockk:mockk-agent:1.13.10")
+
+    //Dependencies for Firebase
+    implementation ("com.google.firebase:firebase-database-ktx:20.3.1")
 }
 kapt {
     correctErrorTypes = true
