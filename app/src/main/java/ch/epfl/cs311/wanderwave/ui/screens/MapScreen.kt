@@ -25,7 +25,6 @@ import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 
@@ -49,18 +48,18 @@ fun MapScreen() {
 
   Box(modifier = Modifier.fillMaxSize().testTag("mapScreen"), contentAlignment = Alignment.Center) {
     AndroidView(
-      modifier = Modifier.testTag("map"),
-      factory = { ctx ->
-        MapView(ctx).apply {
-          onCreate(Bundle())
-          onResume()
-          getMapAsync { googleMap ->
-            viewModel.setGoogleMap(googleMap)
-            isMapReady.value = true
-            googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style))
+        modifier = Modifier.testTag("map"),
+        factory = { ctx ->
+          MapView(ctx).apply {
+            onCreate(Bundle())
+            onResume()
+            getMapAsync { googleMap ->
+              viewModel.setGoogleMap(googleMap)
+              isMapReady.value = true
+              googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style))
+            }
           }
-        }
-      },
+        },
     )
 
     if (!isMapReady.value) {
@@ -89,9 +88,9 @@ fun DisplayBeacons(beacons: List<Beacon>) {
   // val customIcon = BitmapDescriptorFactory.fromResource(R.drawable.waypoint)
   beacons.forEach() {
     Marker(
-      state = MarkerState(position = it.location.toLatLng()),
-      title = it.id,
-      // icon = customIcon,
+        state = MarkerState(position = it.location.toLatLng()),
+        title = it.id,
+        // icon = customIcon,
     )
   }
 }
