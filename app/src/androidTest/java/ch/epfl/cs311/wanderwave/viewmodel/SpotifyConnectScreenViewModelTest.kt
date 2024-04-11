@@ -2,6 +2,7 @@ package ch.epfl.cs311.wanderwave.viewmodel
 
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import io.mockk.called
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -72,7 +73,7 @@ class SpotifyConnectScreenViewModelTest {
     setup(SpotifyController.ConnectResult.SUCCESS, false)
     viewModel.connectRemote()
 
-    verify { mockSpotifyController.connectRemote() }
+    verify { mockSpotifyController.connectRemote() wasNot called}
 
     val uiState = viewModel.uiState.first()
     assert(uiState.hasResult)
