@@ -21,12 +21,11 @@ import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
 
 /**
  * A screen that displays a map if loaded, else display a CircularProgressIndicator.
@@ -44,7 +43,6 @@ fun MapScreen() {
   val context = LocalContext.current
   val isMapReady = remember { mutableStateOf(false) }
   val googleMapState = viewModel.googleMapState.collectAsState().value
-  // GoogleMap(modifier = Modifier.testTag("mapScreen")) { DisplayBeacons(uiState.beacons) }
 
   Box(modifier = Modifier.fillMaxSize().testTag("mapScreen"), contentAlignment = Alignment.Center) {
     AndroidView(
@@ -57,6 +55,7 @@ fun MapScreen() {
               viewModel.setGoogleMap(googleMap)
               isMapReady.value = true
               googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style))
+              if (!uiState.loading) DisplayBeacons(googleMap = googleMap, beacons = uiState.beacons)
             }
           }
         },
@@ -72,12 +71,6 @@ fun MapScreen() {
       }
     }
   }
-
-  // TODO: Make sure the beacons are filtered to be within the radius
-
-//  GoogleMap(modifier = Modifier.testTag("mapScreen")) {
-//    if (!uiState.loading) DisplayBeacons(beacons = uiState.beacons)
-//  }
 }
 
 /**
@@ -86,13 +79,9 @@ fun MapScreen() {
  *
  * @param beacons The list of beacons to be displayed on the map.
  */
-@Composable
-fun DisplayBeacons(beacons: List<Beacon>) {
+fun DisplayBeacons(googleMap: GoogleMap, beacons: List<Beacon>) {
   // Create each beacon from the list
   beacons.forEach() {
-    Marker(
-        state = MarkerState(position = it.location.toLatLng()),
-        title = it.id,
-    )
+    googleMap.addMarker(MarkerOptions().position(it.location.toLatLng()).title(it.id))
   }
 }
