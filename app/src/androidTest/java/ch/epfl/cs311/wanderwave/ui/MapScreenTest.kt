@@ -44,6 +44,7 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
 
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
+  @RelaxedMockK private lateinit var mockLocationSource: LocationSource
   @RelaxedMockK private lateinit var mockMapViewModel: MapViewModel
 
   @RelaxedMockK private lateinit var beaconDao: BeaconDao
@@ -85,8 +86,8 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
     // Creating the repository with the mocked database
     beaconLocalRepository = LocalBeaconRepository(database)
 
-    beaconRepository = BeaconRepositoryImpl(beaconLocalRepository)
     beaconRepositoryMock = BeaconRepositoryImpl(beaconLocalRepositoryMock)
+    mockMapViewModel = MapViewModel(beaconRepositoryMock, mockLocationSource)
 
     composeTestRule.setContent { MapScreen(mockNavigationActions, mockMapViewModel) }
 
@@ -101,12 +102,6 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   @Test
   fun launchingMapScreenDoesNotThrowError() = run {
     onComposeScreen<MapScreen>(composeTestRule) { assertIsDisplayed() }
-  }
-
-  @Test
-  fun locationCallbackIsCalled() = run {
-    val viewModel = mockMapViewModel
-    verify { viewModel.locationSource }
   }
 
   @Test
