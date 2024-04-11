@@ -73,7 +73,7 @@ class SpotifyConnectScreenViewModelTest {
     setup(SpotifyController.ConnectResult.SUCCESS, false)
     viewModel.connectRemote()
 
-    verify { mockSpotifyController.connectRemote() wasNot called}
+    verify { mockSpotifyController.connectRemote() wasNot called }
 
     val uiState = viewModel.uiState.first()
     assert(uiState.hasResult)
