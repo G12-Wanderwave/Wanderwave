@@ -8,6 +8,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,17 +63,11 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
   }
 
   // if we have permission, show the location, otherwise show the map without location
-  if (permissionState.allPermissionsGranted) {
-    WanderwaveGoogleMap(
-        cameraPositionState,
-        viewModel,
-        onMapLoaded = {
-          println("Map is loaded!")
-          mapIsLoaded.value = true
-        })
-  } else {
-    WanderwaveGoogleMap(cameraPositionState, viewModel)
-  }
+  WanderwaveGoogleMap(
+      cameraPositionState = cameraPositionState,
+      viewModel = viewModel,
+      mapIsLoaded = mapIsLoaded,
+      locationEnabled = permissionState.allPermissionsGranted)
 
   if (needToRequestPermissions(permissionState)) {
     AskForPermissions(permissionState)
@@ -88,34 +83,22 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
 }
 
 @Composable
-fun WanderwaveGoogleMap(cameraPositionState: CameraPositionState, viewModel: MapViewModel) {
-  val context = LocalContext.current
-  GoogleMap(
-      modifier = Modifier.testTag("mapScreen"),
-      properties =
-          MapProperties(
-              mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)),
-      cameraPositionState = cameraPositionState) {
-        MapContent(viewModel)
-      }
-}
-
-@Composable
 fun WanderwaveGoogleMap(
     cameraPositionState: CameraPositionState,
     viewModel: MapViewModel,
-    onMapLoaded: () -> Unit
+    mapIsLoaded: MutableState<Boolean>,
+    locationEnabled: Boolean = false
 ) {
   val context = LocalContext.current
   GoogleMap(
       modifier = Modifier.testTag("mapScreen"),
       properties =
           MapProperties(
-              isMyLocationEnabled = true,
+              isMyLocationEnabled = locationEnabled,
               mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)),
       locationSource = viewModel.locationSource,
       cameraPositionState = cameraPositionState,
-      onMapLoaded = onMapLoaded) {
+      onMapLoaded = { mapIsLoaded.value = true }) {
         MapContent(viewModel)
       }
 }
