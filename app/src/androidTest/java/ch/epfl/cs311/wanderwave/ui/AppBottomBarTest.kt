@@ -25,7 +25,7 @@ class AppBottomBarTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
   @get:Rule val composeTestRule = createComposeRule()
 
   @get:Rule val mockkRule = MockKRule(this)
-
+  // testing
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
   @Before
@@ -38,7 +38,7 @@ class AppBottomBarTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
     onComposeScreen<AppBottomBarScreen>(composeTestRule) {
       assertIsDisplayed()
 
-      bottomAppBarMainPlaceHolderButton {
+      bottomAppBarMainButton {
         assertIsDisplayed()
         performClick()
         verify { mockNavigationActions.navigateToTopLevel(Route.MAIN) }
@@ -47,6 +47,11 @@ class AppBottomBarTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
         assertIsDisplayed()
         performClick()
         verify { mockNavigationActions.navigateToTopLevel(Route.TRACK_LIST) }
+      }
+      mapScreenButton {
+        assertIsDisplayed()
+        performClick()
+        verify { mockNavigationActions.navigateToTopLevel(Route.MAP) }
       }
     }
   }

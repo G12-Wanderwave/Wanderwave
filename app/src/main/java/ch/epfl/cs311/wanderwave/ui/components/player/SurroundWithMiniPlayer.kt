@@ -31,9 +31,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
-import ch.epfl.cs311.wanderwave.viewmodel.TrackListUiState
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import javax.inject.Singleton
 import kotlinx.coroutines.delay
@@ -41,7 +39,7 @@ import kotlinx.coroutines.delay
 @Singleton
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SurroundWithMiniPlayer(currentRouteState: Route?, screen: @Composable () -> Unit) {
+fun SurroundWithMiniPlayer(displayPlayer: Boolean, screen: @Composable () -> Unit) {
   val viewModel: TrackListViewModel = hiltViewModel()
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   val sheetState = rememberStandardBottomSheetState(initialValue = SheetValue.PartiallyExpanded)
@@ -52,9 +50,7 @@ fun SurroundWithMiniPlayer(currentRouteState: Route?, screen: @Composable () -> 
 
   BottomSheetScaffold(
       sheetContent = {
-        if (!uiState.expanded &&
-            sheetState.hasPartiallyExpandedState &&
-            currentRouteState != Route.LOGIN) {
+        if (!uiState.expanded && sheetState.hasPartiallyExpandedState && displayPlayer) {
           MiniPlayer(
               isPlaying = uiState.isPlaying,
               onTitleClick = { viewModel.expand() },
@@ -74,9 +70,7 @@ fun SurroundWithMiniPlayer(currentRouteState: Route?, screen: @Composable () -> 
       sheetShape = RectangleShape,
       sheetContainerColor = MaterialTheme.colorScheme.background.copy(alpha = .85f),
       sheetDragHandle = {
-        if (!uiState.expanded &&
-            sheetState.hasPartiallyExpandedState &&
-            currentRouteState != Route.LOGIN) {
+        if (!uiState.expanded && sheetState.hasPartiallyExpandedState && displayPlayer) {
           Column(
               modifier =
                   Modifier.background(
@@ -90,8 +84,7 @@ fun SurroundWithMiniPlayer(currentRouteState: Route?, screen: @Composable () -> 
       scaffoldState =
           BottomSheetScaffoldState(
               bottomSheetState = sheetState, snackbarHostState = SnackbarHostState()),
-      sheetPeekHeight =
-          if (currentRouteState != Route.LOGIN && currentRouteState != null) 144.dp else 0.dp) {
+      sheetPeekHeight = if (displayPlayer) 144.dp else 0.dp) {
         screen()
       }
 }
@@ -100,7 +93,7 @@ fun SurroundWithMiniPlayer(currentRouteState: Route?, screen: @Composable () -> 
 @Composable
 private fun HandleSheetStateChanges(
     sheetState: SheetState,
-    uiState: TrackListUiState,
+    uiState: TrackListViewModel.UiState,
     viewModel: TrackListViewModel
 ) {
   LaunchedEffect(uiState.expanded) {
@@ -124,7 +117,7 @@ private fun HandleSheetStateChanges(
 
 // A placeholder
 @Composable
-fun HandleProgressChanges(uiState: TrackListUiState, progress: MutableFloatState) {
+fun HandleProgressChanges(uiState: TrackListViewModel.UiState, progress: MutableFloatState) {
   LaunchedEffect(uiState.isPlaying) {
     if (uiState.isPlaying) {
       while (true) {
