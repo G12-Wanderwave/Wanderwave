@@ -1,27 +1,26 @@
 package ch.epfl.cs311.wanderwave.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.navigation.TOP_LEVEL_DESTINATIONS
 
-val trackListIcon: ImageVector = Icons.AutoMirrored.Filled.List
+val trackListIcon: ImageVector = Icons.Default.List
 val mainIcon: ImageVector = Icons.Default.Home
 val mapIcon: ImageVector = Icons.Default.LocationOn
 
@@ -41,23 +40,37 @@ val mapIcon: ImageVector = Icons.Default.LocationOn
  */
 @Composable
 fun AppBottomBar(navActions: NavigationActions) {
-  Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.testTag("appBottomBar")) {
-    BottomAppBar(
-        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface),
-    ) {
-      for (destination in TOP_LEVEL_DESTINATIONS) {
-        Button(
-            onClick = { navActions.navigateToTopLevel(destination.route) },
-            modifier =
-                Modifier.padding(8.dp)
-                    .testTag("bottomAppBarButton" + destination.route.routeString)) {
-              when (destination.route) {
-                Route.TRACK_LIST -> trackListIcon
-                Route.MAIN -> mainIcon
-                else -> mapIcon
-              }
-            }
-      }
-    }
+  BottomAppBar(
+      modifier =
+          Modifier.fillMaxWidth()
+              .background(MaterialTheme.colorScheme.surface)
+              .testTag("appBottomBar"),
+  ) {
+    // Assumes TOP_LEVEL_DESTINATIONS are in the order of Track List, Main, and Map for indexing
+    IconButton(
+        onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[0].route) },
+        modifier =
+            Modifier.weight(1f) // Spread the icons evenly across the BottomAppBar
+                .testTag("bottomAppBarButton" + Route.TRACK_LIST.routeString)) {
+          Icon(
+              trackListIcon,
+              contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[0].textId))
+        }
+
+    Spacer(Modifier.weight(1f)) // Spacer for centering the middle icon
+
+    IconButton(
+        onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[1].route) },
+        modifier = Modifier.weight(1f).testTag("bottomAppBarButton" + Route.MAIN.routeString)) {
+          Icon(mainIcon, contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[1].textId))
+        }
+
+    Spacer(Modifier.weight(1f)) // Spacer for centering the middle icon
+
+    IconButton(
+        onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[2].route) },
+        modifier = Modifier.weight(1f).testTag("bottomAppBarButton" + Route.MAP.routeString)) {
+          Icon(mapIcon, contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[2].textId))
+        }
   }
 }
