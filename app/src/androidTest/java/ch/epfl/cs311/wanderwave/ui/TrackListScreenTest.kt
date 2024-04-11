@@ -12,41 +12,68 @@ import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
+import io.mockk.Called
 import io.mockk.called
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-
 @RunWith(AndroidJUnit4::class)
-class TrackListScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
+class TrackListScreenTest : TestCase() {
 
-  @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
+  private val testDispatcher = TestCoroutineDispatcher()
 
-  @RelaxedMockK lateinit var mockTrackRepositoryImpl: TrackRepositoryImpl
+  @get:Rule
+  val composeTestRule = createAndroidComposeRule<TestActivity>()
 
-  @get:Rule val mockkRule = MockKRule(this)
+  @get:Rule
+  val mockkRule = MockKRule(this)
+  @RelaxedMockK
+  lateinit var mockTrackRepositoryImpl: TrackRepositoryImpl
 
-  @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
+  @RelaxedMockK
+  lateinit var mockSpotifyController: SpotifyController
 
-  @RelaxedMockK private lateinit var mockShowMessage: (String) -> Unit
+  @RelaxedMockK
+  lateinit var mockShowMessage: (String) -> Unit
+  @Before
+  fun setup() {
+    Dispatchers.setMain(testDispatcher)
+  }
 
-  fun setup(result: Boolean) {
-    every { mockTrackRepositoryImpl.getAll() } returns
-        flowOf(listOf(Track("id1", "title1", "artist1")))
+  @After
+  fun tearDown() {
+    Dispatchers.resetMain()
+    testDispatcher.cleanupTestCoroutines()
+  }
+
+  private fun setupViewModel(result: Boolean) {
+    every { mockTrackRepositoryImpl.getAll() } returns flowOf(listOf(Track("id1", "title1", "artist1")))
     every { mockSpotifyController.playTrack(any()) } returns flowOf(result)
+
     val viewModel = TrackListViewModel(mockTrackRepositoryImpl, mockSpotifyController)
-    composeTestRule.setContent { TrackListScreen(mockShowMessage, viewModel) }
+
+    composeTestRule.setContent {
+      TrackListScreen(mockShowMessage, viewModel)
+    }
   }
 
   @Test
-  fun trackListScreenIsDisplayed() = run {
-    setup(true)
+  fun trackListScreenIsDisplayed() = testDispatcher.runBlockingTest {
+    setupViewModel(true)
     onComposeScreen<TrackListScreen>(composeTestRule) {
       assertIsDisplayed()
 
@@ -58,29 +85,29 @@ class TrackListScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCo
   }
 
   @Test
-  fun tappingTrackPlaysIt() = run {
-    setup(true)
+  fun tappingTrackPlaysIt() = testDispatcher.runBlockingTest {
+    setupViewModel(true)
     onComposeScreen<TrackListScreen>(composeTestRule) {
       trackButton {
         assertIsDisplayed()
         performClick()
       }
+      advanceUntilIdle()
       verify { mockSpotifyController.playTrack(any()) }
-      coVerify { mockShowMessage wasNot called }
+      coVerify { mockShowMessage wasNot Called }
     }
   }
 
   @Test
-  fun failedToPlayTrackDisplaysMessage() = run {
-    setup(false)
+  fun failedToPlayTrackDisplaysMessage() = testDispatcher.runBlockingTest {
+    setupViewModel(false)
     onComposeScreen<TrackListScreen>(composeTestRule) {
       trackButton {
         assertIsDisplayed()
         performClick()
       }
+      advanceUntilIdle()
       verify { mockSpotifyController.playTrack(any()) }
-      // coVerify { mockShowMessage(any()) }
-
     }
   }
 }
