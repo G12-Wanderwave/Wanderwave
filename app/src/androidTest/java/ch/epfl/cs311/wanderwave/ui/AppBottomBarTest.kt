@@ -25,7 +25,7 @@ class AppBottomBarTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
   @get:Rule val composeTestRule = createComposeRule()
 
   @get:Rule val mockkRule = MockKRule(this)
-
+  // testing
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
   @Before

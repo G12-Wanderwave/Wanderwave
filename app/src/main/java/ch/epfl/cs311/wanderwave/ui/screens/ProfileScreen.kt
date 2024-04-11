@@ -7,12 +7,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -20,7 +26,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
 import ch.epfl.cs311.wanderwave.ui.components.profile.ClickableIcon
+import ch.epfl.cs311.wanderwave.ui.components.profile.SongsListDisplay
 import ch.epfl.cs311.wanderwave.ui.components.profile.VisitCard
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
@@ -35,7 +44,6 @@ val INPUT_BOX_NAM_SIZE = 150.dp
  * to modify the profile. It also includes a toggle to switch between showing the "TOP SONGS" list
  * or the "CHOSEN SONGS" list, as well as dialogs to add new tracks to the lists.
  *
- * @param viewModel the ViewModel that will handle the profile and song lists.
  * @author Ayman Bakiri
  * @author Menzo Bouaissi
  * @since 1.0
@@ -45,23 +53,73 @@ val INPUT_BOX_NAM_SIZE = 150.dp
 fun ProfileScreen() {
   val viewModel: ProfileViewModel = hiltViewModel()
   val currentProfileState by viewModel.profile.collectAsState()
+  val songLists by viewModel.songLists.collectAsState()
+  var showDialog by remember { mutableStateOf(false) }
+  var dialogListType by remember { mutableStateOf("TOP SONGS") }
+  var isTopSongsListVisible by remember { mutableStateOf(true) }
   val isInEditMode by viewModel.isInEditMode.collectAsState()
 
-  val currentProfile: Profile = currentProfileState
+  val currentProfile: Profile = currentProfileState ?: return
+  LaunchedEffect(Unit) {
+    viewModel.createSpecificSongList("TOP_SONGS")
+    viewModel.createSpecificSongList("CHOSEN_SONGS")
+  }
 
-  if (isInEditMode) { // TODO: instead of doing this, we should have a navigation action to go to
-    // the edit profile screen
-
-    EditProfileScreen(
-        profile = currentProfile,
-        onProfileChange = { updatedProfile -> viewModel.updateProfile(updatedProfile) })
-  } else {
-
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen")) {
+  Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen")) {
+    if (isInEditMode) {
+      EditProfileScreen(
+          profile = currentProfile,
+          onProfileChange = { updatedProfile -> viewModel.updateProfile(updatedProfile) })
+    } else {
       Box(modifier = Modifier.fillMaxWidth()) {
         VisitCard(Modifier, currentProfile)
         ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
         ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create)
+      }
+
+      // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
+      Button(
+          onClick = { isTopSongsListVisible = !isTopSongsListVisible },
+          modifier = Modifier.testTag("toggleSongList")) {
+            Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
+          }
+
+      // Call the SongsListDisplay function
+      SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
+
+      // Buttons for adding tracks to top songs lists
+      Button(
+          onClick = {
+            showDialog = true
+            dialogListType = "TOP SONGS"
+          },
+          modifier = Modifier.testTag("addTopSongs")) {
+            Text("Add Track to TOP SONGS List")
+          }
+
+      // Buttons for adding tracks to chosen songs list
+      Button(
+          onClick = {
+            showDialog = true
+            dialogListType = "CHOSEN SONGS"
+          },
+          modifier = Modifier.testTag("addChosenSongs")) {
+            Text("Add Track to CHOSEN SONGS List")
+          }
+
+      // Show dialog for adding a new track and add the track to the appropriate list
+      if (showDialog) {
+        AddTrackDialog(
+            onAddTrack = { id, title, artist ->
+              viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
+              viewModel.addTrackToList(dialogListType, Track(id, title, artist))
+              showDialog = false
+            },
+            onDismiss = { showDialog = false },
+            initialTrackId = "",
+            initialTrackTitle = "",
+            initialTrackArtist = "",
+            dialogTestTag = "addTrackDialog")
       }
     }
   }

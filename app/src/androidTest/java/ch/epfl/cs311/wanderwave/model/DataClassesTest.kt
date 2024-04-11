@@ -63,6 +63,32 @@ class DataClassesTest {
   }
 
   @Test
+  fun documentToProfileExistWithNullValues() {
+    every { document.exists() } returns true
+    every { document.getString("firstName") } returns null
+    every { document.getString("lastName") } returns null
+    every { document.getString("description") } returns null
+    every { document.getLong("numberOfLikes") } returns null
+    every { document.getBoolean("isPublic") } returns null
+    every { document.getString("profilePictureUri") } returns null
+    every { document.getString("spotifyUid") } returns null
+    every { document.getString("firebaseUid") } returns null
+
+    val profile = Profile.from(document)
+    // assert if the profile is not null
+    assert(profile != null)
+    // assert if the profile has the default values
+    assertEquals("", profile!!.firstName)
+    assertEquals("", profile.lastName)
+    assertEquals("", profile.description)
+    assertEquals(0, profile.numberOfLikes)
+    assertEquals(false, profile.isPublic)
+    assertEquals(null, profile.profilePictureUri)
+    assertEquals("", profile.spotifyUid)
+    assertEquals("", profile.firebaseUid)
+  }
+
+  @Test
   fun documentSnapshotToBeacon() {
     every { document.exists() } returns true
 
@@ -76,6 +102,37 @@ class DataClassesTest {
 
     // assert if the beacon is null
     assert(beacon2 == null)
+  }
+
+  @Test
+  fun documentToBeaconExistWithNullValues() {
+    every { document.exists() } returns true
+    every { document.get("location") } returns null
+
+    val beacon = Beacon.from(document)
+    // assert if the beacon is not null
+    assert(beacon != null)
+    // assert if the beacon has the default values
+    assertEquals(Location(0.0, 0.0), beacon!!.location)
+
+    every { document.get("location") } returns
+        mapOf("latitude" to null, "longitude" to null, "name" to null)
+
+    assertEquals(Location(0.0, 0.0), beacon!!.location)
+  }
+
+  @Test
+  fun beaconToMap() {
+    val location = Location(1.0, 1.0, "Test Location")
+    val beacon = Beacon("Test Id", location, listOf())
+    val beaconMap: Map<String, Any> = beacon.toMap()
+    // test beacon behaviour
+    assertEquals("Test Id", beacon.id)
+    assertEquals(location, beacon.location)
+    assertEquals(listOf<Track>(), beacon.tracks)
+    assertEquals("Test Id", beaconMap["id"])
+    assertEquals(location.toMap(), beaconMap["location"])
+    assertEquals(listOf<Track>(), beaconMap["tracks"])
   }
 
   @Test

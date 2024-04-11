@@ -1,12 +1,13 @@
 package ch.epfl.cs311.wanderwave.model
 
-import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
+import com.google.firebase.firestore.DocumentSnapshot
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
+import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -27,33 +28,53 @@ public constructor Profile(
 public class ProfileConnectionTest {
 
   @get:Rule val mockkRule = MockKRule(this)
+
+  @RelaxedMockK private lateinit var documentSnapshot: DocumentSnapshot
   private lateinit var profileConnection: ProfileConnection
 
   @Before
   fun setup() {
+
+    MockKAnnotations.init(this)
     profileConnection = ProfileConnection()
   }
 
   @Test
-  fun testAddAndGetItem() = runBlocking {
-    withTimeout(30000) {
-      var profile =
-          Profile(
-              firstName = "My FirstName",
-              lastName = "My LastName",
-              description = "My Description",
-              numberOfLikes = 0,
-              isPublic = true,
-              profilePictureUri = null,
-              firebaseUid = "My Firebase UID",
-              spotifyUid = "My Spotify UID")
+  fun testDocumentToItem() {
+    // Mock document snapshot data
+    val firstName = "John"
+    val lastName = "Doe"
+    val description = "Test description"
+    val numberOfLikes = 5
+    val isPublic = true
+    val spotifyUid = "spotifyUid"
+    val firebaseUid = "firebaseUid"
 
-      profileConnection.addItemWithId(profile)
+    // Mock the behavior of Document
+    every { documentSnapshot.exists() } returns true
+    every { documentSnapshot.getString("firstName") } returns firstName
+    every { documentSnapshot.getString("lastName") } returns lastName
+    every { documentSnapshot.getString("description") } returns description
+    every { documentSnapshot.getLong("numberOfLikes") } returns numberOfLikes.toLong()
+    every { documentSnapshot.getBoolean("isPublic") } returns isPublic
+    every { documentSnapshot.getString("spotifyUid") } returns spotifyUid
+    every { documentSnapshot.getString("firebaseUid") } returns firebaseUid
+    every { documentSnapshot.getString("profilePictureUri") } returns null
 
-      Log.d("Firestore", "Added item")
-      val retrievedProfile = profileConnection.getItem("testProfile").first()
+    // Call the function under test
+    val result = profileConnection.documentToItem(documentSnapshot)
 
-      assert(profile == retrievedProfile)
-    }
+    // Assert the result
+    val expectedProfile =
+        Profile(
+            firstName = firstName,
+            lastName = lastName,
+            description = description,
+            numberOfLikes = numberOfLikes.toInt(),
+            isPublic = isPublic,
+            profilePictureUri = null,
+            spotifyUid = spotifyUid,
+            firebaseUid = firebaseUid)
+    assertEquals(expectedProfile, result)
   }
 }
