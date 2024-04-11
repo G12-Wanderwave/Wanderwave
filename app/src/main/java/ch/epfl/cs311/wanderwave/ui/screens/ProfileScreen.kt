@@ -51,78 +51,78 @@ val INPUT_BOX_NAM_SIZE = 150.dp
  */
 @Composable
 fun ProfileScreen() {
-  val viewModel: ProfileViewModel = hiltViewModel()
-  val currentProfileState by viewModel.profile.collectAsState()
-  val songLists by viewModel.songLists.collectAsState()
-  var showDialog by remember { mutableStateOf(false) }
-  var dialogListType by remember { mutableStateOf("TOP SONGS") }
-  var isTopSongsListVisible by remember { mutableStateOf(true) }
-  val isInEditMode by viewModel.isInEditMode.collectAsState()
+    val viewModel: ProfileViewModel = hiltViewModel()
+    val currentProfileState by viewModel.profile.collectAsState()
+    val songLists by viewModel.songLists.collectAsState()
+    var showDialog by remember { mutableStateOf(false) }
+    var dialogListType by remember { mutableStateOf("TOP SONGS") }
+    var isTopSongsListVisible by remember { mutableStateOf(true) }
+    val isInEditMode by viewModel.isInEditMode.collectAsState()
 
-  val currentProfile: Profile = currentProfileState ?: return
-  LaunchedEffect(Unit) {
-    viewModel.createSpecificSongList("TOP_SONGS")
-    viewModel.createSpecificSongList("CHOSEN_SONGS")
-  }
-
-  Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen")) {
-    if (isInEditMode) {
-      EditProfileScreen(
-          profile = currentProfile,
-          onProfileChange = { updatedProfile -> viewModel.updateProfile(updatedProfile) })
-    } else {
-      Box(modifier = Modifier.fillMaxWidth()) {
-        VisitCard(Modifier, currentProfile)
-        ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
-        ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create)
-      }
-
-      // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
-      Button(
-          onClick = { isTopSongsListVisible = !isTopSongsListVisible },
-          modifier = Modifier.testTag("toggleSongList")) {
-            Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
-          }
-
-      // Call the SongsListDisplay function
-      SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
-
-      // Buttons for adding tracks to top songs lists
-      Button(
-          onClick = {
-            showDialog = true
-            dialogListType = "TOP SONGS"
-          },
-          modifier = Modifier.testTag("addTopSongs")) {
-            Text("Add Track to TOP SONGS List")
-          }
-
-      // Buttons for adding tracks to chosen songs list
-      Button(
-          onClick = {
-            showDialog = true
-            dialogListType = "CHOSEN SONGS"
-          },
-          modifier = Modifier.testTag("addChosenSongs")) {
-            Text("Add Track to CHOSEN SONGS List")
-          }
-
-      // Show dialog for adding a new track and add the track to the appropriate list
-      if (showDialog) {
-        AddTrackDialog(
-            onAddTrack = { id, title, artist ->
-              viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
-              viewModel.addTrackToList(dialogListType, Track(id, title, artist))
-              showDialog = false
-            },
-            onDismiss = { showDialog = false },
-            initialTrackId = "",
-            initialTrackTitle = "",
-            initialTrackArtist = "",
-            dialogTestTag = "addTrackDialog")
-      }
+    val currentProfile: Profile = currentProfileState ?: return
+    LaunchedEffect(Unit) {
+        viewModel.createSpecificSongList("TOP_SONGS")
+        viewModel.createSpecificSongList("CHOSEN_SONGS")
     }
-  }
+
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen")) {
+        if (isInEditMode) {
+            EditProfileScreen(
+                profile = currentProfile,
+                onProfileChange = { updatedProfile -> viewModel.updateProfile(updatedProfile) })
+        } else {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                VisitCard(Modifier, currentProfile)
+                ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
+                ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create)
+            }
+
+            // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
+            Button(
+                onClick = { isTopSongsListVisible = !isTopSongsListVisible },
+                modifier = Modifier.testTag("toggleSongList")) {
+                Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
+            }
+
+            // Call the SongsListDisplay function
+            SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
+
+            // Buttons for adding tracks to top songs lists
+            Button(
+                onClick = {
+                    showDialog = true
+                    dialogListType = "TOP SONGS"
+                },
+                modifier = Modifier.testTag("addTopSongs")) {
+                Text("Add Track to TOP SONGS List")
+            }
+
+            // Buttons for adding tracks to chosen songs list
+            Button(
+                onClick = {
+                    showDialog = true
+                    dialogListType = "CHOSEN SONGS"
+                },
+                modifier = Modifier.testTag("addChosenSongs")) {
+                Text("Add Track to CHOSEN SONGS List")
+            }
+
+            // Show dialog for adding a new track and add the track to the appropriate list
+            if (showDialog) {
+                AddTrackDialog(
+                    onAddTrack = { id, title, artist ->
+                        viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
+                        viewModel.addTrackToList(dialogListType, Track(id, title, artist))
+                        showDialog = false
+                    },
+                    onDismiss = { showDialog = false },
+                    initialTrackId = "",
+                    initialTrackTitle = "",
+                    initialTrackArtist = "",
+                    dialogTestTag = "addTrackDialog")
+            }
+        }
+    }
 }
 
 /**
@@ -135,27 +135,28 @@ fun ProfileScreen() {
  */
 @Composable
 fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel = hiltViewModel()) {
-  // Determine the current public mode state
-  val isPublicMode by viewModel.isInPublicMode.collectAsState(false)
-  Switch(
-      checked = isPublicMode,
-      onCheckedChange = {
-        // When the switch is toggled, call viewModel's method to update the profile's public mode
-        viewModel.togglePublicMode()
-      },
-      modifier =
-          modifier
-              .graphicsLayer {
+    // Determine the current public mode state
+    val isPublicMode by viewModel.isInPublicMode.collectAsState(false)
+    Switch(
+        checked = isPublicMode,
+        onCheckedChange = {
+            // When the switch is toggled, call viewModel's method to update the profile's public mode
+            viewModel.togglePublicMode()
+        },
+        modifier =
+        modifier
+            .graphicsLayer {
                 scaleX = SCALE_X
                 scaleY = SCALE_Y
-              }
-              .testTag("profileSwitch"),
-      colors =
-          SwitchDefaults.colors(
-              checkedThumbColor = MaterialTheme.colorScheme.primary,
-              checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
-              uncheckedThumbColor = MaterialTheme.colorScheme.secondary,
-              uncheckedTrackColor = MaterialTheme.colorScheme.secondaryContainer,
-          ),
-  )
+            }
+            .testTag("profileSwitch"),
+        colors =
+        SwitchDefaults.colors(
+            checkedThumbColor = MaterialTheme.colorScheme.primary,
+            checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
+            uncheckedThumbColor = MaterialTheme.colorScheme.secondary,
+            uncheckedTrackColor = MaterialTheme.colorScheme.secondaryContainer,
+        ),
+    )
 }
+

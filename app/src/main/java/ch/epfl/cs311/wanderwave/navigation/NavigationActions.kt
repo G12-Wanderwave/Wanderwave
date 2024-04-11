@@ -14,6 +14,7 @@ enum class Route(val routeString: String, val showBottomBar: Boolean) {
   TRACK_LIST("trackList", true),
   MAP("map", true);
 
+
   companion object {
     fun forRouteString(routeString: String): Route? {
       return entries.firstOrNull { it.routeString == routeString }
