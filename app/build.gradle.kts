@@ -117,7 +117,6 @@ dependencies {
     implementation(libs.androidx.room.ktx)
 
     implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.core)
     implementation(libs.firebase.database)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)

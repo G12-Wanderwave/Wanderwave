@@ -23,9 +23,12 @@ class AuthenticationController @Inject constructor(private val auth: FirebaseAut
     }
   }
 
-  fun signIn(): Flow<Boolean> {
+  fun authenticate(token: String): Flow<Boolean> {
     if (auth.currentUser != null) {
       return flowOf(true)
+    }
+    if (token.isEmpty()) {
+      return flowOf(false)
     }
     return flow {
       val result = auth.signInAnonymously().await()
@@ -37,7 +40,7 @@ class AuthenticationController @Inject constructor(private val auth: FirebaseAut
     }
   }
 
-  fun signOut() {
+  fun deauthenticate() {
     auth.signOut()
   }
 
