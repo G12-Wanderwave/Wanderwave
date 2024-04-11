@@ -24,9 +24,8 @@ class FastLocationSource(private val context: Context) : LocationSource, Locatio
   override fun activate(onLocationChangedListener: LocationSource.OnLocationChangedListener) {
     listener = onLocationChangedListener
     locationClient = LocationServices.getFusedLocationProviderClient(context)
-    val locationRequest = LocationRequest.Builder(5)
-      .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-      .build()
+    val locationRequest =
+        LocationRequest.Builder(5).setPriority(Priority.PRIORITY_HIGH_ACCURACY).build()
     locationClient?.requestLocationUpdates(locationRequest, this, null)
   }
 

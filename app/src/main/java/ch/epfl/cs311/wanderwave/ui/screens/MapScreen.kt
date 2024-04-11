@@ -1,11 +1,5 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.ktx.model.markerOptions
-
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
@@ -18,10 +12,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -37,9 +29,12 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -81,7 +76,7 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
     permissionState.launchMultiplePermissionRequest()
   }
 
-  val cameraPositionState: CameraPositionState = rememberCameraPositionState() {}
+  val cameraPositionState: CameraPositionState = rememberCameraPositionState {}
   val mapIsLoaded = remember { mutableStateOf(false) }
 
   DisposableEffect(Unit) {
@@ -93,23 +88,16 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
       properties =
           MapProperties(
               isMyLocationEnabled = permissionState.allPermissionsGranted,
-              mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)
-          ),
-
+              mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)),
       locationSource = viewModel.locationSource,
       cameraPositionState = cameraPositionState,
       onMapLoaded = {
         println("Map is loaded!")
         mapIsLoaded.value = true
       }) {
-    val epfl = LatLng(46.518831258, 6.559331096)
-    Marker(
-      state = MarkerState(
-        position = epfl
-      ),
-      title = "Marker at EPFL"
-    )
-  }
+        val epfl = LatLng(46.518831258, 6.559331096)
+        Marker(state = MarkerState(position = epfl), title = "Marker at EPFL")
+      }
 
   if (needToRequestPermissions(permissionState)) {
     AlertDialog(

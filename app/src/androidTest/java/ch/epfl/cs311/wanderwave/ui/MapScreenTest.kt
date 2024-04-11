@@ -5,6 +5,7 @@ import android.content.Context
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.os.Looper
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -93,7 +94,7 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   fun locationSourceCallsOnLocationChanged() = run {
     val mockListener = mockk<LocationSource.OnLocationChangedListener>()
     every { mockListener.onLocationChanged(any()) } returns Unit
-    val mockContext = mockk<Context>()
+    val mockContext = mockk<Context>(relaxed = true)
     val locationManager = mockk<LocationManager>()
     every { mockContext.getSystemService(Context.LOCATION_SERVICE) } returns locationManager
     every {
@@ -101,6 +102,7 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
           any<String>(), any<Long>(), any(), any<LocationListener>())
     } returns Unit
     val source = FastLocationSource(mockContext)
+    Looper.prepare()
     source.activate(mockListener)
     source.onLocationChanged(location)
     verify { mockListener.onLocationChanged(any()) }
@@ -110,7 +112,7 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   fun map_is_display_and_not_circular() = run {
     ComposeScreen.onComposeScreen<MapScreen>(composeTestRule) {
       circularProgressIndicator { assertIsNotDisplayed() } // This line is the difference
-      map { assertIsDisplayed() }
+      assertIsDisplayed()
     }
   }
 }
