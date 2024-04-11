@@ -39,7 +39,6 @@ class MainPlaceHolderTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCo
   }
 
   @Test
-  //TODO
   fun mainPlaceHolderIsDisplayed() = run {
     onComposeScreen<MainPlaceHolder>(composeTestRule) {
       assertIsDisplayed()

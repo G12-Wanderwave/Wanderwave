@@ -4,10 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -34,9 +32,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
-import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
 import ch.epfl.cs311.wanderwave.ui.components.profile.ClickableIcon
 import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
@@ -68,7 +66,6 @@ fun ProfileScreen(navActions: NavigationActions) {
   var showDialog by remember { mutableStateOf(false) }
   var dialogListType by remember { mutableStateOf("TOP SONGS") }
   var isTopSongsListVisible by remember { mutableStateOf(true) }
-  val isInEditMode by viewModel.isInEditMode.collectAsState()
 
   val currentProfile: Profile = currentProfileState ?: return
   LaunchedEffect(Unit) {
@@ -87,54 +84,52 @@ fun ProfileScreen(navActions: NavigationActions) {
               Icons.Filled.Create,
               onClick = { navActions.navigateTo(Route.EDIT_PROFILE) })
         }
-      // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
-      Button(
-          onClick = { isTopSongsListVisible = !isTopSongsListVisible },
-          modifier = Modifier.testTag("toggleSongList")) {
-          Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
-      }
+        // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
+        Button(
+            onClick = { isTopSongsListVisible = !isTopSongsListVisible },
+            modifier = Modifier.testTag("toggleSongList")) {
+              Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
+            }
 
-      // Call the SongsListDisplay function
-      SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
+        // Call the SongsListDisplay function
+        SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
 
-      // Buttons for adding tracks to top songs lists
-      Button(
-          onClick = {
+        // Buttons for adding tracks to top songs lists
+        Button(
+            onClick = {
               showDialog = true
               dialogListType = "TOP SONGS"
-          },
-          modifier = Modifier.testTag("addTopSongs")) {
-          Text("Add Track to TOP SONGS List")
-      }
+            },
+            modifier = Modifier.testTag("addTopSongs")) {
+              Text("Add Track to TOP SONGS List")
+            }
 
-      // Buttons for adding tracks to chosen songs list
-      Button(
-          onClick = {
+        // Buttons for adding tracks to chosen songs list
+        Button(
+            onClick = {
               showDialog = true
               dialogListType = "CHOSEN SONGS"
-          },
-          modifier = Modifier.testTag("addChosenSongs")) {
-          Text("Add Track to CHOSEN SONGS List")
-      }
+            },
+            modifier = Modifier.testTag("addChosenSongs")) {
+              Text("Add Track to CHOSEN SONGS List")
+            }
 
-      // Show dialog for adding a new track and add the track to the appropriate list
-      if (showDialog) {
+        // Show dialog for adding a new track and add the track to the appropriate list
+        if (showDialog) {
           AddTrackDialog(
               onAddTrack = { id, title, artist ->
-                  viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
-                  viewModel.addTrackToList(dialogListType, Track(id, title, artist))
-                  showDialog = false
+                viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
+                viewModel.addTrackToList(dialogListType, Track(id, title, artist))
+                showDialog = false
               },
               onDismiss = { showDialog = false },
               initialTrackId = "",
               initialTrackTitle = "",
               initialTrackArtist = "",
               dialogTestTag = "addTrackDialog")
+        }
       }
-  }
-        SignOutButton(modifier = Modifier, navActions = navActions)
-      }
-
+  SignOutButton(modifier = Modifier, navActions = navActions)
 }
 
 /**
