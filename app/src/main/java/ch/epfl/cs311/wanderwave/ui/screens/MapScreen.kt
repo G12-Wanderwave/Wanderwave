@@ -41,7 +41,38 @@ import com.google.maps.android.compose.MarkerState
 fun MapScreen() {
   val viewModel: MapViewModel = hiltViewModel()
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-  GoogleMap(modifier = Modifier.testTag("mapScreen")) { DisplayBeacons(uiState.beacons) }
+
+  val context = LocalContext.current
+  val isMapReady = remember { mutableStateOf(false) }
+  val googleMapState = viewModel.googleMapState.collectAsState().value
+  // GoogleMap(modifier = Modifier.testTag("mapScreen")) { DisplayBeacons(uiState.beacons) }
+
+  Box(modifier = Modifier.fillMaxSize().testTag("mapScreen"), contentAlignment = Alignment.Center) {
+    AndroidView(
+      modifier = Modifier.testTag("map"),
+      factory = { ctx ->
+        MapView(ctx).apply {
+          onCreate(Bundle())
+          onResume()
+          getMapAsync { googleMap ->
+            viewModel.setGoogleMap(googleMap)
+            isMapReady.value = true
+            googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style))
+          }
+        }
+      },
+    )
+
+    if (!isMapReady.value) {
+      CircularProgressIndicator(modifier = Modifier.testTag("CircularProgressIndicator"))
+    } else {
+      googleMapState?.let { googleMap ->
+        val epfl = LatLng(46.518831258, 6.559331096)
+        googleMap.addMarker(MarkerOptions().position(epfl).title("Marker at EPFL"))
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(epfl))
+      }
+    }
+  }
 }
 
 /**
@@ -58,40 +89,9 @@ fun DisplayBeacons(beacons: List<Beacon>) {
   // val customIcon = BitmapDescriptorFactory.fromResource(R.drawable.waypoint)
   beacons.forEach() {
     Marker(
-        state = MarkerState(position = it.location.toLatLng()),
-        title = it.id,
-        // icon = customIcon,
+      state = MarkerState(position = it.location.toLatLng()),
+      title = it.id,
+      // icon = customIcon,
     )
-  }
-
-  val context = LocalContext.current
-  val isMapReady = remember { mutableStateOf(false) }
-  val viewModel: MapViewModel = hiltViewModel()
-  val googleMapState = viewModel.googleMapState.collectAsState().value
-  Box(modifier = Modifier.fillMaxSize().testTag("mapScreen"), contentAlignment = Alignment.Center) {
-    AndroidView(
-        modifier = Modifier.testTag("map"),
-        factory = { ctx ->
-          MapView(ctx).apply {
-            onCreate(Bundle())
-            onResume()
-            getMapAsync { googleMap ->
-              viewModel.setGoogleMap(googleMap)
-              isMapReady.value = true
-              googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style))
-            }
-          }
-        },
-    )
-
-    if (!isMapReady.value) {
-      CircularProgressIndicator(modifier = Modifier.testTag("CircularProgressIndicator"))
-    } else {
-      googleMapState?.let { googleMap ->
-        val epfl = LatLng(46.518831258, 6.559331096)
-        googleMap.addMarker(MarkerOptions().position(epfl).title("Marker at EPFL"))
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(epfl))
-      }
-    }
   }
 }
