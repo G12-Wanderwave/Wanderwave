@@ -8,7 +8,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,15 +18,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.R
-import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.model.data.Beacon
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.LocationSource
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
@@ -37,8 +35,6 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.maps.android.compose.Marker
 
 @OptIn(ExperimentalPermissionsApi::class)
 fun needToRequestPermissions(permissionState: MultiplePermissionsState): Boolean {
@@ -99,10 +95,9 @@ fun WanderwaveGoogleMap(cameraPositionState: CameraPositionState, viewModel: Map
       properties =
           MapProperties(
               mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)),
-      cameraPositionState = cameraPositionState
-  ) {
-    MapContent(viewModel)
-  }
+      cameraPositionState = cameraPositionState) {
+        MapContent(viewModel)
+      }
 }
 
 @Composable
@@ -160,9 +155,7 @@ fun moveCamera(
     cameraPositionState.move(CameraUpdateFactory.newCameraPosition(currentCameraPosition))
   } else {
     cameraPositionState.move(
-      CameraUpdateFactory.newCameraPosition(CameraPosition.fromLatLngZoom(location, 15f))
-    )
-
+        CameraUpdateFactory.newCameraPosition(CameraPosition.fromLatLngZoom(location, 15f)))
   }
 }
 /**
