@@ -26,5 +26,4 @@ class MapTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport
 
   @Test
   fun mapIsDisplayed() = run { onComposeScreen<MapScreen>(composeTestRule) { assertIsDisplayed() } }
-
 }
