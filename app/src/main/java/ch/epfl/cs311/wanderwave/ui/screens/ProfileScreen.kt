@@ -130,17 +130,17 @@ fun ProfileButton(
   val currentProfile: Profile = currentProfileState
 
   // Display the button only when on the main screen TODO: Also from Map ?
-  if (navActions.getCurrentRoute() == Route.MAIN) {
-    Box(
-        modifier =
-            modifier
-                .clickable { navActions.navigateTo(Route.PROFILE) }
-                .background(Color.Transparent)
-                .padding(16.dp)
-                .testTag("profileButton")) {
+  Box(
+      modifier =
+          modifier
+              .clickable { navActions.navigateTo(Route.PROFILE) }
+              .background(Color.Transparent)
+              .padding(16.dp)
+              .testTag("profileButton")) {
+        if (navActions.getCurrentRoute() == Route.MAIN) {
           SelectImage(modifier = Modifier.clip(CircleShape).size(50.dp), profile = currentProfile)
         }
-  }
+      }
 }
 
 /**
