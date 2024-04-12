@@ -11,14 +11,15 @@ import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
 
 @Composable
-fun BeaconScreen(navigationActions: NavigationActions, viewModel: BeaconViewModel = hiltViewModel()) {
+fun BeaconScreen(
+    navigationActions: NavigationActions,
+    viewModel: BeaconViewModel = hiltViewModel()
+) {
   BeaconScreen()
 }
 
 @Composable
 @Preview
 private fun BeaconScreen() {
-  Column(modifier = Modifier.fillMaxSize()) {
-    Text(text = "Beacon")
-  }
+  Column(modifier = Modifier.fillMaxSize()) { Text(text = "Beacon") }
 }
