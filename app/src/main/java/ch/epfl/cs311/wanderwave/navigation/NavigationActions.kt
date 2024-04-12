@@ -14,7 +14,8 @@ enum class Route(val routeString: String, val showBottomBar: Boolean) {
   TRACK_LIST("trackList", true),
   MAP("map", true),
   PROFILE("profile", false),
-  EDIT_PROFILE("editprofile", false);
+  EDIT_PROFILE("editprofile", false),
+  BEACON("beacon", false);
 
   companion object {
     fun forRouteString(routeString: String): Route? {
