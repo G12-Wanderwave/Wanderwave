@@ -12,7 +12,9 @@ enum class Route(val routeString: String, val showBottomBar: Boolean) {
   ABOUT("about", false),
   MAIN("main", true),
   TRACK_LIST("trackList", true),
-  MAP("map", true);
+  MAP("map", true),
+  PROFILE("profile", false),
+  EDIT_PROFILE("editprofile", false);
 
   companion object {
     fun forRouteString(routeString: String): Route? {

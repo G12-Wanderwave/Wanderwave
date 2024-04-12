@@ -7,5 +7,5 @@ class MainPlaceHolder(semanticsProvider: SemanticsNodeInteractionsProvider) :
     ComposeScreen<MainPlaceHolder>(
         semanticsProvider = semanticsProvider,
         viewBuilderAction = { hasTestTag("mainPlaceHolderScreen") }) {
-  val signOutButton = onNode { hasTestTag("signOutButton") }
+  val profileButton = onNode { hasTestTag("profileButton") }
 }
