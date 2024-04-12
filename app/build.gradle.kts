@@ -104,8 +104,8 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
-  androidTestImplementation("org.testng:testng:6.9.6")
-  debugImplementation(libs.androidx.ui.tooling)
+    androidTestImplementation("org.testng:testng:6.9.6")
+    debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.spotify.auth)
@@ -122,6 +122,9 @@ dependencies {
     implementation("com.google.android.play:core-ktx:1.7.0")
 
     implementation(libs.maps.compose)
+
+    implementation(libs.play.services.location)
+    implementation(libs.accompanist.permissions)
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
@@ -157,7 +160,8 @@ dependencies {
     androidTestImplementation(libs.mockk.agent)
 
     // Dependencies for the photo part
-    implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation(libs.coil.compose)
+
     androidTestImplementation("io.mockk:mockk:1.13.10")
     androidTestImplementation("io.mockk:mockk-android:1.13.10")
     androidTestImplementation("io.mockk:mockk-agent:1.13.10")

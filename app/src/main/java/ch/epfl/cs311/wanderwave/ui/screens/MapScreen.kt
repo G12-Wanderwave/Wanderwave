@@ -1,79 +1,146 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
-import android.os.Bundle
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
+import android.Manifest
+import android.annotation.SuppressLint
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.MultiplePermissionsState
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.maps.android.compose.CameraPositionState
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 
-/**
- * A screen that displays a map if loaded, else display a CircularProgressIndicator.
- *
- * @author Menzo Bouaissi
- * @since 1.0
- * @last update 1.0
- */
-@Preview
+@OptIn(ExperimentalPermissionsApi::class)
+fun needToRequestPermissions(permissionState: MultiplePermissionsState): Boolean {
+  return permissionState.permissions.any { !it.status.isGranted }
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+@SuppressLint("MissingPermission")
 @Composable
-fun MapScreen() {
-  val viewModel: MapViewModel = hiltViewModel()
-  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
+fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hiltViewModel()) {
   val context = LocalContext.current
-  val isMapReady = remember { mutableStateOf(false) }
-  val googleMapState = viewModel.googleMapState.collectAsState().value
-  // GoogleMap(modifier = Modifier.testTag("mapScreen")) { DisplayBeacons(uiState.beacons) }
+  val cameraPositionState: CameraPositionState = rememberCameraPositionState {}
+  val mapIsLoaded = remember { mutableStateOf(false) }
 
-  Box(modifier = Modifier.fillMaxSize().testTag("mapScreen"), contentAlignment = Alignment.Center) {
-    AndroidView(
-        modifier = Modifier.testTag("map"),
-        factory = { ctx ->
-          MapView(ctx).apply {
-            onCreate(Bundle())
-            onResume()
-            getMapAsync { googleMap ->
-              viewModel.setGoogleMap(googleMap)
-              isMapReady.value = true
-              googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style))
-            }
-          }
-        },
-    )
+  val permissionState =
+      rememberMultiplePermissionsState(
+          listOf(
+              Manifest.permission.ACCESS_COARSE_LOCATION,
+              Manifest.permission.ACCESS_FINE_LOCATION,
+          ))
 
-    if (!isMapReady.value) {
-      CircularProgressIndicator(modifier = Modifier.testTag("CircularProgressIndicator"))
-    } else {
-      googleMapState?.let { googleMap ->
-        val epfl = LatLng(46.518831258, 6.559331096)
-        googleMap.addMarker(MarkerOptions().position(epfl).title("Marker at EPFL"))
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(epfl))
+  // remember the camera position when navigating away
+  DisposableEffect(Unit) {
+    onDispose { viewModel.cameraPosition.value = cameraPositionState.position }
+  }
+
+  // if we have permission, show the location, otherwise show the map without location
+  WanderwaveGoogleMap(
+      cameraPositionState = cameraPositionState,
+      viewModel = viewModel,
+      mapIsLoaded = mapIsLoaded,
+      locationEnabled = permissionState.allPermissionsGranted)
+
+  if (needToRequestPermissions(permissionState)) {
+    AskForPermissions(permissionState)
+  } else {
+    // if we have location permissions, move the camera to the last known location **once**
+    val location = viewModel.getLastKnownLocation(context)
+    LaunchedEffect(location != null, mapIsLoaded.value) {
+      if (location != null && mapIsLoaded.value) {
+        moveCamera(cameraPositionState, location, viewModel.cameraPosition.value)
       }
     }
   }
 }
 
+@Composable
+fun WanderwaveGoogleMap(
+    cameraPositionState: CameraPositionState,
+    viewModel: MapViewModel,
+    mapIsLoaded: MutableState<Boolean>,
+    locationEnabled: Boolean = false
+) {
+  val context = LocalContext.current
+  GoogleMap(
+      modifier = Modifier.testTag("mapScreen"),
+      properties =
+          MapProperties(
+              isMyLocationEnabled = locationEnabled,
+              mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)),
+      locationSource = viewModel.locationSource,
+      cameraPositionState = cameraPositionState,
+      onMapLoaded = { mapIsLoaded.value = true }) {
+        MapContent(viewModel)
+      }
+}
+
+@Composable
+fun MapContent(viewModel: MapViewModel) {
+  val epfl = LatLng(46.518831258, 6.559331096)
+  val beacons = viewModel.uiState.collectAsStateWithLifecycle().value.beacons
+  Marker(state = MarkerState(position = epfl), title = "Marker at EPFL")
+  DisplayBeacons(beacons = beacons)
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun AskForPermissions(permissionState: MultiplePermissionsState) {
+  fun onAlertDismissed() {
+    permissionState.launchMultiplePermissionRequest()
+  }
+
+  AlertDialog(
+      title = { Text(stringResource(id = R.string.permission_request_title)) },
+      text = { Text(text = stringResource(id = R.string.permission_request_text_location)) },
+      onDismissRequest = { onAlertDismissed() },
+      confirmButton = {
+        TextButton(onClick = { onAlertDismissed() }) {
+          Text(stringResource(id = R.string.permission_request_confirm_button))
+        }
+      })
+}
+
+fun moveCamera(
+    cameraPositionState: CameraPositionState,
+    location: LatLng,
+    currentCameraPosition: CameraPosition?
+) {
+  if (currentCameraPosition != null) {
+    cameraPositionState.move(CameraUpdateFactory.newCameraPosition(currentCameraPosition))
+  } else {
+    cameraPositionState.move(
+        CameraUpdateFactory.newCameraPosition(CameraPosition.fromLatLngZoom(location, 15f)))
+  }
+}
 /**
  * This is a Composable function that displays the beacons on the map. It takes a list of beacons as
  * input and adds a marker for each beacon on the map.
