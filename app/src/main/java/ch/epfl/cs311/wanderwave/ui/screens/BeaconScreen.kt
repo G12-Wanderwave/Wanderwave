@@ -37,6 +37,15 @@ private fun BeaconScreen() {
       }
 }
 
-@Composable fun BeaconInformation() {}
+@Composable
+fun BeaconInformation() {
+  Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Text("Beacon", style = MaterialTheme.typography.displayMedium)
+    Text("Beacon Information")
+  }
+}
 
-@Composable fun SongList() {}
+@Composable
+fun SongList() {
+  Column() { Text("Song List") }
+}
