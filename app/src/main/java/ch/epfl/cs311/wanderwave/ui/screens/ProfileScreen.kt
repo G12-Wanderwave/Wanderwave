@@ -1,10 +1,14 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material3.Button
@@ -21,14 +25,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
 import ch.epfl.cs311.wanderwave.ui.components.profile.ClickableIcon
+import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
 import ch.epfl.cs311.wanderwave.ui.components.profile.SongsListDisplay
 import ch.epfl.cs311.wanderwave.ui.components.profile.VisitCard
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
@@ -50,14 +59,13 @@ val INPUT_BOX_NAM_SIZE = 150.dp
  * @last update 1.0
  */
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(navActions: NavigationActions) {
   val viewModel: ProfileViewModel = hiltViewModel()
   val currentProfileState by viewModel.profile.collectAsState()
   val songLists by viewModel.songLists.collectAsState()
   var showDialog by remember { mutableStateOf(false) }
   var dialogListType by remember { mutableStateOf("TOP SONGS") }
   var isTopSongsListVisible by remember { mutableStateOf(true) }
-  val isInEditMode by viewModel.isInEditMode.collectAsState()
 
   val currentProfile: Profile = currentProfileState ?: return
   LaunchedEffect(Unit) {
@@ -65,64 +73,63 @@ fun ProfileScreen() {
     viewModel.createSpecificSongList("CHOSEN_SONGS")
   }
 
-  Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen")) {
-    if (isInEditMode) {
-      EditProfileScreen(
-          profile = currentProfile,
-          onProfileChange = { updatedProfile -> viewModel.updateProfile(updatedProfile) })
-    } else {
-      Box(modifier = Modifier.fillMaxWidth()) {
-        VisitCard(Modifier, currentProfile)
-        ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
-        ClickableIcon(Modifier.align(Alignment.BottomEnd), Icons.Filled.Create)
-      }
+  Column(
+      modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
+      horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+          VisitCard(Modifier, currentProfile)
+          ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
+          ClickableIcon(
+              Modifier.align(Alignment.BottomEnd),
+              Icons.Filled.Create,
+              onClick = { navActions.navigateTo(Route.EDIT_PROFILE) })
+        }
+        // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
+        Button(
+            onClick = { isTopSongsListVisible = !isTopSongsListVisible },
+            modifier = Modifier.testTag("toggleSongList")) {
+              Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
+            }
 
-      // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
-      Button(
-          onClick = { isTopSongsListVisible = !isTopSongsListVisible },
-          modifier = Modifier.testTag("toggleSongList")) {
-            Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
-          }
+        // Call the SongsListDisplay function
+        SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
 
-      // Call the SongsListDisplay function
-      SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
-
-      // Buttons for adding tracks to top songs lists
-      Button(
-          onClick = {
-            showDialog = true
-            dialogListType = "TOP SONGS"
-          },
-          modifier = Modifier.testTag("addTopSongs")) {
-            Text("Add Track to TOP SONGS List")
-          }
-
-      // Buttons for adding tracks to chosen songs list
-      Button(
-          onClick = {
-            showDialog = true
-            dialogListType = "CHOSEN SONGS"
-          },
-          modifier = Modifier.testTag("addChosenSongs")) {
-            Text("Add Track to CHOSEN SONGS List")
-          }
-
-      // Show dialog for adding a new track and add the track to the appropriate list
-      if (showDialog) {
-        AddTrackDialog(
-            onAddTrack = { id, title, artist ->
-              viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
-              viewModel.addTrackToList(dialogListType, Track(id, title, artist))
-              showDialog = false
+        // Buttons for adding tracks to top songs lists
+        Button(
+            onClick = {
+              showDialog = true
+              dialogListType = "TOP SONGS"
             },
-            onDismiss = { showDialog = false },
-            initialTrackId = "",
-            initialTrackTitle = "",
-            initialTrackArtist = "",
-            dialogTestTag = "addTrackDialog")
+            modifier = Modifier.testTag("addTopSongs")) {
+              Text("Add Track to TOP SONGS List")
+            }
+
+        // Buttons for adding tracks to chosen songs list
+        Button(
+            onClick = {
+              showDialog = true
+              dialogListType = "CHOSEN SONGS"
+            },
+            modifier = Modifier.testTag("addChosenSongs")) {
+              Text("Add Track to CHOSEN SONGS List")
+            }
+
+        // Show dialog for adding a new track and add the track to the appropriate list
+        if (showDialog) {
+          AddTrackDialog(
+              onAddTrack = { id, title, artist ->
+                viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
+                viewModel.addTrackToList(dialogListType, Track(id, title, artist))
+                showDialog = false
+              },
+              onDismiss = { showDialog = false },
+              initialTrackId = "",
+              initialTrackTitle = "",
+              initialTrackArtist = "",
+              dialogTestTag = "addTrackDialog")
+        }
       }
-    }
-  }
+  SignOutButton(modifier = Modifier, navActions = navActions)
 }
 
 /**
@@ -158,4 +165,52 @@ fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel = h
               uncheckedTrackColor = MaterialTheme.colorScheme.secondaryContainer,
           ),
   )
+}
+
+/**
+ * Creates a button using the user's profile picture to access their profile
+ *
+ * @param modifier to apply any needed modifiers to the button
+ * @param viewModel to get the profile
+ * @param navActions to navigate to and from the profile editor
+ * @author Imade Bouhamria
+ */
+@Composable
+fun ProfileButton(
+    modifier: Modifier = Modifier,
+    viewModel: ProfileViewModel = hiltViewModel(),
+    navActions: NavigationActions
+) {
+  val currentProfileState by viewModel.profile.collectAsState()
+  val currentProfile: Profile = currentProfileState
+
+  // Display the button only when on the main screen TODO: Also from Map ?
+  Box(
+      modifier =
+          modifier
+              .clickable { navActions.navigateTo(Route.PROFILE) }
+              .background(Color.Transparent)
+              .padding(16.dp)
+              .testTag("profileButton")) {
+        if (navActions.getCurrentRoute() == Route.MAIN) {
+          SelectImage(modifier = Modifier.clip(CircleShape).size(50.dp), profile = currentProfile)
+        }
+      }
+}
+
+/**
+ * This is the sign out button that will allow the user to sign out
+ *
+ * @param modifier the modifier to be applied to the Button
+ * @param navActions to be able to navigate back to the login screen
+ * @author Imade Bouhamria
+ */
+@Composable
+fun SignOutButton(modifier: Modifier, navActions: NavigationActions) {
+  // TODO: Implement actual user sign out
+  Button(
+      onClick = { navActions.navigateToTopLevel(Route.LOGIN) },
+      modifier = modifier.testTag("signOutButton")) {
+        Text(text = "Sign Out")
+      }
 }

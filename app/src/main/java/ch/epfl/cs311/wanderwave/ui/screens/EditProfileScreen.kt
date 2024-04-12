@@ -15,6 +15,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,7 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.profile.ImageSelection
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_error
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_primary
@@ -42,8 +44,9 @@ import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
  * @last update 1.0
  */
 @Composable
-fun EditProfileScreen(profile: Profile, onProfileChange: (Profile) -> Unit) {
+fun EditProfileScreen(navActions: NavigationActions) {
   val viewModel: ProfileViewModel = hiltViewModel()
+  val profile by viewModel.profile.collectAsState()
   val profile2 = profile.copy()
   var firstName by remember { mutableStateOf(profile2.firstName) }
   var lastName by remember { mutableStateOf(profile2.lastName) }
@@ -70,7 +73,6 @@ fun EditProfileScreen(profile: Profile, onProfileChange: (Profile) -> Unit) {
         Spacer(Modifier.padding(18.dp))
         ActionButtons(
             onSave = {
-              // TODO: navigation popBack
               val profileCopy =
                   profile.copy(
                       firstName = firstName,
@@ -78,19 +80,18 @@ fun EditProfileScreen(profile: Profile, onProfileChange: (Profile) -> Unit) {
                       description = description,
                       profilePictureUri = profile2.profilePictureUri,
                   )
-              onProfileChange(
-                  profileCopy) // Is this really how we should do ? Shouldn't we use the viewModel ?
-              // I'll leave it here for now, I think we should have the navigation
-              // actions as a parameter, not the onProfileChange
+
               viewModel.updateProfile(profileCopy)
+              navActions.navigateToTopLevel(Route.PROFILE)
             },
-            onCancel = {
-              // TODO: navigation popBack
-            })
+            onCancel = { navActions.navigateToTopLevel(Route.PROFILE) })
 
         Spacer(Modifier.padding(18.dp))
         Button(
-            onClick = { viewModel.deleteProfile() },
+            onClick = {
+              viewModel.deleteProfile()
+              navActions.navigateToTopLevel(Route.LOGIN)
+            },
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
             border = BorderStroke(1.dp, md_theme_light_error),
             modifier = Modifier.width(100.dp).testTag("deleteButton")) {

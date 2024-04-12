@@ -7,5 +7,4 @@ class MapScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
     ComposeScreen<MapScreen>(
         semanticsProvider = semanticsProvider, viewBuilderAction = { hasTestTag("mapScreen") }) {
   val circularProgressIndicator = onNode { hasTestTag("CircularProgressIndicator") }
-  val map = onNode { hasTestTag("map") }
 }
