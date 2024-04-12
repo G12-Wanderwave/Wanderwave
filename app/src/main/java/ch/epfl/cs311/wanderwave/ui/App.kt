@@ -73,7 +73,7 @@ fun AppScaffold(navController: NavHostController) {
         SurroundWithMiniPlayer(showBottomBar) {
           NavHost(
               navController = navController,
-              startDestination = Route.SPOTIFY_CONNECT.routeString,
+              startDestination = Route.BEACON.routeString,
               modifier =
                   Modifier.padding(innerPadding).background(MaterialTheme.colorScheme.background)) {
                 composable(Route.LOGIN.routeString) { LoginScreen(navActions, showSnackbar) }
