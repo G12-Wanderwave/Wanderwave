@@ -9,8 +9,7 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 class BeaconScreenViewModelTest {
 
-  @get:Rule
-  val mockkRule = MockKRule(this)
+  @get:Rule val mockkRule = MockKRule(this)
 
   @Test
   fun canConstructWithNoErrors() {
