@@ -28,11 +28,9 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -108,9 +106,7 @@ fun WanderwaveGoogleMap(
 
 @Composable
 fun MapContent(viewModel: MapViewModel) {
-  val epfl = LatLng(46.518831258, 6.559331096)
-  val beacons = viewModel.uiState.collectAsStateWithLifecycle().value.beacons
-  Marker(state = MarkerState(position = epfl), title = "Marker at EPFL")
+  val beacons: List<Beacon> = viewModel.uiState.collectAsStateWithLifecycle().value.beacons
   DisplayBeacons(beacons = beacons)
 }
 
@@ -154,9 +150,9 @@ fun moveCamera(
 fun DisplayBeacons(beacons: List<Beacon>) {
   // Create each beacon from the list
   beacons.forEach() {
-      Marker(
-          state = MarkerState(position = it.location.toLatLng()),
-          title = it.id,
-      )
+    Marker(
+        state = MarkerState(position = it.location.toLatLng()),
+        title = it.id,
+    )
   }
 }
