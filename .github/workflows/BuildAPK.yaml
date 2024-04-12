@@ -76,7 +76,8 @@ jobs:
         run: |
           # To run the CI with debug information, add --info
           ./gradlew assembleRelease lint --parallel --build-cache
-
+      - name: List output files
+        run: ls -l app/build/outputs/apk/release/
       - name: Releasing using GitHub
         uses: ncipollo/release-action@v1
         with:
