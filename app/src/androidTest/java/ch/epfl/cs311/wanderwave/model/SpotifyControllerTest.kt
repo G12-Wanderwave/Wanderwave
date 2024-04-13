@@ -5,12 +5,14 @@ import androidx.test.platform.app.InstrumentationRegistry
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.android.appremote.api.Connector.ConnectionListener
+import com.spotify.android.appremote.api.ContentApi
 import com.spotify.android.appremote.api.PlayerApi
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.android.appremote.api.error.NotLoggedInException
 import com.spotify.protocol.client.CallResult
 import com.spotify.protocol.types.Empty
 import com.spotify.protocol.types.ListItem
+import com.spotify.protocol.types.ListItems
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -149,8 +151,27 @@ class SpotifyControllerTest {
   }
 
   @Test
+  fun getTrackAndChildren() {
+    runBlocking {
+      val listItem = ListItem("id", "uri", null, "title", "type", true, false)
+      val emptyListItem = ListItem("", "", null, "", "", false, false)
+      val callResult = mockk<CallResult<ListItems>>(relaxed = true)
+
+      val contentApi = mockk<ContentApi>(relaxed = true)
+      every { mockAppRemote.contentApi } returns contentApi
+      every { contentApi.getRecommendedContentItems(any()) } returns callResult
+
+      val flow = spotifyController.getTrack()
+
+      val result = flow.timeout(2.seconds).catch {}.firstOrNull()
+      spotifyController.getChildren(listItem).timeout(2.seconds).catch {}.firstOrNull()
+
+      verify { contentApi.getRecommendedContentItems(any()) }
+    }
+  }
+
+  @Test
   fun getTrackError() = runBlocking {
-    // Prepare for an error condition
     every { mockAppRemote.contentApi.getRecommendedContentItems(any()) } answers
         {
           throw Exception("Network error")
@@ -166,7 +187,6 @@ class SpotifyControllerTest {
 
   @Test
   fun getChildrenError() = runBlocking {
-    // Prepare a mock response for an error during retrieval of children items
     val listItem =
         ListItem("parent_id", "parent_uri", null, "parent_title", "parent_type", true, false)
     every { mockAppRemote.contentApi.getChildrenOfItem(any(), any(), any()) } answers
