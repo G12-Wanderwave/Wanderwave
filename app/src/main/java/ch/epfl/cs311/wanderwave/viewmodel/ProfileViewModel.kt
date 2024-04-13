@@ -14,7 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 // Define a simple class for a song list
@@ -134,7 +134,7 @@ constructor(
   //  }
 
   /**
-   * get the element under the tab "listen recently" and add it to the top list
+   * Get the element under the tab "listen recently" and add it to the top list
    *
    * @author Menzo Bouaissi
    * @since 2.0
@@ -142,12 +142,18 @@ constructor(
    */
   fun retrieveTopTrack() {
     CoroutineScope(Dispatchers.IO).launch {
-      if (spotifyController.getTrack().first().id != "") {
-        if (spotifyController.getTrack().first().hasChildren) {
-          val children = spotifyController.getChildren(spotifyController.getTrack().first()).first()
-          if (children.id != "")
+      try {
+        val track = spotifyController.getTrack().firstOrNull()
+        if (track != null && track.id.isNotEmpty()) {
+          if (track.hasChildren) {
+            val children = spotifyController.getChildren(track).firstOrNull()
+            if (children != null && children.id.isNotEmpty()) {
               addTrackToList("TOP SONGS", Track(children.id, children.title, children.subtitle))
+            }
+          }
         }
+      } catch (e: Exception) {
+        Log.e("ProfileViewModel", "Error retrieving top track: ${e.localizedMessage}")
       }
     }
   }
