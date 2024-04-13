@@ -9,9 +9,9 @@ import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -21,9 +21,11 @@ import kotlinx.coroutines.launch
 data class SongList(val name: String, val tracks: MutableList<Track> = mutableListOf())
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor(
-  private val repository: ProfileRepositoryImpl,
-  private val spotifyController: SpotifyController
+class ProfileViewModel
+@Inject
+constructor(
+    private val repository: ProfileRepositoryImpl,
+    private val spotifyController: SpotifyController
 ) : ViewModel() {
 
   private val _profile =
@@ -68,21 +70,21 @@ class ProfileViewModel @Inject constructor(
   // Function to add a track to a song list
 
   fun addTrackToList(listName: String, track: Track) {
-    Log.d("listName",listName)
+    Log.d("listName", listName)
     val updatedLists =
         _songLists.value.map { list ->
           if (list.name.equals(listName)) {
-            Log.d("Updated","OK")
+            Log.d("Updated", "OK")
 
             list.copy(tracks = ArrayList(list.tracks).apply { add(track) })
           } else {
-            Log.d("Updated","Not ok")
+            Log.d("Updated", "Not ok")
 
             list
           }
         }
     _songLists.value = updatedLists
-    Log.d("Updated",updatedLists.toString())
+    Log.d("Updated", updatedLists.toString())
   }
 
   val profileConnection = ProfileConnection()
@@ -143,15 +145,12 @@ class ProfileViewModel @Inject constructor(
    */
   fun retrieveTopTrack() {
     CoroutineScope(Dispatchers.IO).launch {
-      if(spotifyController.getTrack().first().id !=""){
-        if (spotifyController.getTrack().first().hasChildren){
+      if (spotifyController.getTrack().first().id != "") {
+        if (spotifyController.getTrack().first().hasChildren) {
           val children = spotifyController.getChildren(spotifyController.getTrack().first()).first()
-          addTrackToList("TOP SONGS",Track(children.id,
-            children.title,
-            children.subtitle))
+          addTrackToList("TOP SONGS", Track(children.id, children.title, children.subtitle))
         }
       }
-
     }
   }
 }

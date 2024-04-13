@@ -74,12 +74,8 @@ fun ProfileScreen(navActions: NavigationActions) {
     viewModel.retrieveTopTrack()
   }
 
-
   Column(
-      modifier = Modifier
-          .fillMaxSize()
-          .padding(16.dp)
-          .testTag("profileScreen"),
+      modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         Box(modifier = Modifier.fillMaxWidth()) {
           VisitCard(Modifier, currentProfile)
@@ -119,7 +115,6 @@ fun ProfileScreen(navActions: NavigationActions) {
               Text("Add Track to CHOSEN SONGS List")
             }
 
-
         // Show dialog for adding a new track and add the track to the appropriate list
         if (showDialog) {
           AddTrackDialog(
@@ -135,7 +130,7 @@ fun ProfileScreen(navActions: NavigationActions) {
               dialogTestTag = "addTrackDialog")
         }
       }
-    
+
   SignOutButton(modifier = Modifier, navActions = navActions)
 }
 
@@ -158,12 +153,12 @@ fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel = h
         viewModel.togglePublicMode()
       },
       modifier =
-      modifier
-          .graphicsLayer {
-              scaleX = SCALE_X
-              scaleY = SCALE_Y
-          }
-          .testTag("profileSwitch"),
+          modifier
+              .graphicsLayer {
+                scaleX = SCALE_X
+                scaleY = SCALE_Y
+              }
+              .testTag("profileSwitch"),
       colors =
           SwitchDefaults.colors(
               checkedThumbColor = MaterialTheme.colorScheme.primary,
@@ -194,15 +189,13 @@ fun ProfileButton(
   // Display the button only when on the main screen TODO: Also from Map ?
   Box(
       modifier =
-      modifier
-          .clickable { navActions.navigateTo(Route.PROFILE) }
-          .background(Color.Transparent)
-          .padding(16.dp)
-          .testTag("profileButton")) {
+          modifier
+              .clickable { navActions.navigateTo(Route.PROFILE) }
+              .background(Color.Transparent)
+              .padding(16.dp)
+              .testTag("profileButton")) {
         if (navActions.getCurrentRoute() == Route.MAIN) {
-          SelectImage(modifier = Modifier
-              .clip(CircleShape)
-              .size(50.dp), profile = currentProfile)
+          SelectImage(modifier = Modifier.clip(CircleShape).size(50.dp), profile = currentProfile)
         }
       }
 }
