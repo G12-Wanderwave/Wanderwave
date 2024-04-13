@@ -245,7 +245,46 @@ class SpotifyControllerTest {
     // Assertions to check only the matching item is collected
     assertTrue(result == matchingItem)
     assertFalse(result == nonMatchingItem)
-    // verify(exactly = 1) { contentApi.getRecommendedContentItems(any()) } // Verify that the
-    // method was called
   }
 }
+// @Test
+// fun testGetChildrenWithSpecificId() = runBlocking {
+//    // Mock setup
+//    val mockAppRemote = mockk<SpotifyAppRemote>(relaxed = true)
+//    val mockContentApi = mockk<ContentApi>(relaxed = true)
+//    val callResult = mockk<CallResult<ListItems>>(relaxed = true)
+//
+//    every { mockAppRemote.contentApi } returns mockContentApi
+//    every { mockContentApi.getChildrenOfItem(any(), any(), any()) } returns callResult
+//
+//    // Prepare test data
+//    val listItem = ListItem("parent", "parentUri", null, "Parent Title", "type", true, false)
+//    val matchingAlbum = ListItem("id:album1", "uri1", null, "Album Title", "album", true, false)
+//    val matchingPlaylist = ListItem("id:playlist1", "uri2", null, "Playlist Title", "playlist",
+// true, false)
+//    val nonMatchingItem = ListItem("id:track1", "uri3", null, "Track Title", "track", true, false)
+//    val items = listOf(matchingAlbum, matchingPlaylist, nonMatchingItem)
+//
+//    // Convert List to Array
+//    val itemsArray = items.toTypedArray()
+//
+//    // Setup the callback to invoke with our prepared list
+//    every { callResult.setResultCallback(any()) } answers {
+//        val callback = firstArg<CallResult.ResultCallback<ListItems>>()
+//        callback.onResult(ListItems(0, 0, 0, itemsArray)) // Now passing an Array
+//        callResult
+//    }
+//    every { callResult.setErrorCallback(any()) } just Runs
+//
+//    // Execute the function to get the Flow and collect results
+//    val flow = SpotifyController(mockAppRemote).getChildren(listItem)
+//    val collectedItems = mutableListOf<ListItem>()
+//    flow.collect { collectedItems.add(it) }
+//
+//    // Assertions to check only matching items are collected
+//    assertTrue(collectedItems.contains(matchingAlbum))
+//    assertTrue(collectedItems.contains(matchingPlaylist))
+//    assertFalse(collectedItems.contains(nonMatchingItem))
+//    verify { mockContentApi.getChildrenOfItem(eq(listItem), eq(50), eq(0)) } // Verify that the
+// method was called with expected args
+// }
