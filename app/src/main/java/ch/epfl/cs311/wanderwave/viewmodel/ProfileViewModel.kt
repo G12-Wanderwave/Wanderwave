@@ -148,7 +148,8 @@ constructor(
       if (spotifyController.getTrack().first().id != "") {
         if (spotifyController.getTrack().first().hasChildren) {
           val children = spotifyController.getChildren(spotifyController.getTrack().first()).first()
-          addTrackToList("TOP SONGS", Track(children.id, children.title, children.subtitle))
+          if (children.id != "")
+              addTrackToList("TOP SONGS", Track(children.id, children.title, children.subtitle))
         }
       }
     }

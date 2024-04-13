@@ -143,7 +143,7 @@ class SpotifyController(private val context: Context) {
       val callResult =
           appRemote?.let { it ->
             it.contentApi
-                .getChildrenOfItem(listItem, 5, 0)
+                .getChildrenOfItem(listItem, 50, 0)
                 .setResultCallback {
                   for (i in it.items) if (i.id.contains("album") || i.id.contains("playlist"))
                       trySend(i)
