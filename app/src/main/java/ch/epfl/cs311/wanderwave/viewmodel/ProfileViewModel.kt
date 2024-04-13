@@ -73,13 +73,11 @@ constructor(
     Log.d("listName", listName)
     val updatedLists =
         _songLists.value.map { list ->
-          if (list.name.equals(listName)) {
+          if (list.name == listName) {
             Log.d("Updated", "OK")
 
             list.copy(tracks = ArrayList(list.tracks).apply { add(track) })
           } else {
-            Log.d("Updated", "Not ok")
-
             list
           }
         }
@@ -107,34 +105,33 @@ constructor(
     _isInPublicMode.value = !_isInPublicMode.value
   }
 
-  fun fetchProfile(profile: Profile) {
-    // TODO : fetch profile from Spotify
-    // _profile.value = spotifyConnection.getProfile()....
-    // Fetch profile from Firestore if it doesn't exist, create it
-    Log.d("ProfileViewModel", "Fetching profile from Firestore...")
-    profileConnection.isUidExisting(profile.spotifyUid) { isExisting, fetchedProfile ->
-      if (isExisting) {
-        _profile.value = fetchedProfile ?: profile
-        // update profile on the local database
-        viewModelScope.launch {
-          val localProfile = repository.getProfile()
-          localProfile.collect { fetchedLocalProfile ->
-            if (fetchedLocalProfile != fetchedProfile) {
-              repository.delete()
-              repository.insert(fetchedProfile!!)
-            }
-          }
-        }
-      } else {
-        val newProfile = profile
-        profileConnection.addItem(newProfile)
-        viewModelScope.launch { repository.insert(newProfile) }
-        _profile.value = newProfile
-      }
-    }
-    // TODO : get rid of this line
-    profileConnection.getItem(profile.spotifyUid).let { Log.d("Firebase", it.toString()) }
-  }
+  //  fun fetchProfile(profile: Profile) {
+  //    // TODO : fetch profile from Spotify
+  //    // _profile.value = spotifyConnection.getProfile()....
+  //    // Fetch profile from Firestore if it doesn't exist, create it
+  //    profileConnection.isUidExisting(profile.spotifyUid) { isExisting, fetchedProfile ->
+  //      if (isExisting) {
+  //        _profile.value = fetchedProfile ?: profile
+  //        // update profile on the local database
+  //        viewModelScope.launch {
+  //          val localProfile = repository.getProfile()
+  //          localProfile.collect { fetchedLocalProfile ->
+  //            if (fetchedLocalProfile != fetchedProfile) {
+  //              repository.delete()
+  //              repository.insert(fetchedProfile!!)
+  //            }
+  //          }
+  //        }
+  //      } else {
+  //        val newProfile = profile
+  //        profileConnection.addItem(newProfile)
+  //        viewModelScope.launch { repository.insert(newProfile) }
+  //        _profile.value = newProfile
+  //      }
+  //    }
+  //    // TODO : get rid of this line
+  //    profileConnection.getItem(profile.spotifyUid).let { Log.d("Firebase", it.toString()) }
+  //  }
 
   /**
    * get the element under the tab "listen recently" and add it to the top list
