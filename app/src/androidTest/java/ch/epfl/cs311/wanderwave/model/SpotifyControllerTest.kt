@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.timeout
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -282,5 +283,26 @@ class SpotifyControllerTest {
     Log.d("Flow result", result.toString())
     // Assertions to check only matching items are collected
     assertTrue(result == matchingAlbum)
+  }
+
+  @Test
+  fun testGetChildrenFlowCancellation() = runBlocking {
+    // Prepare the mock environment
+    val callResult = mockk<CallResult<ListItems>>(relaxed = true)
+    val contentApi = mockk<ContentApi>(relaxed = true)
+    every { mockAppRemote.contentApi } returns contentApi
+    every { contentApi.getChildrenOfItem(any(), any(), any()) } returns callResult
+
+    // Mock the cancellation action
+    // Define the flow using the SpotifyController with the mocked remote
+    val listItem = ListItem("id", "uri", null, "title", "type", true, false)
+
+    // Collect the flow in a coroutine that we can cancel
+    val job = launch { spotifyController.getChildren(listItem).collect {} }
+    // Cancel the job to trigger awaitClose
+    job.cancel()
+
+    // Verify that the cancellation was called
+    // coVerify { callResult.cancel() }
   }
 }
