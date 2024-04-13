@@ -123,7 +123,6 @@ class SpotifyController(private val context: Context) {
                 }
                 .setErrorCallback { trySend(ListItem("", "", null, "", "", false, false)) }
           }
-      awaitClose { callResult?.cancel() }
     }
   }
 
@@ -150,7 +149,6 @@ class SpotifyController(private val context: Context) {
                 }
                 .setErrorCallback { trySend(ListItem("", "", null, "", "", false, false)) }
           }
-      awaitClose { callResult?.cancel() }
     }
   }
 
