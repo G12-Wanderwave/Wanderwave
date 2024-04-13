@@ -3,6 +3,9 @@ package ch.epfl.cs311.wanderwave.model.remote
 import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.memoryCacheSettings
+import com.google.firebase.firestore.persistentCacheSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.mapNotNull
@@ -13,7 +16,12 @@ abstract class FirebaseConnection<T, U> {
 
   abstract val getItemId: (T) -> String
 
-  open val db = FirebaseFirestore.getInstance()
+  open val db = FirebaseFirestore.getInstance().apply {
+    firestoreSettings = FirebaseFirestoreSettings.Builder()
+      .setLocalCacheSettings(memoryCacheSettings {})// Use memory cache
+      .setLocalCacheSettings(persistentCacheSettings {})// Use persistent disk cache (default)
+      .build()
+  }
 
   abstract fun documentToItem(document: DocumentSnapshot): T?
 

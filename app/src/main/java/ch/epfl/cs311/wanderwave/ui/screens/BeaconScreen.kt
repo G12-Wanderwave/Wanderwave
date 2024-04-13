@@ -32,14 +32,14 @@ fun BeaconScreen(
 ) {
   // id value remebered for the text field
   // Here is the id of a good beacon for testing : UAn8OUadgrUOKYagf8a2
-  var id by remember { mutableStateOf("") }
+  var id by remember { mutableStateOf("UAn8OUadgrUOKYagf8a2") }
   var beacon = viewModel.beacon.collectAsState(initial = null)
   Column(
     modifier = Modifier
       .fillMaxSize()
       .padding(16.dp),
     horizontalAlignment = Alignment.CenterHorizontally) {
-    TextField(value = id, onValueChange = { id = it})
+    TextField(value = id, onValueChange = { id = it}, placeholder = { Text("Beacon ID") })
     Button(onClick = {
       viewModel.getBeaconById(id)
     }) { Text("Get Beacon") }

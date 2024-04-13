@@ -12,7 +12,13 @@ data class Track(
 
     /** Artist of the track */
     val artist: String,
+
+
 ) {
+
+  // No-argument constructor
+  constructor() : this("", "", "")
+
   fun toMap(): Map<String, Any> {
     return hashMapOf("id" to id, "title" to title, "artist" to artist)
   }
