@@ -69,6 +69,17 @@ class ProfileViewModelTest {
   }
 
   @Test
+  fun retrieveTopTrack_doesNotAddTrackToTopSongs_whenTrackHasChildren() = runBlockingTest {
+    val track = ListItem("id", "", null, "", "", false, true)
+    every { spotifyController.getTrack() } returns flowOf(track)
+
+    viewModel.retrieveTopTrack()
+
+    val topSongs = viewModel.songLists.value.find { it.name == "TOP SONGS" }
+    assertTrue(topSongs?.tracks?.isEmpty() ?: true)
+  }
+
+  @Test
   fun retrieveTopTrack_doesNotAddTrackToTopSongs_whenTrackIdIsEmpty() = runBlockingTest {
     val track = ListItem("", "", null, "", "", false, false)
     every { spotifyController.getTrack() } returns flowOf(track)
