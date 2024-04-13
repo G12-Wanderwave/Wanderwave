@@ -71,6 +71,7 @@ fun ProfileScreen(navActions: NavigationActions) {
   LaunchedEffect(Unit) {
     viewModel.createSpecificSongList("TOP_SONGS")
     viewModel.createSpecificSongList("CHOSEN_SONGS")
+    viewModel.retrieveTopTrack()
   }
 
   Column(
@@ -129,6 +130,7 @@ fun ProfileScreen(navActions: NavigationActions) {
               dialogTestTag = "addTrackDialog")
         }
       }
+
   SignOutButton(modifier = Modifier, navActions = navActions)
 }
 

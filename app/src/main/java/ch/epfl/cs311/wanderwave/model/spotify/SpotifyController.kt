@@ -5,8 +5,10 @@ import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
+import com.spotify.android.appremote.api.ContentApi
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.android.appremote.api.error.NotLoggedInException
+import com.spotify.protocol.types.ListItem
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import kotlinx.coroutines.FlowPreview
@@ -94,6 +96,59 @@ class SpotifyController(private val context: Context) {
                 .play(track.id)
                 .setResultCallback { trySend(true) }
                 .setErrorCallback { trySend(false) }
+          }
+      awaitClose { callResult?.cancel() }
+    }
+  }
+
+  /**
+   * get the element under the tab "listen recently"
+   *
+   * @return a Flow of ListItem
+   * @author Menzo Bouaissi
+   * @since 2.0
+   * @last update 2.0
+   */
+  @OptIn(FlowPreview::class)
+  fun getTrack(): Flow<ListItem> {
+    return callbackFlow {
+      val callResult =
+          appRemote?.let { it ->
+            it.contentApi
+                .getRecommendedContentItems(ContentApi.ContentType.DEFAULT)
+                .setResultCallback {
+                  for (i in it.items) if (i.uri == "spotify:section:0JQ5DAroEmF9ANbLaiJ7Wx")
+                      trySend(i)
+                  // TODO checkt if "listen recently playlist" the same for everyone
+                }
+                .setErrorCallback { trySend(ListItem("", "", null, "", "", false, false)) }
+          }
+      awaitClose { callResult?.cancel() }
+    }
+  }
+
+  /**
+   * Get the children of a ListItem. In our case, the children is either a playlist or an album
+   *
+   * @param listItem the ListItem to get the children from
+   * @return a Flow of ListItem
+   * @author Menzo Bouaissi
+   * @since 2.0
+   * @last update 2.0
+   */
+  @OptIn(FlowPreview::class)
+  fun getChildren(listItem: ListItem): Flow<ListItem> {
+
+    return callbackFlow {
+      val callResult =
+          appRemote?.let { it ->
+            it.contentApi
+                .getChildrenOfItem(listItem, 50, 0)
+                .setResultCallback {
+                  for (i in it.items) if (i.id.contains("album") || i.id.contains("playlist"))
+                      trySend(i)
+                }
+                .setErrorCallback { trySend(ListItem("", "", null, "", "", false, false)) }
           }
       awaitClose { callResult?.cancel() }
     }
