@@ -10,6 +10,7 @@ import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.android.appremote.api.error.NotLoggedInException
 import com.spotify.protocol.client.CallResult
 import com.spotify.protocol.types.Empty
+import com.spotify.protocol.types.ListItem
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -145,5 +146,39 @@ class SpotifyControllerTest {
     val result = spotifyController.connectRemote().first()
     assert(result == SpotifyController.ConnectResult.SUCCESS)
     verify { mockAppRemote.isConnected }
+  }
+
+  @Test
+  fun getTrackError() = runBlocking {
+    // Prepare for an error condition
+    every { mockAppRemote.contentApi.getRecommendedContentItems(any()) } answers
+        {
+          throw Exception("Network error")
+        }
+
+    val result =
+        spotifyController
+            .getTrack()
+            .catch { emit(ListItem("", "", null, "", "", false, false)) }
+            .first()
+    assert(result.uri.isEmpty())
+  }
+
+  @Test
+  fun getChildrenError() = runBlocking {
+    // Prepare a mock response for an error during retrieval of children items
+    val listItem =
+        ListItem("parent_id", "parent_uri", null, "parent_title", "parent_type", true, false)
+    every { mockAppRemote.contentApi.getChildrenOfItem(any(), any(), any()) } answers
+        {
+          throw Exception("Network error")
+        }
+
+    val result =
+        spotifyController
+            .getChildren(listItem)
+            .catch { emit(ListItem("", "", null, "", "", false, false)) }
+            .first()
+    assert(result.uri.isEmpty())
   }
 }
