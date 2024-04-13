@@ -7,18 +7,24 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
+import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 // Define a simple class for a song list
 data class SongList(val name: String, val tracks: MutableList<Track> = mutableListOf())
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor(private val repository: ProfileRepositoryImpl) :
-    ViewModel() {
+class ProfileViewModel @Inject constructor(
+  private val repository: ProfileRepositoryImpl,
+  private val spotifyController: SpotifyController
+) : ViewModel() {
 
   private val _profile =
       MutableStateFlow(
@@ -62,15 +68,21 @@ class ProfileViewModel @Inject constructor(private val repository: ProfileReposi
   // Function to add a track to a song list
 
   fun addTrackToList(listName: String, track: Track) {
+    Log.d("listName",listName)
     val updatedLists =
         _songLists.value.map { list ->
-          if (list.name == listName) {
+          if (list.name.equals(listName)) {
+            Log.d("Updated","OK")
+
             list.copy(tracks = ArrayList(list.tracks).apply { add(track) })
           } else {
+            Log.d("Updated","Not ok")
+
             list
           }
         }
     _songLists.value = updatedLists
+    Log.d("Updated",updatedLists.toString())
   }
 
   val profileConnection = ProfileConnection()
@@ -120,5 +132,26 @@ class ProfileViewModel @Inject constructor(private val repository: ProfileReposi
     }
     // TODO : get rid of this line
     profileConnection.getItem(profile.spotifyUid).let { Log.d("Firebase", it.toString()) }
+  }
+
+  /**
+   * get the element under the tab "listen recently" and add it to the top list
+   *
+   * @author Menzo Bouaissi
+   * @since 2.0
+   * @last update 2.0
+   */
+  fun retrieveTopTrack() {
+    CoroutineScope(Dispatchers.IO).launch {
+      if(spotifyController.getTrack().first().id !=""){
+        if (spotifyController.getTrack().first().hasChildren){
+          val children = spotifyController.getChildren(spotifyController.getTrack().first()).first()
+          addTrackToList("TOP SONGS",Track(children.id,
+            children.title,
+            children.subtitle))
+        }
+      }
+
+    }
   }
 }
