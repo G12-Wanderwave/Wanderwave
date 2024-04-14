@@ -13,16 +13,21 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class BeaconViewModel @Inject constructor() : ViewModel() {
-  val beaconConnection = BeaconConnection()
+  private val beaconConnection = BeaconConnection()
 
-  private val _beacon = MutableStateFlow<Beacon?>(null)
-  val beacon: StateFlow<Beacon?> = _beacon
+  private var _uiState = MutableStateFlow<UIState>(UIState())
+  val uiState: StateFlow<UIState> = _uiState
 
   fun getBeaconById(id: String) {
     viewModelScope.launch {
       beaconConnection.getItem(id).collect { fetchedBeacon ->
-        _beacon.value = fetchedBeacon
+        _uiState.value = UIState(beacon = fetchedBeacon, isLoading = false)
       }
     }
   }
+
+  data class UIState(
+    val beacon: Beacon? = null,
+    val isLoading: Boolean = true,
+    val error: String? = null)
 }

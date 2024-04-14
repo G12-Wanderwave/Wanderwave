@@ -3,12 +3,14 @@ package ch.epfl.cs311.wanderwave.ui.screens
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.collectAsState
@@ -20,7 +22,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Beacon
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -35,7 +36,7 @@ fun BeaconScreen(
   // id value remebered for the text field
   // Here is the id of a good beacon for testing : UAn8OUadgrUOKYagf8a2
   var id by remember { mutableStateOf("UAn8OUadgrUOKYagf8a2") }
-  val beacon = viewModel.beacon.collectAsState(initial = null)
+  val beacon = viewModel.uiState.collectAsState()
   Column(
     modifier = Modifier
       .fillMaxSize()
@@ -47,8 +48,8 @@ fun BeaconScreen(
       viewModel.getBeaconById(id)
     }) { Text("Get Beacon") }
 
-    if (beacon.value != null) {
-      BeaconScreen(beacon.value!!)
+    if (!beacon.value.isLoading) {
+      BeaconScreen(beacon = beacon.value.beacon!!)
     } else {
       Text("Beacon not found")
     }
@@ -75,7 +76,9 @@ private fun BeaconScreenPreview() {
 @Composable
 private fun BeaconScreen(beacon: Beacon) {
   Column(
-      modifier = Modifier.fillMaxSize().padding(16.dp),
+      modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
         SongList(beacon)
@@ -97,8 +100,15 @@ fun BeaconInformation(location: Location) {
 
 @Composable
 fun SongList(beacon: Beacon) {
-  // songs
-  beacon.tracks.forEach() { track ->
-    Text("Track: ${track.title} by ${track.artist}")
+  LazyColumn {
+    items(beacon.tracks) { track ->
+      Card(
+      ) {
+        Text(
+          text = "Track: ${track.title} by ${track.artist}",
+          modifier = Modifier.padding(8.dp),
+        )
+      }
+    }
   }
 }
