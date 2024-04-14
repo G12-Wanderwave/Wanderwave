@@ -133,28 +133,62 @@ constructor(
   //    profileConnection.getItem(profile.spotifyUid).let { Log.d("Firebase", it.toString()) }
   //  }
 
-  /**
-   * Get the element under the tab "listen recently" and add it to the top list
-   *
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 2.0
-   */
-  fun retrieveTopTrack() {
-    CoroutineScope(Dispatchers.IO).launch {
-      try {
-        val track = spotifyController.getTrack().firstOrNull()
-        if (track != null && track.id.isNotEmpty()) {
-          if (track.hasChildren) {
-            val children = spotifyController.getChildren(track).firstOrNull()
-            if (children != null && children.id.isNotEmpty()) {
-              addTrackToList("TOP SONGS", Track(children.id, children.title, children.subtitle))
+    /**
+     * Get the element under the tab "listen recently" and add it to the top list
+     *
+     * @author Menzo Bouaissi
+     * @since 2.0
+     * @last update 2.0
+     */
+    fun retrieveTopTrack() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val track = spotifyController.getTrack().firstOrNull()
+                if (track != null && track.id.isNotEmpty()) {
+                    if (track.hasChildren) {
+                        val children = spotifyController.getChildren(track).firstOrNull()
+                        if (children != null && children.id.isNotEmpty()) {
+                            addTrackToList("TOP SONGS", Track(children.id, children.title, children.subtitle))
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ProfileViewModel", "Error retrieving top track: ${e.localizedMessage}")
             }
-          }
         }
-      } catch (e: Exception) {
-        Log.e("ProfileViewModel", "Error retrieving top track: ${e.localizedMessage}")
-      }
     }
-  }
+    /**
+     * Get the element under the tab "listen recently" and add it to the top list
+     *
+     * @author Menzo Bouaissi
+     * @since 2.0
+     * @last update 2.0
+     */
+    fun retrieveTracks() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val track = spotifyController.getAllElementFromSpotify().firstOrNull()
+                if (track != null) {
+                    for (i in track) {
+                        Log.d("element from spotify", i.toString())
+                        if (i.hasChildren) {
+                            val children = spotifyController.getAllChildren(i).firstOrNull()
+                            if (children != null) {
+                                for (child in children) {
+                                    Log.d("\tchildren",child.toString())
+                                    if (child.id.contains("spotify:user")) {
+                                        Log.d("\t\tLiked songs",child.toString())
+                                    }
+                                }
+                            }
+                            Log.d("\tchildren",children.toString())
+                        }
+
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ProfileViewModel", "Error retrieving top track: ${e.localizedMessage}")
+            }
+        }
+    }
 }
