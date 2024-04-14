@@ -20,6 +20,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Beacon
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
@@ -33,57 +35,70 @@ fun BeaconScreen(
   // id value remebered for the text field
   // Here is the id of a good beacon for testing : UAn8OUadgrUOKYagf8a2
   var id by remember { mutableStateOf("UAn8OUadgrUOKYagf8a2") }
-  var beacon = viewModel.beacon.collectAsState(initial = null)
+  val beacon = viewModel.beacon.collectAsState(initial = null)
   Column(
     modifier = Modifier
       .fillMaxSize()
       .padding(16.dp),
-    horizontalAlignment = Alignment.CenterHorizontally) {
-    TextField(value = id, onValueChange = { id = it}, placeholder = { Text("Beacon ID") })
+    horizontalAlignment = Alignment.CenterHorizontally
+  ) {
+    TextField(value = id, onValueChange = { id = it }, placeholder = { Text("Beacon ID") })
     Button(onClick = {
       viewModel.getBeaconById(id)
     }) { Text("Get Beacon") }
 
-    BeaconInformation(beacon)
-    SongList(beacon)
-
-
-
+    if (beacon.value != null) {
+      BeaconScreen(beacon.value!!)
+    } else {
+      Text("Beacon not found")
+    }
   }
 }
 
 @Composable
 @Preview(showBackground = true)
 private fun BeaconScreenPreview() {
-  WanderwaveTheme { BeaconScreen() }
+  val previewBeacon =
+      Beacon(
+          id = "a",
+          location = Location(latitude = 46.519962, longitude = 6.633597, name = "EPFL"),
+          tracks =
+              listOf(
+                  Track("a", "Never gonna give you up", "Rick Astley"),
+                  Track("b", "Take on me", "A-ha"),
+                  Track("c", "Africa", "Toto"),
+              ),
+      )
+  WanderwaveTheme { BeaconScreen(previewBeacon) }
 }
 
 @Composable
-private fun BeaconScreen() {
+private fun BeaconScreen(beacon: Beacon) {
+  Column(
+      modifier = Modifier.fillMaxSize().padding(16.dp),
+      horizontalAlignment = Alignment.CenterHorizontally) {
+        BeaconInformation(beacon.location)
+        SongList(beacon)
+      }
 }
 
 @Composable
-fun BeaconInformation(beacon: State<Beacon?>) {
+fun BeaconInformation(location: Location) {
   Column(horizontalAlignment = Alignment.CenterHorizontally) {
     Text("Beacon", style = MaterialTheme.typography.displayMedium)
-    beacon.value?.let {
-      Text("Beacon: ${it.id}")
+    val locationText = if (location.name != "") {
+      "${location.name} (${location.latitude}, ${location.longitude})"
+    } else {
+      "(${location.latitude}, ${location.longitude})"
     }
-    // location
-    beacon.value?.let {
-      val location = it.location
-      Text("Location: lat:${location.latitude}, long:${location.longitude}")
-    }
+    Text("at $locationText", style = MaterialTheme.typography.titleMedium)
   }
 }
 
 @Composable
-fun SongList(beacon: State<Beacon?>) {
+fun SongList(beacon: Beacon) {
   // songs
-  beacon.value?.let {
-    val tracks:List<Track> = it.tracks
-    tracks.map { track ->
-      Text("Track: ${track.title}")
-    }
+  beacon.tracks.forEach() { track ->
+    Text("Track: ${track.title} by ${track.artist}")
   }
 }

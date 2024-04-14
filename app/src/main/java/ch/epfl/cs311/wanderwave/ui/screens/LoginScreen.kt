@@ -55,11 +55,10 @@ fun LoginScreen(
     LoginAppLogo(modifier = Modifier.weight(1f))
     WelcomeTitle(modifier = Modifier.weight(4f))
     SignInButton(modifier = Modifier.weight(1f)) {
-      // val intent =
-      //     AuthorizationClient.createLoginActivityIntent(
-      //         context.getActivity(), viewModel.getAuthorizationRequest())
-      // launcher.launch(intent)
-      navigationActions.navigateTo(Route.BEACON)
+       val intent =
+           AuthorizationClient.createLoginActivityIntent(
+               context.getActivity(), viewModel.getAuthorizationRequest())
+       launcher.launch(intent)
     }
   }
 }
