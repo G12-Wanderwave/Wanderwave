@@ -1,8 +1,6 @@
 package ch.epfl.cs311.wanderwave.model.spotify
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -140,19 +138,6 @@ class SpotifyController(private val context: Context) {
    * @last update 2.0
    */
   fun getAllElementFromSpotify(): Flow<List<ListItem>> {
-    val spotifyContent = "https://open.spotify.com/album/0sNOF9WDwhWunNAHPD3Baj"
-    val branchLink =
-        "https://spotify.link/content_linking?~campaign=" +
-            context.packageName +
-            "&\$deeplink_path=" +
-            spotifyContent +
-            "&\$fallback_url=" +
-            spotifyContent
-    val intent = Intent(Intent.ACTION_VIEW)
-    intent.setData(Uri.parse(branchLink))
-    // startActivity(intent)
-    // val test = createAppAuthRequest(context)
-    // Log.d("show test",test.toString())
     val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
     return callbackFlow {
       val callResult =

@@ -152,9 +152,7 @@ constructor(
             }
           }
         }
-      } catch (e: Exception) {
-        Log.e("ProfileViewModel", "Error retrieving top track: ${e.localizedMessage}")
-      }
+      } catch (e: Exception) {}
     }
   }
   /**
@@ -170,25 +168,23 @@ constructor(
         val track = spotifyController.getAllElementFromSpotify().firstOrNull()
         if (track != null) {
           for (i in track) {
-            Log.d("element from spotify", i.toString())
+            //  Log.d("element from spotify", i.toString())
             if (i.hasChildren) {
               val children = spotifyController.getAllChildren(i).firstOrNull()
               if (children != null) {
                 for (child in children) {
                   addTrackToList("TOP SONGS", Track(child.id, child.title, child.subtitle))
-                  Log.d("\tchildren", child.toString())
-                  if (child.id.contains("spotify:user")) {
-                    Log.d("\t\tLiked songs", child.toString())
-                  }
+                  //   Log.d("\tchildren", child.toString())
+                  // if (child.id.contains("spotify:user")) {
+                  // Log.d("\t\tLiked songs", child.toString())
+                  //  }
                 }
               }
-              Log.d("\tchildren", children.toString())
+              // Log.d("\tchildren", children.toString())
             }
           }
         }
-      } catch (e: Exception) {
-        Log.e("ProfileViewModel", "Error retrieving top track: ${e.localizedMessage}")
-      }
+      } catch (e: Exception) {}
     }
   }
 }

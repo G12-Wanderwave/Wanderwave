@@ -175,6 +175,26 @@ class SpotifyControllerTest {
   }
 
   @Test
+  fun getTrackAndAllChildren() {
+    runBlocking {
+      val listItem = ListItem("id", "uri", null, "title", "type", true, true)
+      val emptyListItem = ListItem("", "", null, "", "", false, false)
+      val callResult = mockk<CallResult<ListItems>>(relaxed = true)
+
+      val contentApi = mockk<ContentApi>(relaxed = true)
+      every { mockAppRemote.contentApi } returns contentApi
+      every { contentApi.getRecommendedContentItems(any()) } returns callResult
+
+      val flow = spotifyController.getTrack()
+
+      val result = flow.timeout(2.seconds).catch {}.firstOrNull()
+      spotifyController.getAllChildren(listItem).timeout(2.seconds).catch {}.firstOrNull()
+
+      verify { contentApi.getRecommendedContentItems(any()) }
+    }
+  }
+
+  @Test
   fun getTrackError() = runBlocking {
     every { mockAppRemote.contentApi.getRecommendedContentItems(any()) } answers
         {
