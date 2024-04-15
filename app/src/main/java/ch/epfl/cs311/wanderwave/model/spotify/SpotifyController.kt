@@ -184,6 +184,16 @@ class SpotifyController(private val context: Context) {
     }
   }
 
+  /**
+   * Get the all the children of a ListItem. In our case, the children is either a playlist or an
+   * album
+   *
+   * @param listItem the ListItem to get the childrens from
+   * @return a Flow of List<ListItem> which contains all the children of the ListItem
+   * @author Menzo Bouaissi
+   * @since 2.0
+   * @last update 2.0
+   */
   @OptIn(FlowPreview::class)
   fun getAllChildren(listItem: ListItem): Flow<List<ListItem>> {
     val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
