@@ -165,6 +165,7 @@ constructor(
      * @last update 2.0
      */
     fun retrieveTracks() {
+
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val track = spotifyController.getAllElementFromSpotify().firstOrNull()
@@ -175,6 +176,7 @@ constructor(
                             val children = spotifyController.getAllChildren(i).firstOrNull()
                             if (children != null) {
                                 for (child in children) {
+                                    addTrackToList("TOP SONGS", Track(child.id, child.title, child.subtitle))
                                     Log.d("\tchildren",child.toString())
                                     if (child.id.contains("spotify:user")) {
                                         Log.d("\t\tLiked songs",child.toString())
