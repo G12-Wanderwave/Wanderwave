@@ -140,6 +140,7 @@ fun ProfileScreen(navActions: NavigationActions) {
 
 
 
+
 /**
  * This handle the logic behind the switch that can permit the user to switch to the anonymous mode
  *

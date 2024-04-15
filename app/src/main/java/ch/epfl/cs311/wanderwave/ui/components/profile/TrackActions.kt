@@ -2,8 +2,11 @@ package ch.epfl.cs311.wanderwave.ui.components.profile
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -19,17 +22,23 @@ import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.viewmodel.SongList
 
+
 /**
  * Composable that displays a list of tracks. Each track is represented by the TrackItem composable.
  *
  * @param tracks List of tracks to display.
  * @author Ayman Bakiri
+ * @author Menzo Bouaissi (add the scrollable list)
  * @since 1.0
- * @last update 1.0
+ * @last update 2.0
  */
 @Composable
 fun TracksList(tracks: List<Track>) {
-  tracks.forEach { track -> key(track.id) { TrackItem(track = track) } }
+    LazyColumn {
+        items(tracks, key = { track -> track.id }) { track ->
+            TrackItem(track = track)
+        }
+    }
 }
 
 /**
@@ -37,12 +46,15 @@ fun TracksList(tracks: List<Track>) {
  *
  * @param track The track data to display.
  * @author Ayman Bakiri
+ * @author Menzo Bouaissi (modify the ui)
  * @since 1.0
- * @last update 1.0
+ * @last update 2.0
  */
 @Composable
 fun TrackItem(track: Track) {
-  Column(modifier = Modifier.padding(8.dp).testTag("trackItem_${track.id}")) {
+  Card(modifier = Modifier
+      .padding(8.dp)
+      .testTag("trackItem_${track.id}")) {
     Text(text = "ID: ${track.id}", style = MaterialTheme.typography.bodyMedium)
     Text(text = "Title: ${track.title}", style = MaterialTheme.typography.bodyMedium)
     Text(text = "Artist: ${track.artist}", style = MaterialTheme.typography.bodyMedium)
