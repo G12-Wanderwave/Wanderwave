@@ -68,16 +68,14 @@ constructor(
   }
 
   // Function to add a track to a song list
-
   fun addTrackToList(listName: String, track: Track) {
     Log.d("listName", listName)
     val updatedLists =
         _songLists.value.map { list ->
           if (list.name == listName) {
             Log.d("Updated", "OK")
-            if (list.tracks.contains(track)) {
-              return@map list
-            }
+            if (list.tracks.contains(track)) return@map list
+
             list.copy(tracks = ArrayList(list.tracks).apply { add(track) })
           } else {
             list
@@ -167,7 +165,6 @@ constructor(
      * @last update 2.0
      */
     fun retrieveTracks() {
-
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val track = spotifyController.getAllElementFromSpotify().firstOrNull()
