@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import androidx.core.content.ContextCompat.startActivity
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.spotify.android.appremote.api.ConnectionParams
@@ -19,7 +18,6 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-
 
 class SpotifyController(private val context: Context) {
 
@@ -132,41 +130,49 @@ class SpotifyController(private val context: Context) {
     }
   }
 
-    /**
-     * Get all the playlist, title, ... from spotify from the home page of the user.
-     *
-     * @return a Flow of ListItem which has all the playlist, title, ... from the home page of the user.
-     * @author Menzo Bouaissi
-     * @since 2.0
-     * @last update 2.0
-     */
-    fun getAllElementFromSpotify(): Flow<List<ListItem>> {
-        val spotifyContent = "https://open.spotify.com/album/0sNOF9WDwhWunNAHPD3Baj"
-        val branchLink =
-            "https://spotify.link/content_linking?~campaign=" + context.packageName + "&\$deeplink_path=" + spotifyContent + "&\$fallback_url=" + spotifyContent
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.setData(Uri.parse(branchLink))
-        //startActivity(intent)
-        //val test = createAppAuthRequest(context)
-       // Log.d("show test",test.toString())
-        val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
-        return callbackFlow {
-            val callResult =
-                appRemote?.let { it ->
-                    it.contentApi
-                        .getRecommendedContentItems(ContentApi.ContentType.DEFAULT)
-                        .setResultCallback {
-                            Log.d("all the items",it.items.toString())
-                            for (i in it.items) list += i//Log.d("show me all",i.toString())//if (i.uri == "spotify:section:0JQ5DAroEmF9ANbLaiJ7Wx")
-                            for (i in list)  Log.d("show me all",i.toString())
-                            trySend(list)
-                            // TODO checkt if "listen recently playlist" the same for everyone
-                        }
-                        .setErrorCallback { trySend(list + ListItem("", "", null, "", "", false, false)) }
+  /**
+   * Get all the playlist, title, ... from spotify from the home page of the user.
+   *
+   * @return a Flow of ListItem which has all the playlist, title, ... from the home page of the
+   *   user.
+   * @author Menzo Bouaissi
+   * @since 2.0
+   * @last update 2.0
+   */
+  fun getAllElementFromSpotify(): Flow<List<ListItem>> {
+    val spotifyContent = "https://open.spotify.com/album/0sNOF9WDwhWunNAHPD3Baj"
+    val branchLink =
+        "https://spotify.link/content_linking?~campaign=" +
+            context.packageName +
+            "&\$deeplink_path=" +
+            spotifyContent +
+            "&\$fallback_url=" +
+            spotifyContent
+    val intent = Intent(Intent.ACTION_VIEW)
+    intent.setData(Uri.parse(branchLink))
+    // startActivity(intent)
+    // val test = createAppAuthRequest(context)
+    // Log.d("show test",test.toString())
+    val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
+    return callbackFlow {
+      val callResult =
+          appRemote?.let { it ->
+            it.contentApi
+                .getRecommendedContentItems(ContentApi.ContentType.DEFAULT)
+                .setResultCallback {
+                  Log.d("all the items", it.items.toString())
+                  for (i in it.items) list +=
+                      i // Log.d("show me all",i.toString())//if (i.uri ==
+                        // "spotify:section:0JQ5DAroEmF9ANbLaiJ7Wx")
+                  for (i in list) Log.d("show me all", i.toString())
+                  trySend(list)
+                  // TODO checkt if "listen recently playlist" the same for everyone
                 }
-            awaitClose { callResult?.cancel() }
-        }
+                .setErrorCallback { trySend(list + ListItem("", "", null, "", "", false, false)) }
+          }
+      awaitClose { callResult?.cancel() }
     }
+  }
   /**
    * Get the children of a ListItem. In our case, the children is either a playlist or an album
    *
@@ -194,24 +200,25 @@ class SpotifyController(private val context: Context) {
     }
   }
 
-    @OptIn(FlowPreview::class)
-    fun getAllChildren(listItem: ListItem): Flow<List<ListItem>> {
-        val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
+  @OptIn(FlowPreview::class)
+  fun getAllChildren(listItem: ListItem): Flow<List<ListItem>> {
+    val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
 
-        return callbackFlow {
-            val callResult =
-                appRemote?.let { it ->
-                    it.contentApi
-                        .getChildrenOfItem(listItem, 50, 0)
-                        .setResultCallback {
-                            for (i in it.items) list+=i
-                            trySend(list)
-                        }
-                        .setErrorCallback { trySend(list+ListItem("", "", null, "", "", false, false)) }
+    return callbackFlow {
+      val callResult =
+          appRemote?.let { it ->
+            it.contentApi
+                .getChildrenOfItem(listItem, 50, 0)
+                .setResultCallback {
+                  for (i in it.items) list += i
+                  trySend(list)
                 }
-            awaitClose { callResult?.cancel() }
-        }
+                .setErrorCallback { trySend(list + ListItem("", "", null, "", "", false, false)) }
+          }
+      awaitClose { callResult?.cancel() }
     }
+  }
+
   enum class ConnectResult {
     SUCCESS,
     NOT_LOGGED_IN,
