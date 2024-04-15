@@ -162,31 +162,16 @@ constructor(
    */
   fun retrieveTracks() {
     CoroutineScope(Dispatchers.IO).launch {
-      Log.d("fweefwfew", "fweefwfew")
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
       if (track != null) {
         for (i in track) {
-          Log.d("element from spotify", i.toString())
           if (i.hasChildren) {
-            Log.d("element from spotify1", i.toString())
-
             val children = spotifyController.getAllChildren(i).firstOrNull()
-            Log.d("element from spotify2", children.toString())
-
             if (children != null) {
-              Log.d("element from spotify3", i.toString())
-
               for (child in children) {
-                Log.d("\tchildren", songLists.value.toString())
                 addTrackToList("TOP SONGS", Track(child.id, child.title, child.subtitle))
-                Log.d("\tchildren", child.toString())
-                Log.d("\tchildren", songLists.value.toString())
-                // if (child.id.contains("spotify:user")) {
-                // Log.d("\t\tLiked songs", child.toString())
-                //  }
               }
             }
-            // Log.d("\tchildren", children.toString())
           }
         }
       }

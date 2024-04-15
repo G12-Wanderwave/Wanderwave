@@ -1,7 +1,6 @@
 package ch.epfl.cs311.wanderwave.model.spotify
 
 import android.content.Context
-import android.util.Log
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.spotify.android.appremote.api.ConnectionParams
@@ -145,12 +144,8 @@ class SpotifyController(private val context: Context) {
             it.contentApi
                 .getRecommendedContentItems(ContentApi.ContentType.DEFAULT)
                 .setResultCallback {
-                  Log.d("all the items", it.items.toString())
-                  for (i in it.items) list += i // Log.d("show me all",i.toString())//if (i.uri ==
-                  // "spotify:section:0JQ5DAroEmF9ANbLaiJ7Wx")
-                  for (i in list) Log.d("show me all", i.toString())
+                  for (i in it.items) list += i
                   trySend(list)
-                  // TODO checkt if "listen recently playlist" the same for everyone
                 }
                 .setErrorCallback { trySend(list + ListItem("", "", null, "", "", false, false)) }
           }
