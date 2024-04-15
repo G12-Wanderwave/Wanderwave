@@ -362,4 +362,45 @@ class SpotifyControllerTest {
     // Assertions to check only matching items are collected
     assertTrue(result == listOf(matchingAlbum, matchingPlaylist, nonMatchingItem))
   }
+
+  @Test
+  fun testGetAllSpotify() = runBlocking {
+    // Prepare the mocked responses
+    val callResult = mockk<CallResult<ListItems>>(relaxed = true)
+    val contentApi = mockk<ContentApi>(relaxed = true)
+    every { mockAppRemote.contentApi } returns contentApi
+    every { contentApi.getRecommendedContentItems(any()) } returns callResult
+
+    // Prepare a list with mixed URIs
+    val matchingItem =
+        ListItem(
+            "id1",
+            "spotify:section:0JQ5DAroEmF9ANbLaiJ7Wx",
+            null,
+            "Matching Title",
+            "type",
+            true,
+            false)
+    val nonMatchingItem =
+        ListItem(
+            "id2", "spotify:section:NotMatching", null, "Non-Matching Title", "type", true, false)
+    val items = listOf(matchingItem, nonMatchingItem)
+    val itemsArray = items.toTypedArray()
+    // Setup the callback to invoke with our prepared list
+    every { callResult.setResultCallback(any()) } answers
+        {
+          val callback = firstArg<CallResult.ResultCallback<ListItems>>()
+          callback.onResult(ListItems(0, 0, 0, itemsArray))
+          callResult
+        }
+
+    // Execute the function to get the Flow and collect results
+    val flow = spotifyController.getAllElementFromSpotify()
+    val collectedItems = mutableListOf<ListItem>()
+    val result = flow.timeout(2.seconds).catch {}.firstOrNull()
+
+    Log.d("Result of the flow", result.toString())
+    // Assertions to check only the matching item is collected
+    assertTrue(result == listOf(matchingItem, nonMatchingItem))
+  }
 }
