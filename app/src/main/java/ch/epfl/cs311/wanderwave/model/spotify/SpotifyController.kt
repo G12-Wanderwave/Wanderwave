@@ -161,9 +161,8 @@ class SpotifyController(private val context: Context) {
                 .getRecommendedContentItems(ContentApi.ContentType.DEFAULT)
                 .setResultCallback {
                   Log.d("all the items", it.items.toString())
-                  for (i in it.items) list +=
-                      i // Log.d("show me all",i.toString())//if (i.uri ==
-                        // "spotify:section:0JQ5DAroEmF9ANbLaiJ7Wx")
+                  for (i in it.items) list += i // Log.d("show me all",i.toString())//if (i.uri ==
+                  // "spotify:section:0JQ5DAroEmF9ANbLaiJ7Wx")
                   for (i in list) Log.d("show me all", i.toString())
                   trySend(list)
                   // TODO checkt if "listen recently playlist" the same for everyone

@@ -43,7 +43,7 @@ fun TracksList(tracks: List<Track>) {
       TrackItem2(
           track =
               track) // TODO: modify this, so that we are using the TrackItem from @joriba, and dont
-                     // have duplicated code
+      // have duplicated code
     }
   }
 }
