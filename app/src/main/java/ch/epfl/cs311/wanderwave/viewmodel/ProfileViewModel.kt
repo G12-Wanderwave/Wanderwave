@@ -68,13 +68,13 @@ constructor(
   }
 
   // Function to add a track to a song list
-
   fun addTrackToList(listName: String, track: Track) {
     Log.d("listName", listName)
     val updatedLists =
         _songLists.value.map { list ->
           if (list.name == listName) {
             Log.d("Updated", "OK")
+            if (list.tracks.contains(track)) return@map list
 
             list.copy(tracks = ArrayList(list.tracks).apply { add(track) })
           } else {
@@ -142,18 +142,38 @@ constructor(
    */
   fun retrieveTopTrack() {
     CoroutineScope(Dispatchers.IO).launch {
-      try {
-        val track = spotifyController.getTrack().firstOrNull()
-        if (track != null && track.id.isNotEmpty()) {
-          if (track.hasChildren) {
-            val children = spotifyController.getChildren(track).firstOrNull()
-            if (children != null && children.id.isNotEmpty()) {
-              addTrackToList("TOP SONGS", Track(children.id, children.title, children.subtitle))
+      val track = spotifyController.getTrack().firstOrNull()
+      if (track != null && track.id.isNotEmpty()) {
+        if (track.hasChildren) {
+          val children = spotifyController.getChildren(track).firstOrNull()
+          if (children != null && children.id.isNotEmpty()) {
+            addTrackToList("TOP SONGS", Track(children.id, children.title, children.subtitle))
+          }
+        }
+      }
+    }
+  }
+  /**
+   * Get all the element of the main screen and add them to the top list
+   *
+   * @author Menzo Bouaissi
+   * @since 2.0
+   * @last update 2.0
+   */
+  fun retrieveTracks() {
+    CoroutineScope(Dispatchers.IO).launch {
+      val track = spotifyController.getAllElementFromSpotify().firstOrNull()
+      if (track != null) {
+        for (i in track) {
+          if (i.hasChildren) {
+            val children = spotifyController.getAllChildren(i).firstOrNull()
+            if (children != null) {
+              for (child in children) {
+                addTrackToList("TOP SONGS", Track(child.id, child.title, child.subtitle))
+              }
             }
           }
         }
-      } catch (e: Exception) {
-        Log.e("ProfileViewModel", "Error retrieving top track: ${e.localizedMessage}")
       }
     }
   }

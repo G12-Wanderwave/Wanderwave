@@ -71,7 +71,7 @@ fun ProfileScreen(navActions: NavigationActions) {
   LaunchedEffect(Unit) {
     viewModel.createSpecificSongList("TOP_SONGS")
     viewModel.createSpecificSongList("CHOSEN_SONGS")
-    viewModel.retrieveTopTrack()
+    viewModel.retrieveTracks()
   }
 
   Column(

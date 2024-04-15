@@ -128,6 +128,31 @@ class SpotifyController(private val context: Context) {
   }
 
   /**
+   * Get all the playlist, title, ... from spotify from the home page of the user.
+   *
+   * @return a Flow of ListItem which has all the playlist, title, ... from the home page of the
+   *   user.
+   * @author Menzo Bouaissi
+   * @since 2.0
+   * @last update 2.0
+   */
+  fun getAllElementFromSpotify(): Flow<List<ListItem>> {
+    val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
+    return callbackFlow {
+      val callResult =
+          appRemote?.let { it ->
+            it.contentApi
+                .getRecommendedContentItems(ContentApi.ContentType.DEFAULT)
+                .setResultCallback {
+                  for (i in it.items) list += i
+                  trySend(list)
+                }
+                .setErrorCallback { trySend(list + ListItem("", "", null, "", "", false, false)) }
+          }
+      awaitClose { callResult?.cancel() }
+    }
+  }
+  /**
    * Get the children of a ListItem. In our case, the children is either a playlist or an album
    *
    * @param listItem the ListItem to get the children from
@@ -149,6 +174,35 @@ class SpotifyController(private val context: Context) {
                       trySend(i)
                 }
                 .setErrorCallback { trySend(ListItem("", "", null, "", "", false, false)) }
+          }
+      awaitClose { callResult?.cancel() }
+    }
+  }
+
+  /**
+   * Get the all the children of a ListItem. In our case, the children is either a playlist or an
+   * album
+   *
+   * @param listItem the ListItem to get the childrens from
+   * @return a Flow of List<ListItem> which contains all the children of the ListItem
+   * @author Menzo Bouaissi
+   * @since 2.0
+   * @last update 2.0
+   */
+  @OptIn(FlowPreview::class)
+  fun getAllChildren(listItem: ListItem): Flow<List<ListItem>> {
+    val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
+
+    return callbackFlow {
+      val callResult =
+          appRemote?.let { it ->
+            it.contentApi
+                .getChildrenOfItem(listItem, 50, 0)
+                .setResultCallback {
+                  for (i in it.items) list += i
+                  trySend(list)
+                }
+                .setErrorCallback { trySend(list + ListItem("", "", null, "", "", false, false)) }
           }
       awaitClose { callResult?.cancel() }
     }

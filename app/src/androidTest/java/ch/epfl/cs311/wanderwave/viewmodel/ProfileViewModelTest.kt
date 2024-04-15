@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
@@ -10,12 +11,15 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -100,5 +104,68 @@ class ProfileViewModelTest {
 
     val topSongs = viewModel.songLists.value.find { it.name == "TOP SONGS" }
     assertTrue(topSongs?.tracks?.isEmpty() ?: true)
+  }
+
+  @Test
+  fun retrieveTrack_doesNotAddTrackToSongs_whenTrackHasNoChildren() = runBlockingTest {
+    val track = ListItem("id", "", null, "", "", false, false)
+    every { spotifyController.getTrack() } returns flowOf(track)
+
+    viewModel.retrieveTracks()
+
+    val topSongs = viewModel.songLists.value.find { it.name == "TOP SONGS" }
+    assertTrue(topSongs?.tracks?.isEmpty() ?: true)
+  }
+
+  @Test
+  fun retrieveTrack_doesNotAddTrackSongs_whenTrackHasChildren() = runBlockingTest {
+    val track = ListItem("id", "", null, "", "", false, true)
+    every { spotifyController.getTrack() } returns flowOf(track)
+
+    viewModel.retrieveTracks()
+
+    val topSongs = viewModel.songLists.value.find { it.name == "TOP SONGS" }
+    assertTrue(topSongs?.tracks?.isEmpty() ?: true)
+  }
+
+  @Test
+  fun retrieveTrack_doesNotAddTrackToSongs_whenTrackIdIsEmpty() = runBlockingTest {
+    val track = ListItem("", "", null, "", "", false, false)
+    every { spotifyController.getTrack() } returns flowOf(track)
+
+    viewModel.retrieveTracks()
+
+    val topSongs = viewModel.songLists.value.find { it.name == "TOP SONGS" }
+    assertTrue(topSongs?.tracks?.isEmpty() ?: true)
+  }
+
+  @Test
+  fun retrieveTrackTest() = runBlockingTest {
+    val track = ListItem("bbbb", "bbbb", null, "bbbb", "bbbb", false, true)
+    val track2 = ListItem("aaaa", "aaaaa", null, "aaaaa", "aaaaa", false, true)
+    every { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(track))
+    every { spotifyController.getAllChildren(track) } returns
+        flowOf(listOf(track2)) // No empty list first
+
+    viewModel.createSpecificSongList("TOP_SONGS")
+    viewModel.retrieveTracks()
+    advanceUntilIdle()
+    var songLists = viewModel.songLists.value
+    assertFalse("Song list should not be empty after adding a track", songLists.isEmpty())
+
+    songLists = viewModel.songLists.value
+    // Check if the track was added correctly
+    val songsInList = songLists.find { it.name == "TOP SONGS" }?.tracks ?: emptyList()
+    Log.d("Temp", songsInList.toString())
+  }
+
+  @Test
+  fun testGetAllChildrenFlow() = runBlockingTest {
+    val expectedListItem = ListItem("id", "title", null, "subtitle", "", false, true)
+    every { spotifyController.getAllChildren(expectedListItem) } returns
+        flowOf(listOf(expectedListItem))
+
+    val result = spotifyController.getAllChildren(expectedListItem)
+    assertEquals(expectedListItem, result.first().get(0)) // Check if the first item is as expected
   }
 }
