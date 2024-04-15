@@ -142,21 +142,19 @@ constructor(
    */
   fun retrieveTopTrack() {
     CoroutineScope(Dispatchers.IO).launch {
-      try {
-        val track = spotifyController.getTrack().firstOrNull()
-        if (track != null && track.id.isNotEmpty()) {
-          if (track.hasChildren) {
-            val children = spotifyController.getChildren(track).firstOrNull()
-            if (children != null && children.id.isNotEmpty()) {
-              addTrackToList("TOP SONGS", Track(children.id, children.title, children.subtitle))
-            }
+      val track = spotifyController.getTrack().firstOrNull()
+      if (track != null && track.id.isNotEmpty()) {
+        if (track.hasChildren) {
+          val children = spotifyController.getChildren(track).firstOrNull()
+          if (children != null && children.id.isNotEmpty()) {
+            addTrackToList("TOP SONGS", Track(children.id, children.title, children.subtitle))
           }
         }
-      } catch (e: Exception) {}
+      }
     }
   }
   /**
-   * Get the element under the tab "listen recently" and add it to the top list
+   * Get all the element of the main screen and add them to the top list
    *
    * @author Menzo Bouaissi
    * @since 2.0
@@ -164,27 +162,34 @@ constructor(
    */
   fun retrieveTracks() {
     CoroutineScope(Dispatchers.IO).launch {
-      try {
-        val track = spotifyController.getAllElementFromSpotify().firstOrNull()
-        if (track != null) {
-          for (i in track) {
-            //  Log.d("element from spotify", i.toString())
-            if (i.hasChildren) {
-              val children = spotifyController.getAllChildren(i).firstOrNull()
-              if (children != null) {
-                for (child in children) {
-                  addTrackToList("TOP SONGS", Track(child.id, child.title, child.subtitle))
-                  //   Log.d("\tchildren", child.toString())
-                  // if (child.id.contains("spotify:user")) {
-                  // Log.d("\t\tLiked songs", child.toString())
-                  //  }
-                }
+      Log.d("fweefwfew", "fweefwfew")
+      val track = spotifyController.getAllElementFromSpotify().firstOrNull()
+      if (track != null) {
+        for (i in track) {
+          Log.d("element from spotify", i.toString())
+          if (i.hasChildren) {
+            Log.d("element from spotify1", i.toString())
+
+            val children = spotifyController.getAllChildren(i).firstOrNull()
+            Log.d("element from spotify2", children.toString())
+
+            if (children != null) {
+              Log.d("element from spotify3", i.toString())
+
+              for (child in children) {
+                Log.d("\tchildren", songLists.value.toString())
+                addTrackToList("TOP SONGS", Track(child.id, child.title, child.subtitle))
+                Log.d("\tchildren", child.toString())
+                Log.d("\tchildren", songLists.value.toString())
+                // if (child.id.contains("spotify:user")) {
+                // Log.d("\t\tLiked songs", child.toString())
+                //  }
               }
-              // Log.d("\tchildren", children.toString())
             }
+            // Log.d("\tchildren", children.toString())
           }
         }
-      } catch (e: Exception) {}
+      }
     }
   }
 }
