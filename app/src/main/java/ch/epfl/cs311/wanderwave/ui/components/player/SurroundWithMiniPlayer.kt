@@ -22,6 +22,8 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
@@ -31,6 +33,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,8 +62,8 @@ fun SurroundWithMiniPlayer(
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   val sheetState = rememberStandardBottomSheetState(initialValue = SheetValue.PartiallyExpanded)
   val progress = remember { mutableFloatStateOf(0f) }
-
   val selectedVote = remember { mutableIntStateOf(0) }
+  val checked = remember { mutableStateOf(false) }
   HandleSheetStateChanges(sheetState = sheetState, uiState = uiState, viewModel = viewModel)
 
   HandleProgressChanges(uiState = uiState, progress = progress)
@@ -79,7 +82,34 @@ fun SurroundWithMiniPlayer(
               modifier = Modifier.fillMaxSize().padding(bottom = 84.dp),
               horizontalAlignment = Alignment.CenterHorizontally,
               verticalArrangement = Arrangement.SpaceBetween) {
-                PlayerDragHandle()
+                if (checked.value) {
+                  ADHDProofHandle()
+                } else {
+                  PlayerDragHandle()
+                }
+                Switch(
+                    checked = checked.value,
+                    onCheckedChange = { checked.value = it },
+                    colors =
+                        SwitchColors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = MaterialTheme.colorScheme.surface,
+                            checkedBorderColor = Color.White,
+                            checkedIconColor = Color.White,
+                            uncheckedThumbColor = spotify_green,
+                            uncheckedTrackColor = MaterialTheme.colorScheme.surface,
+                            uncheckedBorderColor = spotify_green,
+                            uncheckedIconColor = spotify_green,
+                            disabledCheckedThumbColor = MaterialTheme.colorScheme.onBackground,
+                            disabledCheckedTrackColor = MaterialTheme.colorScheme.onBackground,
+                            disabledCheckedBorderColor = MaterialTheme.colorScheme.onBackground,
+                            disabledCheckedIconColor = MaterialTheme.colorScheme.onBackground,
+                            disabledUncheckedThumbColor = MaterialTheme.colorScheme.onBackground,
+                            disabledUncheckedTrackColor = MaterialTheme.colorScheme.onBackground,
+                            disabledUncheckedBorderColor = MaterialTheme.colorScheme.onBackground,
+                            disabledUncheckedIconColor = MaterialTheme.colorScheme.onBackground,
+                        ),
+                )
                 Row(
                     horizontalArrangement = Arrangement.SpaceAround,
                     verticalAlignment = Alignment.CenterVertically,
