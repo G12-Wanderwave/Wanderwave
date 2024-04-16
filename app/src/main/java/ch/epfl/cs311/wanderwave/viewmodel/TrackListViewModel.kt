@@ -69,8 +69,8 @@ fun pauseTrack() {
 }
 
 fun selectTrack(track: Track) {
-        _uiState.value = _uiState.value.copy(selectedTrack = track)
-
+    _uiState.value = _uiState.value.copy(selectedTrack = track)
+    if(_uiState.value.isPlaying) playTrack(track)
 }
   fun collapse() {
     _uiState.value = _uiState.value.copy(expanded = false)
@@ -81,9 +81,6 @@ fun selectTrack(track: Track) {
   }
 
   fun play() {
-      //TODO remove
-      val t = Track("spotify:track:6ImuyUQYhJKEKFtlrstHCD","Main Title", "John Williams")
-      _uiState.value = _uiState.value.copy(selectedTrack = t)
       if(_uiState.value.selectedTrack != null && !_uiState.value.isPlaying){
 
           if(_uiState.value.pausedTrack == _uiState.value.selectedTrack){
