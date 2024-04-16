@@ -9,7 +9,6 @@ import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.android.appremote.api.error.NotLoggedInException
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -30,7 +29,7 @@ class SpotifyController(private val context: Context) {
   private val connectionParams =
       ConnectionParams.Builder(CLIENT_ID).setRedirectUri(REDIRECT_URI).showAuthView(true).build()
 
-  public var appRemote: SpotifyAppRemote? = null
+  var appRemote: SpotifyAppRemote? = null
 
   fun getAuthorizationRequest(): AuthorizationRequest {
     val builder =
@@ -85,8 +84,7 @@ class SpotifyController(private val context: Context) {
     appRemote?.let { SpotifyAppRemote.disconnect(it) }
   }
 
-  @OptIn(FlowPreview::class)
-  fun playTrack(track: Track): Flow<Boolean> {
+fun playTrack(track: Track): Flow<Boolean> {
     return callbackFlow {
       val callResult =
           appRemote?.let {
@@ -99,6 +97,32 @@ class SpotifyController(private val context: Context) {
     }
   }
 
+fun pauseTrack(): Flow<Boolean> {
+    return callbackFlow {
+        val callResult =
+            appRemote?.let {
+                it.playerApi
+                    .pause()
+                    .setResultCallback { trySend(true) }
+                    .setErrorCallback { trySend(false) }
+            }
+        awaitClose { callResult?.cancel() }
+    }
+}
+
+
+fun resumeTrack(): Flow<Boolean> {
+    return callbackFlow {
+        val callResult =
+            appRemote?.let {
+                it.playerApi
+                    .resume()
+                    .setResultCallback { trySend(true) }
+                    .setErrorCallback { trySend(false) }
+            }
+        awaitClose { callResult?.cancel() }
+    }
+}
   enum class ConnectResult {
     SUCCESS,
     NOT_LOGGED_IN,
