@@ -84,7 +84,7 @@ class SpotifyController(private val context: Context) {
     appRemote?.let { SpotifyAppRemote.disconnect(it) }
   }
 
-fun playTrack(track: Track): Flow<Boolean> {
+  fun playTrack(track: Track): Flow<Boolean> {
     return callbackFlow {
       val callResult =
           appRemote?.let {
@@ -97,32 +97,32 @@ fun playTrack(track: Track): Flow<Boolean> {
     }
   }
 
-fun pauseTrack(): Flow<Boolean> {
+  fun pauseTrack(): Flow<Boolean> {
     return callbackFlow {
-        val callResult =
-            appRemote?.let {
-                it.playerApi
-                    .pause()
-                    .setResultCallback { trySend(true) }
-                    .setErrorCallback { trySend(false) }
-            }
-        awaitClose { callResult?.cancel() }
+      val callResult =
+          appRemote?.let {
+            it.playerApi
+                .pause()
+                .setResultCallback { trySend(true) }
+                .setErrorCallback { trySend(false) }
+          }
+      awaitClose { callResult?.cancel() }
     }
-}
+  }
 
-
-fun resumeTrack(): Flow<Boolean> {
+  fun resumeTrack(): Flow<Boolean> {
     return callbackFlow {
-        val callResult =
-            appRemote?.let {
-                it.playerApi
-                    .resume()
-                    .setResultCallback { trySend(true) }
-                    .setErrorCallback { trySend(false) }
-            }
-        awaitClose { callResult?.cancel() }
+      val callResult =
+          appRemote?.let {
+            it.playerApi
+                .resume()
+                .setResultCallback { trySend(true) }
+                .setErrorCallback { trySend(false) }
+          }
+      awaitClose { callResult?.cancel() }
     }
-}
+  }
+
   enum class ConnectResult {
     SUCCESS,
     NOT_LOGGED_IN,

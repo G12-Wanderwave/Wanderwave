@@ -39,7 +39,11 @@ import kotlinx.coroutines.delay
 @Singleton
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SurroundWithMiniPlayer(displayPlayer: Boolean, viewModel: TrackListViewModel = hiltViewModel(), screen: @Composable () -> Unit) {
+fun SurroundWithMiniPlayer(
+    displayPlayer: Boolean,
+    viewModel: TrackListViewModel = hiltViewModel(),
+    screen: @Composable () -> Unit
+) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   val sheetState = rememberStandardBottomSheetState(initialValue = SheetValue.PartiallyExpanded)
   val progress = remember { mutableFloatStateOf(0f) }

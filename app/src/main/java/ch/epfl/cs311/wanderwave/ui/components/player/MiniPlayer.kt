@@ -38,7 +38,7 @@ fun MiniPlayer(
     onPauseClick: () -> Unit,
     progress: Float
 ) {
-    Log.d("MiniPlayer", "MiniPlayer: ${uiStateFlow.value.selectedTrack}")
+  Log.d("MiniPlayer", "MiniPlayer: ${uiStateFlow.value.selectedTrack}")
   Column(modifier = Modifier.testTag("miniPlayer")) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -46,8 +46,11 @@ fun MiniPlayer(
         modifier = Modifier.height(60.dp).fillMaxWidth()) {
           Box(modifier = Modifier.weight(1f).background(Color.Black)) {}
 
-          MiniPlayerTitle(modifier = Modifier.weight(4f), isPlaying = uiStateFlow.value.isPlaying,
-              onTitleClick = onTitleClick, track = uiStateFlow.value.selectedTrack)
+          MiniPlayerTitle(
+              modifier = Modifier.weight(4f),
+              isPlaying = uiStateFlow.value.isPlaying,
+              onTitleClick = onTitleClick,
+              track = uiStateFlow.value.selectedTrack)
 
           PlayPauseButton(
               modifier = Modifier.weight(1f),
@@ -60,13 +63,18 @@ fun MiniPlayer(
 }
 
 @Composable
-fun MiniPlayerTitle(modifier: Modifier, isPlaying: Boolean, onTitleClick: () -> Unit, track: Track?) {
+fun MiniPlayerTitle(
+    modifier: Modifier,
+    isPlaying: Boolean,
+    onTitleClick: () -> Unit,
+    track: Track?
+) {
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,
       modifier = modifier.clickable { onTitleClick() }.testTag("miniPlayerTitleButton")) {
-      if (track != null) {
+        if (track != null) {
           ScrollingTitle(artist = track.artist, title = track.title, isPlaying = isPlaying)
-      }
+        }
       }
 }
 

@@ -14,44 +14,45 @@ import org.junit.Test
 
 class TrackListViewModelTest {
 
-    @get:Rule
-    val mockkRule = MockKRule(this)
+  @get:Rule val mockkRule = MockKRule(this)
 
-    @RelaxedMockK
-    private lateinit var mockSpotifyController: SpotifyController
+  @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
 
-    lateinit var viewModel: TrackListViewModel
-    lateinit var repository: TrackRepositoryImpl
-    lateinit var track: Track
-    fun setup(connectResult: SpotifyController.ConnectResult) {
-        every { mockSpotifyController.connectRemote() } returns flowOf(connectResult)
+  lateinit var viewModel: TrackListViewModel
+  lateinit var repository: TrackRepositoryImpl
+  lateinit var track: Track
 
-        viewModel = TrackListViewModel(repository, mockSpotifyController)
+  fun setup(connectResult: SpotifyController.ConnectResult) {
+    every { mockSpotifyController.connectRemote() } returns flowOf(connectResult)
 
-        repository = mockk()
+    viewModel = TrackListViewModel(repository, mockSpotifyController)
 
-        track = Track("6ImuyUQYhJKEKFtlrstHCD","Main Title", "John Williams")
-    }
+    repository = mockk()
 
-    @OptIn(TrackListViewModel.ForTestingPurposesOnly::class)
-    @Test
-    fun pauseStopsPlayingWhenTrackIsPlaying() = run {
-        val uiState = MutableStateFlow(viewModel.uiState.value.copy(selectedTrack = track, isPlaying = true))
+    track = Track("6ImuyUQYhJKEKFtlrstHCD", "Main Title", "John Williams")
+  }
 
-        viewModel.testUpdateUiState(uiState.value)
+  @OptIn(TrackListViewModel.ForTestingPurposesOnly::class)
+  @Test
+  fun pauseStopsPlayingWhenTrackIsPlaying() = run {
+    val uiState =
+        MutableStateFlow(viewModel.uiState.value.copy(selectedTrack = track, isPlaying = true))
 
-        viewModel.pause()
+    viewModel.testUpdateUiState(uiState.value)
 
-        assertFalse(viewModel.uiState.value.isPlaying)
-    }
+    viewModel.pause()
 
-    @Test
-    fun pauseDoesNotStopPlayingWhenNoTrackIsPlaying() = run {
-//        uiState.uiState.value = viewModel.uiState.value.copy(selectedTrack = null, isPlaying = false)
+    assertFalse(viewModel.uiState.value.isPlaying)
+  }
 
-        viewModel.pause()
+  @Test
+  fun pauseDoesNotStopPlayingWhenNoTrackIsPlaying() = run {
+    //        uiState.uiState.value = viewModel.uiState.value.copy(selectedTrack = null, isPlaying =
+    // false)
 
-        assertFalse(viewModel.uiState.value.isPlaying)
-        assertEquals("No track playing", viewModel.uiState.value.message)
-    }
+    viewModel.pause()
+
+    assertFalse(viewModel.uiState.value.isPlaying)
+    assertEquals("No track playing", viewModel.uiState.value.message)
+  }
 }

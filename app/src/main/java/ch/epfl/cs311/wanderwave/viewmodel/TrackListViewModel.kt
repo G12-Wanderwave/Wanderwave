@@ -35,8 +35,9 @@ constructor(
 
   @ForTestingPurposesOnly
   internal fun testUpdateUiState(newState: UiState) {
-      _uiState.value = newState
+    _uiState.value = newState
   }
+
   private fun observeTracks() {
     CoroutineScope(Dispatchers.IO).launch {
       repository.getAll().collect { tracks ->
@@ -45,33 +46,35 @@ constructor(
     }
   }
 
-fun playTrack(track: Track) {
+  fun playTrack(track: Track) {
     CoroutineScope(Dispatchers.IO).launch {
-        if (!spotifyController.playTrack(track).first()) {
-            _uiState.value = _uiState.value.copy(message = "Failed to play track")
-        }
+      if (!spotifyController.playTrack(track).first()) {
+        _uiState.value = _uiState.value.copy(message = "Failed to play track")
+      }
     }
-}
+  }
 
-fun resumeTrack() {
+  fun resumeTrack() {
     CoroutineScope(Dispatchers.IO).launch {
-        if (!spotifyController.resumeTrack().first()) {
-            _uiState.value = _uiState.value.copy(message = "Failed to resume track")
-        }
+      if (!spotifyController.resumeTrack().first()) {
+        _uiState.value = _uiState.value.copy(message = "Failed to resume track")
+      }
     }
-}
-fun pauseTrack() {
-    CoroutineScope(Dispatchers.IO).launch {
-        if (!spotifyController.pauseTrack().first()) {
-            _uiState.value = _uiState.value.copy(message = "Failed to pause track")
-        }
-    }
-}
+  }
 
-fun selectTrack(track: Track) {
+  fun pauseTrack() {
+    CoroutineScope(Dispatchers.IO).launch {
+      if (!spotifyController.pauseTrack().first()) {
+        _uiState.value = _uiState.value.copy(message = "Failed to pause track")
+      }
+    }
+  }
+
+  fun selectTrack(track: Track) {
     _uiState.value = _uiState.value.copy(selectedTrack = track)
-    if(_uiState.value.isPlaying) playTrack(track)
-}
+    if (_uiState.value.isPlaying) playTrack(track)
+  }
+
   fun collapse() {
     _uiState.value = _uiState.value.copy(expanded = false)
   }
@@ -81,33 +84,33 @@ fun selectTrack(track: Track) {
   }
 
   fun play() {
-      if(_uiState.value.selectedTrack != null && !_uiState.value.isPlaying){
+    if (_uiState.value.selectedTrack != null && !_uiState.value.isPlaying) {
 
-          if(_uiState.value.pausedTrack == _uiState.value.selectedTrack){
-              resumeTrack()
-          }
-          else {
-              playTrack(_uiState.value.selectedTrack!!)
-          }
-
-          _uiState.value = _uiState.value.copy(isPlaying = true)
+      if (_uiState.value.pausedTrack == _uiState.value.selectedTrack) {
+        resumeTrack()
       } else {
-          if(!_uiState.value.isPlaying){
-              _uiState.value = _uiState.value.copy(message = "No track selected")
-          }else{
-              _uiState.value = _uiState.value.copy(message = "Track already playing")
-          }
+        playTrack(_uiState.value.selectedTrack!!)
       }
+
+      _uiState.value = _uiState.value.copy(isPlaying = true)
+    } else {
+      if (!_uiState.value.isPlaying) {
+        _uiState.value = _uiState.value.copy(message = "No track selected")
+      } else {
+        _uiState.value = _uiState.value.copy(message = "Track already playing")
+      }
+    }
   }
 
   fun pause() {
-      if(_uiState.value.isPlaying) {
-          pauseTrack()
-          _uiState.value = _uiState.value.copy(isPlaying = false, currentMillis = 1000,
-                                               pausedTrack = _uiState.value.selectedTrack)
-      } else {
-          _uiState.value = _uiState.value.copy(message = "No track playing")
-      }
+    if (_uiState.value.isPlaying) {
+      pauseTrack()
+      _uiState.value =
+          _uiState.value.copy(
+              isPlaying = false, currentMillis = 1000, pausedTrack = _uiState.value.selectedTrack)
+    } else {
+      _uiState.value = _uiState.value.copy(message = "No track playing")
+    }
   }
 
   data class UiState(
