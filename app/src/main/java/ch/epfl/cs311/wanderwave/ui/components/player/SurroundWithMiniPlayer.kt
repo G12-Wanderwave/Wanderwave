@@ -2,17 +2,12 @@ package ch.epfl.cs311.wanderwave.ui.components.player
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
@@ -21,22 +16,16 @@ import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableFloatState
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import ch.epfl.cs311.wanderwave.R
-import ch.epfl.cs311.wanderwave.ui.theme.orange
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import javax.inject.Singleton
@@ -138,45 +127,4 @@ fun HandleProgressChanges(uiState: TrackListViewModel.UiState, progress: Mutable
       }
     }
   }
-}
-
-@Composable
-fun VotingButtons(selectedVote: MutableState<Int>, onVoteSelected: (Int) -> Unit) {
-  Row(
-      horizontalArrangement = Arrangement.SpaceAround,
-      verticalAlignment = Alignment.CenterVertically,
-      modifier = Modifier.fillMaxWidth()) {
-        IconButton(onClick = { onVoteSelected(-2) }, Modifier.size(20.dp)) {
-          Icon(
-              painter = painterResource(id = R.drawable.downvote_two_icon),
-              contentDescription = "",
-              tint =
-                  if (selectedVote.value == -2) Color.DarkGray
-                  else MaterialTheme.colorScheme.onSurface,
-              modifier = Modifier.size(20.dp))
-        }
-        IconButton(onClick = { onVoteSelected(-1) }, modifier = Modifier.size(20.dp)) {
-          Icon(
-              painter = painterResource(id = R.drawable.downvote_one_icon),
-              contentDescription = "",
-              tint =
-                  if (selectedVote.value == -1) Color.Gray else MaterialTheme.colorScheme.onSurface,
-              modifier = Modifier.size(20.dp))
-        }
-        IconButton(onClick = { onVoteSelected(1) }, Modifier.size(20.dp)) {
-          Icon(
-              painter = painterResource(id = R.drawable.upvote_one_icon),
-              contentDescription = "",
-              tint = if (selectedVote.value == 1) orange else MaterialTheme.colorScheme.onSurface,
-              modifier = Modifier.size(20.dp))
-        }
-        IconButton(onClick = { onVoteSelected(2) }, Modifier.size(20.dp)) {
-          Icon(
-              painter = painterResource(id = R.drawable.upvote_two_icon),
-              contentDescription = "",
-              tint =
-                  if (selectedVote.value == 2) Color.Red else MaterialTheme.colorScheme.onSurface,
-              modifier = Modifier.size(20.dp))
-        }
-      }
 }

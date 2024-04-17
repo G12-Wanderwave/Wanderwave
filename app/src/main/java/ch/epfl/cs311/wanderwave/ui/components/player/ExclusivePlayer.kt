@@ -1,8 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui.components.player
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
+import ch.epfl.cs311.wanderwave.ui.theme.orange
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 import ch.epfl.cs311.wanderwave.viewmodel.RepeatMode
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
@@ -45,182 +44,259 @@ fun ExclusivePlayer(
       modifier = Modifier.fillMaxSize().padding(bottom = 84.dp).testTag("exclusivePlayer"),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.SpaceBetween) {
-        if (checked.value) {
-          PlayerDragHandle(
-              duration1 = 1500, duration2 = 1500, duration3 = 1500, startColor = Color.Cyan)
-        } else {
-          PlayerDragHandle(
-              duration1 = 4000, duration2 = 3000, duration3 = 2000, startColor = spotify_green)
-        }
-        Switch(
-            modifier = Modifier.testTag("switch"),
-            checked = checked.value,
-            onCheckedChange = { checked.value = it },
-            colors =
-                SwitchColors(
-                    checkedThumbColor = Color.White,
-                    checkedTrackColor = MaterialTheme.colorScheme.surface,
-                    checkedBorderColor = Color.White,
-                    checkedIconColor = Color.White,
-                    uncheckedThumbColor = spotify_green,
-                    uncheckedTrackColor = MaterialTheme.colorScheme.surface,
-                    uncheckedBorderColor = spotify_green,
-                    uncheckedIconColor = spotify_green,
-                    disabledCheckedThumbColor = MaterialTheme.colorScheme.onBackground,
-                    disabledCheckedTrackColor = MaterialTheme.colorScheme.onBackground,
-                    disabledCheckedBorderColor = MaterialTheme.colorScheme.onBackground,
-                    disabledCheckedIconColor = MaterialTheme.colorScheme.onBackground,
-                    disabledUncheckedThumbColor = MaterialTheme.colorScheme.onBackground,
-                    disabledUncheckedTrackColor = MaterialTheme.colorScheme.onBackground,
-                    disabledUncheckedBorderColor = MaterialTheme.colorScheme.onBackground,
-                    disabledUncheckedIconColor = MaterialTheme.colorScheme.onBackground,
-                ),
-        )
-        Row(
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()) {
-              IconButton(onClick = { /*TODO*/}, modifier = Modifier.testTag("broadcastButton")) {
-                Icon(
-                    painter = painterResource(id = R.drawable.broadcast_icon),
-                    contentDescription = "",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(50.dp))
-              }
-              IconButton(onClick = { /*TODO*/}, modifier = Modifier.testTag("beaconButton")) {
-                Icon(
-                    painter = painterResource(id = R.drawable.beacon_add_icon),
-                    contentDescription = "",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(50.dp))
-              }
-              IconButton(onClick = { /*TODO*/}, modifier = Modifier.testTag("playlistButton")) {
-                Icon(
-                    painter = painterResource(id = R.drawable.playlist_add_icon),
-                    contentDescription = "",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(50.dp))
-              }
-              IconButton(onClick = { /*TODO*/}, modifier = Modifier.testTag("ignoreButton")) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ignore_list_icon),
-                    contentDescription = "",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(50.dp))
-              }
-            }
-        VotingButtons(selectedVote) { vote -> selectedVote.intValue = vote }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically) {
-              Box(modifier = Modifier.size(250.dp).background(Color.LightGray))
-            }
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center) {
-              Text(
-                  text = uiState.selectedTrack?.artist ?: "",
-                  style = MaterialTheme.typography.titleSmall)
-              Text(
-                  text = uiState.selectedTrack?.title ?: "",
-                  style = MaterialTheme.typography.titleMedium)
-            }
-        Slider(
-            value = progress.floatValue,
-            onValueChange = { progress.floatValue = it },
-            modifier = Modifier.padding(horizontal = 30.dp),
-            colors =
-                SliderColors(
-                    thumbColor = MaterialTheme.colorScheme.onSurface,
-                    activeTrackColor = spotify_green,
-                    activeTickColor = spotify_green,
-                    inactiveTrackColor = MaterialTheme.colorScheme.onSurface,
-                    inactiveTickColor = MaterialTheme.colorScheme.onSurface,
-                    disabledThumbColor = spotify_green,
-                    disabledActiveTrackColor = spotify_green,
-                    disabledActiveTickColor = spotify_green,
-                    disabledInactiveTrackColor = spotify_green,
-                    disabledInactiveTickColor = spotify_green),
-        )
-
-        Row(
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()) {
-              IconButton(
-                  onClick = { viewModel.toggleShuffle() },
-                  modifier = Modifier.testTag("toggleShuffle")) {
-                    if (!uiState.shuffleOn) {
-                      Icon(
-                          painter = painterResource(id = R.drawable.shuffle_off_icon),
-                          contentDescription = "",
-                          tint = MaterialTheme.colorScheme.onSurface,
-                          modifier = Modifier.size(30.dp))
-                    } else {
-                      Icon(
-                          painter = painterResource(id = R.drawable.shuffle_on_icon),
-                          contentDescription = "",
-                          tint = spotify_green,
-                          modifier = Modifier.size(30.dp))
-                    }
-                  }
-              IconButton(onClick = { /*TODO*/}) {
-                Icon(
-                    painter = painterResource(id = R.drawable.previous_track_icon),
-                    contentDescription = "",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(50.dp))
-              }
-              IconButton(
-                  onClick = { if (uiState.isPlaying) viewModel.pause() else viewModel.play() },
-                  modifier = Modifier.size(70.dp)) {
-                    if (uiState.isPlaying) {
-                      Icon(
-                          painter = painterResource(id = R.drawable.pause_icon),
-                          contentDescription = "",
-                          tint = spotify_green,
-                          modifier = Modifier.size(55.dp))
-                    } else {
-                      Icon(
-                          painter = painterResource(id = R.drawable.play_icon),
-                          contentDescription = "",
-                          tint = MaterialTheme.colorScheme.onSurface,
-                          modifier = Modifier.size(70.dp))
-                    }
-                  }
-              IconButton(onClick = { /*TODO*/}) {
-                Icon(
-                    painter = painterResource(id = R.drawable.next_track_icon),
-                    contentDescription = "",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(50.dp))
-              }
-              IconButton(
-                  onClick = { viewModel.toggleRepeat() },
-                  modifier = Modifier.testTag("toggleRepeat")) {
-                    when (uiState.repeatMode) {
-                      RepeatMode.NONE ->
-                          Icon(
-                              painter = painterResource(id = R.drawable.repeat_icon),
-                              contentDescription = "",
-                              tint = MaterialTheme.colorScheme.onSurface,
-                              modifier = Modifier.size(30.dp))
-                      RepeatMode.ALL ->
-                          Icon(
-                              painter = painterResource(id = R.drawable.repeat_icon),
-                              contentDescription = "",
-                              tint = spotify_green,
-                              modifier = Modifier.size(30.dp))
-                      else ->
-                          Icon(
-                              painter = painterResource(id = R.drawable.repeat_one_icon),
-                              contentDescription = "",
-                              tint = spotify_green,
-                              modifier = Modifier.size(30.dp))
-                    }
-                  }
-            }
+        PlayerDragHandleComponent(checked)
+        SwitchComponent(checked)
+        PlayerIconButtonRowComponent(viewModel)
+        VotingButtonsComponent(selectedVote)
+        TrackInfoComponent(uiState)
+        SliderComponent(progress)
+        PlayerControlRowComponent(viewModel, uiState)
       }
+}
+
+@Composable
+fun PlayerDragHandleComponent(checked: MutableState<Boolean>) {
+  if (checked.value) {
+    PlayerDragHandle(duration1 = 1500, duration2 = 1500, duration3 = 1500, startColor = Color.Cyan)
+  } else {
+    PlayerDragHandle(
+        duration1 = 4000, duration2 = 3000, duration3 = 2000, startColor = spotify_green)
+  }
+}
+
+@Composable
+fun SwitchComponent(checked: MutableState<Boolean>) {
+  Switch(
+      modifier = Modifier.testTag("switch"),
+      checked = checked.value,
+      onCheckedChange = { checked.value = it },
+      colors =
+          SwitchColors(
+              checkedThumbColor = Color.White,
+              checkedTrackColor = MaterialTheme.colorScheme.surface,
+              checkedBorderColor = Color.White,
+              checkedIconColor = Color.White,
+              uncheckedThumbColor = spotify_green,
+              uncheckedTrackColor = MaterialTheme.colorScheme.surface,
+              uncheckedBorderColor = spotify_green,
+              uncheckedIconColor = spotify_green,
+              disabledCheckedThumbColor = MaterialTheme.colorScheme.onBackground,
+              disabledCheckedTrackColor = MaterialTheme.colorScheme.onBackground,
+              disabledCheckedBorderColor = MaterialTheme.colorScheme.onBackground,
+              disabledCheckedIconColor = MaterialTheme.colorScheme.onBackground,
+              disabledUncheckedThumbColor = MaterialTheme.colorScheme.onBackground,
+              disabledUncheckedTrackColor = MaterialTheme.colorScheme.onBackground,
+              disabledUncheckedBorderColor = MaterialTheme.colorScheme.onBackground,
+              disabledUncheckedIconColor = MaterialTheme.colorScheme.onBackground,
+          ))
+}
+
+@Composable
+fun PlayerIconButtonRowComponent(viewModel: TrackListViewModel) {
+  Row(
+      horizontalArrangement = Arrangement.SpaceAround,
+      verticalAlignment = Alignment.CenterVertically,
+      modifier = Modifier.fillMaxWidth()) {
+        PlayerIconButton(
+            onClick = { /*TODO*/},
+            testTag = "broadcastButton",
+            painterId = R.drawable.broadcast_icon,
+            tint = MaterialTheme.colorScheme.onSurface)
+        PlayerIconButton(
+            onClick = { /*TODO*/},
+            testTag = "beaconButton",
+            painterId = R.drawable.beacon_add_icon,
+            tint = MaterialTheme.colorScheme.onSurface)
+        PlayerIconButton(
+            onClick = { /*TODO*/},
+            testTag = "playlistButton",
+            painterId = R.drawable.playlist_add_icon,
+            tint = MaterialTheme.colorScheme.onSurface)
+        PlayerIconButton(
+            onClick = { /*TODO*/},
+            testTag = "ignoreButton",
+            painterId = R.drawable.ignore_list_icon,
+            tint = MaterialTheme.colorScheme.onSurface)
+      }
+}
+
+@Composable
+fun VotingButtonsComponent(selectedVote: MutableIntState) {
+  VotingButtons(selectedVote) { vote -> selectedVote.intValue = vote }
+}
+
+@Composable
+fun TrackInfoComponent(uiState: TrackListViewModel.UiState) {
+  Column(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.Center) {
+        Text(
+            text = uiState.selectedTrack?.artist ?: "", style = MaterialTheme.typography.titleSmall)
+        Text(
+            text = uiState.selectedTrack?.title ?: "", style = MaterialTheme.typography.titleMedium)
+      }
+}
+
+@Composable
+fun SliderComponent(progress: MutableFloatState) {
+  Slider(
+      value = progress.floatValue,
+      onValueChange = { progress.floatValue = it },
+      modifier = Modifier.padding(horizontal = 30.dp),
+      colors =
+          SliderColors(
+              thumbColor = MaterialTheme.colorScheme.onSurface,
+              activeTrackColor = spotify_green,
+              activeTickColor = spotify_green,
+              inactiveTrackColor = MaterialTheme.colorScheme.onSurface,
+              inactiveTickColor = MaterialTheme.colorScheme.onSurface,
+              disabledThumbColor = spotify_green,
+              disabledActiveTrackColor = spotify_green,
+              disabledActiveTickColor = spotify_green,
+              disabledInactiveTrackColor = spotify_green,
+              disabledInactiveTickColor = spotify_green))
+}
+
+@Composable
+fun PlayerControlRowComponent(viewModel: TrackListViewModel, uiState: TrackListViewModel.UiState) {
+  Row(
+      horizontalArrangement = Arrangement.SpaceAround,
+      verticalAlignment = Alignment.CenterVertically,
+      modifier = Modifier.fillMaxWidth()) {
+        ShuffleButton(viewModel, uiState)
+        PlayerIconButton(
+            onClick = { /*TODO*/},
+            testTag = "previousButton",
+            painterId = R.drawable.previous_track_icon,
+            tint = MaterialTheme.colorScheme.onSurface)
+        PlayPauseButton(viewModel, uiState)
+        PlayerIconButton(
+            onClick = { /*TODO*/},
+            testTag = "nextButton",
+            painterId = R.drawable.next_track_icon,
+            tint = MaterialTheme.colorScheme.onSurface)
+        RepeatButton(viewModel, uiState)
+      }
+}
+
+@Composable
+fun ShuffleButton(viewModel: TrackListViewModel, uiState: TrackListViewModel.UiState) {
+  IconButton(
+      onClick = { viewModel.toggleShuffle() }, modifier = Modifier.testTag("toggleShuffle")) {
+        if (!uiState.shuffleOn) {
+          Icon(
+              painter = painterResource(id = R.drawable.shuffle_off_icon),
+              contentDescription = "",
+              tint = MaterialTheme.colorScheme.onSurface,
+              modifier = Modifier.size(30.dp))
+        } else {
+          Icon(
+              painter = painterResource(id = R.drawable.shuffle_on_icon),
+              contentDescription = "",
+              tint = spotify_green,
+              modifier = Modifier.size(30.dp))
+        }
+      }
+}
+
+@Composable
+fun PlayPauseButton(viewModel: TrackListViewModel, uiState: TrackListViewModel.UiState) {
+  IconButton(
+      onClick = { if (uiState.isPlaying) viewModel.pause() else viewModel.play() },
+      modifier = Modifier.size(70.dp)) {
+        if (uiState.isPlaying) {
+          Icon(
+              painter = painterResource(id = R.drawable.pause_icon),
+              contentDescription = "",
+              tint = spotify_green,
+              modifier = Modifier.size(55.dp))
+        } else {
+          Icon(
+              painter = painterResource(id = R.drawable.play_icon),
+              contentDescription = "",
+              tint = MaterialTheme.colorScheme.onSurface,
+              modifier = Modifier.size(70.dp))
+        }
+      }
+}
+
+@Composable
+fun RepeatButton(viewModel: TrackListViewModel, uiState: TrackListViewModel.UiState) {
+  IconButton(onClick = { viewModel.toggleRepeat() }, modifier = Modifier.testTag("toggleRepeat")) {
+    when (uiState.repeatMode) {
+      RepeatMode.NONE ->
+          Icon(
+              painter = painterResource(id = R.drawable.repeat_icon),
+              contentDescription = "",
+              tint = MaterialTheme.colorScheme.onSurface,
+              modifier = Modifier.size(30.dp))
+      RepeatMode.ALL ->
+          Icon(
+              painter = painterResource(id = R.drawable.repeat_icon),
+              contentDescription = "",
+              tint = spotify_green,
+              modifier = Modifier.size(30.dp))
+      else ->
+          Icon(
+              painter = painterResource(id = R.drawable.repeat_one_icon),
+              contentDescription = "",
+              tint = spotify_green,
+              modifier = Modifier.size(30.dp))
+    }
+  }
+}
+
+@Composable
+private fun PlayerIconButton(onClick: () -> Unit, testTag: String, painterId: Int, tint: Color) {
+  IconButton(onClick = onClick, modifier = Modifier.testTag(testTag)) {
+    Icon(
+        painter = painterResource(id = painterId),
+        contentDescription = "",
+        tint = tint,
+        modifier = Modifier.size(50.dp))
+  }
+}
+
+@Composable
+fun VotingButtons(selectedVote: MutableState<Int>, onVoteSelected: (Int) -> Unit) {
+  val voteOptions = listOf(-2, -1, 1, 2)
+  val icons =
+      listOf(
+          R.drawable.downvote_two_icon,
+          R.drawable.downvote_one_icon,
+          R.drawable.upvote_one_icon,
+          R.drawable.upvote_two_icon)
+  val tints = listOf(Color.DarkGray, Color.Gray, orange, Color.Red)
+
+  Row(
+      horizontalArrangement = Arrangement.SpaceAround,
+      verticalAlignment = Alignment.CenterVertically,
+      modifier = Modifier.fillMaxWidth()) {
+        voteOptions.forEachIndexed { index, vote ->
+          VotingButton(
+              vote = vote,
+              selectedVote = selectedVote,
+              onVoteSelected = onVoteSelected,
+              icon = icons[index],
+              tint = tints[index])
+        }
+      }
+}
+
+@Composable
+fun VotingButton(
+    vote: Int,
+    selectedVote: MutableState<Int>,
+    onVoteSelected: (Int) -> Unit,
+    icon: Int,
+    tint: Color
+) {
+  IconButton(onClick = { onVoteSelected(vote) }, modifier = Modifier.size(20.dp)) {
+    Icon(
+        painter = painterResource(id = icon),
+        contentDescription = "",
+        tint = if (selectedVote.value == vote) tint else MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.size(20.dp))
+  }
 }
