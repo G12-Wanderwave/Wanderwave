@@ -39,6 +39,7 @@ import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
 import com.google.android.gms.maps.model.CameraPosition
@@ -110,17 +111,17 @@ fun BeaconInformation(location: Location) {
       Text("at ${location.name}", style = MaterialTheme.typography.titleMedium)
     }
     // TODO: Maybe add location tracking here too?
-    GoogleMap(
+    WanderwaveGoogleMap(
       cameraPositionState = CameraPositionState(
         CameraPosition(LatLng(location.latitude, location.longitude), 15f, 0f, 0f)
       ),
-      properties = MapProperties(
-        mapStyleOptions = MapStyleOptions.loadRawResourceStyle(LocalContext.current, R.raw.map_style)),
+      locationSource = null,
       modifier = Modifier
         .fillMaxWidth()
         .aspectRatio(4f / 3)
         .padding(4.dp)
-        .clip(RoundedCornerShape(8.dp))
+        .clip(RoundedCornerShape(8.dp)),
+      controlsEnabled = false,
     ) {
       Marker(
         state = MarkerState(position = LatLng(location.latitude, location.longitude)),

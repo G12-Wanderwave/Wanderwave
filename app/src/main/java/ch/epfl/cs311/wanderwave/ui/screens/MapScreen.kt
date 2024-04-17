@@ -21,6 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
@@ -63,12 +64,14 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
     onDispose { viewModel.cameraPosition.value = cameraPositionState.position }
   }
 
-  // if we have permission, show the location, otherwise show the map without location
   WanderwaveGoogleMap(
       cameraPositionState = cameraPositionState,
-      viewModel = viewModel,
-      mapIsLoaded = mapIsLoaded,
-      locationEnabled = permissionState.allPermissionsGranted)
+      locationEnabled = permissionState.allPermissionsGranted,
+      locationSource = viewModel.locationSource,
+      modifier = Modifier.testTag("mapScreen"),
+      onMapLoaded = { mapIsLoaded.value = true }) {
+    MapContent(viewModel)
+  }
 
   if (needToRequestPermissions(permissionState)) {
     AskForPermissions(permissionState)
@@ -81,27 +84,6 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
       }
     }
   }
-}
-
-@Composable
-fun WanderwaveGoogleMap(
-    cameraPositionState: CameraPositionState,
-    viewModel: MapViewModel,
-    mapIsLoaded: MutableState<Boolean>,
-    locationEnabled: Boolean = false
-) {
-  val context = LocalContext.current
-  GoogleMap(
-      modifier = Modifier.testTag("mapScreen"),
-      properties =
-          MapProperties(
-              isMyLocationEnabled = locationEnabled,
-              mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)),
-      locationSource = viewModel.locationSource,
-      cameraPositionState = cameraPositionState,
-      onMapLoaded = { mapIsLoaded.value = true }) {
-        MapContent(viewModel)
-      }
 }
 
 @Composable
