@@ -6,23 +6,26 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Assert.*
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
 class TrackListViewModelTest {
 
+  lateinit var viewModel: TrackListViewModel
+
   @get:Rule val mockkRule = MockKRule(this)
 
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
+  @RelaxedMockK private lateinit var repository: TrackRepositoryImpl
 
-  lateinit var viewModel: TrackListViewModel
-  lateinit var repository: TrackRepositoryImpl
   lateinit var track: Track
 
-  fun setup(connectResult: SpotifyController.ConnectResult) {
+  @Before
+  fun setup() {
+    val connectResult = SpotifyController.ConnectResult.SUCCESS
     every { mockSpotifyController.connectRemote() } returns flowOf(connectResult)
 
     viewModel = TrackListViewModel(repository, mockSpotifyController)
@@ -34,25 +37,52 @@ class TrackListViewModelTest {
 
   @OptIn(TrackListViewModel.ForTestingPurposesOnly::class)
   @Test
-  fun pauseStopsPlayingWhenTrackIsPlaying() = run {
-    val uiState =
-        MutableStateFlow(viewModel.uiState.value.copy(selectedTrack = track, isPlaying = true))
-
-    viewModel.testUpdateUiState(uiState.value)
-
-    viewModel.pause()
-
-    assertFalse(viewModel.uiState.value.isPlaying)
+  fun trackIsProperlySelected() = run {
+    viewModel.selectTrack(track)
+    assertEquals(track.id, viewModel.uiState.value.selectedTrack?.id)
   }
 
+  @OptIn(TrackListViewModel.ForTestingPurposesOnly::class)
   @Test
-  fun pauseDoesNotStopPlayingWhenNoTrackIsPlaying() = run {
-    //        uiState.uiState.value = viewModel.uiState.value.copy(selectedTrack = null, isPlaying =
-    // false)
+  fun songPlaysProperly() = run {
+    assertFalse(viewModel.uiState.value.isPlaying)
+
+    viewModel.selectTrack(track)
+    viewModel.play()
+
+    assertTrue(viewModel.uiState.value.isPlaying)
+    assertEquals(track.id, viewModel.uiState.value.selectedTrack?.id)
+  }
+
+  @OptIn(TrackListViewModel.ForTestingPurposesOnly::class)
+  @Test
+  fun songPausesProperly() = run {
+    viewModel.selectTrack(track)
+    viewModel.play()
+    assertTrue(viewModel.uiState.value.isPlaying)
 
     viewModel.pause()
-
     assertFalse(viewModel.uiState.value.isPlaying)
-    assertEquals("No track playing", viewModel.uiState.value.message)
+    assertEquals(track.id, viewModel.uiState.value.pausedTrack?.id)
+  }
+
+  @OptIn(TrackListViewModel.ForTestingPurposesOnly::class)
+  @Test
+  fun songResumesProperly() = run {
+    viewModel.selectTrack(track)
+    viewModel.play()
+    viewModel.pause()
+    assertFalse(viewModel.uiState.value.isPlaying)
+
+    viewModel.play()
+    assertTrue(viewModel.uiState.value.isPlaying)
+    assertEquals(track.id, viewModel.uiState.value.selectedTrack?.id)
+  }
+
+  @OptIn(TrackListViewModel.ForTestingPurposesOnly::class)
+  @Test
+  fun songDoesntPlayWhenNull() = run {
+    viewModel.play()
+    assertFalse(viewModel.uiState.value.isPlaying)
   }
 }
