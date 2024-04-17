@@ -8,7 +8,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,15 +28,9 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.CameraPositionState
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -71,8 +64,8 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
       locationSource = viewModel.locationSource,
       modifier = Modifier.testTag("mapScreen"),
       onMapLoaded = { mapIsLoaded.value = true }) {
-    MapContent(viewModel)
-  }
+        MapContent(viewModel)
+      }
 
   if (needToRequestPermissions(permissionState)) {
     AskForPermissions(permissionState)
@@ -132,7 +125,5 @@ fun moveCamera(
 @Composable
 fun DisplayBeacons(beacons: List<Beacon>) {
   // Create each beacon from the list
-  beacons.forEach() {
-    WanderwaveMapMarker(it.location.toLatLng(), title = it.id)
-  }
+  beacons.forEach() { WanderwaveMapMarker(it.location.toLatLng(), title = it.id) }
 }

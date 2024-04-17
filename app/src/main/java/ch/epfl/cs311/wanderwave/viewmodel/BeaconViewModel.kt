@@ -1,18 +1,14 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
-import dagger.Provides
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
 class BeaconViewModel @Inject constructor() : ViewModel() {
@@ -35,7 +31,8 @@ class BeaconViewModel @Inject constructor() : ViewModel() {
   }
 
   data class UIState(
-    val beacon: Beacon? = null,
-    val isLoading: Boolean = true,
-    val error: String? = null)
+      val beacon: Beacon? = null,
+      val isLoading: Boolean = true,
+      val error: String? = null
+  )
 }

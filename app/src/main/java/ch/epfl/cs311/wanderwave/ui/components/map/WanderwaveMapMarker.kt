@@ -9,11 +9,5 @@ import com.google.maps.android.compose.MarkerState
 @Composable
 @GoogleMapComposable
 fun WanderwaveMapMarker(position: LatLng, title: String? = null, snippet: String? = null) {
-  Marker(
-    state = MarkerState(
-      position = position
-    ),
-    title = title,
-    snippet = snippet
-  )
+  Marker(state = MarkerState(position = position), title = title, snippet = snippet)
 }

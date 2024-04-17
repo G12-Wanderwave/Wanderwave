@@ -22,19 +22,15 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -45,13 +41,7 @@ import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.CameraPositionState
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
 
 @Composable
 fun BeaconScreen(
@@ -62,17 +52,14 @@ fun BeaconScreen(
   // Here is the id of a good beacon for testing : UAn8OUadgrUOKYagf8a2
   val uiState = viewModel.uiState.collectAsState().value
   Column(
-    modifier = Modifier
-      .fillMaxSize()
-      .padding(16.dp),
-    horizontalAlignment = Alignment.CenterHorizontally
-  ) {
-    if (!uiState.isLoading) {
-      BeaconScreen(beacon = uiState.beacon!!)
-    } else {
-      Text("Beacon not found")
-    }
-  }
+      modifier = Modifier.fillMaxSize().padding(16.dp),
+      horizontalAlignment = Alignment.CenterHorizontally) {
+        if (!uiState.isLoading) {
+          BeaconScreen(beacon = uiState.beacon!!)
+        } else {
+          Text("Beacon not found")
+        }
+      }
 }
 
 @Composable
@@ -95,9 +82,7 @@ private fun BeaconScreenPreview() {
 @Composable
 private fun BeaconScreen(beacon: Beacon) {
   Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(8.dp),
+      modifier = Modifier.fillMaxSize().padding(8.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
         SongList(beacon)
@@ -113,16 +98,16 @@ fun BeaconInformation(location: Location) {
     }
     // TODO: Maybe add location tracking here too?
     WanderwaveGoogleMap(
-      cameraPositionState = CameraPositionState(
-        CameraPosition(LatLng(location.latitude, location.longitude), 15f, 0f, 0f)
-      ),
-      locationSource = null,
-      modifier = Modifier
-        .fillMaxWidth()
-        .aspectRatio(4f / 3)
-        .padding(4.dp)
-        .clip(RoundedCornerShape(8.dp)),
-      controlsEnabled = false,
+        cameraPositionState =
+            CameraPositionState(
+                CameraPosition(LatLng(location.latitude, location.longitude), 15f, 0f, 0f)),
+        locationSource = null,
+        modifier =
+            Modifier.fillMaxWidth()
+                .aspectRatio(4f / 3)
+                .padding(4.dp)
+                .clip(RoundedCornerShape(8.dp)),
+        controlsEnabled = false,
     ) {
       WanderwaveMapMarker(location.toLatLng(), location.name, "Beacon location")
     }
@@ -133,46 +118,42 @@ fun BeaconInformation(location: Location) {
 fun SongList(beacon: Beacon) {
   HorizontalDivider()
   Text(text = "Tracks", style = MaterialTheme.typography.displayMedium)
-  LazyColumn {
-    items(beacon.tracks) { TrackItem(it) }
-  }
+  LazyColumn { items(beacon.tracks) { TrackItem(it) } }
 }
 
 @Composable
 internal fun TrackItem(track: Track) {
   Card(
-    colors = CardColors(
-      containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-      CardDefaults.cardColors().contentColor,
-      CardDefaults.cardColors().disabledContainerColor,
-      CardDefaults.cardColors().disabledContentColor
-    ),
-    modifier = Modifier
-      .height(80.dp)
-      .fillMaxWidth()
-      .padding(4.dp)) {
-    Row(
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Box(modifier = Modifier
-        .fillMaxHeight()
-        .aspectRatio(1f), contentAlignment = Alignment.Center) {
-        Image(imageVector = Icons.Default.PlayArrow, contentDescription = "Album Cover",
-          modifier = Modifier.fillMaxSize(.8f),
-        )
+      colors =
+          CardColors(
+              containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+              CardDefaults.cardColors().contentColor,
+              CardDefaults.cardColors().disabledContainerColor,
+              CardDefaults.cardColors().disabledContentColor),
+      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Box(
+              modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+              contentAlignment = Alignment.Center) {
+                Image(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "Album Cover",
+                    modifier = Modifier.fillMaxSize(.8f),
+                )
+              }
+          Column(modifier = Modifier.padding(8.dp)) {
+            Text(
+                text = track.title,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = track.artist,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+          }
+        }
       }
-      Column(modifier = Modifier.padding(8.dp)) {
-        Text(
-          text = track.title,
-          color = MaterialTheme.colorScheme.onSurface,
-          style = MaterialTheme.typography.titleMedium
-        )
-        Text(
-          text = track.artist,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-          style = MaterialTheme.typography.bodyMedium,
-        )
-      }
-    }
-  }
 }

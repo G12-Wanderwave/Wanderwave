@@ -12,8 +12,6 @@ data class Track(
 
     /** Artist of the track */
     val artist: String,
-
-
 ) {
 
   // No-argument constructor
