@@ -6,6 +6,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.MainActivity
 import ch.epfl.cs311.wanderwave.ui.screens.AppScreen
 import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
+import ch.epfl.cs311.wanderwave.ui.screens.components.ExclusivePlayerScreen
+import ch.epfl.cs311.wanderwave.ui.screens.components.MiniPlayerScreen
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -28,5 +30,28 @@ class AppTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport
   @Test
   fun appStartsAtConnectSpotifyScreen() = run {
     onComposeScreen<SpotifyConnectScreen>(composeTestRule) { isDisplayed() }
+  }
+
+  @Test
+  fun canInteractWithPlayer() = run {
+    onComposeScreen<MiniPlayerScreen>(composeTestRule) {
+      assertIsDisplayed()
+      playPauseButton.performClick()
+      playPauseButton.performClick()
+      miniPlayerTitleButton.performClick()
+    }
+    onComposeScreen<ExclusivePlayerScreen>(composeTestRule) {
+      assertIsDisplayed()
+      toggleShuffle.performClick()
+      toggleShuffle.performClick()
+      toggleRepeat.performClick()
+      toggleRepeat.performClick()
+      toggleRepeat.performClick()
+      switch.performClick()
+      broadcastButton.performClick()
+      beaconButton.performClick()
+      playlistButton.performClick()
+      ignoreButton.performClick()
+    }
   }
 }
