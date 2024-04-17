@@ -109,7 +109,7 @@ fun BeaconInformation(location: Location) {
                 .clip(RoundedCornerShape(8.dp)),
         controlsEnabled = false,
     ) {
-      WanderwaveMapMarker(location.toLatLng(), location.name, "Beacon location")
+      WanderwaveMapMarker(location.toLatLng(), location.name)
     }
   }
 }
