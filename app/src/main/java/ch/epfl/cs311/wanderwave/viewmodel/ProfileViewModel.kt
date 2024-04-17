@@ -8,6 +8,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -50,6 +51,12 @@ constructor(
   // Add a state for managing song lists
   private val _songLists = MutableStateFlow<List<SongList>>(emptyList())
   val songLists: StateFlow<List<SongList>> = _songLists
+
+  private val _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
+  val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
+
+  private val _childrenList = MutableStateFlow<List<ListItem>>(emptyList())
+  val childrenList: StateFlow<List<ListItem>> = _childrenList
 
   fun createSpecificSongList(listType: String) {
     val listName =
@@ -177,4 +184,43 @@ constructor(
       }
     }
   }
+
+  /**
+   * Get all the element of the main screen and add them to the top list
+   *
+   * @author Menzo Bouaissi
+   * @since 2.0
+   * @last update 2.0
+   */
+  fun retrieveAndAddSubsection() {
+    CoroutineScope(Dispatchers.IO).launch {
+      val track = spotifyController.getAllElementFromSpotify().firstOrNull()
+      if (track != null) {
+        for (i in track) {
+          _spotifySubsectionList.value += i
+        }
+      }
+    }
+  }
+
+/**
+ * Get all the element of the main screen and add them to the top list
+ *
+ * @author Menzo Bouaissi
+ * @since 2.0
+ * @last update 2.0
+ */
+fun retrieveChild(item:ListItem) {
+  CoroutineScope(Dispatchers.IO).launch {
+    val children = spotifyController.getAllChildren(item).firstOrNull()
+    if (children != null) {
+      for (child in children) {
+        Log.d("TOP SONGS", Track(child.id, child.title, child.subtitle).toString())
+        _childrenList.value+=child
+      }
+    }
+
+  }
 }
+}
+

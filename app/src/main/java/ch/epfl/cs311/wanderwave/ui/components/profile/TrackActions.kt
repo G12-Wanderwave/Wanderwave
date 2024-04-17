@@ -1,5 +1,7 @@
 package ch.epfl.cs311.wanderwave.ui.components.profile
 
+import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.ui.screens.TrackItem2
 import ch.epfl.cs311.wanderwave.viewmodel.SongList
 
 /**
@@ -40,64 +43,15 @@ import ch.epfl.cs311.wanderwave.viewmodel.SongList
 fun TracksList(tracks: List<Track>) {
   LazyColumn {
     items(tracks, key = { track -> track.id }) { track ->
-      TrackItem2(
-          track =
-              track) // TODO: modify this, so that we are using the TrackItem from @joriba, and dont
-      // have duplicated code
-    }
+//      TrackItem2(
+//          track =
+//              track) // TODO: modify this, so that we are using the TrackItem from @joriba, and dont
+//      // have duplicated code
+//    }
   }
 }
+}
 
-/**
- * Composable that displays information for a single track, including its ID, title, and artist.
- *
- * @param track The track data to display.
- * @author Ayman Bakiri
- * @author Menzo Bouaissi (modify the ui)
- * @since 1.0
- * @last update 2.0
- */
-@Composable
-fun TrackItem(track: Track) {
-  Card(
-      colors =
-          CardColors(
-              containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-              CardDefaults.cardColors().contentColor,
-              CardDefaults.cardColors().disabledContainerColor,
-              CardDefaults.cardColors().disabledContentColor),
-      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp)) {
-        Text(text = "ID: ${track.id}", style = MaterialTheme.typography.bodyMedium)
-        Text(text = "Title: ${track.title}", style = MaterialTheme.typography.bodyMedium)
-        Text(text = "Artist: ${track.artist}", style = MaterialTheme.typography.bodyMedium)
-      }
-}
-// TODO: modify this, so that we are using the TrackItem from @joriba, and dont have duplicated code
-@Composable
-fun TrackItem2(track: Track) {
-  Card(
-      colors =
-          CardColors(
-              containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-              CardDefaults.cardColors().contentColor,
-              CardDefaults.cardColors().disabledContainerColor,
-              CardDefaults.cardColors().disabledContentColor),
-      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp)) {
-        Row {
-          Column(modifier = Modifier.padding(8.dp)) {
-            Text(
-                text = track.title,
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.titleMedium)
-            Text(
-                text = track.artist,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-          }
-        }
-      }
-}
 /**
  * Dialog composable that allows the user to add a new track by entering the track ID, title, and
  * artist. On confirming, the track is added via the onAddTrack callback.
@@ -202,3 +156,4 @@ fun SongsListDisplay(songLists: List<SongList>, isTopSongsListVisible: Boolean) 
         }
   }
 }
+

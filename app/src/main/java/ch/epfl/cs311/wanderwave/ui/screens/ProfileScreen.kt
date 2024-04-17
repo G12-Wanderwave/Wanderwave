@@ -63,6 +63,7 @@ fun ProfileScreen(navActions: NavigationActions) {
   val viewModel: ProfileViewModel = hiltViewModel()
   val currentProfileState by viewModel.profile.collectAsState()
   val songLists by viewModel.songLists.collectAsState()
+  val spotifySubsectionList by viewModel.spotifySubsectionList.collectAsState()
   var showDialog by remember { mutableStateOf(false) }
   var dialogListType by remember { mutableStateOf("TOP SONGS") }
   var isTopSongsListVisible by remember { mutableStateOf(true) }
@@ -71,11 +72,15 @@ fun ProfileScreen(navActions: NavigationActions) {
   LaunchedEffect(Unit) {
     viewModel.createSpecificSongList("TOP_SONGS")
     viewModel.createSpecificSongList("CHOSEN_SONGS")
-    viewModel.retrieveTracks()
+    //viewModel.retrieveTracks()
+      viewModel.retrieveAndAddSubsection()
   }
 
   Column(
-      modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
+      modifier = Modifier
+          .fillMaxSize()
+          .padding(16.dp)
+          .testTag("profileScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         Box(modifier = Modifier.fillMaxWidth()) {
           VisitCard(Modifier, currentProfile)
@@ -93,8 +98,8 @@ fun ProfileScreen(navActions: NavigationActions) {
             }
 
         // Call the SongsListDisplay function
-        SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
-
+       // SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
+        SelectSongScreen(navActions = navActions,list=   spotifySubsectionList)
         // Buttons for adding tracks to top songs lists
         Button(
             onClick = {
@@ -153,12 +158,12 @@ fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel = h
         viewModel.togglePublicMode()
       },
       modifier =
-          modifier
-              .graphicsLayer {
-                scaleX = SCALE_X
-                scaleY = SCALE_Y
-              }
-              .testTag("profileSwitch"),
+      modifier
+          .graphicsLayer {
+              scaleX = SCALE_X
+              scaleY = SCALE_Y
+          }
+          .testTag("profileSwitch"),
       colors =
           SwitchDefaults.colors(
               checkedThumbColor = MaterialTheme.colorScheme.primary,
@@ -189,13 +194,15 @@ fun ProfileButton(
   // Display the button only when on the main screen TODO: Also from Map ?
   Box(
       modifier =
-          modifier
-              .clickable { navActions.navigateTo(Route.PROFILE) }
-              .background(Color.Transparent)
-              .padding(16.dp)
-              .testTag("profileButton")) {
+      modifier
+          .clickable { navActions.navigateTo(Route.PROFILE) }
+          .background(Color.Transparent)
+          .padding(16.dp)
+          .testTag("profileButton")) {
         if (navActions.getCurrentRoute() == Route.MAIN) {
-          SelectImage(modifier = Modifier.clip(CircleShape).size(50.dp), profile = currentProfile)
+          SelectImage(modifier = Modifier
+              .clip(CircleShape)
+              .size(50.dp), profile = currentProfile)
         }
       }
 }
