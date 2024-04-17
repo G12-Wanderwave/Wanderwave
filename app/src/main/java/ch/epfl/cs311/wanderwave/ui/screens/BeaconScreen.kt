@@ -40,6 +40,7 @@ import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
+import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveMapMarker
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
 import com.google.android.gms.maps.model.CameraPosition
@@ -123,11 +124,7 @@ fun BeaconInformation(location: Location) {
         .clip(RoundedCornerShape(8.dp)),
       controlsEnabled = false,
     ) {
-      Marker(
-        state = MarkerState(position = LatLng(location.latitude, location.longitude)),
-        title = location.name,
-        snippet = "Beacon location",
-      )
+      WanderwaveMapMarker(location.toLatLng(), location.name, "Beacon location")
     }
   }
 }

@@ -22,6 +22,7 @@ import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
+import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveMapMarker
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
@@ -132,9 +133,6 @@ fun moveCamera(
 fun DisplayBeacons(beacons: List<Beacon>) {
   // Create each beacon from the list
   beacons.forEach() {
-    Marker(
-        state = MarkerState(position = it.location.toLatLng()),
-        title = it.id,
-    )
+    WanderwaveMapMarker(it.location.toLatLng(), title = it.id)
   }
 }
