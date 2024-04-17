@@ -46,7 +46,7 @@ fun ExclusivePlayer(
       verticalArrangement = Arrangement.SpaceBetween) {
         PlayerDragHandleComponent(checked)
         SwitchComponent(checked)
-        PlayerIconButtonRowComponent(viewModel)
+        PlayerIconButtonRowComponent()
         VotingButtonsComponent(selectedVote)
         TrackInfoComponent(uiState)
         SliderComponent(progress)
@@ -92,28 +92,28 @@ fun SwitchComponent(checked: MutableState<Boolean>) {
 }
 
 @Composable
-fun PlayerIconButtonRowComponent(viewModel: TrackListViewModel) {
+fun PlayerIconButtonRowComponent() {
   Row(
       horizontalArrangement = Arrangement.SpaceAround,
       verticalAlignment = Alignment.CenterVertically,
       modifier = Modifier.fillMaxWidth()) {
         PlayerIconButton(
-            onClick = { /*TODO*/},
+            onClick = {},
             testTag = "broadcastButton",
             painterId = R.drawable.broadcast_icon,
             tint = MaterialTheme.colorScheme.onSurface)
         PlayerIconButton(
-            onClick = { /*TODO*/},
+            onClick = {},
             testTag = "beaconButton",
             painterId = R.drawable.beacon_add_icon,
             tint = MaterialTheme.colorScheme.onSurface)
         PlayerIconButton(
-            onClick = { /*TODO*/},
+            onClick = {},
             testTag = "playlistButton",
             painterId = R.drawable.playlist_add_icon,
             tint = MaterialTheme.colorScheme.onSurface)
         PlayerIconButton(
-            onClick = { /*TODO*/},
+            onClick = {},
             testTag = "ignoreButton",
             painterId = R.drawable.ignore_list_icon,
             tint = MaterialTheme.colorScheme.onSurface)
@@ -166,13 +166,13 @@ fun PlayerControlRowComponent(viewModel: TrackListViewModel, uiState: TrackListV
       modifier = Modifier.fillMaxWidth()) {
         ShuffleButton(viewModel, uiState)
         PlayerIconButton(
-            onClick = { /*TODO*/},
+            onClick = {},
             testTag = "previousButton",
             painterId = R.drawable.previous_track_icon,
             tint = MaterialTheme.colorScheme.onSurface)
         PlayPauseButton(viewModel, uiState)
         PlayerIconButton(
-            onClick = { /*TODO*/},
+            onClick = {},
             testTag = "nextButton",
             painterId = R.drawable.next_track_icon,
             tint = MaterialTheme.colorScheme.onSurface)
