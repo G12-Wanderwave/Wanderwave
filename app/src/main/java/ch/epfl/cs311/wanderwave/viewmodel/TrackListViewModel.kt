@@ -45,7 +45,6 @@ constructor(
     }
   }
 
-
   private fun resumeTrack() {
     CoroutineScope(Dispatchers.IO).launch {
       val success = spotifyController.resumeTrack().firstOrNull()
@@ -54,7 +53,6 @@ constructor(
       }
     }
   }
-
 
   private fun pauseTrack() {
     CoroutineScope(Dispatchers.IO).launch {
