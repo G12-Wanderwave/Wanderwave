@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepositoryImpl
@@ -11,7 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -29,15 +28,6 @@ constructor(
     observeTracks()
   }
 
-  @SuppressLint("ExperimentalAnnotationRetention")
-  @RequiresOptIn(message = "This part of the API is visible only for testing.")
-  internal annotation class ForTestingPurposesOnly
-
-  @ForTestingPurposesOnly
-  internal fun testUpdateUiState(newState: UiState) {
-    _uiState.value = newState
-  }
-
   private fun observeTracks() {
     CoroutineScope(Dispatchers.IO).launch {
       repository.getAll().collect { tracks ->
@@ -46,25 +36,30 @@ constructor(
     }
   }
 
-  fun playTrack(track: Track) {
+  private fun playTrack(track: Track) {
     CoroutineScope(Dispatchers.IO).launch {
-      if (!spotifyController.playTrack(track).first()) {
+      val success = spotifyController.playTrack(track).firstOrNull()
+      if (success == null || !success) {
         _uiState.value = _uiState.value.copy(message = "Failed to play track")
       }
     }
   }
 
-  fun resumeTrack() {
+
+  private fun resumeTrack() {
     CoroutineScope(Dispatchers.IO).launch {
-      if (!spotifyController.resumeTrack().first()) {
+      val success = spotifyController.resumeTrack().firstOrNull()
+      if (success == null || !success) {
         _uiState.value = _uiState.value.copy(message = "Failed to resume track")
       }
     }
   }
 
-  fun pauseTrack() {
+
+  private fun pauseTrack() {
     CoroutineScope(Dispatchers.IO).launch {
-      if (!spotifyController.pauseTrack().first()) {
+      val success = spotifyController.pauseTrack().firstOrNull()
+      if (success == null || !success) {
         _uiState.value = _uiState.value.copy(message = "Failed to pause track")
       }
     }

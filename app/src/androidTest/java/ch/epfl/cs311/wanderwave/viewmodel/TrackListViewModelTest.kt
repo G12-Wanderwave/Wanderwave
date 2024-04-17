@@ -35,14 +35,12 @@ class TrackListViewModelTest {
     track = Track("6ImuyUQYhJKEKFtlrstHCD", "Main Title", "John Williams")
   }
 
-  @OptIn(TrackListViewModel.ForTestingPurposesOnly::class)
   @Test
   fun trackIsProperlySelected() = run {
     viewModel.selectTrack(track)
     assertEquals(track.id, viewModel.uiState.value.selectedTrack?.id)
   }
 
-  @OptIn(TrackListViewModel.ForTestingPurposesOnly::class)
   @Test
   fun songPlaysProperly() = run {
     assertFalse(viewModel.uiState.value.isPlaying)
@@ -54,7 +52,6 @@ class TrackListViewModelTest {
     assertEquals(track.id, viewModel.uiState.value.selectedTrack?.id)
   }
 
-  @OptIn(TrackListViewModel.ForTestingPurposesOnly::class)
   @Test
   fun songPausesProperly() = run {
     viewModel.selectTrack(track)
@@ -66,7 +63,6 @@ class TrackListViewModelTest {
     assertEquals(track.id, viewModel.uiState.value.pausedTrack?.id)
   }
 
-  @OptIn(TrackListViewModel.ForTestingPurposesOnly::class)
   @Test
   fun songResumesProperly() = run {
     viewModel.selectTrack(track)
@@ -79,7 +75,6 @@ class TrackListViewModelTest {
     assertEquals(track.id, viewModel.uiState.value.selectedTrack?.id)
   }
 
-  @OptIn(TrackListViewModel.ForTestingPurposesOnly::class)
   @Test
   fun songDoesntPlayWhenNull() = run {
     viewModel.play()
