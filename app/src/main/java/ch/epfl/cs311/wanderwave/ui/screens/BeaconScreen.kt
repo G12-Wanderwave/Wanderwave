@@ -30,16 +30,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
 
 @Composable
 fun BeaconScreen(
@@ -85,7 +95,7 @@ private fun BeaconScreen(beacon: Beacon) {
   Column(
       modifier = Modifier
         .fillMaxSize()
-        .padding(16.dp),
+        .padding(8.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
         SongList(beacon)
@@ -95,21 +105,29 @@ private fun BeaconScreen(beacon: Beacon) {
 @Composable
 fun BeaconInformation(location: Location) {
   Column(horizontalAlignment = Alignment.CenterHorizontally) {
-    Text("Beacon", style = MaterialTheme.typography.displayLarge)
-    val locationText = if (location.name != "") {
-      "${location.name} (${location.latitude}, ${location.longitude})"
-    } else {
-      "(${location.latitude}, ${location.longitude})"
+    Text(text = "Beacon", style = MaterialTheme.typography.displayLarge)
+    if (location.name.isNotBlank()) {
+      Text("at ${location.name}", style = MaterialTheme.typography.titleMedium)
     }
-    Text("at $locationText", style = MaterialTheme.typography.titleMedium)
-    // TODO: Add a proper GoogleMap here (with the proper UI and attributes).
+    // TODO: Maybe add location tracking here too?
     GoogleMap(
+      cameraPositionState = CameraPositionState(
+        CameraPosition(LatLng(location.latitude, location.longitude), 15f, 0f, 0f)
+      ),
+      properties = MapProperties(
+        mapStyleOptions = MapStyleOptions.loadRawResourceStyle(LocalContext.current, R.raw.map_style)),
       modifier = Modifier
         .fillMaxWidth()
         .aspectRatio(4f / 3)
         .padding(4.dp)
         .clip(RoundedCornerShape(8.dp))
-    )
+    ) {
+      Marker(
+        state = MarkerState(position = LatLng(location.latitude, location.longitude)),
+        title = location.name,
+        snippet = "Beacon location",
+      )
+    }
   }
 }
 
