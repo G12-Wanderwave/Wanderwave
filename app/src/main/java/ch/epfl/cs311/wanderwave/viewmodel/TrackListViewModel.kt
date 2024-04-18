@@ -106,6 +106,24 @@ constructor(
     }
   }
 
+  private fun skip(dir: Int) {
+    if (_uiState.value.selectedTrack != null && (dir == 1 || dir == -1)) {
+      _uiState.value.tracks.indexOf(_uiState.value.selectedTrack).let { it: Int ->
+        val next = Math.floorMod((it + dir), _uiState.value.tracks.size)
+        selectTrack(_uiState.value.tracks[next])
+      }
+    }
+  }
+
+  fun skipForward() {
+    skip(1)
+  }
+
+  fun skipBackward() {
+    skip(-1)
+  }
+
+
   data class UiState(
       val tracks: List<Track> = listOf(),
       val loading: Boolean = false,
