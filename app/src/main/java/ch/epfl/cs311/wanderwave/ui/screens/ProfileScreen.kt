@@ -103,7 +103,6 @@ fun ProfileScreen(navActions: NavigationActions,viewModel: ProfileViewModel) {
         // Buttons for adding tracks to top songs lists
         Button(
             onClick = {
-                Log.d("Test44",viewModel.spotifySubsectionList.value.toString())
                 navActions.navigateTo(Route.SELECT_SONG)
                       //showDialog = true
               //dialogListType = "TOP SONGS"
@@ -111,11 +110,13 @@ fun ProfileScreen(navActions: NavigationActions,viewModel: ProfileViewModel) {
             modifier = Modifier.testTag("addTopSongs")) {
               Text("Add Track to TOP SONGS List")
             }
-
+      SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
         // Buttons for adding tracks to chosen songs list
         Button(
             onClick = {
-              showDialog = true
+                Log.d("Test44",viewModel.songLists.value.toString())
+
+                showDialog = true
               dialogListType = "CHOSEN SONGS"
             },
             modifier = Modifier.testTag("addChosenSongs")) {

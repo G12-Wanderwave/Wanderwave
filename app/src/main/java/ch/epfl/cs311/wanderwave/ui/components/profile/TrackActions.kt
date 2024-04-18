@@ -40,16 +40,26 @@ import ch.epfl.cs311.wanderwave.viewmodel.SongList
  */
 @Composable
 fun TracksList(tracks: List<Track>) {
-  LazyColumn {
-    items(tracks, key = { track -> track.id }) { track ->
-//      TrackItem2(
-//          track =
-//              track) // TODO: modify this, so that we are using the TrackItem from @joriba, and dont
-//      // have duplicated code
-//    }
-  }
+    tracks.forEach { track -> key(track.id) { TrackItem(track = track) } }
 }
+
+/**
+ * Composable that displays information for a single track, including its ID, title, and artist.
+ *
+ * @param track The track data to display.
+ * @author Ayman Bakiri
+ * @since 1.0
+ * @last update 1.0
+ */
+@Composable
+fun TrackItem(track: Track) {
+    Column(modifier = Modifier.padding(8.dp).testTag("trackItem_${track.id}")) {
+        Text(text = "ID: ${track.id}", style = MaterialTheme.typography.bodyMedium)
+        Text(text = "Title: ${track.title}", style = MaterialTheme.typography.bodyMedium)
+        Text(text = "Artist: ${track.artist}", style = MaterialTheme.typography.bodyMedium)
+    }
 }
+
 
 /**
  * Dialog composable that allows the user to add a new track by entering the track ID, title, and
