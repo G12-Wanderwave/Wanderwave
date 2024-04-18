@@ -2,14 +2,9 @@ package ch.epfl.cs311.wanderwave.ui.components.player
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,10 +18,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -39,11 +34,16 @@ import kotlinx.coroutines.delay
 @Singleton
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SurroundWithMiniPlayer(displayPlayer: Boolean, screen: @Composable () -> Unit) {
-  val viewModel: TrackListViewModel = hiltViewModel()
+fun SurroundWithMiniPlayer(
+    displayPlayer: Boolean,
+    viewModel: TrackListViewModel = hiltViewModel(),
+    screen: @Composable () -> Unit
+) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   val sheetState = rememberStandardBottomSheetState(initialValue = SheetValue.PartiallyExpanded)
   val progress = remember { mutableFloatStateOf(0f) }
+  val selectedVote = remember { mutableIntStateOf(0) }
+  val checked = remember { mutableStateOf(false) }
   HandleSheetStateChanges(sheetState = sheetState, uiState = uiState, viewModel = viewModel)
 
   HandleProgressChanges(uiState = uiState, progress = progress)
@@ -52,19 +52,17 @@ fun SurroundWithMiniPlayer(displayPlayer: Boolean, screen: @Composable () -> Uni
       sheetContent = {
         if (!uiState.expanded && sheetState.hasPartiallyExpandedState && displayPlayer) {
           MiniPlayer(
-              isPlaying = uiState.isPlaying,
+              uiStateFlow = viewModel.uiState,
               onTitleClick = { viewModel.expand() },
               onPlayClick = { viewModel.play() },
               onPauseClick = { viewModel.pause() },
               progress = progress.floatValue)
         } else {
-          PlayerDragHandle()
-          Row(
-              modifier = Modifier.fillMaxSize(),
-              horizontalArrangement = Arrangement.Center,
-              verticalAlignment = Alignment.CenterVertically) {
-                Box(modifier = Modifier.size(250.dp).background(Color.LightGray))
-              }
+          ExclusivePlayer(
+              checked = checked,
+              selectedVote = selectedVote,
+              uiState = uiState,
+              progress = progress)
         }
       },
       sheetShape = RectangleShape,

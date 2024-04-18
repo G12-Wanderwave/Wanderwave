@@ -15,7 +15,8 @@ enum class Route(val routeString: String, val showBottomBar: Boolean) {
   MAP("map", true),
   PROFILE("profile", false),
   EDIT_PROFILE("editprofile", false),
-  BEACON("beacon", false);
+  BEACON("beacon", false),
+  SELECT_SONG("selectsong", false);
 
   companion object {
     fun forRouteString(routeString: String): Route? {
@@ -66,6 +67,11 @@ class NavigationActions(navController: NavHostController) {
   fun navigateTo(route: Route) {
     navigationController.navigate(route.routeString)
     _currentRouteFlow.value = route
+  }
+
+  fun navigateToBeacon(beaconId: String) {
+    navigationController.navigate("${Route.BEACON.routeString}/$beaconId")
+    _currentRouteFlow.value = Route.BEACON
   }
 
   fun goBack() {

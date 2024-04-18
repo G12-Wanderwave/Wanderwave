@@ -16,6 +16,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -31,9 +32,12 @@ import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
 import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
+import ch.epfl.cs311.wanderwave.ui.screens.SelectSongScreen
 import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -53,12 +57,13 @@ fun AppScaffold(navController: NavHostController) {
   var showBottomBar by remember { mutableStateOf(false) }
   val currentRouteState by navActions.currentRouteFlow.collectAsStateWithLifecycle()
   val snackbarHostState = remember { SnackbarHostState() }
-
+  val viewModel: ProfileViewModel = hiltViewModel()
   val scope = rememberCoroutineScope()
   val showSnackbar = { message: String ->
     scope.launch { snackbarHostState.showSnackbar(message) }
     Unit
   }
+  val trackListViewModel = hiltViewModel<TrackListViewModel>()
 
   LaunchedEffect(currentRouteState) { showBottomBar = currentRouteState?.showBottomBar ?: false }
 
@@ -70,7 +75,7 @@ fun AppScaffold(navController: NavHostController) {
           )
         }
       }) { innerPadding ->
-        SurroundWithMiniPlayer(showBottomBar) {
+        SurroundWithMiniPlayer(displayPlayer = showBottomBar, viewModel = trackListViewModel) {
           NavHost(
               navController = navController,
               startDestination = Route.LOGIN.routeString,
@@ -80,11 +85,20 @@ fun AppScaffold(navController: NavHostController) {
                 composable(Route.SPOTIFY_CONNECT.routeString) { SpotifyConnectScreen(navActions) }
                 composable(Route.ABOUT.routeString) { AboutScreen(navActions) }
                 composable(Route.MAIN.routeString) { MainPlaceHolder(navActions) }
-                composable(Route.TRACK_LIST.routeString) { TrackListScreen(showSnackbar) }
+                composable(Route.TRACK_LIST.routeString) {
+                  TrackListScreen(showSnackbar, trackListViewModel)
+                }
                 composable(Route.MAP.routeString) { MapScreen(navActions) }
-                composable(Route.PROFILE.routeString) { ProfileScreen(navActions) }
-                composable(Route.EDIT_PROFILE.routeString) { EditProfileScreen(navActions) }
-                composable(Route.BEACON.routeString) { BeaconScreen(navActions) }
+                composable(Route.PROFILE.routeString) { ProfileScreen(navActions, viewModel) }
+                composable(Route.EDIT_PROFILE.routeString) {
+                  EditProfileScreen(navActions, viewModel)
+                }
+                composable(Route.SELECT_SONG.routeString) {
+                  SelectSongScreen(navActions, viewModel)
+                }
+                composable("${Route.BEACON.routeString}/{beaconId}") {
+                  BeaconScreen(it.arguments?.getString("beaconId") ?: "", navActions)
+                }
               }
         }
       }

@@ -26,6 +26,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,8 +45,8 @@ import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
-import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveMapMarker
 import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
 import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
@@ -56,11 +57,17 @@ import com.google.maps.android.compose.CameraPositionState
 
 @Composable
 fun BeaconScreen(
+    beaconId: String?,
     navigationActions: NavigationActions,
     viewModel: BeaconViewModel = hiltViewModel()
 ) {
-  // id value remebered for the text field
-  // Here is the id of a good beacon for testing : UAn8OUadgrUOKYagf8a2
+  LaunchedEffect(beaconId) {
+    println(beaconId)
+    if (beaconId != null) {
+      viewModel.getBeaconById(beaconId)
+    }
+  }
+
   val uiState = viewModel.uiState.collectAsState().value
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -127,7 +134,7 @@ fun BeaconInformation(location: Location) {
                 .testTag("beaconMap"),
         controlsEnabled = false,
     ) {
-      WanderwaveMapMarker(location.toLatLng(), location.name)
+      BeaconMapMarker(location.toLatLng(), location.name)
     }
   }
 }

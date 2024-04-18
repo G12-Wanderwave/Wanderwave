@@ -1,5 +1,7 @@
 package ch.epfl.cs311.wanderwave.ui.components.player
 
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,17 +23,22 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
+import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.ui.components.animated.ScrollingTitle
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
+import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
+import kotlinx.coroutines.flow.StateFlow
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun MiniPlayer(
-    isPlaying: Boolean,
+    uiStateFlow: StateFlow<TrackListViewModel.UiState>,
     onTitleClick: () -> Unit,
     onPlayClick: () -> Unit,
     onPauseClick: () -> Unit,
     progress: Float
 ) {
+  Log.d("MiniPlayer", "MiniPlayer: ${uiStateFlow.value.selectedTrack}")
   Column(modifier = Modifier.testTag("miniPlayer")) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -39,11 +46,15 @@ fun MiniPlayer(
         modifier = Modifier.height(60.dp).fillMaxWidth()) {
           Box(modifier = Modifier.weight(1f).background(Color.Black)) {}
 
-          MiniPlayerTitle(modifier = Modifier.weight(4f), isPlaying = isPlaying) { onTitleClick() }
+          MiniPlayerTitle(
+              modifier = Modifier.weight(4f),
+              isPlaying = uiStateFlow.value.isPlaying,
+              onTitleClick = onTitleClick,
+              track = uiStateFlow.value.selectedTrack)
 
           PlayPauseButton(
               modifier = Modifier.weight(1f),
-              isPlaying = isPlaying,
+              isPlaying = uiStateFlow.value.isPlaying,
               onPlayClick = onPlayClick,
               onPauseClick = onPauseClick)
         }
@@ -52,11 +63,18 @@ fun MiniPlayer(
 }
 
 @Composable
-fun MiniPlayerTitle(modifier: Modifier, isPlaying: Boolean, onTitleClick: () -> Unit) {
+fun MiniPlayerTitle(
+    modifier: Modifier,
+    isPlaying: Boolean,
+    onTitleClick: () -> Unit,
+    track: Track?
+) {
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,
       modifier = modifier.clickable { onTitleClick() }.testTag("miniPlayerTitleButton")) {
-        ScrollingTitle(artist = "Travis Scott", title = "STARGAZING", isPlaying = isPlaying)
+        if (track != null) {
+          ScrollingTitle(artist = track.artist, title = track.title, isPlaying = isPlaying)
+        }
       }
 }
 
