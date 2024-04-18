@@ -102,32 +102,6 @@ class SpotifyController(private val context: Context) {
   }
 
   /**
-   * get the element under the tab "listen recently"
-   *
-   * @return a Flow of ListItem
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 2.0
-   */
-  @OptIn(FlowPreview::class)
-  fun getTrack(): Flow<ListItem> {
-    return callbackFlow {
-      val callResult =
-          appRemote?.let { it ->
-            it.contentApi
-                .getRecommendedContentItems(ContentApi.ContentType.DEFAULT)
-                .setResultCallback {
-                  for (i in it.items) if (i.uri == "spotify:section:0JQ5DAroEmF9ANbLaiJ7Wx")
-                      trySend(i)
-                  // TODO checkt if "listen recently playlist" the same for everyone
-                }
-                .setErrorCallback { trySend(ListItem("", "", null, "", "", false, false)) }
-          }
-      awaitClose { callResult?.cancel() }
-    }
-  }
-
-  /**
    * Get all the playlist, title, ... from spotify from the home page of the user.
    *
    * @return a Flow of ListItem which has all the playlist, title, ... from the home page of the

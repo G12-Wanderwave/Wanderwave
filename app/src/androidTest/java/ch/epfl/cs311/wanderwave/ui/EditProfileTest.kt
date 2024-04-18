@@ -79,8 +79,6 @@ class EditProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
     coEvery { profileRepositoryImpl.delete() } just Runs
 
     // Mocking SpotifyController
-    coEvery { spotifyController.getTrack() } returns
-        flowOf(ListItem("", "", null, "", "", false, false))
     coEvery { spotifyController.getChildren(any()) } returns
         flowOf(ListItem("", "", null, "", "", false, false))
     coEvery { spotifyController.getAllElementFromSpotify() } returns

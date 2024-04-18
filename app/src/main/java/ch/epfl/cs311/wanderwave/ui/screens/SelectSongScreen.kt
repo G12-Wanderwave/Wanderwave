@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -87,9 +85,6 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: ProfileViewModel)
                     })
               }
             }
-        Button(onClick = { Log.d("pls work", viewModel.spotifySubsectionList.value.toString()) }) {
-          Text(text = "fewfewfewfewf")
-        }
       }
 }
 

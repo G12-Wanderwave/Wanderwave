@@ -94,11 +94,7 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
         // Call the SongsListDisplay function
         // Buttons for adding tracks to top songs lists
         Button(
-            onClick = {
-              navActions.navigateTo(Route.SELECT_SONG)
-              // showDialog = true
-              // dialogListType = "TOP SONGS"
-            },
+            onClick = { navActions.navigateTo(Route.SELECT_SONG) },
             modifier = Modifier.testTag("addTopSongs")) {
               Text("Add Track to TOP SONGS List")
             }

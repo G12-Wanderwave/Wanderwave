@@ -115,54 +115,6 @@ constructor(
     _isInPublicMode.value = !_isInPublicMode.value
   }
 
-  //  fun fetchProfile(profile: Profile) {
-  //    // TODO : fetch profile from Spotify
-  //    // _profile.value = spotifyConnection.getProfile()....
-  //    // Fetch profile from Firestore if it doesn't exist, create it
-  //    profileConnection.isUidExisting(profile.spotifyUid) { isExisting, fetchedProfile ->
-  //      if (isExisting) {
-  //        _profile.value = fetchedProfile ?: profile
-  //        // update profile on the local database
-  //        viewModelScope.launch {
-  //          val localProfile = repository.getProfile()
-  //          localProfile.collect { fetchedLocalProfile ->
-  //            if (fetchedLocalProfile != fetchedProfile) {
-  //              repository.delete()
-  //              repository.insert(fetchedProfile!!)
-  //            }
-  //          }
-  //        }
-  //      } else {
-  //        val newProfile = profile
-  //        profileConnection.addItem(newProfile)
-  //        viewModelScope.launch { repository.insert(newProfile) }
-  //        _profile.value = newProfile
-  //      }
-  //    }
-  //    // TODO : get rid of this line
-  //    profileConnection.getItem(profile.spotifyUid).let { Log.d("Firebase", it.toString()) }
-  //  }
-
-  /**
-   * Get the element under the tab "listen recently" and add it to the top list
-   *
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 2.0
-   */
-  fun retrieveTopTrack() {
-    CoroutineScope(Dispatchers.IO).launch {
-      val track = spotifyController.getTrack().firstOrNull()
-      if (track != null && track.id.isNotEmpty()) {
-        if (track.hasChildren) {
-          val children = spotifyController.getChildren(track).firstOrNull()
-          if (children != null && children.id.isNotEmpty()) {
-            addTrackToList("TOP SONGS", Track(children.id, children.title, children.subtitle))
-          }
-        }
-      }
-    }
-  }
   /**
    * Get all the element of the main screen and add them to the top list
    *
@@ -199,12 +151,9 @@ constructor(
     CoroutineScope(Dispatchers.IO).launch {
       _spotifySubsectionList.value = emptyList()
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
-      Log.d("tracl", track.toString())
       if (track != null) {
         for (i in track) {
-          Log.d("tracl2", i.toString())
           _spotifySubsectionList.value += i
-          Log.d("Result", spotifySubsectionList.value.toString())
         }
       }
     }
