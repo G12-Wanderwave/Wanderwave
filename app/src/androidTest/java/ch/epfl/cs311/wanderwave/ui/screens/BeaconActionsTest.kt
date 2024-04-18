@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
-
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
@@ -26,55 +25,48 @@ import org.junit.runner.RunWith
 @ExperimentalCoroutinesApi
 class BeaconActionsTest {
 
-    private lateinit var beaconActions: BeaconActions
-    private val db = mockk<FirebaseFirestore>()
-    private val documentSnapshot = mockk<DocumentSnapshot>(relaxed = true)
-    private val documentReference = mockk<DocumentReference>(relaxed = true)
+  private lateinit var beaconActions: BeaconActions
+  private val db = mockk<FirebaseFirestore>()
+  private val documentSnapshot = mockk<DocumentSnapshot>(relaxed = true)
+  private val documentReference = mockk<DocumentReference>(relaxed = true)
 
-    @Before
-    fun setup() {
-        MockKAnnotations.init(this)
-        mockkStatic(FirebaseFirestore::class)
-        every { FirebaseFirestore.getInstance() } returns db
-        every { db.collection(any()).document(any()) } returns documentReference
+  @Before
+  fun setup() {
+    MockKAnnotations.init(this)
+    mockkStatic(FirebaseFirestore::class)
+    every { FirebaseFirestore.getInstance() } returns db
+    every { db.collection(any()).document(any()) } returns documentReference
 
-        beaconActions = BeaconActions()
-    }
+    beaconActions = BeaconActions()
+  }
 
-    @Test
-    fun testDocumentToItem() = runBlockingTest {
-        every { documentSnapshot.exists() } returns true
-        every { documentSnapshot.id } returns "beaconId"
-        every { documentSnapshot.get("location") } returns mapOf(
-            "latitude" to 46.0, "longitude" to 7.0, "name" to "Test Location"
-        )
-        every { documentSnapshot.get("tracks") } returns listOf(
-            mapOf("title" to "Track 1", "artist" to "Artist 1", "id" to "trackId1")
-        )
+  @Test
+  fun testDocumentToItem() = runBlockingTest {
+    every { documentSnapshot.exists() } returns true
+    every { documentSnapshot.id } returns "beaconId"
+    every { documentSnapshot.get("location") } returns
+        mapOf("latitude" to 46.0, "longitude" to 7.0, "name" to "Test Location")
+    every { documentSnapshot.get("tracks") } returns
+        listOf(mapOf("title" to "Track 1", "artist" to "Artist 1", "id" to "trackId1"))
 
-        val beacon = beaconActions.documentToItem(documentSnapshot)
+    val beacon = beaconActions.documentToItem(documentSnapshot)
 
-        assertNotNull(beacon)
-        assertEquals("Test Location", beacon?.location?.name)
-        assertEquals(1, beacon?.tracks?.size)
-    }
+    assertNotNull(beacon)
+    assertEquals("Test Location", beacon?.location?.name)
+    assertEquals(1, beacon?.tracks?.size)
+  }
 
-    @Test
-    fun testItemToMap() = runBlockingTest {
-        val location = Location(46.0, 7.0, "Test Location")
-        val track = Track("trackId1", "Track 1", "Artist 1")
-        val beacon = Beacon("beaconId", location, listOf(track))
+  @Test
+  fun testItemToMap() = runBlockingTest {
+    val location = Location(46.0, 7.0, "Test Location")
+    val track = Track("trackId1", "Track 1", "Artist 1")
+    val beacon = Beacon("beaconId", location, listOf(track))
 
-        val map = beaconActions.itemToMap(beacon)
+    val map = beaconActions.itemToMap(beacon)
 
-        assertNotNull(map)
-        assertTrue(map.containsKey("id"))
-        assertTrue(map.containsKey("location"))
-        assertTrue(map.containsKey("tracks"))
-    }
-
-
-
+    assertNotNull(map)
+    assertTrue(map.containsKey("id"))
+    assertTrue(map.containsKey("location"))
+    assertTrue(map.containsKey("tracks"))
+  }
 }
-
-
