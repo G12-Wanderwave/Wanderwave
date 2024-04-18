@@ -13,9 +13,9 @@ class AuthenticationController @Inject constructor(private val auth: FirebaseAut
     return auth.currentUser != null
   }
 
-  fun getUserData(): UserData? {
+  fun getUserData(): AuthenticationUserData? {
     return auth.currentUser?.let { firebaseUser ->
-      UserData(
+      AuthenticationUserData(
           firebaseUser.uid,
           firebaseUser.email,
           firebaseUser.displayName,
@@ -45,11 +45,4 @@ class AuthenticationController @Inject constructor(private val auth: FirebaseAut
   }
 
   private data class State(val isSignedIn: Boolean = false)
-
-  data class UserData(
-      val id: String,
-      val email: String?,
-      val displayName: String?,
-      val photoUrl: String?
-  )
 }
