@@ -13,8 +13,8 @@ import kotlinx.coroutines.flow.single
 class SpotifyConnectScreenViewModel
 @Inject
 constructor(
-  private val spotifyController: SpotifyController,
-  val authenticationController: AuthenticationController
+    private val spotifyController: SpotifyController,
+    val authenticationController: AuthenticationController
 ) : ViewModel() {
 
   private var _uiState = MutableStateFlow(UiState())
@@ -35,7 +35,7 @@ constructor(
   }
 
   data class UiState(
-    val hasResult: Boolean = false,
-    val success: Boolean = false,
+      val hasResult: Boolean = false,
+      val success: Boolean = false,
   )
 }
