@@ -24,6 +24,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @ExperimentalCoroutinesApi
 class BeaconActionsTest {
+  // gfgd
 
   private lateinit var beaconActions: BeaconActions
   private val db = mockk<FirebaseFirestore>()
