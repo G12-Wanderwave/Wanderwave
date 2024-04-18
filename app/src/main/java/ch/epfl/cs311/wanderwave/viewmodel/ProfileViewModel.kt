@@ -8,6 +8,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -18,7 +19,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 // Define a simple class for a song list
-data class SongList(val name: String, val tracks: MutableList<Track> = mutableListOf())
+data class SongList(val name: String, val tracks: List<Track> = mutableListOf())
 
 @HiltViewModel
 class ProfileViewModel
@@ -50,6 +51,15 @@ constructor(
   // Add a state for managing song lists
   private val _songLists = MutableStateFlow<List<SongList>>(emptyList())
   val songLists: StateFlow<List<SongList>> = _songLists
+
+  private val _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
+  val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
+
+  private val _mainList = MutableStateFlow<List<ListItem>>(emptyList())
+  val mainList: StateFlow<List<ListItem>> = _mainList
+
+  private val _childrenList = MutableStateFlow<List<ListItem>>(emptyList())
+  val childrenList: StateFlow<List<ListItem>> = _childrenList
 
   fun createSpecificSongList(listType: String) {
     val listName =
@@ -173,6 +183,47 @@ constructor(
               }
             }
           }
+        }
+      }
+    }
+  }
+
+  /**
+   * Get all the element of the main screen and add them to the top list
+   *
+   * @author Menzo Bouaissi
+   * @since 2.0
+   * @last update 2.0
+   */
+  fun retrieveAndAddSubsection() {
+    CoroutineScope(Dispatchers.IO).launch {
+      _spotifySubsectionList.value = emptyList()
+      val track = spotifyController.getAllElementFromSpotify().firstOrNull()
+      Log.d("tracl", track.toString())
+      if (track != null) {
+        for (i in track) {
+          Log.d("tracl2", i.toString())
+          _spotifySubsectionList.value += i
+          Log.d("Result", spotifySubsectionList.value.toString())
+        }
+      }
+    }
+  }
+
+  /**
+   * Get all the element of the main screen and add them to the top list
+   *
+   * @author Menzo Bouaissi
+   * @since 2.0
+   * @last update 2.0
+   */
+  fun retrieveChild(item: ListItem) {
+    CoroutineScope(Dispatchers.IO).launch {
+      _childrenList.value = emptyList()
+      val children = spotifyController.getAllChildren(item).firstOrNull()
+      if (children != null) {
+        for (child in children) {
+          _childrenList.value += child
         }
       }
     }

@@ -6,13 +6,18 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.protocol.types.ListItem
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -46,8 +51,16 @@ class ProfileViewModelTest {
 
   @After
   fun tearDown() {
-    Dispatchers.resetMain() // Reset the main dispatcher to the original one
-    testDispatcher.cleanupTestCoroutines()
+    try {
+      testDispatcher.cleanupTestCoroutines()
+    } finally {
+      Dispatchers.resetMain() // Always reset the dispatcher
+    }
+  }
+
+  @After
+  fun clearMocks() {
+    clearAllMocks() // Clear all MockK mocks
   }
 
   @Test
@@ -167,5 +180,27 @@ class ProfileViewModelTest {
 
     val result = spotifyController.getAllChildren(expectedListItem)
     assertEquals(expectedListItem, result.first().get(0)) // Check if the first item is as expected
+  }
+
+  @Test
+  fun testRetrieveSubsectionAndChildrenFlow() = runBlockingTest {
+    val expectedListItem = ListItem("id", "title", null, "subtitle", "", false, true)
+    every { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(expectedListItem))
+    every {
+      spotifyController.getAllChildren(ListItem("id", "title", null, "subtitle", "", false, true))
+    } returns flowOf(listOf(expectedListItem))
+    viewModel.retrieveAndAddSubsection()
+    viewModel.retrieveChild(expectedListItem)
+    advanceUntilIdle() // Ensure all coroutines are completed
+
+    // val result = viewModel.spotifySubsectionList.first()  // Safely access the first item
+    val flow = viewModel.spotifySubsectionList
+    val flow2 = viewModel.childrenList
+    val result = flow.timeout(2.seconds).catch {}.firstOrNull()
+    val result2 = flow2.timeout(2.seconds).catch {}.firstOrNull()
+
+    Log.d("restut", result.toString())
+    assertEquals(expectedListItem, result?.get(0))
+    assertEquals(expectedListItem, result2?.get(0))
   }
 }

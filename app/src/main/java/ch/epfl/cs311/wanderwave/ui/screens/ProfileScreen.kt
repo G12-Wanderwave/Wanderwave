@@ -56,13 +56,13 @@ val INPUT_BOX_NAM_SIZE = 150.dp
  * @author Ayman Bakiri
  * @author Menzo Bouaissi
  * @since 1.0
- * @last update 1.0
+ * @last update 2.0
  */
 @Composable
-fun ProfileScreen(navActions: NavigationActions) {
-  val viewModel: ProfileViewModel = hiltViewModel()
+fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
   val currentProfileState by viewModel.profile.collectAsState()
   val songLists by viewModel.songLists.collectAsState()
+  val spotifySubsectionList by viewModel.spotifySubsectionList.collectAsState()
   var showDialog by remember { mutableStateOf(false) }
   var dialogListType by remember { mutableStateOf("TOP SONGS") }
   var isTopSongsListVisible by remember { mutableStateOf(true) }
@@ -71,7 +71,6 @@ fun ProfileScreen(navActions: NavigationActions) {
   LaunchedEffect(Unit) {
     viewModel.createSpecificSongList("TOP_SONGS")
     viewModel.createSpecificSongList("CHOSEN_SONGS")
-    viewModel.retrieveTracks()
   }
 
   Column(
@@ -93,18 +92,17 @@ fun ProfileScreen(navActions: NavigationActions) {
             }
 
         // Call the SongsListDisplay function
-        SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
-
         // Buttons for adding tracks to top songs lists
         Button(
             onClick = {
-              showDialog = true
-              dialogListType = "TOP SONGS"
+              navActions.navigateTo(Route.SELECT_SONG)
+              // showDialog = true
+              // dialogListType = "TOP SONGS"
             },
             modifier = Modifier.testTag("addTopSongs")) {
               Text("Add Track to TOP SONGS List")
             }
-
+        SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
         // Buttons for adding tracks to chosen songs list
         Button(
             onClick = {
