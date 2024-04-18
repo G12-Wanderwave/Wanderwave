@@ -184,9 +184,11 @@ class ProfileViewModelTest {
 
     // val result = viewModel.spotifySubsectionList.first()  // Safely access the first item
     val flow = viewModel.spotifySubsectionList
-    val result = flow.timeout(2.seconds).catch {}.firstOrNull()
+    val result = flow.timeout(20.seconds).catch {}.firstOrNull()
+    advanceUntilIdle() // Ensure all coroutines are completed
+
     Log.d("restut", result.toString())
-    // assertEquals(expectedListItem, result?.get(0))
+    assertEquals(expectedListItem, result?.get(0))
   }
 
   @Test

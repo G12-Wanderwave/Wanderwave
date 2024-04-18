@@ -203,6 +203,7 @@ constructor(
         for (i in track) {
           Log.d("tracl2", i.toString())
           _spotifySubsectionList.value += i
+          Log.d("Result", spotifySubsectionList.value.toString())
         }
       }
     }
