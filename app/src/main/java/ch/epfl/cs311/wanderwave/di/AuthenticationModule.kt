@@ -8,6 +8,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import okhttp3.OkHttpClient
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -15,7 +16,7 @@ object AuthenticationModule {
 
   @Provides
   @Singleton
-  fun provideAuthenticationController(): AuthenticationController {
-    return AuthenticationController(Firebase.auth)
+  fun provideAuthenticationController(httpClient: OkHttpClient): AuthenticationController {
+    return AuthenticationController(Firebase.auth, httpClient)
   }
 }
