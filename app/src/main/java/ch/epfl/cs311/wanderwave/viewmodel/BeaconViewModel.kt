@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Beacon
+import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -28,6 +29,11 @@ class BeaconViewModel @Inject constructor() : ViewModel() {
         _uiState.value = UIState(beacon = fetchedBeacon, isLoading = false)
       }
     }
+  }
+
+  fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
+    // Call the BeaconConnection's addTrackToBeacon with the provided beaconId and track
+    beaconConnection.addTrackToBeacon(beaconId, track, onComplete)
   }
 
   data class UIState(
