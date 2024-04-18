@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 // Define a simple class for a song list
-data class SongList(val name: String, val tracks: MutableList<Track> = mutableListOf())
+data class SongList(val name: String, val tracks: List<Track> = mutableListOf())
 
 @HiltViewModel
 class ProfileViewModel
