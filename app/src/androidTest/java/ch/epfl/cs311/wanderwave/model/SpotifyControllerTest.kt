@@ -140,11 +140,11 @@ class SpotifyControllerTest {
     var slot = slot<CallResult.ResultCallback<Empty>>()
     every { mockAppRemote.playerApi.play(any()) } returns callResult
     every { callResult.setResultCallback(capture(slot)) } answers
-            {
-              slot.captured.onResult(Empty())
-              slot.captured.onResult(Empty())
-              callResult
-            }
+        {
+          slot.captured.onResult(Empty())
+          slot.captured.onResult(Empty())
+          callResult
+        }
     val result = spotifyController.connectRemote().first()
     assert(result == SpotifyController.ConnectResult.SUCCESS)
     verify { mockAppRemote.isConnected }
@@ -159,11 +159,11 @@ class SpotifyControllerTest {
     var slot = slot<CallResult.ResultCallback<Empty>>()
     every { playerApi.resume() } returns callResult
     every { callResult.setResultCallback(capture(slot)) } answers
-            {
-              slot.captured.onResult(Empty())
-              slot.captured.onResult(Empty())
-              callResult
-            }
+        {
+          slot.captured.onResult(Empty())
+          slot.captured.onResult(Empty())
+          callResult
+        }
 
     every { callResult.setErrorCallback(any()) } returns callResult
     every { callResult.cancel() } just Runs
@@ -183,11 +183,11 @@ class SpotifyControllerTest {
     var slot = slot<CallResult.ResultCallback<Empty>>()
     every { playerApi.pause() } returns callResult
     every { callResult.setResultCallback(capture(slot)) } answers
-            {
-              slot.captured.onResult(Empty())
-              slot.captured.onResult(Empty())
-              callResult
-            }
+        {
+          slot.captured.onResult(Empty())
+          slot.captured.onResult(Empty())
+          callResult
+        }
 
     every { callResult.setErrorCallback(any()) } returns callResult
     every { callResult.cancel() } just Runs
@@ -197,5 +197,4 @@ class SpotifyControllerTest {
     verify { playerApi.pause() }
     assertTrue(result == true)
   }
-
 }
