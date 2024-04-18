@@ -1,23 +1,15 @@
 package ch.epfl.cs311.wanderwave.ui
 
-import android.util.Log
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.android.ComposeNotIdleException
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
-import ch.epfl.cs311.wanderwave.viewmodel.SongList
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -25,20 +17,14 @@ import com.spotify.protocol.types.ListItem
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
 import io.mockk.Runs
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.just
-import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -52,8 +38,7 @@ class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSup
 
   @get:Rule val mockkRule = MockKRule(this)
 
-  @RelaxedMockK
-  private lateinit var mockNavigationActions: NavigationActions
+  @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
   lateinit var viewModel: ProfileViewModel
   val testDispatcher = CoroutineScope(Dispatchers.Unconfined)
   @RelaxedMockK private lateinit var profileRepositoryImpl: ProfileRepositoryImpl
@@ -65,34 +50,42 @@ class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSup
     mockDependencies()
     viewModel = ProfileViewModel(profileRepositoryImpl, spotifyController)
 
-    composeTestRule.setContent { ProfileScreen(mockNavigationActions,viewModel) }
+    composeTestRule.setContent { ProfileScreen(mockNavigationActions, viewModel) }
   }
+
   @After
   fun tearDown() {
     try {
       // Cancel any ongoing coroutines started by the ViewModel
       viewModel.viewModelScope.cancel()
       // Cleanup test coroutines to avoid leaking them
-//      testDispatcher.cleanupTestCoroutines()
+      //      testDispatcher.cleanupTestCoroutines()
     } finally {
       Dispatchers.resetMain() // Reset the main dispatcher to the original one
     }
   }
+
   @Test
   fun profileScreeIsDisplay() = run {
-      onComposeScreen<ProfileScreen>(composeTestRule) { assertIsDisplayed() }
+    onComposeScreen<ProfileScreen>(composeTestRule) { assertIsDisplayed() }
   }
+
   private fun mockDependencies() {
     // Mocking ProfileRepositoryImpl
     coEvery { profileRepositoryImpl.insert(any()) } just Runs
     coEvery { profileRepositoryImpl.delete() } just Runs
 
     // Mocking SpotifyController
-    coEvery { spotifyController.getTrack() } returns flowOf(ListItem("", "", null, "", "", false, false))
-    coEvery { spotifyController.getChildren(any()) } returns flowOf(ListItem("", "", null, "", "", false, false))
-    coEvery { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(ListItem("", "", null, "", "", false, false)))
-    coEvery { spotifyController.getAllChildren(any()) } returns flowOf(listOf(ListItem("", "", null, "", "", false, false)))
+    coEvery { spotifyController.getTrack() } returns
+        flowOf(ListItem("", "", null, "", "", false, false))
+    coEvery { spotifyController.getChildren(any()) } returns
+        flowOf(ListItem("", "", null, "", "", false, false))
+    coEvery { spotifyController.getAllElementFromSpotify() } returns
+        flowOf(listOf(ListItem("", "", null, "", "", false, false)))
+    coEvery { spotifyController.getAllChildren(any()) } returns
+        flowOf(listOf(ListItem("", "", null, "", "", false, false)))
   }
+
   @Test
   fun canSwitchAnonymousMode() = run {
     onComposeScreen<ProfileScreen>(composeTestRule) {

@@ -204,31 +204,24 @@ constructor(
         }
       }
     }
-    Log.d("Test32",_spotifySubsectionList.value.toString())
   }
 
-/**
- * Get all the element of the main screen and add them to the top list
- *
- * @author Menzo Bouaissi
- * @since 2.0
- * @last update 2.0
- */
-fun retrieveChild(item:ListItem) {
-  CoroutineScope(Dispatchers.IO).launch {
+  /**
+   * Get all the element of the main screen and add them to the top list
+   *
+   * @author Menzo Bouaissi
+   * @since 2.0
+   * @last update 2.0
+   */
+  fun retrieveChild(item: ListItem) {
+    CoroutineScope(Dispatchers.IO).launch {
       _childrenList.value = emptyList()
       val children = spotifyController.getAllChildren(item).firstOrNull()
       if (children != null) {
         for (child in children) {
-          Log.d("TOP SONGS", Track(child.id, child.title, child.subtitle).toString())
           _childrenList.value += child
         }
-
       }
-
+    }
   }
 }
-}
-
-
-

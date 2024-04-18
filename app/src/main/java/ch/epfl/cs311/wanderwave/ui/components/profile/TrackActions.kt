@@ -1,19 +1,9 @@
 package ch.epfl.cs311.wanderwave.ui.components.profile
 
-import android.util.Log
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -40,7 +30,7 @@ import ch.epfl.cs311.wanderwave.viewmodel.SongList
  */
 @Composable
 fun TracksList(tracks: List<Track>) {
-    tracks.forEach { track -> key(track.id) { TrackItem(track = track) } }
+  tracks.forEach { track -> key(track.id) { TrackItem(track = track) } }
 }
 
 /**
@@ -53,13 +43,12 @@ fun TracksList(tracks: List<Track>) {
  */
 @Composable
 fun TrackItem(track: Track) {
-    Column(modifier = Modifier.padding(8.dp).testTag("trackItem_${track.id}")) {
-        Text(text = "ID: ${track.id}", style = MaterialTheme.typography.bodyMedium)
-        Text(text = "Title: ${track.title}", style = MaterialTheme.typography.bodyMedium)
-        Text(text = "Artist: ${track.artist}", style = MaterialTheme.typography.bodyMedium)
-    }
+  Column(modifier = Modifier.padding(8.dp).testTag("trackItem_${track.id}")) {
+    Text(text = "ID: ${track.id}", style = MaterialTheme.typography.bodyMedium)
+    Text(text = "Title: ${track.title}", style = MaterialTheme.typography.bodyMedium)
+    Text(text = "Artist: ${track.artist}", style = MaterialTheme.typography.bodyMedium)
+  }
 }
-
 
 /**
  * Dialog composable that allows the user to add a new track by entering the track ID, title, and
@@ -165,4 +154,3 @@ fun SongsListDisplay(songLists: List<SongList>, isTopSongsListVisible: Boolean) 
         }
   }
 }
-

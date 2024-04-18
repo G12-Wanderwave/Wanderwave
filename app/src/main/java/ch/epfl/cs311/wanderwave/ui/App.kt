@@ -55,8 +55,8 @@ fun AppScaffold(navController: NavHostController) {
   var showBottomBar by remember { mutableStateOf(false) }
   val currentRouteState by navActions.currentRouteFlow.collectAsStateWithLifecycle()
   val snackbarHostState = remember { SnackbarHostState() }
-    val viewModel: ProfileViewModel = hiltViewModel()
-    val scope = rememberCoroutineScope()
+  val viewModel: ProfileViewModel = hiltViewModel()
+  val scope = rememberCoroutineScope()
   val showSnackbar = { message: String ->
     scope.launch { snackbarHostState.showSnackbar(message) }
     Unit
@@ -84,9 +84,13 @@ fun AppScaffold(navController: NavHostController) {
                 composable(Route.MAIN.routeString) { MainPlaceHolder(navActions) }
                 composable(Route.TRACK_LIST.routeString) { TrackListScreen(showSnackbar) }
                 composable(Route.MAP.routeString) { MapScreen(navActions) }
-                composable(Route.PROFILE.routeString) { ProfileScreen(navActions,viewModel) }
-              composable(Route.EDIT_PROFILE.routeString) { EditProfileScreen(navActions,viewModel) }
-              composable(Route.SELECT_SONG.routeString) { SelectSongScreen(navActions,viewModel) }
+                composable(Route.PROFILE.routeString) { ProfileScreen(navActions, viewModel) }
+                composable(Route.EDIT_PROFILE.routeString) {
+                  EditProfileScreen(navActions, viewModel)
+                }
+                composable(Route.SELECT_SONG.routeString) {
+                  SelectSongScreen(navActions, viewModel)
+                }
               }
         }
       }

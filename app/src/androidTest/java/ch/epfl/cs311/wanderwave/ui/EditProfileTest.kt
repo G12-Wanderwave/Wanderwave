@@ -53,34 +53,42 @@ class EditProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
     mockDependencies()
     viewModel = ProfileViewModel(profileRepositoryImpl, spotifyController)
 
-    composeTestRule.setContent { EditProfileScreen(mockNavigationActions,viewModel) }
+    composeTestRule.setContent { EditProfileScreen(mockNavigationActions, viewModel) }
   }
+
   @After
   fun tearDown() {
     try {
       // Cancel any ongoing coroutines started by the ViewModel
       viewModel.viewModelScope.cancel()
       // Cleanup test coroutines to avoid leaking them
-//      testDispatcher.cleanupTestCoroutines()
+      //      testDispatcher.cleanupTestCoroutines()
     } finally {
       Dispatchers.resetMain() // Reset the main dispatcher to the original one
     }
   }
+
   @Test
   fun profileScreenIsDisplayed() = run {
     onComposeScreen<EditProfileScreen>(composeTestRule) { assertIsDisplayed() }
   }
+
   private fun mockDependencies() {
     // Mocking ProfileRepositoryImpl
     coEvery { profileRepositoryImpl.insert(any()) } just Runs
     coEvery { profileRepositoryImpl.delete() } just Runs
 
     // Mocking SpotifyController
-    coEvery { spotifyController.getTrack() } returns flowOf(ListItem("", "", null, "", "", false, false))
-    coEvery { spotifyController.getChildren(any()) } returns flowOf(ListItem("", "", null, "", "", false, false))
-    coEvery { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(ListItem("", "", null, "", "", false, false)))
-    coEvery { spotifyController.getAllChildren(any()) } returns flowOf(listOf(ListItem("", "", null, "", "", false, false)))
+    coEvery { spotifyController.getTrack() } returns
+        flowOf(ListItem("", "", null, "", "", false, false))
+    coEvery { spotifyController.getChildren(any()) } returns
+        flowOf(ListItem("", "", null, "", "", false, false))
+    coEvery { spotifyController.getAllElementFromSpotify() } returns
+        flowOf(listOf(ListItem("", "", null, "", "", false, false)))
+    coEvery { spotifyController.getAllChildren(any()) } returns
+        flowOf(listOf(ListItem("", "", null, "", "", false, false)))
   }
+
   @Test
   fun editScreen() = run {
     onComposeScreen<EditProfileScreen>(composeTestRule) {
