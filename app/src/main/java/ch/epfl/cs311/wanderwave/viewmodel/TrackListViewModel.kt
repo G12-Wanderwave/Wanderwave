@@ -36,6 +36,11 @@ constructor(
     }
   }
 
+  /**
+   * Plays the given track using the SpotifyController.
+   *
+   * @param track The track to play.
+   */
   private fun playTrack(track: Track) {
     CoroutineScope(Dispatchers.IO).launch {
       val success = spotifyController.playTrack(track).firstOrNull()
@@ -45,6 +50,7 @@ constructor(
     }
   }
 
+  /** Resumes the currently paused track using the SpotifyController. */
   private fun resumeTrack() {
     CoroutineScope(Dispatchers.IO).launch {
       val success = spotifyController.resumeTrack().firstOrNull()
@@ -54,6 +60,7 @@ constructor(
     }
   }
 
+  /** Pauses the currently playing track using the SpotifyController. */
   private fun pauseTrack() {
     CoroutineScope(Dispatchers.IO).launch {
       val success = spotifyController.pauseTrack().firstOrNull()
@@ -63,6 +70,11 @@ constructor(
     }
   }
 
+  /**
+   * Selects the given track and updates the UI state accordingly.
+   *
+   * @param track The track to select.
+   */
   fun selectTrack(track: Track) {
     _uiState.value = _uiState.value.copy(selectedTrack = track)
     _uiState.value = _uiState.value.copy(pausedTrack = null)
@@ -77,6 +89,11 @@ constructor(
     _uiState.value = _uiState.value.copy(expanded = true)
   }
 
+  /**
+   * Plays the selected track if it's not already playing or resumes the paused track if it's the
+   * same as the selected track. If no track is selected, it updates the UI state with an
+   * appropriate message.
+   */
   fun play() {
     if (_uiState.value.selectedTrack != null && !_uiState.value.isPlaying) {
 
@@ -96,6 +113,10 @@ constructor(
     }
   }
 
+  /**
+   * Pauses the currently playing track and updates the UI state accordingly. If no track is
+   * playing, it updates the UI state with an appropriate message.
+   */
   fun pause() {
     if (_uiState.value.isPlaying) {
       pauseTrack()
@@ -107,6 +128,11 @@ constructor(
     }
   }
 
+  /**
+   * Skips to the next or previous track in the list.
+   *
+   * @param dir The direction to skip in. 1 for next, -1 for previous.
+   */
   private fun skip(dir: Int) {
     if (_uiState.value.selectedTrack != null && (dir == 1 || dir == -1)) {
       _uiState.value.tracks.indexOf(_uiState.value.selectedTrack).let { it: Int ->
@@ -116,10 +142,12 @@ constructor(
     }
   }
 
+  /** Skips to the next track in the list. */
   fun skipForward() {
     skip(1)
   }
 
+  /** Skips to the previous track in the list. */
   fun skipBackward() {
     skip(-1)
   }
