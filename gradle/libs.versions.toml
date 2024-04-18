@@ -30,6 +30,8 @@ mockkAgent = "1.13.10"
 mockkAndroid = "1.13.10"
 mockk = "1.13.10"
 navigationCompose = "2.7.7"
+okhttp = "4.12.0"
+okhttp-coroutines = "1.0"
 playServicesLocation = "21.1.0"
 roomRuntime = "2.6.1"
 secretsGradlePlugin = "2.0.1"
@@ -65,6 +67,8 @@ maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = 
 mockk-agent = { module = "io.mockk:mockk-agent", version.ref = "mockkAgent" }
 mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockkAndroid" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+okhttp-coroutines = { module = "ru.gildor.coroutines:kotlin-coroutines-okhttp", version.ref = "okhttp-coroutines" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
 spotify-auth = { module = "com.spotify.android:auth", version.ref = "auth" }
