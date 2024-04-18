@@ -175,6 +175,8 @@ class TrackListViewModelTest {
 
   @Test
   fun resumeTrackWhenControllerReturnsFalse() = run {
+    every { mockSpotifyController.pauseTrack() } returns flowOf(true)
+    every { mockSpotifyController.playTrack(track) } returns flowOf(true)
     every { mockSpotifyController.resumeTrack() } returns flowOf(false)
     viewModel.selectTrack(track)
     viewModel.play()
