@@ -1,5 +1,7 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
+import androidx.compose.material3.HorizontalDivider
+
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.Image
@@ -20,11 +22,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -154,6 +158,35 @@ fun SongList(beacon: Beacon, navigationActions: NavigationActions) {
       style = MaterialTheme.typography.displayMedium,
       modifier = Modifier.testTag("beaconTracksTitle"))
   LazyColumn { items(beacon.profileAndTrack) { TrackItem(it, navigationActions) } }
+//=======
+//fun SongList(beacon: Beacon, viewModel: BeaconViewModel) {
+//  Row(
+//      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+//      verticalAlignment = Alignment.CenterVertically,
+//      horizontalArrangement = Arrangement.SpaceBetween) {
+//        Text(
+//            text = stringResource(R.string.beaconTracksTitle),
+//            style = MaterialTheme.typography.headlineMedium,
+//            modifier = Modifier)
+//        IconButton(
+//            onClick = {
+//              val newTrack =
+//                  Track(id = "newTrackId", title = "New Track Title", artist = "New Artist Name")
+//              viewModel.addTrackToBeacon(beaconId = beacon.id, track = newTrack) { success ->
+//                if (success) {
+//                  Log.d("BeaconScreen", "Track added successfully.")
+//                } else {
+//                  Log.e("BeaconScreen", "Failed to add track.")
+//                }
+//              }
+//            }) {
+//              Icon(
+//                  imageVector = Icons.Filled.Add,
+//                  contentDescription = stringResource(R.string.beaconTitle))
+//            }
+//      }
+//  LazyColumn { items(beacon.tracks) { TrackItem(it) } }
+//>>>>>>> 3189f8f ( add the button to beacon screen)
 }
 
 @Composable

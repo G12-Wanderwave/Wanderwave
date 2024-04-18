@@ -52,6 +52,11 @@ class BeaconViewModel @Inject constructor(private val beaconRepository: BeaconRe
     }
   }
 
+  fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
+    // Call the BeaconConnection's addTrackToBeacon with the provided beaconId and track
+    //beaconConnection.addTrackToBeacon(beaconId, track, onComplete)
+  }
+
   data class UIState(
       val beacon: Beacon? = null,
       val isLoading: Boolean = true,
