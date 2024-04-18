@@ -197,6 +197,7 @@ constructor(
    */
   fun retrieveAndAddSubsection() {
     CoroutineScope(Dispatchers.IO).launch {
+      _spotifySubsectionList.value = emptyList()
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
       Log.d("tracl", track.toString())
       if (track != null) {
