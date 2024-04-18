@@ -23,11 +23,11 @@ class AuthenticationController @Inject constructor(private val auth: FirebaseAut
     }
   }
 
-  fun authenticate(token: String): Flow<Boolean> {
+  fun authenticate(authenticationCode: String): Flow<Boolean> {
     if (auth.currentUser != null) {
       return flowOf(true)
     }
-    if (token.isEmpty()) {
+    if (authenticationCode.isEmpty()) {
       return flowOf(false)
     }
     return flow {
