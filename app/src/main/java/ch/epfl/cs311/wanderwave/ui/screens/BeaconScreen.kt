@@ -37,6 +37,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveMapMarker
+import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
 import com.google.android.gms.maps.model.CameraPosition
@@ -57,7 +58,7 @@ fun BeaconScreen(
         if (!uiState.isLoading) {
           BeaconScreen(beacon = uiState.beacon!!)
         } else {
-          Text("Beacon not found")
+          LoadingScreen()
         }
       }
 }
