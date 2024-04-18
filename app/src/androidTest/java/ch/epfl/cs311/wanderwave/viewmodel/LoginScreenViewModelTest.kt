@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import io.mockk.every
@@ -7,7 +8,9 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -22,36 +25,59 @@ class LoginScreenViewModelTest {
 
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
 
+  @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
+
+  private lateinit var viewModel: LoginScreenViewModel
+
   @Before
   fun setup() {
     every { mockSpotifyController.getAuthorizationRequest() } returns mockk()
+    viewModel = LoginScreenViewModel(mockSpotifyController, mockAuthenticationController)
   }
 
   @Test
   fun getAuthorizationRequest() {
-    val viewModel = LoginScreenViewModel(mockSpotifyController)
-    val request = viewModel.getAuthorizationRequest()
+    viewModel.getAuthorizationRequest()
     verify { mockSpotifyController.getAuthorizationRequest() }
   }
 
   @Test
   fun loginSuccess() = runBlocking {
-    val viewModel = LoginScreenViewModel(mockSpotifyController)
+    every { mockAuthenticationController.authenticate(any()) } returns flowOf(true)
 
+    val token = "testing-token"
     val response = mockk<AuthorizationResponse>()
     every { response.type } returns AuthorizationResponse.Type.TOKEN
+    every { response.accessToken } returns token
 
     viewModel.handleAuthorizationResponse(response)
 
-    val state = viewModel.uiState.first()
+    val state = viewModel.uiState.dropWhile { it.hasResult.not() }.first()
+
+    verify { mockAuthenticationController.authenticate(token) }
+
     assert(state.hasResult)
     assert(state.success)
   }
 
   @Test
-  fun loginFailure() = runBlocking {
-    val viewModel = LoginScreenViewModel(mockSpotifyController)
+  fun authenticationFailure() = runBlocking {
+    every { mockAuthenticationController.authenticate(any()) } returns flowOf(false)
 
+    val token = "testing-token"
+    val response = mockk<AuthorizationResponse>()
+    every { response.type } returns AuthorizationResponse.Type.TOKEN
+    every { response.accessToken } returns token
+
+    viewModel.handleAuthorizationResponse(response)
+
+    val state = viewModel.uiState.dropWhile { it.hasResult.not() }.first()
+    assert(state.hasResult)
+    assert(!state.success)
+  }
+
+  @Test
+  fun loginFailure() = runBlocking {
     val errorMsg = "login error message"
     val response = mockk<AuthorizationResponse>()
     every { response.type } returns AuthorizationResponse.Type.ERROR
@@ -67,8 +93,6 @@ class LoginScreenViewModelTest {
 
   @Test
   fun loginUnknown() = runBlocking {
-    val viewModel = LoginScreenViewModel(mockSpotifyController)
-
     val errorMsg = "login unknown message"
     val response = mockk<AuthorizationResponse>()
     every { response.type } returns AuthorizationResponse.Type.UNKNOWN
