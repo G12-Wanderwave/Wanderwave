@@ -65,6 +65,7 @@ constructor(
 
   fun selectTrack(track: Track) {
     _uiState.value = _uiState.value.copy(selectedTrack = track)
+    _uiState.value = _uiState.value.copy(pausedTrack = null)
     if (_uiState.value.isPlaying) playTrack(track)
   }
 
@@ -122,7 +123,6 @@ constructor(
   fun skipBackward() {
     skip(-1)
   }
-
 
   data class UiState(
       val tracks: List<Track> = listOf(),
