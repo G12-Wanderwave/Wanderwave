@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -59,8 +60,7 @@ val INPUT_BOX_NAM_SIZE = 150.dp
  * @last update 1.0
  */
 @Composable
-fun ProfileScreen(navActions: NavigationActions) {
-  val viewModel: ProfileViewModel = hiltViewModel()
+fun ProfileScreen(navActions: NavigationActions,viewModel: ProfileViewModel) {
   val currentProfileState by viewModel.profile.collectAsState()
   val songLists by viewModel.songLists.collectAsState()
   val spotifySubsectionList by viewModel.spotifySubsectionList.collectAsState()
@@ -73,7 +73,6 @@ fun ProfileScreen(navActions: NavigationActions) {
     viewModel.createSpecificSongList("TOP_SONGS")
     viewModel.createSpecificSongList("CHOSEN_SONGS")
     //viewModel.retrieveTracks()
-      viewModel.retrieveAndAddSubsection()
   }
 
   Column(
@@ -92,19 +91,22 @@ fun ProfileScreen(navActions: NavigationActions) {
         }
         // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
         Button(
-            onClick = { isTopSongsListVisible = !isTopSongsListVisible },
+            onClick = { isTopSongsListVisible = !isTopSongsListVisible
+                Log.d("show my list",songLists.toString())
+                      },
             modifier = Modifier.testTag("toggleSongList")) {
               Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
             }
 
         // Call the SongsListDisplay function
        // SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
-        SelectSongScreen(navActions = navActions,list=   spotifySubsectionList)
         // Buttons for adding tracks to top songs lists
         Button(
             onClick = {
-              showDialog = true
-              dialogListType = "TOP SONGS"
+                Log.d("Test44",viewModel.spotifySubsectionList.value.toString())
+                navActions.navigateTo(Route.SELECT_SONG)
+                      //showDialog = true
+              //dialogListType = "TOP SONGS"
             },
             modifier = Modifier.testTag("addTopSongs")) {
               Text("Add Track to TOP SONGS List")

@@ -55,6 +55,9 @@ constructor(
   private val _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
   val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
 
+  private val _mainList = MutableStateFlow<List<ListItem>>(emptyList())
+  val mainList: StateFlow<List<ListItem>> = _mainList
+
   private val _childrenList = MutableStateFlow<List<ListItem>>(emptyList())
   val childrenList: StateFlow<List<ListItem>> = _childrenList
 
@@ -201,6 +204,7 @@ constructor(
         }
       }
     }
+    Log.d("Test32",_spotifySubsectionList.value.toString())
   }
 
 /**
@@ -212,15 +216,19 @@ constructor(
  */
 fun retrieveChild(item:ListItem) {
   CoroutineScope(Dispatchers.IO).launch {
-    val children = spotifyController.getAllChildren(item).firstOrNull()
-    if (children != null) {
-      for (child in children) {
-        Log.d("TOP SONGS", Track(child.id, child.title, child.subtitle).toString())
-        _childrenList.value+=child
+      _childrenList.value = emptyList()
+      val children = spotifyController.getAllChildren(item).firstOrNull()
+      if (children != null) {
+        for (child in children) {
+          Log.d("TOP SONGS", Track(child.id, child.title, child.subtitle).toString())
+          _childrenList.value += child
+        }
+
       }
-    }
 
   }
 }
 }
+
+
 

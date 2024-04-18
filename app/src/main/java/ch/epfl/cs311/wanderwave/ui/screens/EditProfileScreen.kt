@@ -44,8 +44,7 @@ import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
  * @last update 1.0
  */
 @Composable
-fun EditProfileScreen(navActions: NavigationActions) {
-  val viewModel: ProfileViewModel = hiltViewModel()
+fun EditProfileScreen(navActions: NavigationActions,viewModel: ProfileViewModel){
   val profile by viewModel.profile.collectAsState()
   val profile2 = profile.copy()
   var firstName by remember { mutableStateOf(profile2.firstName) }

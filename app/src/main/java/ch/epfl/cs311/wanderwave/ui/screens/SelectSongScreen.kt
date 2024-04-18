@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,19 +14,28 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.runtime.toMutableStateMap
 import androidx.compose.ui.Alignment
@@ -123,53 +133,155 @@ import kotlinx.coroutines.launch
 //        ),
 //    )
 //}
+//@Composable
+//fun SelectSongScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
+//    val mainList by viewModel.spotifySubsectionList.collectAsState()
+//    val childrenList by viewModel.childrenList.collectAsState()
+//
+//    var displayedList by remember { mutableStateOf(mainList) }
+//
+//    LaunchedEffect(mainList) {
+//        displayedList = mainList
+//    }
+//
+//    LaunchedEffect(childrenList) {
+//        displayedList = childrenList
+//    }
+//
+//    LazyColumn {
+//        items(displayedList, key = { it.id }) { listItem ->
+//            TrackItem(listItem, navActions, onClick = {
+//                if (listItem.hasChildren) {
+//                    viewModel.retrieveChild(listItem)
+//                }else{
+//                    viewModel.addTrackToList("TOP SONGS", Track(listItem.id, listItem.title, listItem.subtitle))
+//                    navActions.goBack()
+//                }
+//            })
+//        }
+//    }
+//    Button(onClick = {
+//        Log.d("contentOfList",displayedList.toString())
+//        Log.d("childrenList",childrenList.toString())
+//    }) {
+//        Text("Add Track to TOP SONGS List")
+//    }
+//}
+//
+//@Composable
+//fun TrackItem(
+//    listItem: ListItem,
+//    navActions: NavigationActions,
+//    onClick: () -> Unit
+//) {
+//    Card(
+//        colors = CardDefaults.cardColors(
+//            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+//            contentColor = MaterialTheme.colorScheme.onSurface,
+//            disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariant,
+//            disabledContentColor = MaterialTheme.colorScheme.error // Example color
+//        ),
+//        modifier = Modifier
+//            .height(80.dp)
+//            .fillMaxWidth()
+//            .padding(4.dp)
+//            .clickable(onClick = onClick)
+//    ) {
+//        Row {
+//            Column(modifier = Modifier.padding(8.dp)) {
+//                Text(
+//                    text = listItem.title,
+//                    style = MaterialTheme.typography.titleMedium
+//                )
+//                Text(
+//                    text = listItem.subtitle,
+//                    style = MaterialTheme.typography.bodyMedium
+//                )
+//            }
+//        }
+//    }
+//}
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectSongScreen(navActions:NavigationActions,
-                     list: List<ListItem> ) {
-    LazyColumn {
-        items(list, key = { listItem -> listItem.id }) { listItem ->
-            TrackItem2(listItem,navActions) // TODO: modify this, so that we are using the TrackItem from @joriba, and dont
-            // have duplicated code
-        }
+fun SelectSongScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
+    val mainList by viewModel.spotifySubsectionList.collectAsState()
+    val childrenList by viewModel.childrenList.collectAsState()
+
+    var displayedList by remember { mutableStateOf(mainList) }
+
+    LaunchedEffect (Unit){
+        viewModel.retrieveAndAddSubsection()
+    }
+    LaunchedEffect(mainList) {
+        displayedList = mainList
     }
 
-}
-// TODO: modify this, so that we are using the TrackItem from @joriba, and dont have duplicated code
-@Composable
-fun TrackItem2(listItem: ListItem,navActions: NavigationActions) {
-    val viewModel: ProfileViewModel = hiltViewModel()
-    val  childrenList by viewModel.childrenList.collectAsState()
+    LaunchedEffect(childrenList) {
+        displayedList = childrenList
+    }
 
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Select Song") },
+                navigationIcon = {
+                    IconButton(onClick = { navActions.goBack() }) {
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Go back")
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->  // This is the padding parameter you need to use
+        LazyColumn(
+            contentPadding = innerPadding,  // Apply the innerPadding to the LazyColumn
+            modifier = Modifier.padding(all = 16.dp)  // Additional padding can still be applied here if needed
+        ) {
+            items(displayedList, key = { it.id }) { listItem ->
+                TrackItem(listItem, navActions, onClick = {
+                    if (listItem.hasChildren) {
+                        viewModel.retrieveChild(listItem)
+                    } else {
+                        viewModel.addTrackToList("TOP SONGS", Track(listItem.id, listItem.title, listItem.subtitle))
+                        navActions.goBack()
+                    }
+                })
+            }
+        }
+        Button(onClick = {Log.d("pls work", viewModel.spotifySubsectionList.value.toString())}) {
+            Text(text = "fewfewfewfewf")
+        }
+    }
+}
+
+
+@Composable
+fun TrackItem(
+    listItem: ListItem,
+    navActions: NavigationActions,
+    onClick: () -> Unit
+) {
     Card(
-        colors =
-        CardColors(
+        colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            CardDefaults.cardColors().contentColor,
-            CardDefaults.cardColors().disabledContainerColor,
-            CardDefaults.cardColors().disabledContentColor),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            disabledContentColor = MaterialTheme.colorScheme.error // Example color
+        ),
         modifier = Modifier
             .height(80.dp)
             .fillMaxWidth()
             .padding(4.dp)
-            .clickable {},
-        onClick = { if (listItem.hasChildren){
-            viewModel.retrieveChild(listItem)
-
-            Log.d("dasadsadas",childrenList.toString())
-        }
-
-        }
+            .clickable(onClick = onClick)
     ) {
         Row {
             Column(modifier = Modifier.padding(8.dp)) {
                 Text(
                     text = listItem.title,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.titleMedium)
+                    style = MaterialTheme.typography.titleMedium
+                )
                 Text(
                     text = listItem.subtitle,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }
