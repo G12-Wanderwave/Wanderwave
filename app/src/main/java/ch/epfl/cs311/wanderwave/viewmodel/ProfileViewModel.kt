@@ -198,10 +198,10 @@ constructor(
   fun retrieveAndAddSubsection() {
     CoroutineScope(Dispatchers.IO).launch {
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
-      Log.d("tracl",track.toString())
+      Log.d("tracl", track.toString())
       if (track != null) {
         for (i in track) {
-          Log.d("tracl2",i.toString())
+          Log.d("tracl2", i.toString())
           _spotifySubsectionList.value += i
         }
       }
@@ -215,7 +215,7 @@ constructor(
    * @since 2.0
    * @last update 2.0
    */
-    fun retrieveChild(item: ListItem) {
+  fun retrieveChild(item: ListItem) {
     CoroutineScope(Dispatchers.IO).launch {
       _childrenList.value = emptyList()
       val children = spotifyController.getAllChildren(item).firstOrNull()
