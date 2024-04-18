@@ -121,6 +121,9 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
 
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.coroutines)
+
     implementation("com.google.android.play:core-ktx:1.7.0")
 
     implementation(libs.maps.compose)
