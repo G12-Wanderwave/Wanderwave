@@ -237,7 +237,7 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: ProfileViewModel)
             modifier = Modifier.padding(all = 16.dp)  // Additional padding can still be applied here if needed
         ) {
             items(displayedList, key = { it.id }) { listItem ->
-                TrackItem(listItem, navActions, onClick = {
+                TrackItem(listItem, onClick = {
                     if (listItem.hasChildren) {
                         viewModel.retrieveChild(listItem)
                     } else {
@@ -257,7 +257,6 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: ProfileViewModel)
 @Composable
 fun TrackItem(
     listItem: ListItem,
-    navActions: NavigationActions,
     onClick: () -> Unit
 ) {
     Card(
