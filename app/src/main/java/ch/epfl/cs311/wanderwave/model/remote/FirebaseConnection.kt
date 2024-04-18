@@ -16,12 +16,15 @@ abstract class FirebaseConnection<T, U> {
 
   abstract val getItemId: (T) -> String
 
-  open val db = FirebaseFirestore.getInstance().apply {
-    firestoreSettings = FirebaseFirestoreSettings.Builder()
-      .setLocalCacheSettings(memoryCacheSettings {})// Use memory cache
-      .setLocalCacheSettings(persistentCacheSettings {})// Use persistent disk cache (default)
-      .build()
-  }
+  open val db =
+      FirebaseFirestore.getInstance().apply {
+        firestoreSettings =
+            FirebaseFirestoreSettings.Builder()
+                .setLocalCacheSettings(memoryCacheSettings {}) // Use memory cache
+                .setLocalCacheSettings(
+                    persistentCacheSettings {}) // Use persistent disk cache (default)
+                .build()
+      }
 
   abstract fun documentToItem(document: DocumentSnapshot): T?
 

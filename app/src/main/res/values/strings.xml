@@ -19,4 +19,7 @@
     <string name="permission_request_title">Permissions needed</string>
     <string name="permission_request_text_location">In order to provide a full experience, Wanderwave needs access to this device\'s precise location. Please enable location permissions in the next window.</string>
     <string name="permission_request_confirm_button">I understand</string>
+    <string name="beaconTitle">Beacon</string>
+    <string name="beaconLocation">at %1$s</string>
+    <string name="beaconTracksTitle">Tracks</string>
 </resources>

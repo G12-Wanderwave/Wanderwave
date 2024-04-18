@@ -6,16 +6,14 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filterNotNull
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-
 
 class BeaconConnection(private val database: FirebaseFirestore? = null) :
     FirebaseConnection<Beacon, Beacon>() {
@@ -54,31 +52,30 @@ class BeaconConnection(private val database: FirebaseFirestore? = null) :
   override fun getItem(itemId: String): Flow<Beacon> {
     val dataFlow = MutableStateFlow<Beacon?>(null)
 
-
     db.collection(collectionName)
         .document(itemId)
         .get()
         .addOnSuccessListener { document ->
           if (document != null && document.data != null) {
             documentToItem(document)?.let { beacon ->
-
               val trackRefs = document.get("tracks") as? List<DocumentReference>
               val tracks = mutableListOf<Track>()
 
               // Use a coroutine to perform asynchronous operations
               coroutineScope.launch {
-                val tracksDeferred = trackRefs?.map { trackRef ->
-                  async(Dispatchers.IO) {
-                    try {
-                      val trackDocument = trackRef.get().await()
-                      trackDocument.toObject(Track::class.java)
-                    } catch (e: Exception) {
-                      // Handle exceptions
-                      Log.e("Firestore", "Error fetching track: ${e.message}")
-                      null
+                val tracksDeferred =
+                    trackRefs?.map { trackRef ->
+                      async(Dispatchers.IO) {
+                        try {
+                          val trackDocument = trackRef.get().await()
+                          trackDocument.toObject(Track::class.java)
+                        } catch (e: Exception) {
+                          // Handle exceptions
+                          Log.e("Firestore", "Error fetching track: ${e.message}")
+                          null
+                        }
+                      }
                     }
-                  }
-                }
 
                 // Wait for all tracks to be fetched
                 val tracks = tracksDeferred?.mapNotNull { it?.await() }
@@ -87,7 +84,6 @@ class BeaconConnection(private val database: FirebaseFirestore? = null) :
                 val updatedBeacon = beacon.copy(tracks = tracks ?: emptyList())
                 dataFlow.value = updatedBeacon
               }
-
             }
           } else {
             dataFlow.value = null

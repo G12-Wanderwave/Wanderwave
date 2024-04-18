@@ -8,7 +8,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,21 +20,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
+import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveMapMarker
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.CameraPositionState
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -63,12 +58,14 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
     onDispose { viewModel.cameraPosition.value = cameraPositionState.position }
   }
 
-  // if we have permission, show the location, otherwise show the map without location
   WanderwaveGoogleMap(
       cameraPositionState = cameraPositionState,
-      viewModel = viewModel,
-      mapIsLoaded = mapIsLoaded,
-      locationEnabled = permissionState.allPermissionsGranted)
+      locationEnabled = permissionState.allPermissionsGranted,
+      locationSource = viewModel.locationSource,
+      modifier = Modifier.testTag("mapScreen"),
+      onMapLoaded = { mapIsLoaded.value = true }) {
+        MapContent(viewModel)
+      }
 
   if (needToRequestPermissions(permissionState)) {
     AskForPermissions(permissionState)
@@ -81,27 +78,6 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
       }
     }
   }
-}
-
-@Composable
-fun WanderwaveGoogleMap(
-    cameraPositionState: CameraPositionState,
-    viewModel: MapViewModel,
-    mapIsLoaded: MutableState<Boolean>,
-    locationEnabled: Boolean = false
-) {
-  val context = LocalContext.current
-  GoogleMap(
-      modifier = Modifier.testTag("mapScreen"),
-      properties =
-          MapProperties(
-              isMyLocationEnabled = locationEnabled,
-              mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)),
-      locationSource = viewModel.locationSource,
-      cameraPositionState = cameraPositionState,
-      onMapLoaded = { mapIsLoaded.value = true }) {
-        MapContent(viewModel)
-      }
 }
 
 @Composable
@@ -149,10 +125,5 @@ fun moveCamera(
 @Composable
 fun DisplayBeacons(beacons: List<Beacon>) {
   // Create each beacon from the list
-  beacons.forEach() {
-    Marker(
-        state = MarkerState(position = it.location.toLatLng()),
-        title = it.id,
-    )
-  }
+  beacons.forEach() { WanderwaveMapMarker(it.location.toLatLng(), title = it.id) }
 }
