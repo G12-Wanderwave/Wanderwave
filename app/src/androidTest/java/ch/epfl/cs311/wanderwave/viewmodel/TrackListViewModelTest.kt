@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -16,14 +17,14 @@ import org.junit.Test
 
 class TrackListViewModelTest {
 
-  lateinit var viewModel: TrackListViewModel
+  private lateinit var viewModel: TrackListViewModel
 
   @get:Rule val mockkRule = MockKRule(this)
 
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
   @RelaxedMockK private lateinit var repository: TrackRepositoryImpl
 
-  lateinit var track: Track
+  private lateinit var track: Track
 
   @Before
   fun setup() {
@@ -161,5 +162,31 @@ class TrackListViewModelTest {
 
     viewModel.skipBackward()
     assertEquals(lastTrack.id, viewModel.uiState.value.selectedTrack?.id)
+  }
+
+  @Test
+  fun playTrackWhenControllerReturnsFalse() = run {
+    every { mockSpotifyController.playTrack(track) } returns flowOf(false)
+    viewModel.selectTrack(track)
+    viewModel.play()
+    verify { mockSpotifyController.playTrack(any()) }
+    assertEquals("Failed to play track", viewModel.uiState.value.message)
+  }
+
+  @Test
+  fun resumeTrackWhenControllerReturnsFalse() = run {
+    every { mockSpotifyController.resumeTrack() } returns flowOf(false)
+    viewModel.selectTrack(track)
+    viewModel.play()
+    viewModel.pause()
+    viewModel.play()
+    verify { mockSpotifyController.resumeTrack() }
+    assertEquals("Failed to resume track", viewModel.uiState.value.message)
+  }
+
+  @Test
+  fun collapseTrackList() = run {
+    viewModel.collapse()
+    assertFalse(viewModel.uiState.value.expanded)
   }
 }
