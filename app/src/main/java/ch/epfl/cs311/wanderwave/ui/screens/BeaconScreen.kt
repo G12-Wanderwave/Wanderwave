@@ -28,9 +28,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -83,7 +86,7 @@ private fun BeaconScreenPreview() {
 @Composable
 private fun BeaconScreen(beacon: Beacon) {
   Column(
-      modifier = Modifier.fillMaxSize().padding(8.dp),
+      modifier = Modifier.fillMaxSize().padding(8.dp).testTag("beaconScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
         SongList(beacon)
@@ -93,9 +96,15 @@ private fun BeaconScreen(beacon: Beacon) {
 @Composable
 fun BeaconInformation(location: Location) {
   Column(horizontalAlignment = Alignment.CenterHorizontally) {
-    Text(text = "Beacon", style = MaterialTheme.typography.displayLarge)
+    Text(
+        text = stringResource(R.string.beaconTitle),
+        style = MaterialTheme.typography.displayLarge,
+        modifier = Modifier.testTag("beaconTitle"))
     if (location.name.isNotBlank()) {
-      Text("at ${location.name}", style = MaterialTheme.typography.titleMedium)
+      Text(
+          stringResource(R.string.beaconLocation, location.name),
+          style = MaterialTheme.typography.titleMedium,
+          modifier = Modifier.testTag("beaconLocation"))
     }
     // TODO: Maybe add location tracking here too?
     WanderwaveGoogleMap(
@@ -107,7 +116,8 @@ fun BeaconInformation(location: Location) {
             Modifier.fillMaxWidth()
                 .aspectRatio(4f / 3)
                 .padding(4.dp)
-                .clip(RoundedCornerShape(8.dp)),
+                .clip(RoundedCornerShape(8.dp))
+                .testTag("beaconMap"),
         controlsEnabled = false,
     ) {
       WanderwaveMapMarker(location.toLatLng(), location.name)
@@ -118,7 +128,10 @@ fun BeaconInformation(location: Location) {
 @Composable
 fun SongList(beacon: Beacon) {
   HorizontalDivider()
-  Text(text = "Tracks", style = MaterialTheme.typography.displayMedium)
+  Text(
+      text = stringResource(R.string.beaconTracksTitle),
+      style = MaterialTheme.typography.displayMedium,
+      modifier = Modifier.testTag("beaconTracksTitle"))
   LazyColumn { items(beacon.tracks) { TrackItem(it) } }
 }
 
@@ -131,7 +144,7 @@ internal fun TrackItem(track: Track) {
               CardDefaults.cardColors().contentColor,
               CardDefaults.cardColors().disabledContainerColor,
               CardDefaults.cardColors().disabledContentColor),
-      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp)) {
+      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
