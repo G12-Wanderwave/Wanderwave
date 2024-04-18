@@ -51,7 +51,7 @@ constructor(private val auth: FirebaseAuth, private val httpClient: OkHttpClient
               .post("code=$authenticationCode".toRequestBody())
               .build()
 
-      val responseJson = httpClient.newCall(request).await().body!!.string()
+      val responseJson = httpClient.newCall(request).execute().body!!.string()
       val response = JSONObject(responseJson)
       val firebaseToken = response.getString("firebase_token")
 
