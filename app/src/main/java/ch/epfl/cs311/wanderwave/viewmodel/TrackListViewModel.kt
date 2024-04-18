@@ -10,7 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -36,12 +36,36 @@ constructor(
     }
   }
 
-  fun playTrack(track: Track) {
+  private fun playTrack(track: Track) {
     CoroutineScope(Dispatchers.IO).launch {
-      if (!spotifyController.playTrack(track).first()) {
+      val success = spotifyController.playTrack(track).firstOrNull()
+      if (success == null || !success) {
         _uiState.value = _uiState.value.copy(message = "Failed to play track")
       }
     }
+  }
+
+  private fun resumeTrack() {
+    CoroutineScope(Dispatchers.IO).launch {
+      val success = spotifyController.resumeTrack().firstOrNull()
+      if (success == null || !success) {
+        _uiState.value = _uiState.value.copy(message = "Failed to resume track")
+      }
+    }
+  }
+
+  private fun pauseTrack() {
+    CoroutineScope(Dispatchers.IO).launch {
+      val success = spotifyController.pauseTrack().firstOrNull()
+      if (success == null || !success) {
+        _uiState.value = _uiState.value.copy(message = "Failed to pause track")
+      }
+    }
+  }
+
+  fun selectTrack(track: Track) {
+    _uiState.value = _uiState.value.copy(selectedTrack = track)
+    if (_uiState.value.isPlaying) playTrack(track)
   }
 
   fun collapse() {
@@ -53,11 +77,33 @@ constructor(
   }
 
   fun play() {
-    _uiState.value = _uiState.value.copy(isPlaying = true)
+    if (_uiState.value.selectedTrack != null && !_uiState.value.isPlaying) {
+
+      if (_uiState.value.pausedTrack == _uiState.value.selectedTrack) {
+        resumeTrack()
+      } else {
+        playTrack(_uiState.value.selectedTrack!!)
+      }
+
+      _uiState.value = _uiState.value.copy(isPlaying = true)
+    } else {
+      if (!_uiState.value.isPlaying) {
+        _uiState.value = _uiState.value.copy(message = "No track selected")
+      } else {
+        _uiState.value = _uiState.value.copy(message = "Track already playing")
+      }
+    }
   }
 
   fun pause() {
-    _uiState.value = _uiState.value.copy(isPlaying = false, currentMillis = 1000)
+    if (_uiState.value.isPlaying) {
+      pauseTrack()
+      _uiState.value =
+          _uiState.value.copy(
+              isPlaying = false, currentMillis = 1000, pausedTrack = _uiState.value.selectedTrack)
+    } else {
+      _uiState.value = _uiState.value.copy(message = "No track playing")
+    }
   }
 
   data class UiState(
@@ -65,6 +111,7 @@ constructor(
       val loading: Boolean = false,
       val message: String? = null,
       val selectedTrack: Track? = null,
+      val pausedTrack: Track? = null,
       val isPlaying: Boolean = false,
       val currentMillis: Int = 0,
       val expanded: Boolean = false,

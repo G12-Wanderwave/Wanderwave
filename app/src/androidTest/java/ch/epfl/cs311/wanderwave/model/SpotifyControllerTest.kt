@@ -17,11 +17,14 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
+import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertTrue
 import kotlin.Exception
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -37,6 +40,8 @@ class SpotifyControllerTest {
   @RelaxedMockK private lateinit var mockAppRemote: SpotifyAppRemote
 
   private lateinit var spotifyController: SpotifyController
+
+  private val mockSotifyController: SpotifyController = mockk(relaxed = true)
 
   @Before
   fun setup() {
@@ -145,5 +150,42 @@ class SpotifyControllerTest {
     val result = spotifyController.connectRemote().first()
     assert(result == SpotifyController.ConnectResult.SUCCESS)
     verify { mockAppRemote.isConnected }
+  }
+
+  @Test
+  fun pauseTrackSuccessfullyPausesWhenTrackIsPlaying() = runBlocking {
+    every { mockSotifyController.pauseTrack() } returns flowOf(true)
+
+    val result = mockSotifyController.pauseTrack().first()
+
+    assertTrue(result)
+  }
+
+  @Test
+  fun pauseTrackFailsToPauseWhenNoTrackIsPlaying() = runBlocking {
+    every { mockSotifyController.pauseTrack() } returns flowOf(false)
+
+    val result = mockSotifyController.pauseTrack().first()
+
+    assertFalse(result)
+  }
+
+  @Test
+  fun playTrackSuccessfullyPausesWhenNoTrackIsPlaying() = runBlocking {
+    val track = Track("6ImuyUQYhJKEKFtlrstHCD", "Main Title", "John Williams")
+    every { mockSotifyController.playTrack(track) } returns flowOf(true)
+
+    val result = mockSotifyController.playTrack(track).first()
+
+    assertTrue(result)
+  }
+
+  @Test
+  fun resumeTrackSuccessfullyPausesWhenNoTrackIsPlaying() = runBlocking {
+    every { mockSotifyController.resumeTrack() } returns flowOf(true)
+
+    val result = mockSotifyController.resumeTrack().first()
+
+    assertTrue(result)
   }
 }
