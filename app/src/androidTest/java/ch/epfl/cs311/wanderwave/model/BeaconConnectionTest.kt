@@ -8,6 +8,7 @@ import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -16,7 +17,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import kotlin.system.measureTimeMillis
 
 public class BeaconConnectionTest {
 
@@ -147,8 +147,6 @@ public class BeaconConnectionTest {
       assert(valueEmitted.not()) { "Flow emitted unexpected value" }
     }
   }
-
-
 
   @After
   fun cleanupTestData() = runBlocking {
