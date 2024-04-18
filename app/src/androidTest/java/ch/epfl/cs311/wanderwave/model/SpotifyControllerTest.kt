@@ -10,21 +10,21 @@ import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.android.appremote.api.error.NotLoggedInException
 import com.spotify.protocol.client.CallResult
 import com.spotify.protocol.types.Empty
+import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
-import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
 import kotlin.Exception
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -40,8 +40,6 @@ class SpotifyControllerTest {
   @RelaxedMockK private lateinit var mockAppRemote: SpotifyAppRemote
 
   private lateinit var spotifyController: SpotifyController
-
-  private val mockSotifyController: SpotifyController = mockk(relaxed = true)
 
   @Before
   fun setup() {
@@ -142,50 +140,62 @@ class SpotifyControllerTest {
     var slot = slot<CallResult.ResultCallback<Empty>>()
     every { mockAppRemote.playerApi.play(any()) } returns callResult
     every { callResult.setResultCallback(capture(slot)) } answers
-        {
-          slot.captured.onResult(Empty())
-          slot.captured.onResult(Empty())
-          callResult
-        }
+            {
+              slot.captured.onResult(Empty())
+              slot.captured.onResult(Empty())
+              callResult
+            }
     val result = spotifyController.connectRemote().first()
     assert(result == SpotifyController.ConnectResult.SUCCESS)
     verify { mockAppRemote.isConnected }
   }
 
   @Test
-  fun pauseTrackSuccessfullyPausesWhenTrackIsPlaying() = runBlocking {
-    every { mockSotifyController.pauseTrack() } returns flowOf(true)
+  fun resumeTrackTest() = runBlocking {
+    every { mockAppRemote.isConnected } returns true
+    var callResult = mockk<CallResult<Empty>>()
+    var playerApi = mockk<PlayerApi>()
+    every { mockAppRemote.playerApi } returns playerApi
+    var slot = slot<CallResult.ResultCallback<Empty>>()
+    every { playerApi.resume() } returns callResult
+    every { callResult.setResultCallback(capture(slot)) } answers
+            {
+              slot.captured.onResult(Empty())
+              slot.captured.onResult(Empty())
+              callResult
+            }
 
-    val result = mockSotifyController.pauseTrack().first()
+    every { callResult.setErrorCallback(any()) } returns callResult
+    every { callResult.cancel() } just Runs
 
-    assertTrue(result)
+    val result = spotifyController.resumeTrack().first()
+
+    verify { playerApi.resume() }
+    assertTrue(result == true)
   }
 
   @Test
-  fun pauseTrackFailsToPauseWhenNoTrackIsPlaying() = runBlocking {
-    every { mockSotifyController.pauseTrack() } returns flowOf(false)
+  fun pauseTrackTest() = runBlocking {
+    every { mockAppRemote.isConnected } returns true
+    var callResult = mockk<CallResult<Empty>>()
+    var playerApi = mockk<PlayerApi>()
+    every { mockAppRemote.playerApi } returns playerApi
+    var slot = slot<CallResult.ResultCallback<Empty>>()
+    every { playerApi.pause() } returns callResult
+    every { callResult.setResultCallback(capture(slot)) } answers
+            {
+              slot.captured.onResult(Empty())
+              slot.captured.onResult(Empty())
+              callResult
+            }
 
-    val result = mockSotifyController.pauseTrack().first()
+    every { callResult.setErrorCallback(any()) } returns callResult
+    every { callResult.cancel() } just Runs
 
-    assertFalse(result)
+    val result = spotifyController.pauseTrack().first()
+
+    verify { playerApi.pause() }
+    assertTrue(result == true)
   }
 
-  @Test
-  fun playTrackSuccessfullyPausesWhenNoTrackIsPlaying() = runBlocking {
-    val track = Track("6ImuyUQYhJKEKFtlrstHCD", "Main Title", "John Williams")
-    every { mockSotifyController.playTrack(track) } returns flowOf(true)
-
-    val result = mockSotifyController.playTrack(track).first()
-
-    assertTrue(result)
-  }
-
-  @Test
-  fun resumeTrackSuccessfullyPausesWhenNoTrackIsPlaying() = runBlocking {
-    every { mockSotifyController.resumeTrack() } returns flowOf(true)
-
-    val result = mockSotifyController.resumeTrack().first()
-
-    assertTrue(result)
-  }
 }
