@@ -2,6 +2,7 @@
 accompanistPermissions = "0.35.0-alpha"
 coilCompose = "2.6.0"
 agp = "8.3.1"
+firebaseBom = "32.8.0"
 hiltNavigationCompose = "1.2.0"
 googleHiltAndroidCompiler = "2.49"
 hiltAndroidTestingVersion = "2.49"
@@ -50,6 +51,10 @@ coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose"
 google-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "googleHiltAndroidCompiler" }
 dagger-hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTestingVersion" }
 dagger-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompilerVersion" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-database = { module = "com.google.firebase:firebase-database", version = "" }
+firebase-firestore = { module = "com.google.firebase:firebase-firestore", version = "" }
+firebase-auth = { module = "com.google.firebase:firebase-auth", version = "" }
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTesting" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
