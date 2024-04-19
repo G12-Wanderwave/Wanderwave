@@ -31,9 +31,11 @@ import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
 import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
+import ch.epfl.cs311.wanderwave.ui.screens.SelectSongScreen
 import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import kotlinx.coroutines.launch
 
@@ -54,7 +56,7 @@ fun AppScaffold(navController: NavHostController) {
   var showBottomBar by remember { mutableStateOf(false) }
   val currentRouteState by navActions.currentRouteFlow.collectAsStateWithLifecycle()
   val snackbarHostState = remember { SnackbarHostState() }
-
+  val viewModel: ProfileViewModel = hiltViewModel()
   val scope = rememberCoroutineScope()
   val showSnackbar = { message: String ->
     scope.launch { snackbarHostState.showSnackbar(message) }
@@ -86,8 +88,13 @@ fun AppScaffold(navController: NavHostController) {
                   TrackListScreen(showSnackbar, trackListViewModel)
                 }
                 composable(Route.MAP.routeString) { MapScreen(navActions) }
-                composable(Route.PROFILE.routeString) { ProfileScreen(navActions) }
-                composable(Route.EDIT_PROFILE.routeString) { EditProfileScreen(navActions) }
+                composable(Route.PROFILE.routeString) { ProfileScreen(navActions, viewModel) }
+                composable(Route.EDIT_PROFILE.routeString) {
+                  EditProfileScreen(navActions, viewModel)
+                }
+                composable(Route.SELECT_SONG.routeString) {
+                  SelectSongScreen(navActions, viewModel)
+                }
               }
         }
       }
