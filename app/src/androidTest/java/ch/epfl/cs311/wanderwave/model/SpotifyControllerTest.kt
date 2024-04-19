@@ -328,29 +328,29 @@ class SpotifyControllerTest {
       verify { playerApi.resume() }
       assertTrue(result == true)
     }
+  }
 
-    @Test
-    fun pauseTrackTest() = runBlocking {
-      every { mockAppRemote.isConnected } returns true
-      var callResult = mockk<CallResult<Empty>>()
-      var playerApi = mockk<PlayerApi>()
-      every { mockAppRemote.playerApi } returns playerApi
-      var slot = slot<CallResult.ResultCallback<Empty>>()
-      every { playerApi.pause() } returns callResult
-      every { callResult.setResultCallback(capture(slot)) } answers
-          {
-            slot.captured.onResult(Empty())
-            slot.captured.onResult(Empty())
-            callResult
-          }
+  @Test
+  fun pauseTrackTest() = runBlocking {
+    every { mockAppRemote.isConnected } returns true
+    var callResult = mockk<CallResult<Empty>>()
+    var playerApi = mockk<PlayerApi>()
+    every { mockAppRemote.playerApi } returns playerApi
+    var slot = slot<CallResult.ResultCallback<Empty>>()
+    every { playerApi.pause() } returns callResult
+    every { callResult.setResultCallback(capture(slot)) } answers
+        {
+          slot.captured.onResult(Empty())
+          slot.captured.onResult(Empty())
+          callResult
+        }
 
-      every { callResult.setErrorCallback(any()) } returns callResult
-      every { callResult.cancel() } just Runs
+    every { callResult.setErrorCallback(any()) } returns callResult
+    every { callResult.cancel() } just Runs
 
-      val result = spotifyController.pauseTrack().first()
+    val result = spotifyController.pauseTrack().first()
 
-      verify { playerApi.pause() }
-      assertTrue(result == true)
-    }
+    verify { playerApi.pause() }
+    assertTrue(result == true)
   }
 }

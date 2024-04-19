@@ -169,7 +169,7 @@ class TrackListViewModelTest {
     every { mockSpotifyController.playTrack(track) } returns flowOf(false)
     viewModel.selectTrack(track)
     viewModel.play()
-    verify { mockSpotifyController.playTrack(any()) }
+    verify { mockSpotifyController.playTrack(track) }
     assertEquals("Failed to play track", viewModel.uiState.value.message)
   }
 
