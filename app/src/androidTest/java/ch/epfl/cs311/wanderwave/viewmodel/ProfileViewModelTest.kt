@@ -129,7 +129,7 @@ class ProfileViewModelTest {
 
     // val result = viewModel.spotifySubsectionList.first()  // Safely access the first item
     val flow = viewModel.spotifySubsectionList
-    val flow2 = viewModel.childrenList
+    val flow2 = viewModel.childrenPlaylistTrackList
     val result = flow.timeout(2.seconds).catch {}.firstOrNull()
     val result2 = flow2.timeout(2.seconds).catch {}.firstOrNull()
 

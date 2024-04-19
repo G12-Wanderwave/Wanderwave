@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Profile
@@ -55,11 +54,8 @@ constructor(
   private val _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
   val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
 
-  private val _mainList = MutableStateFlow<List<ListItem>>(emptyList())
-  val mainList: StateFlow<List<ListItem>> = _mainList
-
-  private val _childrenList = MutableStateFlow<List<ListItem>>(emptyList())
-  val childrenList: StateFlow<List<ListItem>> = _childrenList
+  private val _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
+  val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
 
   fun createSpecificSongList(listType: String) {
     val listName =
@@ -79,11 +75,9 @@ constructor(
 
   // Function to add a track to a song list
   fun addTrackToList(listName: String, track: Track) {
-    Log.d("listName", listName)
     val updatedLists =
         _songLists.value.map { list ->
           if (list.name == listName) {
-            Log.d("Updated", "OK")
             if (list.tracks.contains(track)) return@map list
 
             list.copy(tracks = ArrayList(list.tracks).apply { add(track) })
@@ -92,7 +86,6 @@ constructor(
           }
         }
     _songLists.value = updatedLists
-    Log.d("Updated", updatedLists.toString())
   }
 
   val profileConnection = ProfileConnection()
@@ -168,11 +161,11 @@ constructor(
    */
   fun retrieveChild(item: ListItem) {
     CoroutineScope(Dispatchers.IO).launch {
-      _childrenList.value = emptyList()
+      _childrenPlaylistTrackList.value = emptyList()
       val children = spotifyController.getAllChildren(item).firstOrNull()
       if (children != null) {
         for (child in children) {
-          _childrenList.value += child
+          _childrenPlaylistTrackList.value += child
         }
       }
     }

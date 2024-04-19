@@ -46,14 +46,14 @@ import com.spotify.protocol.types.ListItem
 @Composable
 fun SelectSongScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
   val mainList by viewModel.spotifySubsectionList.collectAsState()
-  val childrenList by viewModel.childrenList.collectAsState()
+  val childrenPlaylistTrackList by viewModel.childrenPlaylistTrackList.collectAsState()
 
   var displayedList by remember { mutableStateOf(mainList) }
 
   LaunchedEffect(Unit) { viewModel.retrieveAndAddSubsection() }
   LaunchedEffect(mainList) { displayedList = mainList }
 
-  LaunchedEffect(childrenList) { displayedList = childrenList }
+  LaunchedEffect(childrenPlaylistTrackList) { displayedList = childrenPlaylistTrackList }
 
   Scaffold(
       topBar = {
