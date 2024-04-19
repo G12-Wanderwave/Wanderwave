@@ -14,9 +14,11 @@ import com.spotify.protocol.client.CallResult
 import com.spotify.protocol.types.Empty
 import com.spotify.protocol.types.ListItem
 import com.spotify.protocol.types.ListItems
+import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
@@ -304,5 +306,52 @@ class SpotifyControllerTest {
     Log.d("Result of the flow", result.toString())
     // Assertions to check only the matching item is collected
     assertTrue(result == listOf(matchingItem, nonMatchingItem))
+  fun resumeTrackTest() = runBlocking {
+    every { mockAppRemote.isConnected } returns true
+    var callResult = mockk<CallResult<Empty>>()
+    var playerApi = mockk<PlayerApi>()
+    every { mockAppRemote.playerApi } returns playerApi
+    var slot = slot<CallResult.ResultCallback<Empty>>()
+    every { playerApi.resume() } returns callResult
+    every { callResult.setResultCallback(capture(slot)) } answers
+        {
+          slot.captured.onResult(Empty())
+          slot.captured.onResult(Empty())
+          callResult
+        }
+
+    every { callResult.setErrorCallback(any()) } returns callResult
+    every { callResult.cancel() } just Runs
+
+    val result = spotifyController.resumeTrack().first()
+
+    verify { playerApi.resume() }
+    assertTrue(result == true)
+  }
+
+  @Test
+  fun pauseTrackTest() = runBlocking {
+    every { mockAppRemote.isConnected } returns true
+    var callResult = mockk<CallResult<Empty>>()
+    var playerApi = mockk<PlayerApi>()
+    every { mockAppRemote.playerApi } returns playerApi
+    var slot = slot<CallResult.ResultCallback<Empty>>()
+    every { playerApi.pause() } returns callResult
+    every { callResult.setResultCallback(capture(slot)) } answers
+        {
+          slot.captured.onResult(Empty())
+          slot.captured.onResult(Empty())
+          callResult
+        }
+
+    every { callResult.setErrorCallback(any()) } returns callResult
+    every { callResult.cancel() } just Runs
+
+    val result = spotifyController.pauseTrack().first()
+
+    verify { playerApi.pause() }
+    assertTrue(result == true)
+  }
   }
 }
+

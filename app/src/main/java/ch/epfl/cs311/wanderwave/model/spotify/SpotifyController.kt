@@ -16,175 +16,200 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
+
 class SpotifyController(private val context: Context) {
 
-  private val CLIENT_ID = BuildConfig.SPOTIFY_CLIENT_ID
-  private val REDIRECT_URI = "wanderwave-auth://callback"
-  private val SCOPES =
-      listOf(
-          "app-remote-control",
-          "playlist-read-private",
-          "playlist-read-collaborative",
-          "user-library-read",
-          "user-read-email",
-          "user-read-private")
+    private val CLIENT_ID = BuildConfig.SPOTIFY_CLIENT_ID
+    private val REDIRECT_URI = "wanderwave-auth://callback"
+    private val SCOPES =
+        listOf(
+            "app-remote-control",
+            "playlist-read-private",
+            "playlist-read-collaborative",
+            "user-library-read",
+            "user-read-email",
+            "user-read-private")
 
-  private val connectionParams =
-      ConnectionParams.Builder(CLIENT_ID).setRedirectUri(REDIRECT_URI).showAuthView(true).build()
+    private val connectionParams =
+        ConnectionParams.Builder(CLIENT_ID).setRedirectUri(REDIRECT_URI).showAuthView(true).build()
 
-  public var appRemote: SpotifyAppRemote? = null
+    var appRemote: SpotifyAppRemote? = null
 
-  fun getAuthorizationRequest(): AuthorizationRequest {
-    val builder =
-        AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
-            .setScopes(SCOPES.toTypedArray())
-    return builder.build()
-  }
+    fun getAuthorizationRequest(): AuthorizationRequest {
+        val builder =
+            AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
+                .setScopes(SCOPES.toTypedArray())
+        return builder.build()
+    }
 
-  fun getLogoutRequest(): AuthorizationRequest {
-    val builder =
-        AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
-            .setScopes(emptyArray())
-            .setShowDialog(true)
-    return builder.build()
-  }
+    fun getLogoutRequest(): AuthorizationRequest {
+        val builder =
+            AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
+                .setScopes(emptyArray())
+                .setShowDialog(true)
+        return builder.build()
+    }
 
-  fun isConnected(): Boolean {
-    return appRemote?.isConnected ?: false
-  }
+    fun isConnected(): Boolean {
+        return appRemote?.isConnected ?: false
+    }
 
-  fun connectRemote(): Flow<ConnectResult> {
-    return callbackFlow {
-      if (isConnected()) {
-        trySend(ConnectResult.SUCCESS)
-      } else {
-        disconnectRemote()
-        SpotifyAppRemote.connect(
-            context,
-            connectionParams,
-            object : Connector.ConnectionListener {
-              override fun onConnected(spotifyAppRemote: SpotifyAppRemote) {
-                appRemote = spotifyAppRemote
-                println("Connected to Spotify App Remote")
+    fun connectRemote(): Flow<ConnectResult> {
+        return callbackFlow {
+            if (isConnected()) {
                 trySend(ConnectResult.SUCCESS)
-                channel.close()
-              }
+            } else {
+                disconnectRemote()
+                SpotifyAppRemote.connect(
+                    context,
+                    connectionParams,
+                    object : Connector.ConnectionListener {
+                        override fun onConnected(spotifyAppRemote: SpotifyAppRemote) {
+                            appRemote = spotifyAppRemote
+                            println("Connected to Spotify App Remote")
+                            trySend(ConnectResult.SUCCESS)
+                            channel.close()
+                        }
 
-              override fun onFailure(throwable: Throwable) {
-                when (throwable) {
-                  is NotLoggedInException -> trySend(ConnectResult.NOT_LOGGED_IN)
-                  else -> trySend(ConnectResult.FAILED)
+                        override fun onFailure(throwable: Throwable) {
+                            when (throwable) {
+                                is NotLoggedInException -> trySend(ConnectResult.NOT_LOGGED_IN)
+                                else -> trySend(ConnectResult.FAILED)
+                            }
+                            channel.close()
+                        }
+                    })
+            }
+            awaitClose {}
+        }
+    }
+
+    fun disconnectRemote() {
+        appRemote?.let { SpotifyAppRemote.disconnect(it) }
+    }
+
+    fun playTrack(track: Track): Flow<Boolean> {
+        return callbackFlow {
+            val callResult =
+                appRemote?.let {
+                    it.playerApi
+                        .play(track.id)
+                        .setResultCallback { trySend(true) }
+                        .setErrorCallback { trySend(false) }
                 }
-                channel.close()
-              }
-            })
-      }
-      awaitClose {}
+            awaitClose { callResult?.cancel() }
+        }
     }
-  }
 
-  fun disconnectRemote() {
-    appRemote?.let { SpotifyAppRemote.disconnect(it) }
-  }
-
-  @OptIn(FlowPreview::class)
-  fun playTrack(track: Track): Flow<Boolean> {
-    return callbackFlow {
-      val callResult =
-          appRemote?.let {
-            it.playerApi
-                .play(track.id)
-                .setResultCallback { trySend(true) }
-                .setErrorCallback { trySend(false) }
-          }
-      awaitClose { callResult?.cancel() }
-    }
-  }
-
-  /**
-   * Get all the playlist, title, ... from spotify from the home page of the user.
-   *
-   * @return a Flow of ListItem which has all the playlist, title, ... from the home page of the
-   *   user.
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 2.0
-   */
-  fun getAllElementFromSpotify(): Flow<List<ListItem>> {
-    val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
-    return callbackFlow {
-      val callResult =
-          appRemote?.let { it ->
-            it.contentApi
-                .getRecommendedContentItems(ContentApi.ContentType.DEFAULT)
-                .setResultCallback {
-                  for (i in it.items) list += i
-                  trySend(list)
+    fun pauseTrack(): Flow<Boolean> {
+        return callbackFlow {
+            val callResult =
+                appRemote?.let {
+                    it.playerApi
+                        .pause()
+                        .setResultCallback { trySend(true) }
+                        .setErrorCallback { trySend(false) }
                 }
-                .setErrorCallback { trySend(list + ListItem("", "", null, "", "", false, false)) }
-          }
-      awaitClose { callResult?.cancel() }
+            awaitClose { callResult?.cancel() }
+        }
     }
-  }
-  /**
-   * Get the children of a ListItem. In our case, the children is either a playlist or an album
-   *
-   * @param listItem the ListItem to get the children from
-   * @return a Flow of ListItem
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 2.0
-   */
-  @OptIn(FlowPreview::class)
-  fun getChildren(listItem: ListItem): Flow<ListItem> {
 
-    return callbackFlow {
-      val callResult =
-          appRemote?.let { it ->
-            it.contentApi
-                .getChildrenOfItem(listItem, 50, 0)
-                .setResultCallback {
-                  for (i in it.items) if (i.id.contains("album") || i.id.contains("playlist"))
-                      trySend(i)
+    fun resumeTrack(): Flow<Boolean> {
+        return callbackFlow {
+            val callResult =
+                appRemote?.let {
+                    it.playerApi
+                        .resume()
+                        .setResultCallback { trySend(true) }
+                        .setErrorCallback { trySend(false) }
                 }
-                .setErrorCallback { trySend(ListItem("", "", null, "", "", false, false)) }
-          }
-      awaitClose { callResult?.cancel() }
+            awaitClose { callResult?.cancel() }
+        }
     }
-  }
-
-  /**
-   * Get the all the children of a ListItem. In our case, the children is either a playlist or an
-   * album
-   *
-   * @param listItem the ListItem to get the childrens from
-   * @return a Flow of List<ListItem> which contains all the children of the ListItem
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 2.0
-   */
-  @OptIn(FlowPreview::class)
-  fun getAllChildren(listItem: ListItem): Flow<List<ListItem>> {
-    val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
-
-    return callbackFlow {
-      val callResult =
-          appRemote?.let { it ->
-            it.contentApi
-                .getChildrenOfItem(listItem, 50, 0)
-                .setResultCallback {
-                  for (i in it.items) list += i
-                  trySend(list)
+    /**
+     * Get all the playlist, title, ... from spotify from the home page of the user.
+     *
+     * @return a Flow of ListItem which has all the playlist, title, ... from the home page of the
+     *   user.
+     * @author Menzo Bouaissi
+     * @since 2.0
+     * @last update 2.0
+     */
+    fun getAllElementFromSpotify(): Flow<List<ListItem>> {
+        val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
+        return callbackFlow {
+            val callResult =
+                appRemote?.let { it ->
+                    it.contentApi
+                        .getRecommendedContentItems(ContentApi.ContentType.DEFAULT)
+                        .setResultCallback {
+                            for (i in it.items) list += i
+                            trySend(list)
+                        }
+                        .setErrorCallback { trySend(list + ListItem("", "", null, "", "", false, false)) }
                 }
-                .setErrorCallback { trySend(list + ListItem("", "", null, "", "", false, false)) }
-          }
-      awaitClose { callResult?.cancel() }
+            awaitClose { callResult?.cancel() }
+        }
     }
-  }
+    /**
+     * Get the children of a ListItem. In our case, the children is either a playlist or an album
+     *
+     * @param listItem the ListItem to get the children from
+     * @return a Flow of ListItem
+     * @author Menzo Bouaissi
+     * @since 2.0
+     * @last update 2.0
+     */
+    @OptIn(FlowPreview::class)
+    fun getChildren(listItem: ListItem): Flow<ListItem> {
 
-  enum class ConnectResult {
-    SUCCESS,
-    NOT_LOGGED_IN,
-    FAILED
-  }
+        return callbackFlow {
+            val callResult =
+                appRemote?.let { it ->
+                    it.contentApi
+                        .getChildrenOfItem(listItem, 50, 0)
+                        .setResultCallback {
+                            for (i in it.items) if (i.id.contains("album") || i.id.contains("playlist"))
+                                trySend(i)
+                        }
+                        .setErrorCallback { trySend(ListItem("", "", null, "", "", false, false)) }
+                }
+            awaitClose { callResult?.cancel() }
+        }
+    }
+
+    /**
+     * Get the all the children of a ListItem. In our case, the children is either a playlist or an
+     * album
+     *
+     * @param listItem the ListItem to get the childrens from
+     * @return a Flow of List<ListItem> which contains all the children of the ListItem
+     * @author Menzo Bouaissi
+     * @since 2.0
+     * @last update 2.0
+     */
+    @OptIn(FlowPreview::class)
+    fun getAllChildren(listItem: ListItem): Flow<List<ListItem>> {
+        val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
+
+        return callbackFlow {
+            val callResult =
+                appRemote?.let { it ->
+                    it.contentApi
+                        .getChildrenOfItem(listItem, 50, 0)
+                        .setResultCallback {
+                            for (i in it.items) list += i
+                            trySend(list)
+                        }
+                        .setErrorCallback { trySend(list + ListItem("", "", null, "", "", false, false)) }
+                }
+            awaitClose { callResult?.cancel() }
+        }
+    }
+    enum class ConnectResult {
+        SUCCESS,
+        NOT_LOGGED_IN,
+        FAILED
+    }
+
 }
