@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.model
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import ch.epfl.cs311.wanderwave.model.data.Beacon
@@ -11,11 +12,23 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.localDb.PlaceHolderEntity
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import com.google.android.gms.tasks.OnSuccessListener
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 import io.mockk.MockKAnnotations
+import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.mockk
+import io.mockk.verify
+import junit.framework.TestCase.assertEquals
 import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
@@ -26,46 +39,93 @@ import org.junit.Test
 
 public class BeaconConnectionTest {
 
-  @get:Rule val mockkRule = MockKRule(this)
+  @get:Rule
+  val mockkRule = MockKRule(this)
   private lateinit var beaconConnection: BeaconConnection
 
-  @RelaxedMockK private lateinit var beaconConnectionMock: BeaconConnection
+  @RelaxedMockK
+  private lateinit var beaconConnectionMock: BeaconConnection
+
+  private lateinit var firestore: FirebaseFirestore
+  private lateinit var documentReference: DocumentReference
+  private lateinit var documentSnapshot: DocumentSnapshot
 
   @Before
   fun setup() {
-    MockKAnnotations.init(this)
-    beaconConnection = BeaconConnection()
+    // Create the mocks
+    firestore = mockk()
+    documentReference = mockk()
+    documentSnapshot = mockk()
+
+    // Define behavior for the mocks
+    every { firestore.collection(any()) } returns mockk(relaxed = true)
+    every { documentReference.get() } returns mockk(relaxed = true)
+    every { documentSnapshot.data } returns mockk(relaxed = true)
+
+
+    // Pass the mock Firestore instance to your BeaconConnection
+    beaconConnection = BeaconConnection(firestore)
   }
 
-  //  @Test
-  //  fun testAddAndGetItem() = runBlocking {
-  //    withTimeout(30000) { // Increase the timeout to 30 seconds
-  //      val beacon =
-  //          Beacon(
-  //              id = "testBeacon",
-  //              location = Location(1.0, 1.0, "Test Location"),
-  //              profileAndTrack =
-  //                  listOf(
-  //                      ProfileTrackAssociation(
-  //                          Profile(
-  //                              "Sample First Name",
-  //                              "Sample last name",
-  //                              "Sample desc",
-  //                              0,
-  //                              false,
-  //                              null,
-  //                              "Sample Profile ID",
-  //                              "Sample Track ID"),
-  //                          Track("Sample Track ID", "Sample Track Title", "Sample Artist
-  // Name"))))
-  //
-  //      beaconConnection.addItemWithId(beacon)
-  //
-  //      val retrievedBeacon = beaconConnection.getItem("testBeacon").first()
-  //      Log.d("Firestore", "$retrievedBeacon $beacon")
-  //      assert(beacon == retrievedBeacon)
-  //    }
-  //  }
+  @Test
+  fun testAddAndGetItem() = runBlocking {
+    withTimeout(3000) { // Increased timeout to 30 seconds
+      val beacon = Beacon(
+        id = "testBeacon",
+        location = Location(1.0, 1.0, "Test Location"),
+          profileAndTrack =
+          listOf(
+              ProfileTrackAssociation(
+                  Profile(
+                      "Sample First Name",
+                      "Sample last name",
+                      "Sample desc",
+                      0,
+                      false,
+                      null,
+                      "Sample Profile ID",
+                      "Sample Track ID"),
+                  Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
+
+
+      val trackDocumentSnapshot = mockk<DocumentSnapshot>(relaxed = true)
+      every { trackDocumentSnapshot.data } returns mapOf(
+        "id" to "testTrack",
+        "title" to "Test Title",
+        "artist" to "Test Artist"
+      )
+      every { trackDocumentSnapshot.toObject(Track::class.java) } returns Track("testTrack", "Test Title", "Test Artist")
+      every { trackDocumentSnapshot.exists() } returns true
+
+      val trackRef = mockk<DocumentReference>(relaxed = true)
+      val trackTask = mockk<Task<DocumentSnapshot>>(relaxed = true)
+      every { trackTask.isSuccessful } returns true
+      every { trackTask.result } returns trackDocumentSnapshot
+      every { trackRef.get() } returns trackTask
+
+      // Define behavior for the mocks
+      every { firestore.collection(any()).document(any()).set(any()) } returns Tasks.forResult(null)
+
+      // Define behavior for the mocks
+      every { firestore.collection(any()).document(any()).delete() } returns Tasks.forResult(null)
+      coEvery { firestore.collection(any()).document(any()).get() } returns Tasks.forResult(documentSnapshot)
+      every { documentSnapshot.toObject(Beacon::class.java) } returns beacon
+      every { documentSnapshot.get("location") } returns mapOf("latitude" to 1.0, "longitude" to 1.0, "name" to "Test Location")
+      every { documentSnapshot.get("tracks") } returns listOf(trackRef)
+      every { documentSnapshot.id } returns "testBeacon"
+      every { documentSnapshot.exists() } returns true
+
+      Log.d("Firestore", "Adding beacon")
+      beaconConnection.addItemWithId(beacon)
+      Log.d("Firestore", "Added beacon, getting beacon")
+      val retrievedBeacon = beaconConnection.getItem("testBeacon").firstOrNull()
+
+      assertEquals(beacon, retrievedBeacon)
+      verify { trackRef.get() }
+    }
+  }
+
+
 
   @Test
   fun testAddItem() = runBlocking {
@@ -181,36 +241,35 @@ public class BeaconConnectionTest {
     }
   }
 
-  //  @Test
-  //  fun testAddItemTwice() = runBlocking {
-  //    withTimeout(20000) {
-  //      val beacon =
-  //          Beacon(
-  //              id = "testBeacon",
-  //              location = Location(1.0, 1.0, "Test Location"),
-  //              profileAndTrack =
-  //                  listOf(
-  //                      ProfileTrackAssociation(
-  //                          Profile(
-  //                              "Sample First Name",
-  //                              "Sample last name",
-  //                              "Sample desc",
-  //                              0,
-  //                              false,
-  //                              null,
-  //                              "Sample Profile ID",
-  //                              "Sample Track ID"),
-  //                          Track("Sample Track ID", "Sample Track Title", "Sample Artist
-  // Name"))))
-  //
-  //      beaconConnection.addItemWithId(beacon)
-  //      beaconConnection.addItemWithId(beacon)
-  //
-  //      val retrievedBeacon = beaconConnection.getItem("testBeacon").first()
-  //
-  //      assert(beacon == retrievedBeacon)
-  //    }
-  //  }
+  @Test
+  fun testAddItemTwice() = runBlocking {
+    withTimeout(20000) {
+      val beacon =
+        Beacon(
+          id = "testBeacon",
+          location = Location(1.0, 1.0, "Test Location"),
+            profileAndTrack =
+            listOf(
+                ProfileTrackAssociation(
+                    Profile(
+                        "Sample First Name",
+                        "Sample last name",
+                        "Sample desc",
+                        0,
+                        false,
+                        null,
+                        "Sample Profile ID",
+                        "Sample Track ID"),
+                    Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
+
+      beaconConnection.addItemWithId(beacon)
+      beaconConnection.addItemWithId(beacon)
+
+      val retrievedBeacon = beaconConnection.getItem("testBeacon").first()
+
+      assert(beacon == retrievedBeacon)
+    }
+  }
 
   @Test
   fun AddDeleteAndGetItem() = runBlocking {
