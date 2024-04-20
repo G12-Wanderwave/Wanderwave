@@ -88,8 +88,9 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
                     icon = Icons.Filled.ArrowBack,
                     onClick = { navActions.navigateTo(Route.MAIN) }
                 )
-                Spacer(modifier = Modifier.weight(1f))  // This spacer pushes the exit icon to the right
+                Spacer(modifier = Modifier.weight(1f))
                 ClickableIcon(
+                    modifier = Modifier.testTag("signOutButton"),
                     icon = Icons.Filled.ExitToApp,
                     onClick = { navActions.navigateToTopLevel(Route.LOGIN) }
                     // TODO: Implement actual user sign out

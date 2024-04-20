@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Profile
@@ -115,8 +116,8 @@ constructor(
    * @since 2.0
    * @last update 2.0
    */
-  fun retrieveTracks() {
-    CoroutineScope(Dispatchers.IO).launch {
+  fun retrieveTracks(scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) {
+    scope.launch {
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
       if (track != null) {
         for (i in track) {
@@ -140,8 +141,8 @@ constructor(
    * @since 2.0
    * @last update 2.0
    */
-  fun retrieveAndAddSubsection() {
-    CoroutineScope(Dispatchers.IO).launch {
+  fun retrieveAndAddSubsection(scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) {
+    scope.launch {
       _spotifySubsectionList.value = emptyList()
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
       if (track != null) {
@@ -159,8 +160,8 @@ constructor(
    * @since 2.0
    * @last update 2.0
    */
-  fun retrieveChild(item: ListItem) {
-    CoroutineScope(Dispatchers.IO).launch {
+  fun retrieveChild(item: ListItem,scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) {
+    scope.launch {
       _childrenPlaylistTrackList.value = emptyList()
       val children = spotifyController.getAllChildren(item).firstOrNull()
       if (children != null) {
