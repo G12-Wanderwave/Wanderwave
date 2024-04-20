@@ -76,15 +76,17 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
       modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         Box(modifier = Modifier.fillMaxWidth()) {
-          Row(modifier = Modifier.fillMaxWidth()) {
-            ClickableIcon(
-                icon = Icons.Filled.ArrowBack, onClick = { navActions.navigateTo(Route.MAIN) })
-            Spacer(modifier = Modifier.weight(1f))
-            ClickableIcon(
-                modifier = Modifier.testTag("signOutButton"),
-                icon = Icons.Filled.ExitToApp,
-                onClick = { navActions.navigateToTopLevel(Route.LOGIN) }
-                // TODO: Implement actual user sign out
+            Row(modifier = Modifier.fillMaxWidth()) {
+                ClickableIcon(
+                    icon = Icons.Filled.ArrowBack,
+                    onClick = { navActions.navigateTo(Route.MAIN) }
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                ClickableIcon(
+                    modifier = Modifier.testTag("signOutButton"),
+                    icon = Icons.Filled.ExitToApp,
+                    onClick = { navActions.navigateToTopLevel(Route.LOGIN) }
+                    // TODO: Implement actual user sign out
 
                 )
           } // Spacer to create space between Box and VisitCard

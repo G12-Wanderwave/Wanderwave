@@ -13,6 +13,10 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
+<<<<<<< HEAD
+=======
+import kotlinx.coroutines.delay
+>>>>>>> bf92b3b (Fix a test that sometimes was passing, sometimes not)
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -115,12 +119,10 @@ class ProfileViewModelTest {
     advanceUntilIdle()
 
     // Optionally check additional conditions after ensuring Flow had time to collect
-    assertFalse(
-        "Song list should not be empty after adding a track", viewModel.songLists.value.isEmpty())
-    assertEquals(
-        Track(track2.id, track2.title, track2.subtitle),
-        viewModel.songLists.value.first().tracks.get(0))
+    assertFalse("Song list should not be empty after adding a track", viewModel.songLists.value.isEmpty())
+    assertEquals(Track(track2.id,track2.title,track2.subtitle), viewModel.songLists.value.first().tracks.get(0))
   }
+
 
   @Test
   fun testGetAllChildrenFlow() = runBlockingTest {
