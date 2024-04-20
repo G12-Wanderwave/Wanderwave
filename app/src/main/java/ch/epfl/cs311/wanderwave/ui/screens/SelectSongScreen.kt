@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.ui.components.profile.TrackItem
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import com.spotify.protocol.types.ListItem
 
@@ -88,23 +89,3 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: ProfileViewModel)
       }
 }
 
-// TODO :Merge with @Joriba stuff if possible
-@Composable
-fun TrackItem(listItem: ListItem, onClick: () -> Unit) {
-  Card(
-      colors =
-          CardDefaults.cardColors(
-              containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-              contentColor = MaterialTheme.colorScheme.onSurface,
-              disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariant,
-              disabledContentColor = MaterialTheme.colorScheme.error // Example color
-              ),
-      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).clickable(onClick = onClick)) {
-        Row {
-          Column(modifier = Modifier.padding(8.dp)) {
-            Text(text = listItem.title, style = MaterialTheme.typography.titleMedium)
-            Text(text = listItem.subtitle, style = MaterialTheme.typography.bodyMedium)
-          }
-        }
-      }
-}

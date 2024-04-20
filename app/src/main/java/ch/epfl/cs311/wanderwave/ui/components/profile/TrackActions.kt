@@ -1,13 +1,20 @@
 package ch.epfl.cs311.wanderwave.ui.components.profile
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -18,6 +25,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.viewmodel.SongList
+import com.spotify.protocol.types.ListItem
 
 /**
  * Composable that displays a list of tracks. Each track is represented by the TrackItem composable.
@@ -42,12 +50,23 @@ fun TracksList(tracks: List<Track>) {
  * @last update 1.0
  */
 @Composable
-fun TrackItem(track: Track) {
-  Column(modifier = Modifier.padding(8.dp).testTag("trackItem_${track.id}")) {
-    Text(text = "ID: ${track.id}", style = MaterialTheme.typography.bodyMedium)
-    Text(text = "Title: ${track.title}", style = MaterialTheme.typography.bodyMedium)
-    Text(text = "Artist: ${track.artist}", style = MaterialTheme.typography.bodyMedium)
-  }
+fun TrackItem(track:  Track, onClick: () -> Unit = {}) {
+    Card(
+        colors =
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            disabledContentColor = MaterialTheme.colorScheme.error // Example color
+        ),
+        modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).clickable(onClick = onClick)) {
+        Row {
+            Column(modifier = Modifier.padding(8.dp)) {
+                Text(text = track.title, style = MaterialTheme.typography.titleMedium)
+                Text(text = track.artist, style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+    }
 }
 
 /**
@@ -153,4 +172,25 @@ fun SongsListDisplay(songLists: List<SongList>, isTopSongsListVisible: Boolean) 
           }
         }
   }
+}
+
+
+@Composable
+fun TrackItem(listItem: ListItem, onClick: () -> Unit) {
+    Card(
+        colors =
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            disabledContentColor = MaterialTheme.colorScheme.error // Example color
+        ),
+        modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).clickable(onClick = onClick)) {
+        Row {
+            Column(modifier = Modifier.padding(8.dp)) {
+                Text(text = listItem.title, style = MaterialTheme.typography.titleMedium)
+                Text(text = listItem.subtitle, style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+    }
 }
