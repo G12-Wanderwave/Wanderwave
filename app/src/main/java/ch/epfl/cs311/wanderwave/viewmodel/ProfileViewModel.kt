@@ -11,7 +11,6 @@ import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
@@ -115,7 +114,7 @@ constructor(
    * @since 2.0
    * @last update 2.0
    */
-  fun retrieveTracks(scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) {
+  fun retrieveTracks(scope: CoroutineScope) {
     scope.launch {
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
       if (track != null) {
@@ -140,7 +139,7 @@ constructor(
    * @since 2.0
    * @last update 2.0
    */
-  fun retrieveAndAddSubsection(scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) {
+  fun retrieveAndAddSubsection(scope: CoroutineScope) {
     scope.launch {
       _spotifySubsectionList.value = emptyList()
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
@@ -159,7 +158,7 @@ constructor(
    * @since 2.0
    * @last update 2.0
    */
-  fun retrieveChild(item: ListItem, scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) {
+  fun retrieveChild(item: ListItem, scope: CoroutineScope) {
     scope.launch {
       _childrenPlaylistTrackList.value = emptyList()
       val children = spotifyController.getAllChildren(item).firstOrNull()
