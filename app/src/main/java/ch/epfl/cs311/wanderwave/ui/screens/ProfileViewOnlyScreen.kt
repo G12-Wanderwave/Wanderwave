@@ -40,8 +40,8 @@ fun ProfileViewOnlyScreen(profile: Profile) {
         // TODO: modify this, because the profile.songLists is not available
         showListSong(
             mockSongLists) // TODO: change to actually recover the profile.songLists, but related to
-                           // #127
-  }
+        // #127
+      }
 }
 
 @Composable
