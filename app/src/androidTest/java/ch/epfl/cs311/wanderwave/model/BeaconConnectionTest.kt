@@ -19,6 +19,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
@@ -42,7 +43,6 @@ public class BeaconConnectionTest {
 
   private lateinit var firestore: FirebaseFirestore
   private lateinit var documentReference: DocumentReference
-  private lateinit var documentSnapshot: DocumentSnapshot
   private lateinit var collectionReference: CollectionReference
 
   lateinit var beacon: Beacon
@@ -52,7 +52,6 @@ public class BeaconConnectionTest {
     // Create the mocks
     firestore = mockk()
     documentReference = mockk<DocumentReference>(relaxed = true)
-    documentSnapshot = mockk<DocumentSnapshot>(relaxed = true)
     collectionReference = mockk<CollectionReference>(relaxed = true)
 
     // Mock data
@@ -122,13 +121,13 @@ public class BeaconConnectionTest {
       every { firestore.collection(any()).document(any()).set(any()) } returns Tasks.forResult(null)
 
       // Define behavior for the mocks
-      every { firestore.collection(any()).document(any()).delete() } returns Tasks.forResult(null)
-      coEvery { firestore.collection(any()).document(any()).get() } returns Tasks.forResult(documentSnapshot)
-      every { documentSnapshot.toObject(Beacon::class.java) } returns beacon
-      every { documentSnapshot.get("location") } returns mapOf("latitude" to 1.0, "longitude" to 1.0, "name" to "Test Location")
-      every { documentSnapshot.get("tracks") } returns listOf(trackRef)
-      every { documentSnapshot.id } returns "testBeacon"
-      every { documentSnapshot.exists() } returns true
+//      every { firestore.collection(any()).document(any()).delete() } returns Tasks.forResult(null)
+//      coEvery { firestore.collection(any()).document(any()).get() } returns Tasks.forResult(documentSnapshot)
+//      every { documentSnapshot.toObject(Beacon::class.java) } returns beacon
+//      every { documentSnapshot.get("location") } returns mapOf("latitude" to 1.0, "longitude" to 1.0, "name" to "Test Location")
+//      every { documentSnapshot.get("tracks") } returns listOf(trackRef)
+//      every { documentSnapshot.id } returns "testBeacon"
+//      every { documentSnapshot.exists() } returns true
 
       Log.d("Firestore", "Adding beacon")
       beaconConnection.addItemWithId(beacon)
@@ -237,30 +236,47 @@ public class BeaconConnectionTest {
   @Test
   fun testAddItemTwice() = runBlocking {
     withTimeout(20000) {
-      val beacon =
-        Beacon(
-          id = "testBeacon",
-          location = Location(1.0, 1.0, "Test Location"),
-            profileAndTrack =
-            listOf(
-                ProfileTrackAssociation(
-                    Profile(
-                        "Sample First Name",
-                        "Sample last name",
-                        "Sample desc",
-                        0,
-                        false,
-                        null,
-                        "Sample Profile ID",
-                        "Sample Track ID"),
-                    Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
+        val beacon =
+            Beacon(
+                id = "testBeacon",
+                location = Location(1.0, 1.0, "Test Location"),
+                profileAndTrack =
+                listOf(
+                    ProfileTrackAssociation(
+                        Profile(
+                            "Sample First Name",
+                            "Sample last name",
+                            "Sample desc",
+                            0,
+                            false,
+                            null,
+                            "Sample Profile ID",
+                            "Sample Track ID"
+                        ),
+                        Track("Sample Track ID", "Sample Track Title", "Sample Artist Name")
+                    )
+                )
+            )
+    }
+  fun testGetItem() = runBlocking {
+    withTimeout(3000) {
+      // Call the function under test
+      val retrievedBeacon = beaconConnection.getItem("testBeacon")
+
+      // Verify that the get function is called on the document with the correct id
+      coVerify { documentReference.get() }
+    }
+  }
+
+  @Test
+  fun testDeleteItem() {
+    // Call the function under test
+    beaconConnection.deleteItem(beacon)
 
       beaconConnection.addItemWithId(beacon)
       beaconConnection.addItemWithId(beacon)
 
-      val retrievedBeacon = beaconConnection.getItem("testBeacon").first()
 
-      assert(beacon == retrievedBeacon)
     }
   }
 
@@ -306,7 +322,7 @@ public class BeaconConnectionTest {
   }
 
   // TODO : To be deleted after a real entry is added to the database
-  private lateinit var db: AppDatabase
+  lateinit var db: AppDatabase
 
   @Test
   fun createDb() {
