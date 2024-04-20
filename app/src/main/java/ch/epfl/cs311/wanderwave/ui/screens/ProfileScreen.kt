@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -16,7 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -35,7 +33,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
@@ -65,7 +62,6 @@ val INPUT_BOX_NAM_SIZE = 150.dp
  * @since 1.0
  * @last update 2.0
  */
-
 @Composable
 fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
   val currentProfileState by viewModel.profile.collectAsState()
@@ -77,37 +73,30 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
   }
 
   Column(
-      modifier = Modifier
-          .fillMaxSize()
-          .padding(16.dp)
-          .testTag("profileScreen"),
+      modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                ClickableIcon(
-                    icon = Icons.Filled.ArrowBack,
-                    onClick = { navActions.navigateTo(Route.MAIN) }
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                ClickableIcon(
-                    modifier = Modifier.testTag("signOutButton"),
-                    icon = Icons.Filled.ExitToApp,
-                    onClick = { navActions.navigateToTopLevel(Route.LOGIN) }
-                    // TODO: Implement actual user sign out
+          Row(modifier = Modifier.fillMaxWidth()) {
+            ClickableIcon(
+                icon = Icons.Filled.ArrowBack, onClick = { navActions.navigateTo(Route.MAIN) })
+            Spacer(modifier = Modifier.weight(1f))
+            ClickableIcon(
+                modifier = Modifier.testTag("signOutButton"),
+                icon = Icons.Filled.ExitToApp,
+                onClick = { navActions.navigateToTopLevel(Route.LOGIN) }
+                // TODO: Implement actual user sign out
 
                 )
-            }  // Spacer to create space between Box and VisitCard
+          } // Spacer to create space between Box and VisitCard
           VisitCard(Modifier, currentProfile)
-          ProfileSwitch(Modifier.align(Alignment.TopEnd).padding(top=20.dp), viewModel)
+          ProfileSwitch(Modifier.align(Alignment.TopEnd).padding(top = 20.dp), viewModel)
           ClickableIcon(
               Modifier.align(Alignment.BottomEnd),
               Icons.Filled.Create,
               onClick = { navActions.navigateTo(Route.EDIT_PROFILE) })
         }
         showSongList(navActions, viewModel)
-
       }
-
 }
 
 /**
@@ -120,53 +109,52 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
  * @last update 2.0
  */
 @Composable
-fun showSongList(navActions:NavigationActions, viewModel:ProfileViewModel) {
-    val songLists by viewModel.songLists.collectAsState()
-    var showDialog by remember { mutableStateOf(false) }
-    var dialogListType by remember { mutableStateOf("TOP SONGS") }
-    var isTopSongsListVisible by remember { mutableStateOf(true) }
-    Button(
-        onClick = { isTopSongsListVisible = !isTopSongsListVisible },
-        modifier = Modifier.testTag("toggleSongList")) {
+fun showSongList(navActions: NavigationActions, viewModel: ProfileViewModel) {
+  val songLists by viewModel.songLists.collectAsState()
+  var showDialog by remember { mutableStateOf(false) }
+  var dialogListType by remember { mutableStateOf("TOP SONGS") }
+  var isTopSongsListVisible by remember { mutableStateOf(true) }
+  Button(
+      onClick = { isTopSongsListVisible = !isTopSongsListVisible },
+      modifier = Modifier.testTag("toggleSongList")) {
         Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
-    }
+      }
 
-    // Call the SongsListDisplay function
-    // Buttons for adding tracks to top songs lists
-    if (isTopSongsListVisible){
-        Button(
-            onClick = { navActions.navigateTo(Route.SELECT_SONG) },
-            modifier = Modifier.testTag("addTopSongs")) {
-            Text("Add Track to TOP SONGS List")
+  // Call the SongsListDisplay function
+  // Buttons for adding tracks to top songs lists
+  if (isTopSongsListVisible) {
+    Button(
+        onClick = { navActions.navigateTo(Route.SELECT_SONG) },
+        modifier = Modifier.testTag("addTopSongs")) {
+          Text("Add Track to TOP SONGS List")
         }
-    }else{
-        Button(
-            onClick = {
-                showDialog = true
-                dialogListType = "CHOSEN SONGS"
-            },
-            modifier = Modifier.testTag("addChosenSongs")) {
-            Text("Add Track to CHOSEN SONGS List")
+  } else {
+    Button(
+        onClick = {
+          showDialog = true
+          dialogListType = "CHOSEN SONGS"
+        },
+        modifier = Modifier.testTag("addChosenSongs")) {
+          Text("Add Track to CHOSEN SONGS List")
         }
-    }
-    SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
-    // Buttons for adding tracks to chosen songs list
+  }
+  SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
+  // Buttons for adding tracks to chosen songs list
 
-
-    // Show dialog for adding a new track and add the track to the appropriate list
-    if (showDialog) {
-        AddTrackDialog(
-            onAddTrack = { id, title, artist ->
-                viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
-                viewModel.addTrackToList(dialogListType, Track(id, title, artist))
-                showDialog = false
-            },
-            onDismiss = { showDialog = false },
-            initialTrackId = "",
-            initialTrackTitle = "",
-            initialTrackArtist = "",
-            dialogTestTag = "addTrackDialog")
-    }
+  // Show dialog for adding a new track and add the track to the appropriate list
+  if (showDialog) {
+    AddTrackDialog(
+        onAddTrack = { id, title, artist ->
+          viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
+          viewModel.addTrackToList(dialogListType, Track(id, title, artist))
+          showDialog = false
+        },
+        onDismiss = { showDialog = false },
+        initialTrackId = "",
+        initialTrackTitle = "",
+        initialTrackArtist = "",
+        dialogTestTag = "addTrackDialog")
+  }
 }
 /**
  * This handle the logic behind the switch that can permit the user to switch to the anonymous mode
@@ -187,12 +175,12 @@ fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel = h
         viewModel.togglePublicMode()
       },
       modifier =
-      modifier
-          .graphicsLayer {
-              scaleX = SCALE_X
-              scaleY = SCALE_Y
-          }
-          .testTag("profileSwitch"),
+          modifier
+              .graphicsLayer {
+                scaleX = SCALE_X
+                scaleY = SCALE_Y
+              }
+              .testTag("profileSwitch"),
       colors =
           SwitchDefaults.colors(
               checkedThumbColor = MaterialTheme.colorScheme.primary,
@@ -223,15 +211,13 @@ fun ProfileButton(
   // Display the button only when on the main screen TODO: Also from Map ?
   Box(
       modifier =
-      modifier
-          .clickable { navActions.navigateTo(Route.PROFILE) }
-          .background(Color.Transparent)
-          .padding(16.dp)
-          .testTag("profileButton")) {
+          modifier
+              .clickable { navActions.navigateTo(Route.PROFILE) }
+              .background(Color.Transparent)
+              .padding(16.dp)
+              .testTag("profileButton")) {
         if (navActions.getCurrentRoute() == Route.MAIN) {
-          SelectImage(modifier = Modifier
-              .clip(CircleShape)
-              .size(50.dp), profile = currentProfile)
+          SelectImage(modifier = Modifier.clip(CircleShape).size(50.dp), profile = currentProfile)
         }
       }
 }

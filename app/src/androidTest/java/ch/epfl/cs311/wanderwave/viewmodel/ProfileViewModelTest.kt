@@ -14,7 +14,6 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -103,7 +102,7 @@ class ProfileViewModelTest {
     val job = launch {
       viewModel.songLists.collect { songLists ->
         if (songLists.isNotEmpty()) {
-          cancel()  // Stop collecting once we have our expected result
+          cancel() // Stop collecting once we have our expected result
         }
       }
     }
@@ -117,12 +116,14 @@ class ProfileViewModelTest {
     advanceUntilIdle()
 
     // Optionally check additional conditions after ensuring Flow had time to collect
-    assertFalse("Song list should not be empty after adding a track", viewModel.songLists.value.isEmpty())
-    Log.d("fwefewfew",viewModel.songLists.value.first().tracks.toString())
-    Log.d("fwefewfew2",Track(track2.id,track2.title,track2.subtitle).toString())
-    assertEquals(Track(track2.id,track2.title,track2.subtitle), viewModel.songLists.value.first().tracks.get(0))
+    assertFalse(
+        "Song list should not be empty after adding a track", viewModel.songLists.value.isEmpty())
+    Log.d("fwefewfew", viewModel.songLists.value.first().tracks.toString())
+    Log.d("fwefewfew2", Track(track2.id, track2.title, track2.subtitle).toString())
+    assertEquals(
+        Track(track2.id, track2.title, track2.subtitle),
+        viewModel.songLists.value.first().tracks.get(0))
   }
-
 
   @Test
   fun testGetAllChildrenFlow() = runBlockingTest {
@@ -142,7 +143,7 @@ class ProfileViewModelTest {
       spotifyController.getAllChildren(ListItem("id", "title", null, "subtitle", "", false, true))
     } returns flowOf(listOf(expectedListItem))
     viewModel.retrieveAndAddSubsection(this)
-    viewModel.retrieveChild(expectedListItem,this)
+    viewModel.retrieveChild(expectedListItem, this)
     advanceUntilIdle() // Ensure all coroutines are completed
 
     // val result = viewModel.spotifySubsectionList.first()  // Safely access the first item

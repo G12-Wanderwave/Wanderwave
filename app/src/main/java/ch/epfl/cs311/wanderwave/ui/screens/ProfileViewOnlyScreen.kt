@@ -25,40 +25,47 @@ import ch.epfl.cs311.wanderwave.viewmodel.SongList
 
 @Composable
 fun ProfileViewOnlyScreen(profile: Profile) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .testTag("profileScreen"),
-        horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            VisitCard(Modifier, profile)
-        }
-        val mockSongLists = listOf(
-        SongList("TOP SONGS", listOf(Track("1", "Track 1", "Artist 1"), Track("2", "Track 2", "Artist 2"))),
-        SongList("CHOSEN SONGS", listOf(Track("3", "Track 3", "Artist 3"), Track("4", "Track 4", "Artist 4")))
-        )
-        //TODO: modify this, because the profile.songLists is not available
-        showListSong(mockSongLists)//TODO: change to actually recover the profile.songLists, but related to #127
-
-    }
-
+  Column(
+      modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
+      horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(modifier = Modifier.fillMaxWidth()) { VisitCard(Modifier, profile) }
+        val mockSongLists =
+            listOf(
+                SongList(
+                    "TOP SONGS",
+                    listOf(Track("1", "Track 1", "Artist 1"), Track("2", "Track 2", "Artist 2"))),
+                SongList(
+                    "CHOSEN SONGS",
+                    listOf(Track("3", "Track 3", "Artist 3"), Track("4", "Track 4", "Artist 4"))))
+        // TODO: modify this, because the profile.songLists is not available
+        showListSong(
+            mockSongLists) // TODO: change to actually recover the profile.songLists, but related to
+                           // #127
+  }
 }
 
 @Composable
-fun showListSong(songLists: List<SongList>){
-    var isTopSongsListVisible by remember { mutableStateOf(true) }
-    Button(
-        onClick = { isTopSongsListVisible = !isTopSongsListVisible },
-        modifier = Modifier.testTag("toggleSongList")) {
+fun showListSong(songLists: List<SongList>) {
+  var isTopSongsListVisible by remember { mutableStateOf(true) }
+  Button(
+      onClick = { isTopSongsListVisible = !isTopSongsListVisible },
+      modifier = Modifier.testTag("toggleSongList")) {
         Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
-    }
-    SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
-
+      }
+  SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
 }
 
 @Preview
 @Composable
 fun ProfileViewOnlyScreenPreview() {
-    ProfileViewOnlyScreen(Profile("My FirstName", "My LastName", "My Description", 0, true, null, "My Firebase UID", "My Spotify UID"))
+  ProfileViewOnlyScreen(
+      Profile(
+          "My FirstName",
+          "My LastName",
+          "My Description",
+          0,
+          true,
+          null,
+          "My Firebase UID",
+          "My Spotify UID"))
 }
