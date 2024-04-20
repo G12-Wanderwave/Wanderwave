@@ -45,8 +45,9 @@ fun TracksList(tracks: List<Track>) {
  *
  * @param track The track data to display.
  * @author Ayman Bakiri
+ * @author Menzo Bouaissi
  * @since 1.0
- * @last update 1.0
+ * @last update 2.0
  */
 @Composable
 fun TrackItem(track: Track, onClick: () -> Unit = {}) {
@@ -173,6 +174,14 @@ fun SongsListDisplay(songLists: List<SongList>, isTopSongsListVisible: Boolean) 
   }
 }
 
+/**
+ * Composable that displays a Track. Each track is represented by the TrackItem composable, which is
+ * a Card with the track's title and subtitle.
+ *
+ * @author Menzo Bouaissi
+ * @since 2.0
+ * @last update 2.0
+ */
 @Composable
 fun TrackItem(listItem: ListItem, onClick: () -> Unit) {
   Card(

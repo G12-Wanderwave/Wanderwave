@@ -23,6 +23,15 @@ import ch.epfl.cs311.wanderwave.ui.components.profile.SongsListDisplay
 import ch.epfl.cs311.wanderwave.ui.components.profile.VisitCard
 import ch.epfl.cs311.wanderwave.viewmodel.SongList
 
+/**
+ * This is the screen composable which can only show the profile of the user. It includes a visit
+ * card and a list of songs. This screen is not modifiable.
+ *
+ * @param profile The profile to display.
+ * @author Menzo Bouaissi
+ * @since 2.0
+ * @last update 2.0
+ */
 @Composable
 fun ProfileViewOnlyScreen(profile: Profile) {
   Column(
@@ -44,6 +53,14 @@ fun ProfileViewOnlyScreen(profile: Profile) {
       }
 }
 
+/**
+ * Composable that displays a list of tracks. Each track is represented by the TrackItem composable.
+ *
+ * @param songLists List of song lists to display.
+ * @author Menzo Bouaissi
+ * @since 2.0
+ * @last update 2.0
+ */
 @Composable
 fun showListSong(songLists: List<SongList>) {
   var isTopSongsListVisible by remember { mutableStateOf(true) }
