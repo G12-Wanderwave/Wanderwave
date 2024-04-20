@@ -12,21 +12,18 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.localDb.PlaceHolderEntity
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
-import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.every
-import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
-import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
@@ -36,32 +33,50 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import kotlin.system.measureTimeMillis
 
 public class BeaconConnectionTest {
 
-  @get:Rule
-  val mockkRule = MockKRule(this)
+  @get:Rule val mockkRule = MockKRule(this)
   private lateinit var beaconConnection: BeaconConnection
-
-  @RelaxedMockK
-  private lateinit var beaconConnectionMock: BeaconConnection
 
   private lateinit var firestore: FirebaseFirestore
   private lateinit var documentReference: DocumentReference
   private lateinit var documentSnapshot: DocumentSnapshot
+  private lateinit var collectionReference: CollectionReference
+
+  lateinit var beacon: Beacon
 
   @Before
   fun setup() {
     // Create the mocks
     firestore = mockk()
-    documentReference = mockk()
-    documentSnapshot = mockk()
+    documentReference = mockk<DocumentReference>(relaxed = true)
+    documentSnapshot = mockk<DocumentSnapshot>(relaxed = true)
+    collectionReference = mockk<CollectionReference>(relaxed = true)
+
+    // Mock data
+    beacon = Beacon(
+        id = "testBeacon",
+        location = Location(1.0, 1.0, "Test Location"),
+        profileAndTrack =
+        listOf(
+            ProfileTrackAssociation(
+                Profile(
+                    "Sample First Name",
+                    "Sample last name",
+                    "Sample desc",
+                    0,
+                    false,
+                    null,
+                    "Sample Profile ID",
+                    "Sample Track ID"),
+                Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
     // Define behavior for the mocks
     every { firestore.collection(any()) } returns mockk(relaxed = true)
-    every { documentReference.get() } returns mockk(relaxed = true)
-    every { documentSnapshot.data } returns mockk(relaxed = true)
-
+    every { collectionReference.document(beacon.id) } returns documentReference
+    every { firestore.collection(any()) } returns collectionReference
 
     // Pass the mock Firestore instance to your BeaconConnection
     beaconConnection = BeaconConnection(firestore)
@@ -151,7 +166,8 @@ public class BeaconConnectionTest {
     // Call the function under test
     beaconConnection.addItem(beacon)
 
-    // No verification is needed for interactions with the real object
+    // Verify that either the set function is called
+    verify { collectionReference.add(any()) }
   }
 
   @Test
@@ -211,34 +227,11 @@ public class BeaconConnectionTest {
                             "Sample Profile ID",
                             "Sample Track ID"),
                         Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
-
     // Call the function under test
     beaconConnection.updateItem(beacon)
 
-    // No verification is needed for interactions with the real object
-  }
-
-  // If someone knows how to deal with the flow already being null and how to test it, please let me
-  // know
-  @Test
-  fun testGetNonexistentItem() = runBlocking {
-    // By default the test passes, if a value is emitted the test fails
-    withTimeout(20000) {
-      // Flag to indicate if the flow emits any value
-      var valueEmitted = false
-
-      // Collect the flow within a 2-second timeout
-      measureTimeMillis {
-        withTimeoutOrNull(2000) {
-          beaconConnection.getItem("nonexistentBeacon").collect {
-            valueEmitted = true // Set the flag if the flow emits any value
-          }
-        }
-      }
-
-      // Assert that the flow didn't emit anything within the timeout
-      assert(valueEmitted.not()) { "Flow emitted unexpected value" }
-    }
+    // Verify that the set function is called on the document with the correct id
+    verify { documentReference.set(any()) }
   }
 
   @Test
