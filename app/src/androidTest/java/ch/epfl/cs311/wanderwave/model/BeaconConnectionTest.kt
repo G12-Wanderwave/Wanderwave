@@ -6,13 +6,14 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -24,7 +25,6 @@ public class BeaconConnectionTest {
 
   private lateinit var firestore: FirebaseFirestore
   private lateinit var documentReference: DocumentReference
-  private lateinit var documentSnapshot: DocumentSnapshot
   private lateinit var collectionReference: CollectionReference
 
   lateinit var beacon: Beacon
@@ -34,7 +34,6 @@ public class BeaconConnectionTest {
     // Create the mocks
     firestore = mockk()
     documentReference = mockk<DocumentReference>(relaxed = true)
-    documentSnapshot = mockk<DocumentSnapshot>(relaxed = true)
     collectionReference = mockk<CollectionReference>(relaxed = true)
 
     // Mock data
@@ -69,6 +68,17 @@ public class BeaconConnectionTest {
 
     // Verify that the set function is called on the document with the correct id
     verify { documentReference.set(any()) }
+  }
+
+  @Test
+  fun testGetItem() = runBlocking {
+    withTimeout(3000) {
+      // Call the function under test
+      val retrievedBeacon = beaconConnection.getItem("testBeacon")
+
+      // Verify that the get function is called on the document with the correct id
+      coVerify { documentReference.get() }
+    }
   }
 
   @Test

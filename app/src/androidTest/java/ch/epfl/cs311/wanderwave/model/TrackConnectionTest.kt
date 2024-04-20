@@ -1,94 +1,81 @@
 package ch.epfl.cs311.wanderwave.model
 
-import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
-import kotlin.system.measureTimeMillis
-import kotlinx.coroutines.flow.first
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FirebaseFirestore
+import io.mockk.every
+import io.mockk.junit4.MockKRule
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
-import kotlinx.coroutines.withTimeoutOrNull
-import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 class TrackConnectionTest {
-  // backend testing of the track connection
+  @get:Rule val mockkRule = MockKRule(this)
   private lateinit var trackConnection: TrackConnection
+
+  private lateinit var firestore: FirebaseFirestore
+  private lateinit var documentReference: DocumentReference
+  private lateinit var collectionReference: CollectionReference
+
+  lateinit var track: Track
 
   @Before
   fun setup() {
-    trackConnection = TrackConnection()
+    // Create the mocks
+    firestore = mockk()
+    documentReference = mockk<DocumentReference>(relaxed = true)
+    collectionReference = mockk<CollectionReference>(relaxed = true)
+
+    // Mock data
+    track = Track("testTrack", "Test Title", "Test Artist")
+
+    // Define behavior for the mocks
+    every { firestore.collection(any()) } returns mockk(relaxed = true)
+    every { collectionReference.document(track.id) } returns documentReference
+    every { firestore.collection(any()) } returns collectionReference
+
+    // Pass the mock Firestore instance to your TrackConnection
+    trackConnection = TrackConnection(firestore)
   }
 
   @Test
-  fun testAddAndGetItem() = runBlocking {
-    withTimeout(20000) {
-      val track = Track("testTrack", "Test Title", "Test Artist")
+  fun testAddItem() {
+    // Call the function under test
+    trackConnection.addItemWithId(track)
 
-      trackConnection.addItemWithId(track)
-
-      Log.d("Firestore", "Added item")
-      val retrievedTrack = trackConnection.getItem("testTrack").first()
-
-      assert(track == retrievedTrack)
-    }
+    // Verify that either the set function is called
+    verify { documentReference.set(any()) }
   }
 
   @Test
-  fun testGetNonexistentItem() = runBlocking {
-    withTimeout(20000) {
-      var valueEmitted = false
+  fun testUpdateItem() {
+    // Call the function under test
+    trackConnection.updateItem(track)
 
-      measureTimeMillis {
-        withTimeoutOrNull(2000) {
-          trackConnection.getItem("nonexistentTrack").collect { valueEmitted = true }
-        }
-      }
-
-      assert(valueEmitted.not()) { "Flow emitted unexpected value" }
-    }
+    // Verify that the set function is called on the document with the correct id
+    verify { documentReference.set(any()) }
   }
 
   @Test
-  fun testAddItemTwice() = runBlocking {
-    withTimeout(20000) {
-      val track = Track("testTrack", "Test Title", "Test Artist")
+  fun testGetItem() = runBlocking {
+    // Call the function under test
+    val retrievedTrack = trackConnection.getItem("testTrack")
 
-      trackConnection.addItemWithId(track)
-      trackConnection.addItemWithId(track)
-
-      val retrievedTrack = trackConnection.getItem("testTrack").first()
-
-      assert(track == retrievedTrack)
-    }
+    // Verify that the get function is called on the document with the correct id
+    verify { documentReference.get() }
   }
 
   @Test
-  fun AddDeleteAndGetItem() = runBlocking {
-    withTimeout(20000) {
-      val track = Track("testTrack1", "Test Title", "Test Artist")
-
-      trackConnection.addItemWithId(track)
-      trackConnection.deleteItem("testTrack1")
-
-      var valueEmitted = false
-
-      measureTimeMillis {
-        withTimeoutOrNull(2000) {
-          trackConnection.getItem("testTrack1").collect { valueEmitted = true }
-        }
-      }
-
-      assert(valueEmitted.not()) { "Flow emitted unexpected value" }
-    }
-  }
-
-  @After
-  fun cleanupTestData() = runBlocking {
+  fun testDeleteItem() {
+    // Call the function under test
     trackConnection.deleteItem("testTrack")
-    trackConnection.deleteItem("testTrack1")
-    trackConnection.deleteItem("testTrack2")
-    trackConnection.deleteItem("nonexistentTrack")
+
+    // Verify that the delete function is called on the document with the correct id
+    verify { documentReference.delete() }
   }
 }
