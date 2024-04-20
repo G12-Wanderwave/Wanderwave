@@ -59,7 +59,6 @@ fun ProfileViewOnlyScreen(profileId: String, navigationActions: NavigationAction
               icon = Icons.Default.ArrowBack,
               onClick = { navigationActions?.goBack() })
           VisitCard(Modifier, uiState.profile!!)
-        }
         val mockSongLists =
             listOf(
                 SongList(
@@ -70,10 +69,11 @@ fun ProfileViewOnlyScreen(profileId: String, navigationActions: NavigationAction
                     listOf(Track("3", "Track 3", "Artist 3"), Track("4", "Track 4", "Artist 4"))))
         // TODO: modify this, because the profile.songLists is not available
         showListSong(
-            mockSongLists) // TODO: change to actually recover the profile.songLists, but related to
-        // #127
+            mockSongLists) // TODO: change to actually recover the profile.songLists, but related to #127
       }
+  }
 }
+
 
 /**
  * Composable that displays a list of tracks. Each track is represented by the TrackItem composable.
@@ -94,17 +94,3 @@ fun showListSong(songLists: List<SongList>) {
   SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
 }
 
-// @Preview
-// @Composable
-// fun ProfileViewOnlyScreenPreview() {
-//  ProfileViewOnlyScreen(
-//      Profile(
-//          "My FirstName",
-//          "My LastName",
-//          "My Description",
-//          0,
-//          true,
-//          null,
-//          "My Firebase UID",
-//          "My Spotify UID"))
-// }

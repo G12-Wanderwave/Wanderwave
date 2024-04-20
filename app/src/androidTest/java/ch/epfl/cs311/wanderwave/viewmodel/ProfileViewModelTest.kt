@@ -2,6 +2,7 @@ package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.protocol.types.ListItem
@@ -13,10 +14,6 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
-<<<<<<< HEAD
-=======
-import kotlinx.coroutines.delay
->>>>>>> bf92b3b (Fix a test that sometimes was passing, sometimes not)
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -44,7 +41,7 @@ class ProfileViewModelTest {
   lateinit var viewModel: ProfileViewModel
   val testDispatcher = TestCoroutineDispatcher()
   @get:Rule val mockkRule = MockKRule(this)
-  @RelaxedMockK private lateinit var profileRepository: ProfileRepository
+  @RelaxedMockK private lateinit var profileRepository: ProfileConnection
 
   @RelaxedMockK private lateinit var spotifyController: SpotifyController
 
@@ -119,10 +116,13 @@ class ProfileViewModelTest {
     advanceUntilIdle()
 
     // Optionally check additional conditions after ensuring Flow had time to collect
-    assertFalse("Song list should not be empty after adding a track", viewModel.songLists.value.isEmpty())
-    assertEquals(Track(track2.id,track2.title,track2.subtitle), viewModel.songLists.value.first().tracks.get(0))
-  }
 
+    assertFalse(
+        "Song list should not be empty after adding a track", viewModel.songLists.value.isEmpty())
+    assertEquals(
+        Track(track2.id, track2.title, track2.subtitle),
+        viewModel.songLists.value.first().tracks.get(0))
+  }
 
   @Test
   fun testGetAllChildrenFlow() = runBlockingTest {
