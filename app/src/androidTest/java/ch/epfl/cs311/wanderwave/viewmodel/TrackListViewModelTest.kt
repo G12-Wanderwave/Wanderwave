@@ -191,4 +191,18 @@ class TrackListViewModelTest {
     viewModel.collapse()
     assertFalse(viewModel.uiState.value.expanded)
   }
+
+  @Test
+  fun expandTrackList() = run {
+    viewModel.expand()
+    assertTrue(viewModel.uiState.value.expanded)
+  }
+
+  @Test
+  fun queueNextTrack() = run {
+    viewModel.selectTrack(track)
+    viewModel.play()
+    viewModel.skipForward()
+    assertEquals(viewModel.uiState.value.selectedTrack, viewModel.uiState.value.tracks[1])
+  }
 }

@@ -14,6 +14,7 @@ import com.spotify.protocol.client.CallResult
 import com.spotify.protocol.types.Empty
 import com.spotify.protocol.types.ListItem
 import com.spotify.protocol.types.ListItems
+import com.spotify.protocol.types.PlayerState
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -330,27 +331,80 @@ class SpotifyControllerTest {
     }
   }
 
-  @Test
-  fun pauseTrackTest() = runBlocking {
-    every { mockAppRemote.isConnected } returns true
-    var callResult = mockk<CallResult<Empty>>()
-    var playerApi = mockk<PlayerApi>()
-    every { mockAppRemote.playerApi } returns playerApi
-    var slot = slot<CallResult.ResultCallback<Empty>>()
-    every { playerApi.pause() } returns callResult
-    every { callResult.setResultCallback(capture(slot)) } answers
-        {
-          slot.captured.onResult(Empty())
-          slot.captured.onResult(Empty())
-          callResult
+    @Test
+    fun pauseTrackTest() = runBlocking {
+        every { mockAppRemote.isConnected } returns true
+        var callResult = mockk<CallResult<Empty>>()
+        var playerApi = mockk<PlayerApi>()
+        every { mockAppRemote.playerApi } returns playerApi
+        var slot = slot<CallResult.ResultCallback<Empty>>()
+        every { playerApi.pause() } returns callResult
+        every { callResult.setResultCallback(capture(slot)) } answers
+                {
+                    slot.captured.onResult(Empty())
+                    slot.captured.onResult(Empty())
+                    callResult
+                }
+
+        every { callResult.setErrorCallback(any()) } returns callResult
+        every { callResult.cancel() } just Runs
+
+        val result = spotifyController.pauseTrack().first()
+
+        verify { playerApi.pause() }
+        assertTrue(result)
+    }
+    @Test
+    fun resumeTrackTest() = runBlocking {
+        every { mockAppRemote.isConnected } returns true
+        var callResult = mockk<CallResult<Empty>>()
+        var playerApi = mockk<PlayerApi>()
+        every { mockAppRemote.playerApi } returns playerApi
+        var slot = slot<CallResult.ResultCallback<Empty>>()
+        every { playerApi.resume() } returns callResult
+        every { callResult.setResultCallback(capture(slot)) } answers
+                {
+                    slot.captured.onResult(Empty())
+                    slot.captured.onResult(Empty())
+                    callResult
+                }
+
+        every { callResult.setErrorCallback(any()) } returns callResult
+        every { callResult.cancel() } just Runs
+
+        val result = spotifyController.resumeTrack().first()
+
+        verify { playerApi.resume() }
+        assertTrue(result)
+    }
+
+    @Test
+    fun startPeriodicCheckTest() = runBlocking {
+        every { mockAppRemote.isConnected } returns true
+        val playerApi = mockk<PlayerApi>()
+        val playerState = mockk<PlayerState>()
+        val callResultPlayerState = mockk<CallResult<PlayerState>>()
+        every { playerApi.playerState } returns callResultPlayerState
+        every { callResultPlayerState.setResultCallback(any()) } answers {
+            firstArg<CallResult.ResultCallback<PlayerState>>().onResult(playerState)
+            callResultPlayerState
         }
 
-    every { callResult.setErrorCallback(any()) } returns callResult
-    every { callResult.cancel() } just Runs
+        every { mockAppRemote.playerApi } returns playerApi
+        var slot = slot<CallResult.ResultCallback<Empty>>()
+        var callResult = mockk<CallResult<Empty>>()
+        every { playerApi.pause() } returns callResult
+        every { callResult.setResultCallback(capture(slot)) } answers
+                {
+                    slot.captured.onResult(Empty())
+                    slot.captured.onResult(Empty())
+                    callResult
+                }
 
-    val result = spotifyController.pauseTrack().first()
+        every { callResult.setErrorCallback(any()) } returns callResult
+        every { callResult.cancel() } just Runs
 
-    verify { playerApi.pause() }
-    assertTrue(result == true)
-  }
+        spotifyController.startPeriodicCheck()
+    }
+
 }
