@@ -69,7 +69,6 @@ import com.google.maps.android.compose.CameraPositionState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-
 @Composable
 fun BeaconScreen(
     beaconId: String?,
@@ -167,47 +166,45 @@ fun SongList(beacon: Beacon, navigationActions: NavigationActions) {
       modifier = Modifier.testTag("beaconTracksTitle"))
   LazyColumn { items(beacon.profileAndTrack) { TrackItem(it, navigationActions) } }
 
-    Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(
-                text = stringResource(R.string.beaconTracksTitle),
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier)
-            IconButton(
-                onClick = { showDialog = true }) { // Toggle dialog visibility
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.beaconTitle))
-            }
+  Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween) {
+          Text(
+              text = stringResource(R.string.beaconTracksTitle),
+              style = MaterialTheme.typography.headlineMedium,
+              modifier = Modifier)
+          IconButton(onClick = { showDialog = true }) { // Toggle dialog visibility
+            Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = stringResource(R.string.beaconTitle))
+          }
         }
 
-        if (showDialog) {
-            AddTrackDialog(
-                onAddTrack = { id, title, artist ->
-//                    viewModel.addTrackToBeacon(beacon.id, Track(id, title, artist)) { success ->
-//                        if (success) {
-//                            Log.d("SongList", "Track added successfully.")
-//                        } else {
-//                            Log.e("SongList", "Failed to add track.")
-//                        }
-//                    }
-                    showDialog = false // Close dialog after adding track
-                },
-                onDismiss = {
-                    showDialog = false // Close dialog on dismiss
-                },
-                initialTrackId = "",
-                initialTrackTitle = "",
-                initialTrackArtist = "",
-                dialogTestTag = "addTrackDialog" // For testing purposes
-            )
-        }
+    if (showDialog) {
+      AddTrackDialog(
+          onAddTrack = { id, title, artist ->
+//            viewModel.addTrackToBeacon(beacon.id, Track(id, title, artist)) { success ->
+//              if (success) {
+//                Log.d("SongList", "Track added successfully.")
+//              } else {
+//                Log.e("SongList", "Failed to add track.")
+//              }
+//            }
+            showDialog = false // Close dialog after adding track
+          },
+          onDismiss = {
+            showDialog = false // Close dialog on dismiss
+          },
+          initialTrackId = "",
+          initialTrackTitle = "",
+          initialTrackArtist = "",
+          dialogTestTag = "addTrackDialog" // For testing purposes
+          )
     }
+  }
 }
-
 
 @Composable
 internal fun TrackItem(
