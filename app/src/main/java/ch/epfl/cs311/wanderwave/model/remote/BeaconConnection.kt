@@ -97,6 +97,23 @@ class BeaconConnection(private val database: FirebaseFirestore? = null) :
     return dataFlow.filterNotNull()
   }
 
+  fun getAll(): Flow<List<Beacon>> {
+    val dataFlow = MutableStateFlow<List<Beacon>?>(null)
+
+    db.collection(collectionName)
+        .get()
+        .addOnSuccessListener { documents ->
+          val beacons = documents.mapNotNull { documentToItem(it) }
+          dataFlow.value = beacons
+        }
+        .addOnFailureListener { e ->
+          dataFlow.value = null
+          Log.e("Firestore", "Error getting documents: ", e)
+        }
+
+    return dataFlow.filterNotNull()
+  }
+
   override fun itemToMap(beacon: Beacon): Map<String, Any> {
     val beaconMap: HashMap<String, Any> =
         hashMapOf(

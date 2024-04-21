@@ -7,7 +7,9 @@ import android.location.LocationManager
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Beacon
+import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import com.google.android.gms.maps.LocationSource
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -15,9 +17,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 @HiltViewModel
-class MapViewModel @Inject constructor(val locationSource: LocationSource) : ViewModel() {
+class MapViewModel @Inject constructor(val locationSource: LocationSource, private val beaconConnection: BeaconConnection) : ViewModel() {
   val cameraPosition = MutableLiveData<CameraPosition?>()
 
   private val _uiState = MutableStateFlow(BeaconListUiState(loading = true))
@@ -28,13 +31,11 @@ class MapViewModel @Inject constructor(val locationSource: LocationSource) : Vie
   }
 
   private fun observeBeacons() {
-    // CoroutineScope(Dispatchers.IO).launch {
-    //   repository.getAll().collect { beacons ->
-    //     _uiState.value = BeaconListUiState(beacons = beacons, loading = false)
-    //   }
-    // }
-
-    // TODO : Implement the repository with the local database
+    viewModelScope.launch {
+      beaconConnection.getAll().collect { beacons ->
+        _uiState.value = BeaconListUiState(beacons = beacons, loading = false)
+      }
+    }
   }
 
   @RequiresPermission(
