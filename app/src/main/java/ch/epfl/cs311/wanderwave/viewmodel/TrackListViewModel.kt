@@ -13,11 +13,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class TrackListViewModel
-@Inject
-constructor(
-    private val spotifyController: SpotifyController
-) : ViewModel() {
+class TrackListViewModel @Inject constructor(private val spotifyController: SpotifyController) :
+    ViewModel() {
 
   // TODO : implement the repository with the local database
 

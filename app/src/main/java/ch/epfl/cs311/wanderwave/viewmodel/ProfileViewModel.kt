@@ -2,7 +2,6 @@ package ch.epfl.cs311.wanderwave.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
@@ -10,7 +9,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 // Define a simple class for a song list
 data class SongList(val name: String, val tracks: MutableList<Track> = mutableListOf())
@@ -18,8 +16,7 @@ data class SongList(val name: String, val tracks: MutableList<Track> = mutableLi
 // TODO : Implement the repository with the local database
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor() :
-    ViewModel() {
+class ProfileViewModel @Inject constructor() : ViewModel() {
 
   private val _profile =
       MutableStateFlow(
