@@ -13,8 +13,6 @@ import kotlinx.coroutines.flow.StateFlow
 // Define a simple class for a song list
 data class SongList(val name: String, val tracks: MutableList<Track> = mutableListOf())
 
-// TODO : Implement the repository with the local database
-
 @HiltViewModel
 class ProfileViewModel @Inject constructor() : ViewModel() {
 
@@ -76,15 +74,10 @@ class ProfileViewModel @Inject constructor() : ViewModel() {
   fun updateProfile(updatedProfile: Profile) {
     _profile.value = updatedProfile
     profileConnection.updateItem(updatedProfile)
-    // viewModelScope.launch {
-    //   repository.delete()
-    //   repository.insert(_profile.value)
-    // }
   }
 
   fun deleteProfile() {
     profileConnection.deleteItem(_profile.value)
-    // viewModelScope.launch { repository.delete() }
   }
 
   fun togglePublicMode() {
@@ -99,24 +92,11 @@ class ProfileViewModel @Inject constructor() : ViewModel() {
     profileConnection.isUidExisting(profile.spotifyUid) { isExisting, fetchedProfile ->
       if (isExisting) {
         _profile.value = fetchedProfile ?: profile
-        // update profile on the local database
-        // viewModelScope.launch {
-        //   val localProfile = repository.getProfile()
-        //   localProfile.collect { fetchedLocalProfile ->
-        //     if (fetchedLocalProfile != fetchedProfile) {
-        //       repository.delete()
-        //       repository.insert(fetchedProfile!!)
-        //     }
-        //   }
-        // }
       } else {
         val newProfile = profile
         profileConnection.addItem(newProfile)
-        // viewModelScope.launch { repository.insert(newProfile) }
         _profile.value = newProfile
       }
     }
-    // TODO : get rid of this line
-    profileConnection.getItem(profile.spotifyUid).let { Log.d("Firebase", it.toString()) }
   }
 }

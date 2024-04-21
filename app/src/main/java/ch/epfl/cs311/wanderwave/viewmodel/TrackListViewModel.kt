@@ -17,9 +17,6 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class TrackListViewModel @Inject constructor(private val spotifyController: SpotifyController, private val trackConnection: TrackConnection = TrackConnection()) : ViewModel() {
 
-  // TODO : implement the repository with the local database
-
-
   private val _uiState = MutableStateFlow(UiState(loading = true))
   val uiState: StateFlow<UiState> = _uiState
 
@@ -28,11 +25,10 @@ class TrackListViewModel @Inject constructor(private val spotifyController: Spot
   }
 
   private fun observeTracks() {
-    // CoroutineScope(Dispatchers.IO).launch {
-    //   repository.getAll().collect { tracks ->
-    //     _uiState.value = UiState(tracks = tracks, loading = false)
-    //   }
-    // }
+    viewModelScope.launch {
+      val tracks = trackConnection.getAll() // TODO : update to get only useful tracks
+      _uiState.value = _uiState.value.copy(tracks = tracks, loading = false)
+    }
   }
 
   fun playTrack(track: Track) {
