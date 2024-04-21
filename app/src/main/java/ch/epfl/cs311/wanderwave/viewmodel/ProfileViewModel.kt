@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 data class SongList(val name: String, val tracks: MutableList<Track> = mutableListOf())
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor(val profileConnection : ProfileConnection) : ViewModel() {
+class ProfileViewModel @Inject constructor(val profileConnection: ProfileConnection) : ViewModel() {
 
   private val _profile =
       MutableStateFlow(
@@ -68,8 +68,6 @@ class ProfileViewModel @Inject constructor(val profileConnection : ProfileConnec
         }
     _songLists.value = updatedLists
   }
-
-
 
   fun updateProfile(updatedProfile: Profile) {
     _profile.value = updatedProfile
