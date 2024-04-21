@@ -3,6 +3,8 @@ package ch.epfl.cs311.wanderwave.model.remote
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 
 class TrackConnection(private val database: FirebaseFirestore? = null) :
     FirebaseConnection<Track, Track>() {
@@ -37,13 +39,15 @@ class TrackConnection(private val database: FirebaseFirestore? = null) :
     }
   }
 
-  fun getAll(): List<Track> {
-    val tracks = mutableListOf<Track>()
-    db.collection(collectionName).get().addOnSuccessListener { documents ->
-      for (document in documents) {
-        documentToItem(document)?.let { track -> tracks.add(track) }
+  fun getAll(): Flow<List<Track>> {
+    val stateFlow = MutableStateFlow<List<Track>>(listOf())
+    db.collection(collectionName).addSnapshotListener { value, error ->
+      if (error != null) {
+        return@addSnapshotListener
       }
+      val tracks = value?.documents?.mapNotNull { documentToItem(it) } ?: listOf()
+      stateFlow.value = tracks
     }
-    return tracks
+    return stateFlow
   }
 }

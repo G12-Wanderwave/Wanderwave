@@ -31,8 +31,11 @@ constructor(
 
   private fun observeTracks() {
     viewModelScope.launch {
-      val tracks = trackConnection.getAll() // TODO : update to get only useful tracks
-      _uiState.value = _uiState.value.copy(tracks = tracks, loading = false
+      trackConnection.getAll().collect {
+        _uiState.value = _uiState.value.copy(tracks = it, loading = false)
+      } // TODO : update to get only useful tracks
+
+      // deal with the flow
     }
   }
 

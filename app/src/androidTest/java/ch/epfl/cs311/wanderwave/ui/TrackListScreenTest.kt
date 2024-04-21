@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.ui
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
@@ -55,6 +56,12 @@ class TrackListScreenTest : TestCase() {
 
   private fun setupViewModel(result: Boolean) {
     every { mockSpotifyController.playTrack(any()) } returns flowOf(result)
+    every { trackConnection.getAll() } returns flowOf(
+        listOf(
+            Track("is 1", "Track 1", "Artist 1"),
+            Track("is 2", "Track 2", "Artist 2"),
+        )
+    )
 
     val viewModel = TrackListViewModel(mockSpotifyController, trackConnection)
 
