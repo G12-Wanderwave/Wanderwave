@@ -11,8 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class BeaconViewModel @Inject constructor() : ViewModel() {
-  private val beaconConnection = BeaconConnection()
+class BeaconViewModel @Inject constructor(private val beaconConnection: BeaconConnection) : ViewModel() {
   private val id = "UAn8OUadgrUOKYagf8a2"
 
   private var _uiState = MutableStateFlow(UIState())
