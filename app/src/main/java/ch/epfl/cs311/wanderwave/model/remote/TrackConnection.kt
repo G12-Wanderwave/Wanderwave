@@ -41,9 +41,7 @@ class TrackConnection(private val database: FirebaseFirestore? = null) :
     val tracks = mutableListOf<Track>()
     db.collection(collectionName).get().addOnSuccessListener { documents ->
       for (document in documents) {
-        documentToItem(document)?.let { track ->
-          tracks.add(track)
-        }
+        documentToItem(document)?.let { track -> tracks.add(track) }
       }
     }
     return tracks
