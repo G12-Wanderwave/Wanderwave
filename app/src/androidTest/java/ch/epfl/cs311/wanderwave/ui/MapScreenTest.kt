@@ -43,13 +43,6 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   @RelaxedMockK private lateinit var mockLocationSource: LocationSource
   @RelaxedMockK private lateinit var mockMapViewModel: MapViewModel
 
-  @RelaxedMockK private lateinit var beaconDao: BeaconDao
-
-  private lateinit var beaconLocalRepository: LocalBeaconRepository
-  @RelaxedMockK private lateinit var beaconLocalRepositoryMock: LocalBeaconRepository
-
-  private lateinit var beaconRepositoryMock: BeaconRepositoryImpl
-
   @get:Rule
   val permissionRule: GrantPermissionRule =
       GrantPermissionRule.grant(
@@ -74,15 +67,7 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   fun setup() {
     MockKAnnotations.init(this)
 
-    // Mocking the AppDatabase and providing the mocked beaconDao
-    val database = mockk<AppDatabase>()
-    every { database.beaconDao() } returns beaconDao
-
-    // Creating the repository with the mocked database
-    beaconLocalRepository = LocalBeaconRepository(database)
-
-    beaconRepositoryMock = BeaconRepositoryImpl(beaconLocalRepositoryMock)
-    mockMapViewModel = MapViewModel(beaconRepositoryMock, mockLocationSource)
+    mockMapViewModel = MapViewModel(mockLocationSource)
 
     composeTestRule.setContent { MapScreen(mockNavigationActions, mockMapViewModel) }
 
