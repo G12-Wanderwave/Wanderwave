@@ -408,4 +408,176 @@ class SpotifyControllerTest {
 
     spotifyController.startPeriodicCheck()
   }
+
+  @Test
+  fun testGetAllElementFromSpotifyCancellation() {
+    runBlocking {
+      // Prepare the mocked responses
+      val callResult = mockk<CallResult<ListItems>>(relaxed = true)
+      val contentApi = mockk<ContentApi>(relaxed = true)
+      every { mockAppRemote.contentApi } returns contentApi
+      every { contentApi.getRecommendedContentItems(any()) } returns callResult
+
+      // Prepare a list with mixed URIs
+      val matchingItem =
+          ListItem(
+              "id1",
+              "spotify:section:0JQ5DAroEmF9ANbLaiJ7Wx",
+              null,
+              "Matching Title",
+              "type",
+              true,
+              false)
+      val nonMatchingItem =
+          ListItem(
+              "id2", "spotify:section:NotMatching", null, "Non-Matching Title", "type", true, false)
+      val items = listOf(matchingItem, nonMatchingItem)
+      val itemsArray = items.toTypedArray()
+      // Setup the callback to invoke with our prepared list
+      every { callResult.setResultCallback(any()) } answers
+          {
+            val callback = firstArg<CallResult.ResultCallback<ListItems>>()
+            callback.onResult(ListItems(0, 0, 0, itemsArray))
+            callResult
+          }
+
+      // Execute the function to get the Flow and collect results
+      val flow = spotifyController.getAllElementFromSpotify()
+      val collectedItems = mutableListOf<ListItem>()
+      val result = flow.timeout(2.seconds).catch {}.firstOrNull()
+
+      Log.d("Result of the flow", result.toString())
+      // Assertions to check only the matching item is collected
+      assertTrue(result == listOf(matchingItem, nonMatchingItem))
+      fun resumeTrackTest() = runBlocking {
+        every { mockAppRemote.isConnected } returns true
+        var callResult = mockk<CallResult<Empty>>()
+        var playerApi = mockk<PlayerApi>()
+        every { mockAppRemote.playerApi } returns playerApi
+        var slot = slot<CallResult.ResultCallback<Empty>>()
+        every { playerApi.resume() } returns callResult
+        every { callResult.setResultCallback(capture(slot)) } answers
+            {
+              slot.captured.onResult(Empty())
+              slot.captured.onResult(Empty())
+              callResult
+            }
+
+        every { callResult.setErrorCallback(any()) } returns callResult
+        every { callResult.cancel() } just Runs
+      }
+    }
+  }
+
+  @Test
+  fun testgetChildrenCancellation() {
+    runBlocking {
+      // Prepare the mock environment
+      val callResult = mockk<CallResult<ListItems>>(relaxed = true)
+      val contentApi = mockk<ContentApi>(relaxed = true)
+      every { mockAppRemote.contentApi } returns contentApi
+      every { contentApi.getChildrenOfItem(any(), any(), any()) } returns callResult
+
+      // Define the flow using the SpotifyController with the mocked remote
+      val listItem = ListItem("id", "uri", null, "title", "type", true, false)
+
+      // Collect the flow in a coroutine that we can cancel
+      val job = launch { spotifyController.getChildren(listItem).collect {} }
+      // Cancel the job to trigger awaitClose
+      job.cancel()
+
+      // Verify that the cancellation was called
+      // coVerify { callResult.cancel() }
+    }
+  }
+
+  @Test
+  fun testGetAllChildrenCancellation() {
+    runBlocking {
+      // Prepare the mock environment
+      val callResult = mockk<CallResult<ListItems>>(relaxed = true)
+      val contentApi = mockk<ContentApi>(relaxed = true)
+      every { mockAppRemote.contentApi } returns contentApi
+      every { contentApi.getChildrenOfItem(any(), any(), any()) } returns callResult
+
+      // Define the flow using the SpotifyController with the mocked remote
+      val listItem = ListItem("id", "uri", null, "title", "type", true, false)
+
+      // Collect the flow in a coroutine that we can cancel
+      val job = launch { spotifyController.getAllChildren(listItem).collect {} }
+      // Cancel the job to trigger awaitClose
+      job.cancel()
+
+      // Verify that the cancellation was called
+      // coVerify { callResult.cancel() }
+    }
+  }
+
+  @Test
+  fun testPlayTrackCancellation() {
+    runBlocking {
+      val callResult = mockk<CallResult<Empty>>(relaxed = true)
+      val playerApi = mockk<PlayerApi>(relaxed = true)
+      every { mockAppRemote.playerApi } returns playerApi
+      every { playerApi.play(any()) } returns callResult
+      val id = "fakeid"
+      val flow = spotifyController.playTrack(Track(id, "faketitle", "fakeartist"))
+
+      val result = flow.timeout(2.seconds).catch {}.firstOrNull()
+
+      verify { playerApi.play(any()) }
+    }
+  }
+
+  @Test
+  fun testPauseTrackCancellation() {
+    runBlocking {
+      every { mockAppRemote.isConnected } returns true
+      var callResult = mockk<CallResult<Empty>>()
+      var playerApi = mockk<PlayerApi>()
+      every { mockAppRemote.playerApi } returns playerApi
+      var slot = slot<CallResult.ResultCallback<Empty>>()
+      every { playerApi.pause() } returns callResult
+      every { callResult.setResultCallback(capture(slot)) } answers
+          {
+            slot.captured.onResult(Empty())
+            slot.captured.onResult(Empty())
+            callResult
+          }
+
+      every { callResult.setErrorCallback(any()) } returns callResult
+      every { callResult.cancel() } just Runs
+
+      val result = spotifyController.pauseTrack().first()
+
+      verify { playerApi.pause() }
+      assertTrue(result)
+    }
+  }
+
+  @Test
+  fun testResumeTrackCancellation() {
+    runBlocking {
+      every { mockAppRemote.isConnected } returns true
+      var callResult = mockk<CallResult<Empty>>()
+      var playerApi = mockk<PlayerApi>()
+      every { mockAppRemote.playerApi } returns playerApi
+      var slot = slot<CallResult.ResultCallback<Empty>>()
+      every { playerApi.resume() } returns callResult
+      every { callResult.setResultCallback(capture(slot)) } answers
+          {
+            slot.captured.onResult(Empty())
+            slot.captured.onResult(Empty())
+            callResult
+          }
+
+      every { callResult.setErrorCallback(any()) } returns callResult
+      every { callResult.cancel() } just Runs
+
+      val result = spotifyController.resumeTrack().first()
+
+      verify { playerApi.resume() }
+      assertTrue(result)
+    }
+  }
 }
