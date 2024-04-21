@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class MapViewModel
 @Inject
-constructor(private val repository: BeaconRepositoryImpl, val locationSource: LocationSource) :
+constructor( val locationSource: LocationSource) :
     ViewModel() {
   val cameraPosition = MutableLiveData<CameraPosition?>()
 
@@ -34,11 +34,13 @@ constructor(private val repository: BeaconRepositoryImpl, val locationSource: Lo
   }
 
   private fun observeBeacons() {
-    CoroutineScope(Dispatchers.IO).launch {
-      repository.getAll().collect { beacons ->
-        _uiState.value = BeaconListUiState(beacons = beacons, loading = false)
-      }
-    }
+    // CoroutineScope(Dispatchers.IO).launch {
+    //   repository.getAll().collect { beacons ->
+    //     _uiState.value = BeaconListUiState(beacons = beacons, loading = false)
+    //   }
+    // }
+
+    // TODO : Implement the repository with the local database
   }
 
   @RequiresPermission(

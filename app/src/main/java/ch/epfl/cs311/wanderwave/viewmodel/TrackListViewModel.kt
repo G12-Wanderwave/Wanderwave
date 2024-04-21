@@ -16,9 +16,10 @@ import kotlinx.coroutines.launch
 class TrackListViewModel
 @Inject
 constructor(
-    private val repository: TrackRepositoryImpl,
     private val spotifyController: SpotifyController
 ) : ViewModel() {
+
+  // TODO : implement the repository with the local database
 
   private val _uiState = MutableStateFlow(UiState(loading = true))
   val uiState: StateFlow<UiState> = _uiState
@@ -28,11 +29,11 @@ constructor(
   }
 
   private fun observeTracks() {
-    CoroutineScope(Dispatchers.IO).launch {
-      repository.getAll().collect { tracks ->
-        _uiState.value = UiState(tracks = tracks, loading = false)
-      }
-    }
+    // CoroutineScope(Dispatchers.IO).launch {
+    //   repository.getAll().collect { tracks ->
+    //     _uiState.value = UiState(tracks = tracks, loading = false)
+    //   }
+    // }
   }
 
   fun playTrack(track: Track) {
