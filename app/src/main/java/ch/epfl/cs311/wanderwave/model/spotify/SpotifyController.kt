@@ -132,7 +132,7 @@ class SpotifyController(private val context: Context) {
     }
   }
 
-  private val handler = Handler(Looper.getMainLooper())
+  var handler = Handler(Looper.getMainLooper())
 
   fun startPeriodicCheck() {
     val updateRunnable =

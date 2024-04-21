@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.model
 
+import android.os.Handler
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -46,6 +47,7 @@ class SpotifyControllerTest {
   @RelaxedMockK private lateinit var mockAppRemote: SpotifyAppRemote
 
   private lateinit var spotifyController: SpotifyController
+  private lateinit var mockHandler: Handler
 
   @Before
   fun setup() {
@@ -53,6 +55,8 @@ class SpotifyControllerTest {
     spotifyController = SpotifyController(context)
     spotifyController.appRemote = mockAppRemote
     mockkStatic(SpotifyAppRemote::class)
+    mockHandler = mockk(relaxed = true)
+    spotifyController.handler = mockHandler
   }
 
   @Test
@@ -579,5 +583,13 @@ class SpotifyControllerTest {
       verify { playerApi.resume() }
       assertTrue(result)
     }
+  }
+
+  @Test
+  fun handlerTest() {
+    val runnable = mockk<Runnable>()
+    every { mockHandler.postDelayed(runnable, 1000) } returns true
+    spotifyController.handler.postDelayed(runnable, 1000)
+    verify { mockHandler.postDelayed(runnable, 1000) }
   }
 }
