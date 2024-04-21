@@ -20,7 +20,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class MapViewModel @Inject constructor(val locationSource: LocationSource, private val beaconConnection: BeaconConnection) : ViewModel() {
+class MapViewModel
+@Inject
+constructor(val locationSource: LocationSource, private val beaconConnection: BeaconConnection) :
+    ViewModel() {
   val cameraPosition = MutableLiveData<CameraPosition?>()
 
   private val _uiState = MutableStateFlow(BeaconListUiState(loading = true))

@@ -39,56 +39,49 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
 
-  @get:Rule
-  val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-  @get:Rule
-  val mockkRule = MockKRule(this)
+  @get:Rule val mockkRule = MockKRule(this)
 
-  @RelaxedMockK
-  private lateinit var mockNavigationActions: NavigationActions
+  @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
-  @RelaxedMockK
-  private lateinit var mockLocationSource: LocationSource
-  @RelaxedMockK
-  private lateinit var mockMapViewModel: MapViewModel
+  @RelaxedMockK private lateinit var mockLocationSource: LocationSource
+  @RelaxedMockK private lateinit var mockMapViewModel: MapViewModel
 
-  @RelaxedMockK
-  private lateinit var mockBeaconConnection: BeaconConnection
+  @RelaxedMockK private lateinit var mockBeaconConnection: BeaconConnection
 
   @get:Rule
   val permissionRule: GrantPermissionRule =
-    GrantPermissionRule.grant(
-      Manifest.permission.ACCESS_COARSE_LOCATION,
-      Manifest.permission.ACCESS_FINE_LOCATION,
-    )
+      GrantPermissionRule.grant(
+          Manifest.permission.ACCESS_COARSE_LOCATION,
+          Manifest.permission.ACCESS_FINE_LOCATION,
+      )
 
   private val context = InstrumentationRegistry.getInstrumentation().context
 
   private val locationManager =
-    context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+      context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
   val location =
-    Location(LocationManager.GPS_PROVIDER).apply {
-      latitude = 46.519962
-      longitude = 6.633597
-      time = System.currentTimeMillis()
-      elapsedRealtimeNanos = System.nanoTime()
-    }
+      Location(LocationManager.GPS_PROVIDER).apply {
+        latitude = 46.519962
+        longitude = 6.633597
+        time = System.currentTimeMillis()
+        elapsedRealtimeNanos = System.nanoTime()
+      }
 
   @Before
   fun setup() {
     MockKAnnotations.init(this)
 
-    coEvery { mockBeaconConnection.getAll() } returns flowOf(
-      listOf(
-        Beacon(
-          "UAn8OUadgrUOKYagf8a2",
-          ch.epfl.cs311.wanderwave.model.data.Location(46.519653, 6.632273, "Lausanne"),
-          listOf<Track>(Track("Some Track ID", "Track Title", "Artist Name")),
-        )
-      )
-    )
+    coEvery { mockBeaconConnection.getAll() } returns
+        flowOf(
+            listOf(
+                Beacon(
+                    "UAn8OUadgrUOKYagf8a2",
+                    ch.epfl.cs311.wanderwave.model.data.Location(46.519653, 6.632273, "Lausanne"),
+                    listOf<Track>(Track("Some Track ID", "Track Title", "Artist Name")),
+                )))
 
     mockMapViewModel = MapViewModel(mockLocationSource, mockBeaconConnection)
 
@@ -100,8 +93,6 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
     } catch (e: SecurityException) {
       e.printStackTrace()
     }
-
-
   }
 
   @Test
@@ -131,8 +122,7 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
     every { mockContext.getSystemService(Context.LOCATION_SERVICE) } returns locationManager
     every {
       locationManager.requestLocationUpdates(
-        any<String>(), any<Long>(), any(), any<LocationListener>()
-      )
+          any<String>(), any<Long>(), any(), any<LocationListener>())
     } returns Unit
     val source = FastLocationSource(mockContext)
     Looper.prepare()
