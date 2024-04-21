@@ -26,12 +26,13 @@ constructor(
 
   init {
     observeTracks()
+    spotifyController.setOnTrackEndCallback { queueNextTrack() }
   }
 
   private fun observeTracks() {
     CoroutineScope(Dispatchers.IO).launch {
       repository.getAll().collect { tracks ->
-        _uiState.value = UiState(tracks = tracks, loading = false)
+        _uiState.value = UiState(tracks = tracks, queue = tracks, loading = false)
       }
     }
   }
@@ -67,6 +68,15 @@ constructor(
       if (success == null || !success) {
         _uiState.value = _uiState.value.copy(message = "Failed to pause track")
       }
+    }
+  }
+
+  private fun queueNextTrack() {
+    val currentIndex = _uiState.value.queue.indexOf(_uiState.value.selectedTrack)
+    if (currentIndex != -1 && currentIndex + 1 < _uiState.value.queue.size) {
+      val nextTrack = _uiState.value.queue[currentIndex + 1]
+      _uiState.value = _uiState.value.copy(selectedTrack = nextTrack)
+      selectTrack(nextTrack)
     }
   }
 
@@ -135,9 +145,9 @@ constructor(
    */
   private fun skip(dir: Int) {
     if (_uiState.value.selectedTrack != null && (dir == 1 || dir == -1)) {
-      _uiState.value.tracks.indexOf(_uiState.value.selectedTrack).let { it: Int ->
-        val next = Math.floorMod((it + dir), _uiState.value.tracks.size)
-        selectTrack(_uiState.value.tracks[next])
+      _uiState.value.queue.indexOf(_uiState.value.selectedTrack).let { it: Int ->
+        val next = Math.floorMod((it + dir), _uiState.value.queue.size)
+        selectTrack(_uiState.value.queue[next])
       }
     }
   }
@@ -154,6 +164,7 @@ constructor(
 
   data class UiState(
       val tracks: List<Track> = listOf(),
+      val queue: List<Track> = listOf(),
       val loading: Boolean = false,
       val message: String? = null,
       val selectedTrack: Track? = null,
