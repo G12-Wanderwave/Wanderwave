@@ -1,7 +1,9 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -13,10 +15,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class TrackListViewModel @Inject constructor(private val spotifyController: SpotifyController) :
-    ViewModel() {
+class TrackListViewModel @Inject constructor(private val spotifyController: SpotifyController, private val trackConnection: TrackConnection = TrackConnection()) : ViewModel() {
 
   // TODO : implement the repository with the local database
+
 
   private val _uiState = MutableStateFlow(UiState(loading = true))
   val uiState: StateFlow<UiState> = _uiState
@@ -58,13 +60,6 @@ class TrackListViewModel @Inject constructor(private val spotifyController: Spot
   }
 
   data class UiState(
-      val tracks: List<Track> = listOf(),
-      val loading: Boolean = false,
-      val message: String? = null,
-      val selectedTrack: Track? = null,
-      val isPlaying: Boolean = false,
-      val currentMillis: Int = 0,
-      val expanded: Boolean = false,
-      val progress: Float = 0f
+    val tracks: List<Track> = listOf(), val loading: Boolean = false, val message: String? = null, val selectedTrack: Track? = null, val isPlaying: Boolean = false, val currentMillis: Int = 0, val expanded: Boolean = false, val progress: Float = 0f
   )
 }
