@@ -14,11 +14,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.timeout
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -91,20 +93,38 @@ class ProfileViewModelTest {
   fun retrieveTrackTest() = runBlockingTest {
     val track = ListItem("bbbb", "bbbb", null, "bbbb", "bbbb", false, true)
     val track2 = ListItem("aaaa", "aaaaa", null, "aaaaa", "aaaaa", false, true)
+
+    // Mocking responses for your spotifyController
     every { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(track))
-    every { spotifyController.getAllChildren(track) } returns
-        flowOf(listOf(track2)) // No empty list first
+    every { spotifyController.getAllChildren(track) } returns flowOf(listOf(track2))
 
     viewModel.createSpecificSongList("TOP_SONGS")
-    viewModel.retrieveTracks(CoroutineScope(Dispatchers.IO))
-    advanceUntilIdle()
-    var songLists = viewModel.songLists.value
-    assertFalse("Song list should not be empty after adding a track", songLists.isEmpty())
 
-    songLists = viewModel.songLists.value
-    // Check if the track was added correctly
-    val songsInList = songLists.find { it.name == "TOP SONGS" }?.tracks ?: emptyList()
-    Log.d("Temp", songsInList.toString())
+    // Start observing the Flow before triggering actions that modify it
+    val job = launch {
+      viewModel.songLists.collect { songLists ->
+        if (songLists.isNotEmpty()) {
+          cancel() // Stop collecting once we have our expected result
+        }
+      }
+    }
+
+    // Trigger the operations that will cause the song lists to be populated
+    viewModel.retrieveTracks(this)
+    // Wait for the job to complete which includes Flow collection
+    job.join()
+
+    // Since Flow collection is asynchronous, ensure the Flow has time to collect
+    advanceUntilIdle()
+
+    // Optionally check additional conditions after ensuring Flow had time to collect
+    assertFalse(
+        "Song list should not be empty after adding a track", viewModel.songLists.value.isEmpty())
+    Log.d("fwefewfew", viewModel.songLists.value.first().tracks.toString())
+    Log.d("fwefewfew2", Track(track2.id, track2.title, track2.subtitle).toString())
+    assertEquals(
+        Track(track2.id, track2.title, track2.subtitle),
+        viewModel.songLists.value.first().tracks.get(0))
   }
 
   @Test
@@ -124,8 +144,9 @@ class ProfileViewModelTest {
     every {
       spotifyController.getAllChildren(ListItem("id", "title", null, "subtitle", "", false, true))
     } returns flowOf(listOf(expectedListItem))
-    viewModel.retrieveAndAddSubsection(CoroutineScope(Dispatchers.IO))
-    viewModel.retrieveChild(expectedListItem,CoroutineScope(Dispatchers.IO))
+
+    viewModel.retrieveAndAddSubsection(this)
+    viewModel.retrieveChild(expectedListItem, this)
     advanceUntilIdle() // Ensure all coroutines are completed
 
     // val result = viewModel.spotifySubsectionList.first()  // Safely access the first item
@@ -134,7 +155,7 @@ class ProfileViewModelTest {
     val result = flow.timeout(2.seconds).catch {}.firstOrNull()
     val result2 = flow2.timeout(2.seconds).catch {}.firstOrNull()
 
-    Log.d("restut", result.toString())
-    Log.d("restut", result2.toString())
+    assertEquals(expectedListItem, result?.get(0))
+    assertEquals(expectedListItem, result2?.get(0))
   }
 }

@@ -113,7 +113,7 @@ class LoginAndAddSong : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
     fun loginNavigateToProfileScreenAndAddSong() = runBlockingTest() {  // Use the testDispatcher to control coroutine execution
         setup(SpotifyConnectScreenViewModel.UiState(hasResult = true, success = true))
 
-        ComposeScreen.onComposeScreen<SpotifyConnectScreen>(composeTestgRule) {}
+ //       ComposeScreen.onComposeScreen<SpotifyConnectScreen>(composeTestgRule) {}
 
         ComposeScreen.onComposeScreen<MainPlaceHolder>(composeTestRule) {
             assertIsDisplayed()
