@@ -139,14 +139,14 @@ class SpotifyController(private val context: Context) {
         object : Runnable {
           override fun run() {
             appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
-                playerState.track?.let { track ->
-                    val trackDuration = track.duration
-                    val currentPosition = playerState.playbackPosition
-                    if (trackDuration - currentPosition <= 1500) {
-                        onTrackEndCallback?.invoke()
-                    }
+              playerState.track?.let { track ->
+                val trackDuration = track.duration
+                val currentPosition = playerState.playbackPosition
+                if (trackDuration - currentPosition <= 1500) {
+                  onTrackEndCallback?.invoke()
                 }
-                handler.postDelayed(this, 1000)
+              }
+              handler.postDelayed(this, 1000)
             }
           }
         }
