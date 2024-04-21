@@ -10,11 +10,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
-import ch.epfl.cs311.wanderwave.model.local.BeaconDao
-import ch.epfl.cs311.wanderwave.model.local.LocalBeaconRepository
-import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
-import ch.epfl.cs311.wanderwave.model.repository.BeaconRepositoryImpl
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
