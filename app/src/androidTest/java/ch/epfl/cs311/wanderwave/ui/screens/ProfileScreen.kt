@@ -16,6 +16,6 @@ class ProfileScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
   val outputFirstName = onNode { hasTestTag("outputFirstName") }
   val outputLastName = onNode { hasTestTag("outputLastName") }
   val outputDescription = onNode { hasTestTag("outputDescription") }
-    val addTopSongs = onNode { hasTestTag("addTopSongs") }
-    val trackItemCard = onNode { hasTestTag("trackItemCard") }
+  val addTopSongs = onNode { hasTestTag("addTopSongs") }
+  val trackItemCard = onNode { hasTestTag("trackItemCard") }
 }

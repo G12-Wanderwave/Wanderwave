@@ -10,7 +10,6 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
-import kotlinx.coroutines.CoroutineScope
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

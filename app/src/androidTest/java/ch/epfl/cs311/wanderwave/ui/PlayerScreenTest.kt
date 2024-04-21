@@ -7,9 +7,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.ui.TestActivity
 import ch.epfl.cs311.wanderwave.ui.components.player.ExclusivePlayer
-import ch.epfl.cs311.wanderwave.ui.components.player.MiniPlayer
 import ch.epfl.cs311.wanderwave.ui.screens.components.ExclusivePlayerScreen
-import ch.epfl.cs311.wanderwave.ui.screens.components.MiniPlayerScreen
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
@@ -35,7 +33,6 @@ class PlayerScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
     viewModel = mockk<TrackListViewModel>(relaxed = true)
     every { viewModel.uiState } returns MutableStateFlow(TrackListViewModel.UiState())
   }
-
 
   @Test
   fun exclusivePlayerScreenInteractions() = run {

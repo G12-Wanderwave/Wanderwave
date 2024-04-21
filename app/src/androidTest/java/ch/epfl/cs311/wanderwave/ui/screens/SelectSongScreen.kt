@@ -8,6 +8,5 @@ class SelectSongScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
         semanticsProvider = semanticsProvider,
         viewBuilderAction = { hasTestTag("selectSongScreen") }) {
 
-
-    val trackItemCard = onNode { hasTestTag("trackItemCard") }
+  val trackItemCard = onNode { hasTestTag("trackItemCard") }
 }

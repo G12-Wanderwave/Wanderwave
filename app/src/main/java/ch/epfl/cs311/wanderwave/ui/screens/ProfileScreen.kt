@@ -116,7 +116,7 @@ fun showSongList(navActions: NavigationActions, viewModel: ProfileViewModel) {
   var dialogListType by remember { mutableStateOf("TOP SONGS") }
   var isTopSongsListVisible by remember { mutableStateOf(true) }
 
-    Log.d("fwfewfw1","fwewfwfw")
+  Log.d("fwfewfw1", "fwewfwfw")
   Button(
       onClick = { isTopSongsListVisible = !isTopSongsListVisible },
       modifier = Modifier.testTag("toggleSongList")) {
@@ -128,8 +128,9 @@ fun showSongList(navActions: NavigationActions, viewModel: ProfileViewModel) {
   if (isTopSongsListVisible) {
     Button(
         onClick = {
-            Log.d("fwfewfw2","fwewfwfw")
-            navActions.navigateTo(Route.SELECT_SONG) },
+          Log.d("fwfewfw2", "fwewfwfw")
+          navActions.navigateTo(Route.SELECT_SONG)
+        },
         modifier = Modifier.testTag("addTopSongs")) {
           Text("Add Track to TOP SONGS List")
         }

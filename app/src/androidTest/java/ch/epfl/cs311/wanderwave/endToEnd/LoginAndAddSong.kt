@@ -1,13 +1,10 @@
 package ch.epfl.cs311.wanderwave.endToEnd
 
-import android.util.Log
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.TestActivity
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
 import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
@@ -24,113 +21,100 @@ import io.github.kakaocup.compose.node.element.ComposeScreen
 import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.just
-import io.mockk.verify
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.timeout
-import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.runBlocking
+
 @RunWith(AndroidJUnit4::class)
 @HiltAndroidTest
 class LoginAndAddSong : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
 
+  @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
 
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<TestActivity>()
+  @get:Rule val mockkRule = MockKRule(this)
 
-    @get:Rule
-    val mockkRule = MockKRule(this)
+  @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
-    @RelaxedMockK
-    private lateinit var mockNavigationActions: NavigationActions
+  @RelaxedMockK private lateinit var mockViewModel: SpotifyConnectScreenViewModel
 
-    @RelaxedMockK
-    private lateinit var mockViewModel: SpotifyConnectScreenViewModel
+  lateinit var viewModel: ProfileViewModel
 
-    lateinit var viewModel: ProfileViewModel
+  @RelaxedMockK private lateinit var profileRepositoryImpl: ProfileRepositoryImpl
 
-    @RelaxedMockK private lateinit var profileRepositoryImpl: ProfileRepositoryImpl
+  @RelaxedMockK private lateinit var spotifyController: SpotifyController
 
-    @RelaxedMockK private lateinit var spotifyController: SpotifyController
+  @After
+  fun clearMocks() {
+    clearAllMocks() // Clear all MockK mocks
+  }
 
+  private fun setup(uiState: SpotifyConnectScreenViewModel.UiState) {
+    mockDependencies()
+    every { mockViewModel.uiState } returns MutableStateFlow(uiState)
+    viewModel = ProfileViewModel(profileRepositoryImpl, spotifyController)
 
-
-    @After
-    fun clearMocks() {
-        clearAllMocks() // Clear all MockK mocks
+    composeTestRule.setContent {
+      SpotifyConnectScreen(navigationActions = mockNavigationActions, viewModel = mockViewModel)
+      //
+      MainPlaceHolder(mockNavigationActions)
+      ProfileScreen(mockNavigationActions, viewModel)
+      SelectSongScreen(mockNavigationActions, viewModel)
     }
+  }
 
-    private fun setup(uiState: SpotifyConnectScreenViewModel.UiState) {
-        mockDependencies()
-        every { mockViewModel.uiState } returns MutableStateFlow(uiState)
-        viewModel = ProfileViewModel(profileRepositoryImpl, spotifyController)
+  private fun mockDependencies() {
+    // Mocking ProfileRepositoryImpl
+    coEvery { profileRepositoryImpl.insert(any()) } just Runs
+    coEvery { profileRepositoryImpl.delete() } just Runs
 
-        composeTestRule.setContent {
-            SpotifyConnectScreen(navigationActions = mockNavigationActions, viewModel = mockViewModel)
-//
-        MainPlaceHolder(mockNavigationActions)
-            ProfileScreen(mockNavigationActions, viewModel)
-           SelectSongScreen(mockNavigationActions, viewModel)
-        }
+    // Mocking SpotifyController
+    coEvery { spotifyController.getChildren(any()) } returns
+        flowOf(ListItem("", "", null, "", "", false, false))
+    coEvery { spotifyController.getAllElementFromSpotify() } returns
+        flowOf(listOf(ListItem("", "", null, "", "", false, false)))
+    coEvery { spotifyController.getAllChildren(any()) } returns
+        flowOf(listOf(ListItem("", "", null, "", "", false, false)))
+  }
 
-    }
-    private fun mockDependencies() {
-        // Mocking ProfileRepositoryImpl
-        coEvery { profileRepositoryImpl.insert(any()) } just Runs
-        coEvery { profileRepositoryImpl.delete() } just Runs
-
-        // Mocking SpotifyController
-        coEvery { spotifyController.getChildren(any()) } returns
-                flowOf(ListItem("", "", null, "", "", false, false))
-        coEvery { spotifyController.getAllElementFromSpotify() } returns
-                flowOf(listOf(ListItem("", "", null, "", "", false, false)))
-        coEvery { spotifyController.getAllChildren(any()) } returns
-                flowOf(listOf(ListItem("", "", null, "", "", false, false)))
-    }
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Test
-    fun loginNavigateToProfileAndAddSong_SuccessfulFlow() = runBlockingTest() {
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun loginNavigateToProfileAndAddSong_SuccessfulFlow() =
+      runBlockingTest() {
         setup(SpotifyConnectScreenViewModel.UiState(hasResult = true, success = true))
 
         ComposeScreen.onComposeScreen<MainPlaceHolder>(composeTestRule) {
-            assertIsDisplayed()
-            profileButton.assertIsDisplayed()
-            profileButton.performClick()
+          assertIsDisplayed()
+          profileButton.assertIsDisplayed()
+          profileButton.performClick()
         }
 
         ComposeScreen.onComposeScreen<ProfileScreen>(composeTestRule) {
-            assertIsDisplayed()
-            addTopSongs.assertIsDisplayed()
-            addTopSongs.performClick()
-
+          assertIsDisplayed()
+          addTopSongs.assertIsDisplayed()
+          addTopSongs.performClick()
         }
         val expectedListItem = ListItem("id", "title", null, "subtitle", "", false, true)
 
-        every { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(expectedListItem))
+        every { spotifyController.getAllElementFromSpotify() } returns
+            flowOf(listOf(expectedListItem))
         every {
-            spotifyController.getAllChildren(ListItem("id", "title", null, "subtitle", "", false, true))
+          spotifyController.getAllChildren(
+              ListItem("id", "title", null, "subtitle", "", false, true))
         } returns flowOf(listOf(expectedListItem))
 
         viewModel.retrieveAndAddSubsection(this)
@@ -146,19 +130,15 @@ class LoginAndAddSong : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
         assertEquals(expectedListItem, result2?.get(0))
 
         ComposeScreen.onComposeScreen<SelectSongScreen>(composeTestRule) {
-            assertIsDisplayed()
-            trackItemCard.assertIsDisplayed()
-            trackItemCard.performClick()
+          assertIsDisplayed()
+          trackItemCard.assertIsDisplayed()
+          trackItemCard.performClick()
         }
 
         ComposeScreen.onComposeScreen<ProfileScreen>(composeTestRule) {
-            assertIsDisplayed()
-            addTopSongs.assertIsDisplayed()
-            trackItemCard.assertIsDisplayed()
+          assertIsDisplayed()
+          addTopSongs.assertIsDisplayed()
+          trackItemCard.assertIsDisplayed()
         }
-
-    }
-        }
-
-
-
+      }
+}

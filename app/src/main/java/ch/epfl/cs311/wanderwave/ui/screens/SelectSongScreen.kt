@@ -25,7 +25,6 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.profile.TrackItem
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
-
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
