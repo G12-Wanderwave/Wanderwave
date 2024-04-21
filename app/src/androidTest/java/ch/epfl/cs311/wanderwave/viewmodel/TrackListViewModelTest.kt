@@ -7,9 +7,17 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
@@ -24,10 +32,14 @@ class TrackListViewModelTest {
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
   @RelaxedMockK private lateinit var repository: TrackRepositoryImpl
 
+  private val testDispatcher = TestCoroutineDispatcher()
   private lateinit var track: Track
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Before
   fun setup() {
+    Dispatchers.setMain(testDispatcher)
+
     val connectResult = SpotifyController.ConnectResult.SUCCESS
     every { mockSpotifyController.connectRemote() } returns flowOf(connectResult)
 
@@ -56,6 +68,12 @@ class TrackListViewModelTest {
     viewModel = TrackListViewModel(repository, mockSpotifyController)
 
     runBlocking { viewModel.uiState.first { !it.loading } }
+  }
+
+  @After
+  fun tearDown() {
+    Dispatchers.resetMain()
+    testDispatcher.cleanupTestCoroutines()
   }
 
   @Test
@@ -173,8 +191,9 @@ class TrackListViewModelTest {
     assertEquals("Failed to play track", viewModel.uiState.value.message)
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
-  fun resumeTrackWhenControllerReturnsFalse() = run {
+  fun resumeTrackWhenControllerReturnsFalse() = runTest {
     every { mockSpotifyController.pauseTrack() } returns flowOf(true)
     every { mockSpotifyController.playTrack(track) } returns flowOf(true)
     every { mockSpotifyController.resumeTrack() } returns flowOf(false)
@@ -182,6 +201,9 @@ class TrackListViewModelTest {
     viewModel.play()
     viewModel.pause()
     viewModel.play()
+
+    advanceUntilIdle()
+
     verify { mockSpotifyController.resumeTrack() }
     assertEquals("Failed to resume track", viewModel.uiState.value.message)
   }
