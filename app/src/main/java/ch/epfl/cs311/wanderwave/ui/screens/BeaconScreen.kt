@@ -64,6 +64,7 @@ import com.google.maps.android.compose.CameraPositionState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+
 @Composable
 fun BeaconScreen(
     beaconId: String?,
@@ -186,8 +187,9 @@ fun SongList(beacon: Beacon, navigationActions: NavigationActions) {
 //            }
 //      }
 //  LazyColumn { items(beacon.tracks) { TrackItem(it) } }
-//>>>>>>> 3189f8f ( add the button to beacon screen)
+
 }
+
 
 @Composable
 internal fun TrackItem(
