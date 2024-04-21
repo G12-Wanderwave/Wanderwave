@@ -54,7 +54,6 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
 
-
 @Composable
 fun BeaconScreen(
     navigationActions: NavigationActions,
@@ -135,51 +134,49 @@ fun BeaconInformation(location: Location) {
 
 @Composable
 fun SongList(beacon: Beacon, viewModel: BeaconViewModel) {
-    // State to control the visibility of the add track dialog
-    var showDialog by remember { mutableStateOf(false) }
+  // State to control the visibility of the add track dialog
+  var showDialog by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(
-                text = stringResource(R.string.beaconTracksTitle),
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier)
-            IconButton(
-                onClick = { showDialog = true }) { // Toggle dialog visibility
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.beaconTitle))
+  Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween) {
+          Text(
+              text = stringResource(R.string.beaconTracksTitle),
+              style = MaterialTheme.typography.headlineMedium,
+              modifier = Modifier)
+          IconButton(onClick = { showDialog = true }) { // Toggle dialog visibility
+            Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = stringResource(R.string.beaconTitle))
+          }
+        }
+    LazyColumn { items(beacon.tracks) { TrackItem(it) } }
+
+    if (showDialog) {
+      AddTrackDialog(
+          onAddTrack = { id, title, artist ->
+            viewModel.addTrackToBeacon(beacon.id, Track(id, title, artist)) { success ->
+              if (success) {
+                Log.d("SongList", "Track added successfully.")
+              } else {
+                Log.e("SongList", "Failed to add track.")
+              }
             }
-        }
-        LazyColumn { items(beacon.tracks) { TrackItem(it) } }
-
-        if (showDialog) {
-            AddTrackDialog(
-                onAddTrack = { id, title, artist ->
-                    viewModel.addTrackToBeacon(beacon.id, Track(id, title, artist)) { success ->
-                        if (success) {
-                            Log.d("SongList", "Track added successfully.")
-                        } else {
-                            Log.e("SongList", "Failed to add track.")
-                        }
-                    }
-                    showDialog = false // Close dialog after adding track
-                },
-                onDismiss = {
-                    showDialog = false // Close dialog on dismiss
-                },
-                initialTrackId = "",
-                initialTrackTitle = "",
-                initialTrackArtist = "",
-                dialogTestTag = "addTrackDialog" // For testing purposes
-            )
-        }
+            showDialog = false // Close dialog after adding track
+          },
+          onDismiss = {
+            showDialog = false // Close dialog on dismiss
+          },
+          initialTrackId = "",
+          initialTrackTitle = "",
+          initialTrackArtist = "",
+          dialogTestTag = "addTrackDialog" // For testing purposes
+          )
     }
+  }
 }
-
 
 @Composable
 internal fun TrackItem(track: Track) {
