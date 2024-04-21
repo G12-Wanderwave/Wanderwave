@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -56,6 +57,7 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: ProfileViewModel)
   LaunchedEffect(childrenPlaylistTrackList) { displayedList = childrenPlaylistTrackList }
 
   Scaffold(
+      modifier = Modifier.testTag("selectSongScreen"),
       topBar = {
         TopAppBar(
             title = { Text("Select Song") },
