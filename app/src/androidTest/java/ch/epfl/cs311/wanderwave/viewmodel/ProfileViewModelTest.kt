@@ -2,6 +2,8 @@ package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
+import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
@@ -19,10 +21,11 @@ class ProfileViewModelTest {
   lateinit var viewModel: ProfileViewModel
 
   @get:Rule val mockkRule = MockKRule(this)
+  @RelaxedMockK private lateinit var profileConnection: ProfileConnection
 
   @Before
   fun setup() {
-    viewModel = ProfileViewModel()
+    viewModel = ProfileViewModel(profileConnection)
   }
 
   @Test

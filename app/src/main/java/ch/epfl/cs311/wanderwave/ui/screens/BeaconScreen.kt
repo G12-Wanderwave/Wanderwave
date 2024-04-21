@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -58,9 +59,11 @@ fun BeaconScreen(
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
+        Log.d("BeaconScreen", "UIState: $uiState")
         if (!uiState.isLoading) {
           BeaconScreen(beacon = uiState.beacon!!)
         } else {
+          Log.d("BeaconScreen", "Loading screen")
           LoadingScreen()
         }
       }
