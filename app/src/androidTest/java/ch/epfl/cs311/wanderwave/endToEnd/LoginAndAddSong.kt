@@ -89,9 +89,10 @@ class LoginAndAddSong : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
 
         composeTestRule.setContent {
             SpotifyConnectScreen(navigationActions = mockNavigationActions, viewModel = mockViewModel)
-            MainPlaceHolder(mockNavigationActions)
+//
+        MainPlaceHolder(mockNavigationActions)
             ProfileScreen(mockNavigationActions, viewModel)
-            SelectSongScreen(mockNavigationActions, viewModel)
+           SelectSongScreen(mockNavigationActions, viewModel)
         }
 
     }
@@ -110,10 +111,8 @@ class LoginAndAddSong : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
     }
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun loginNavigateToProfileScreenAndAddSong() = runBlockingTest() {  // Use the testDispatcher to control coroutine execution
+    fun loginNavigateToProfileAndAddSong_SuccessfulFlow() = runBlockingTest() {
         setup(SpotifyConnectScreenViewModel.UiState(hasResult = true, success = true))
-
- //       ComposeScreen.onComposeScreen<SpotifyConnectScreen>(composeTestgRule) {}
 
         ComposeScreen.onComposeScreen<MainPlaceHolder>(composeTestRule) {
             assertIsDisplayed()
@@ -125,11 +124,41 @@ class LoginAndAddSong : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
             assertIsDisplayed()
             addTopSongs.assertIsDisplayed()
             addTopSongs.performClick()
+
         }
+        val expectedListItem = ListItem("id", "title", null, "subtitle", "", false, true)
+
+        every { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(expectedListItem))
+        every {
+            spotifyController.getAllChildren(ListItem("id", "title", null, "subtitle", "", false, true))
+        } returns flowOf(listOf(expectedListItem))
+
+        viewModel.retrieveAndAddSubsection(this)
+        viewModel.retrieveChild(expectedListItem, this)
+        advanceUntilIdle() // Ensure all coroutines are completed
+
+        val flow = viewModel.spotifySubsectionList
+        val flow2 = viewModel.childrenPlaylistTrackList
+        val result = flow.timeout(2.seconds).catch {}.firstOrNull()
+        val result2 = flow2.timeout(2.seconds).catch {}.firstOrNull()
+
+        assertEquals(expectedListItem, result?.get(0))
+        assertEquals(expectedListItem, result2?.get(0))
 
         ComposeScreen.onComposeScreen<SelectSongScreen>(composeTestRule) {
             assertIsDisplayed()
+            trackItemCard.assertIsDisplayed()
+            trackItemCard.performClick()
         }
-    }
 
-}
+        ComposeScreen.onComposeScreen<ProfileScreen>(composeTestRule) {
+            assertIsDisplayed()
+            addTopSongs.assertIsDisplayed()
+            trackItemCard.assertIsDisplayed()
+        }
+
+    }
+        }
+
+
+
