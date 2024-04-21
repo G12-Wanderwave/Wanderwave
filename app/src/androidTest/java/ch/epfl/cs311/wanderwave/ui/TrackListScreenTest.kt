@@ -56,12 +56,12 @@ class TrackListScreenTest : TestCase() {
 
   private fun setupViewModel(result: Boolean) {
     every { mockSpotifyController.playTrack(any()) } returns flowOf(result)
-    every { trackConnection.getAll() } returns flowOf(
-        listOf(
-            Track("is 1", "Track 1", "Artist 1"),
-            Track("is 2", "Track 2", "Artist 2"),
-        )
-    )
+    every { trackConnection.getAll() } returns
+        flowOf(
+            listOf(
+                Track("is 1", "Track 1", "Artist 1"),
+                Track("is 2", "Track 2", "Artist 2"),
+            ))
 
     val viewModel = TrackListViewModel(mockSpotifyController, trackConnection)
 
