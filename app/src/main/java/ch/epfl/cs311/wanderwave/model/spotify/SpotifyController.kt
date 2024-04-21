@@ -141,7 +141,7 @@ class SpotifyController(private val context: Context) {
             appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
               val trackDuration = playerState.track.duration
               val currentPosition = playerState.playbackPosition
-              if (trackDuration - currentPosition <= 500) {
+              if (trackDuration - currentPosition <= 1500) {
                 onTrackEndCallback?.invoke()
               }
               handler.postDelayed(this, 1000)

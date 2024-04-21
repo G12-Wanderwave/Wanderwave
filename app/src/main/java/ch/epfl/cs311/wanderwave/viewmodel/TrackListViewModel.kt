@@ -26,7 +26,7 @@ constructor(
 
   init {
     observeTracks()
-    spotifyController.setOnTrackEndCallback { queueNextTrack() }
+    spotifyController.setOnTrackEndCallback { skipForward() }
   }
 
   private fun observeTracks() {
@@ -68,15 +68,6 @@ constructor(
       if (success == null || !success) {
         _uiState.value = _uiState.value.copy(message = "Failed to pause track")
       }
-    }
-  }
-
-  private fun queueNextTrack() {
-    val currentIndex = _uiState.value.queue.indexOf(_uiState.value.selectedTrack)
-    if (currentIndex != -1 && currentIndex + 1 < _uiState.value.queue.size) {
-      val nextTrack = _uiState.value.queue[currentIndex + 1]
-      _uiState.value = _uiState.value.copy(selectedTrack = nextTrack)
-      selectTrack(nextTrack)
     }
   }
 
@@ -151,7 +142,6 @@ constructor(
       }
     }
   }
-
   /** Skips to the next track in the list. */
   fun skipForward() {
     skip(1)
