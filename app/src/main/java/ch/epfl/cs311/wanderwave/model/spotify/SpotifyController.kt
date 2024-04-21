@@ -36,7 +36,6 @@ class SpotifyController(private val context: Context) {
 
   var appRemote: SpotifyAppRemote? = null
 
-
   @Volatile private var onTrackEndCallback: (() -> Unit)? = null
 
   fun getAuthorizationRequest(): AuthorizationRequest {
@@ -132,33 +131,34 @@ class SpotifyController(private val context: Context) {
       awaitClose { callResult?.cancel() }
     }
   }
-    private val handler = Handler(Looper.getMainLooper())
-    fun startPeriodicCheck() {
-        val updateRunnable = object : Runnable {
-            override fun run() {
-                appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
-                    val trackDuration = playerState.track.duration
-                    val currentPosition = playerState.playbackPosition
-                    if (trackDuration - currentPosition <= 500) {
-                        onTrackEndCallback?.invoke()
-                    }
-                    handler.postDelayed(this, 1000)
-                }
+
+  private val handler = Handler(Looper.getMainLooper())
+
+  fun startPeriodicCheck() {
+    val updateRunnable =
+        object : Runnable {
+          override fun run() {
+            appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
+              val trackDuration = playerState.track.duration
+              val currentPosition = playerState.playbackPosition
+              if (trackDuration - currentPosition <= 500) {
+                onTrackEndCallback?.invoke()
+              }
+              handler.postDelayed(this, 1000)
             }
+          }
         }
 
-        handler.post(updateRunnable)
-    }
+    handler.post(updateRunnable)
+  }
 
+  fun stopPeriodicCheck() {
+    handler.removeCallbacksAndMessages(null)
+  }
 
-    fun stopPeriodicCheck() {
-        handler.removeCallbacksAndMessages(null)
-    }
-
-    fun setOnTrackEndCallback(callback: () -> Unit) {
-        onTrackEndCallback = callback
-    }
-
+  fun setOnTrackEndCallback(callback: () -> Unit) {
+    onTrackEndCallback = callback
+  }
 
   /**
    * Get all the playlist, title, ... from spotify from the home page of the user.
