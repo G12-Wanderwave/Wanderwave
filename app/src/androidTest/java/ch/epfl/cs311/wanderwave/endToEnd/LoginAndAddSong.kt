@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.endToEnd
 
+import android.util.Log
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -21,6 +22,7 @@ import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.kakaocup.compose.node.element.ComposeScreen
 import io.mockk.Runs
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -28,12 +30,28 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.just
 import io.mockk.verify
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.timeout
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.runBlocking
 @RunWith(AndroidJUnit4::class)
 @HiltAndroidTest
 class LoginAndAddSong : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
@@ -56,6 +74,14 @@ class LoginAndAddSong : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
     @RelaxedMockK private lateinit var profileRepositoryImpl: ProfileRepositoryImpl
 
     @RelaxedMockK private lateinit var spotifyController: SpotifyController
+
+
+
+    @After
+    fun clearMocks() {
+        clearAllMocks() // Clear all MockK mocks
+    }
+
     private fun setup(uiState: SpotifyConnectScreenViewModel.UiState) {
         mockDependencies()
         every { mockViewModel.uiState } returns MutableStateFlow(uiState)
@@ -82,17 +108,17 @@ class LoginAndAddSong : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
         coEvery { spotifyController.getAllChildren(any()) } returns
                 flowOf(listOf(ListItem("", "", null, "", "", false, false)))
     }
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun loginNavigateToProfileScreenAndAddSong() = run {
+    fun loginNavigateToProfileScreenAndAddSong() = runBlockingTest() {  // Use the testDispatcher to control coroutine execution
         setup(SpotifyConnectScreenViewModel.UiState(hasResult = true, success = true))
 
-        ComposeScreen.onComposeScreen<SpotifyConnectScreen>(composeTestRule) {}
+        ComposeScreen.onComposeScreen<SpotifyConnectScreen>(composeTestgRule) {}
 
         ComposeScreen.onComposeScreen<MainPlaceHolder>(composeTestRule) {
             assertIsDisplayed()
             profileButton.assertIsDisplayed()
             profileButton.performClick()
-
         }
 
         ComposeScreen.onComposeScreen<ProfileScreen>(composeTestRule) {
@@ -100,10 +126,10 @@ class LoginAndAddSong : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
             addTopSongs.assertIsDisplayed()
             addTopSongs.performClick()
         }
+
         ComposeScreen.onComposeScreen<SelectSongScreen>(composeTestRule) {
             assertIsDisplayed()
         }
     }
-
 
 }

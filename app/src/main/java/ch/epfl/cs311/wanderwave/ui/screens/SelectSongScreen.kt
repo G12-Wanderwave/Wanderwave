@@ -33,6 +33,8 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import com.spotify.protocol.types.ListItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 
 /**
  * Screen to select a song from Spotify
@@ -51,7 +53,7 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: ProfileViewModel)
 
   var displayedList by remember { mutableStateOf(mainList) }
 
-  LaunchedEffect(Unit) { viewModel.retrieveAndAddSubsection() }
+  LaunchedEffect(Unit) { viewModel.retrieveAndAddSubsection(CoroutineScope(Dispatchers.IO)) }
   LaunchedEffect(mainList) { displayedList = mainList }
 
   LaunchedEffect(childrenPlaylistTrackList) { displayedList = childrenPlaylistTrackList }
@@ -78,7 +80,7 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: ProfileViewModel)
                     listItem,
                     onClick = {
                       if (listItem.hasChildren) {
-                        viewModel.retrieveChild(listItem)
+                        viewModel.retrieveChild(listItem,CoroutineScope(Dispatchers.IO))
                       } else {
                         viewModel.addTrackToList(
                             "TOP SONGS", Track(listItem.id, listItem.title, listItem.subtitle))

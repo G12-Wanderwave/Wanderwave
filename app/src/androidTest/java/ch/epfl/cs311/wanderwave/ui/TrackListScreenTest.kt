@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui
 
+import android.util.Log
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -68,7 +69,7 @@ class TrackListScreenTest : TestCase() {
 
   @Test
   fun trackListScreenIsDisplayed() =
-      testDispatcher.runBlockingTest {
+      runBlockingTest {
         setupViewModel(true)
         onComposeScreen<TrackListScreen>(composeTestRule) {
           assertIsDisplayed()

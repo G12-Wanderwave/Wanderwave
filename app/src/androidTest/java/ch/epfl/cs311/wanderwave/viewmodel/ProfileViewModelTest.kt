@@ -10,6 +10,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import kotlinx.coroutines.CoroutineScope
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -95,7 +96,7 @@ class ProfileViewModelTest {
         flowOf(listOf(track2)) // No empty list first
 
     viewModel.createSpecificSongList("TOP_SONGS")
-    viewModel.retrieveTracks()
+    viewModel.retrieveTracks(CoroutineScope(Dispatchers.IO))
     advanceUntilIdle()
     var songLists = viewModel.songLists.value
     assertFalse("Song list should not be empty after adding a track", songLists.isEmpty())
@@ -123,8 +124,8 @@ class ProfileViewModelTest {
     every {
       spotifyController.getAllChildren(ListItem("id", "title", null, "subtitle", "", false, true))
     } returns flowOf(listOf(expectedListItem))
-    viewModel.retrieveAndAddSubsection()
-    viewModel.retrieveChild(expectedListItem)
+    viewModel.retrieveAndAddSubsection(CoroutineScope(Dispatchers.IO))
+    viewModel.retrieveChild(expectedListItem,CoroutineScope(Dispatchers.IO))
     advanceUntilIdle() // Ensure all coroutines are completed
 
     // val result = viewModel.spotifySubsectionList.first()  // Safely access the first item
