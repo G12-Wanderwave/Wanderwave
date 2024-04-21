@@ -7,6 +7,7 @@ import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,8 +35,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,6 +59,7 @@ import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
 import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
+import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
 import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
@@ -63,6 +68,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
 
 @Composable
 fun BeaconScreen(
@@ -152,54 +158,56 @@ fun BeaconInformation(location: Location) {
 
 @Composable
 fun SongList(beacon: Beacon, navigationActions: NavigationActions) {
-  HorizontalDivider()
+    var showDialog by remember { mutableStateOf(false) }
+
+    HorizontalDivider()
   Text(
       text = stringResource(R.string.beaconTracksTitle),
       style = MaterialTheme.typography.displayMedium,
       modifier = Modifier.testTag("beaconTracksTitle"))
   LazyColumn { items(beacon.profileAndTrack) { TrackItem(it, navigationActions) } }
 
+    Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(
+                text = stringResource(R.string.beaconTracksTitle),
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier)
+            IconButton(
+                onClick = { showDialog = true }) { // Toggle dialog visibility
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = stringResource(R.string.beaconTitle))
+            }
+        }
 
-//  Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
-//    Row(
-//        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-//        verticalAlignment = Alignment.CenterVertically,
-//        horizontalArrangement = Arrangement.SpaceBetween) {
-//          Text(
-//              text = stringResource(R.string.beaconTracksTitle),
-//              style = MaterialTheme.typography.headlineMedium,
-//              modifier = Modifier)
-//          IconButton(onClick = { showDialog = true }) { // Toggle dialog visibility
-//            Icon(
-//                imageVector = Icons.Filled.Add,
-//                contentDescription = stringResource(R.string.beaconTitle))
-//          }
-//        }
-//    LazyColumn { items(beacon.tracks) { TrackItem(it) } }
-//
-//    if (showDialog) {
-//      AddTrackDialog(
-//          onAddTrack = { id, title, artist ->
-//            viewModel.addTrackToBeacon(beacon.id, Track(id, title, artist)) { success ->
-//              if (success) {
-//                Log.d("SongList", "Track added successfully.")
-//              } else {
-//                Log.e("SongList", "Failed to add track.")
-//              }
-//            }
-//            showDialog = false // Close dialog after adding track
-//          },
-//          onDismiss = {
-//            showDialog = false // Close dialog on dismiss
-//          },
-//          initialTrackId = "",
-//          initialTrackTitle = "",
-//          initialTrackArtist = "",
-//          dialogTestTag = "addTrackDialog" // For testing purposes
-//          )
-//    }
-//  }
+        if (showDialog) {
+            AddTrackDialog(
+                onAddTrack = { id, title, artist ->
+//                    viewModel.addTrackToBeacon(beacon.id, Track(id, title, artist)) { success ->
+//                        if (success) {
+//                            Log.d("SongList", "Track added successfully.")
+//                        } else {
+//                            Log.e("SongList", "Failed to add track.")
+//                        }
+//                    }
+                    showDialog = false // Close dialog after adding track
+                },
+                onDismiss = {
+                    showDialog = false // Close dialog on dismiss
+                },
+                initialTrackId = "",
+                initialTrackTitle = "",
+                initialTrackArtist = "",
+                dialogTestTag = "addTrackDialog" // For testing purposes
+            )
+        }
+    }
 }
+
 
 @Composable
 internal fun TrackItem(
