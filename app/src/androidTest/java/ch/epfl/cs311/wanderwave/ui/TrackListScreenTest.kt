@@ -67,18 +67,17 @@ class TrackListScreenTest : TestCase() {
   }
 
   @Test
-  fun trackListScreenIsDisplayed() =
-      testDispatcher.runBlockingTest {
-        setupViewModel(true)
-        onComposeScreen<TrackListScreen>(composeTestRule) {
-          assertIsDisplayed()
+  fun trackListScreenIsDisplayed() = runBlockingTest {
+    setupViewModel(true)
+    onComposeScreen<TrackListScreen>(composeTestRule) {
+      assertIsDisplayed()
 
-          trackButton {
-            assertIsDisplayed()
-            assert(hasClickAction())
-          }
-        }
+      trackButton {
+        assertIsDisplayed()
+        assert(hasClickAction())
       }
+    }
+  }
 
   @Test
   fun tappingTrackSelectssIt() =
