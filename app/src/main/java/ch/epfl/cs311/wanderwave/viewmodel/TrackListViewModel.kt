@@ -152,6 +152,19 @@ constructor(
     skip(-1)
   }
 
+  fun toggleShuffle() {
+    _uiState.value = _uiState.value.copy(shuffleOn = !_uiState.value.shuffleOn)
+  }
+
+  fun toggleRepeat() {
+    _uiState.value =
+        when (_uiState.value.repeatMode) {
+          RepeatMode.NONE -> _uiState.value.copy(repeatMode = RepeatMode.ALL)
+          RepeatMode.ALL -> _uiState.value.copy(repeatMode = RepeatMode.ONE)
+          else -> _uiState.value.copy(repeatMode = RepeatMode.NONE)
+        }
+  }
+
   data class UiState(
       val tracks: List<Track> = listOf(),
       val loading: Boolean = false,
@@ -161,6 +174,14 @@ constructor(
       val isPlaying: Boolean = false,
       val currentMillis: Int = 0,
       val expanded: Boolean = false,
-      val progress: Float = 0f
+      val progress: Float = 0f,
+      val shuffleOn: Boolean = false,
+      val repeatMode: RepeatMode = RepeatMode.NONE
   )
+}
+
+enum class RepeatMode {
+  NONE,
+  ONE,
+  ALL
 }
