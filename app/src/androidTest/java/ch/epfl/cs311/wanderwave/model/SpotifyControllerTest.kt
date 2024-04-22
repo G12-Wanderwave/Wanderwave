@@ -11,6 +11,7 @@ import com.spotify.android.appremote.api.PlayerApi
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.android.appremote.api.error.NotLoggedInException
 import com.spotify.protocol.client.CallResult
+import com.spotify.protocol.client.ErrorCallback
 import com.spotify.protocol.types.Empty
 import com.spotify.protocol.types.ListItem
 import com.spotify.protocol.types.ListItems
@@ -24,6 +25,7 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
+import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
 import kotlin.Exception
 import kotlin.time.Duration.Companion.seconds
@@ -611,5 +613,68 @@ class SpotifyControllerTest {
 
       spotifyController.startPeriodicCheck()
     }
+  }
+
+  @Test
+  fun resumeTrack_Failure() = runBlocking {
+    val playerApi = mockk<PlayerApi>()
+    every { mockAppRemote.playerApi } returns playerApi
+
+    val callResult = mockk<CallResult<Empty>>()
+    every { playerApi.resume() } returns callResult
+    every { callResult.setResultCallback(any()) } answers { callResult }
+    every { callResult.setErrorCallback(any()) } answers
+        {
+          firstArg<ErrorCallback>().onError(RuntimeException("Error"))
+          callResult // Return the mocked callResult here
+        }
+
+    every { callResult.cancel() } just Runs
+
+    val result = spotifyController.resumeTrack().first()
+
+    assertFalse(result)
+  }
+
+  @Test
+  fun pauseTrack_Failure() = runBlocking {
+    val playerApi = mockk<PlayerApi>()
+    every { mockAppRemote.playerApi } returns playerApi
+
+    val callResult = mockk<CallResult<Empty>>()
+    every { playerApi.pause() } returns callResult
+    every { callResult.setResultCallback(any()) } answers { callResult }
+    every { callResult.setErrorCallback(any()) } answers
+        {
+          firstArg<ErrorCallback>().onError(RuntimeException("Error"))
+          callResult // Return the mocked callResult here
+        }
+
+    every { callResult.cancel() } just Runs
+
+    val result = spotifyController.pauseTrack().first()
+
+    assertFalse(result)
+  }
+
+  @Test
+  fun playTrack_Failure() = runBlocking {
+    val playerApi = mockk<PlayerApi>()
+    every { mockAppRemote.playerApi } returns playerApi
+
+    val callResult = mockk<CallResult<Empty>>()
+    every { playerApi.play(any()) } returns callResult
+    every { callResult.setResultCallback(any()) } answers { callResult }
+    every { callResult.setErrorCallback(any()) } answers
+        {
+          firstArg<ErrorCallback>().onError(RuntimeException("Error"))
+          callResult // Return the mocked callResult here
+        }
+
+    every { callResult.cancel() } just Runs
+
+    val result = spotifyController.playTrack(Track("id", "title", "artist")).first()
+
+    assertFalse(result)
   }
 }
