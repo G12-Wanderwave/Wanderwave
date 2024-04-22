@@ -95,6 +95,7 @@ class AuthenticationControllerTest {
 
   @Test
   fun signInWithToken() = runBlocking {
+    setupDummyUserSignedIn()
     val mockFirebaseUser =
         mockk<com.google.firebase.auth.FirebaseUser> {
           every { uid } returns "testid"
