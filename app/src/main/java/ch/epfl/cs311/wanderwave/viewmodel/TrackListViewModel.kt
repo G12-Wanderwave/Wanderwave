@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
+import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -19,7 +20,7 @@ class TrackListViewModel
 @Inject
 constructor(
     private val spotifyController: SpotifyController,
-    private val trackConnection: TrackConnection = TrackConnection()
+    private val trackRepository: TrackRepository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(UiState(loading = true))
@@ -31,7 +32,7 @@ constructor(
 
   private fun observeTracks() {
     viewModelScope.launch {
-      trackConnection.getAll().collect {
+      trackRepository.getAll().collect {
         _uiState.value = _uiState.value.copy(tracks = it, loading = false)
       } // TODO : update to get only useful tracks
 

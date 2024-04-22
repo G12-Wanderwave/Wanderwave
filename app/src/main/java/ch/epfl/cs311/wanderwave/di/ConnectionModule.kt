@@ -4,6 +4,12 @@ import android.content.Context
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
+import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
+import ch.epfl.cs311.wanderwave.model.repository.BeaconRepositoryImpl
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
+import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
+import ch.epfl.cs311.wanderwave.model.repository.TrackRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,19 +23,19 @@ object ConnectionModule {
 
   @Provides
   @Singleton
-  fun provideBeaconConnection(@ApplicationContext context: Context): BeaconConnection {
-    return BeaconConnection()
+  fun provideBeaconRepository(@ApplicationContext context: Context): BeaconRepository {
+    return BeaconRepositoryImpl(BeaconConnection())
   }
 
   @Provides
   @Singleton
-  fun provideTrackConnection(@ApplicationContext context: Context): TrackConnection {
-    return TrackConnection()
+  fun provideTrackRepository(@ApplicationContext context: Context): TrackRepository {
+    return TrackRepositoryImpl(TrackConnection())
   }
 
   @Provides
   @Singleton
-  fun provideProfileConnection(@ApplicationContext context: Context): ProfileConnection {
-    return ProfileConnection()
+  fun provideProfileRepository(@ApplicationContext context: Context): ProfileRepository {
+    return ProfileRepositoryImpl(ProfileConnection())
   }
 }

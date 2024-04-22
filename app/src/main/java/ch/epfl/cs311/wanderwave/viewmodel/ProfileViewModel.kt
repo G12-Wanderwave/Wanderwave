@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 data class SongList(val name: String, val tracks: MutableList<Track> = mutableListOf())
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor(val profileConnection: ProfileConnection) : ViewModel() {
+class ProfileViewModel @Inject constructor(val profileRepository: ProfileRepository) : ViewModel() {
 
   private val _profile =
       MutableStateFlow(
@@ -71,11 +72,11 @@ class ProfileViewModel @Inject constructor(val profileConnection: ProfileConnect
 
   fun updateProfile(updatedProfile: Profile) {
     _profile.value = updatedProfile
-    profileConnection.updateItem(updatedProfile)
+    profileRepository.updateItem(updatedProfile)
   }
 
   fun deleteProfile() {
-    profileConnection.deleteItem(_profile.value)
+    profileRepository.deleteItem(_profile.value)
   }
 
   fun togglePublicMode() {
@@ -87,12 +88,12 @@ class ProfileViewModel @Inject constructor(val profileConnection: ProfileConnect
     // _profile.value = spotifyConnection.getProfile()....
     // Fetch profile from Firestore if it doesn't exist, create it
     Log.d("ProfileViewModel", "Fetching profile from Firestore...")
-    profileConnection.isUidExisting(profile.spotifyUid) { isExisting, fetchedProfile ->
+    profileRepository.isUidExisting(profile.spotifyUid) { isExisting, fetchedProfile ->
       if (isExisting) {
         _profile.value = fetchedProfile ?: profile
       } else {
         val newProfile = profile
-        profileConnection.addItem(newProfile)
+        profileRepository.addItem(newProfile)
         _profile.value = newProfile
       }
     }
