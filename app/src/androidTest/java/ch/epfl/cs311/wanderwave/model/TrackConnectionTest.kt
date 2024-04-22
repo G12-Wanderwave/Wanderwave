@@ -69,43 +69,42 @@ class TrackConnectionTest {
   }
 
   @Test
-fun testGetItem() = runBlocking {
+  fun testGetItem() = runBlocking {
     withTimeout(3000) {
-        // Mock the Task
-        val mockTask = mockk<Task<DocumentSnapshot>>()
-        val mockDocumentSnapshot = mockk<DocumentSnapshot>()
+      // Mock the Task
+      val mockTask = mockk<Task<DocumentSnapshot>>()
+      val mockDocumentSnapshot = mockk<DocumentSnapshot>()
 
-        val getTestTrack = Track("testTrack", "Test Title", "Test Artist")
+      val getTestTrack = Track("testTrack", "Test Title", "Test Artist")
 
-        every { mockDocumentSnapshot.getData() } returns getTestTrack.toMap()
-        every { mockDocumentSnapshot.exists() } returns true
-        every { mockDocumentSnapshot.id } returns getTestTrack.id
-        every { mockDocumentSnapshot.getString("title") } returns getTestTrack.title
-        every { mockDocumentSnapshot.getString("artist") } returns getTestTrack.artist
+      every { mockDocumentSnapshot.getData() } returns getTestTrack.toMap()
+      every { mockDocumentSnapshot.exists() } returns true
+      every { mockDocumentSnapshot.id } returns getTestTrack.id
+      every { mockDocumentSnapshot.getString("title") } returns getTestTrack.title
+      every { mockDocumentSnapshot.getString("artist") } returns getTestTrack.artist
 
-        // Define behavior for the addOnSuccessListener method
-        every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentSnapshot>>()) } answers {
+      // Define behavior for the addOnSuccessListener method
+      every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentSnapshot>>()) } answers
+          {
             val listener = arg<OnSuccessListener<DocumentSnapshot>>(0)
 
             // Define the behavior of the mock DocumentSnapshot here
             listener.onSuccess(mockDocumentSnapshot)
             mockTask
-        }
-        every { mockTask.addOnFailureListener(any()) } answers {
-            mockTask
-        }
+          }
+      every { mockTask.addOnFailureListener(any()) } answers { mockTask }
 
-        // Define behavior for the get() method on the DocumentReference to return the mock task
-        every { documentReference.get() } returns mockTask
+      // Define behavior for the get() method on the DocumentReference to return the mock task
+      every { documentReference.get() } returns mockTask
 
-        // Call the function under test
-        val retrievedTrack = trackConnection.getItem("testTrack").first()
+      // Call the function under test
+      val retrievedTrack = trackConnection.getItem("testTrack").first()
 
-        // Verify that the get function is called on the document with the correct id
-        coVerify { documentReference.get() }
-        assertEquals(getTestTrack, retrievedTrack)
+      // Verify that the get function is called on the document with the correct id
+      coVerify { documentReference.get() }
+      assertEquals(getTestTrack, retrievedTrack)
     }
-}
+  }
 
   @Test
   fun testDeleteItem() {

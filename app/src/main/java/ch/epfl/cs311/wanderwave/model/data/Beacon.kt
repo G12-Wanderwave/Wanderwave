@@ -30,8 +30,9 @@ data class Beacon(
 
         val tracks = listOf<Track>()
 
-
-        Log.d("Firestore", "DocumentSnapshot data 3: ${Beacon(id = id, location = location, tracks = tracks)}")
+        Log.d(
+            "Firestore",
+            "DocumentSnapshot data 3: ${Beacon(id = id, location = location, tracks = tracks)}")
         Beacon(id = id, location = location, tracks = tracks)
       } else {
         null

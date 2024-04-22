@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.model
 
-import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -18,7 +17,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
@@ -84,11 +82,9 @@ public class BeaconConnectionTest {
       val mockTask = mockk<Task<DocumentSnapshot>>()
       val mockDocumentSnapshot = mockk<DocumentSnapshot>()
 
-      val getTestBeacon = Beacon(
-        id = "testBeacon",
-        location = Location(1.0, 1.0, "Test Location"),
-        tracks = listOf()
-      )
+      val getTestBeacon =
+          Beacon(
+              id = "testBeacon", location = Location(1.0, 1.0, "Test Location"), tracks = listOf())
 
       every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap()
       every { mockDocumentSnapshot.exists() } returns true
@@ -97,20 +93,18 @@ public class BeaconConnectionTest {
       every { mockDocumentSnapshot.get("tracks") } returns getTestBeacon.tracks
 
       // Define behavior for the addOnSuccessListener method
-      every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentSnapshot>>()) } answers {
-        val listener = arg<OnSuccessListener<DocumentSnapshot>>(0)
+      every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentSnapshot>>()) } answers
+          {
+            val listener = arg<OnSuccessListener<DocumentSnapshot>>(0)
 
-        // Define the behavior of the mock DocumentSnapshot here
-        listener.onSuccess(mockDocumentSnapshot)
-        mockTask
-      }
-      every { mockTask.addOnFailureListener(any()) } answers {
-        mockTask
-      }
+            // Define the behavior of the mock DocumentSnapshot here
+            listener.onSuccess(mockDocumentSnapshot)
+            mockTask
+          }
+      every { mockTask.addOnFailureListener(any()) } answers { mockTask }
 
       // Define behavior for the get() method on the DocumentReference to return the mock task
       every { documentReference.get() } returns mockTask
-
 
       // Call the function under test
       val retrievedBeacon = beaconConnection.getItem("testBeacon").first()
