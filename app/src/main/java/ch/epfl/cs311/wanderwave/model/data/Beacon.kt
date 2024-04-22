@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.model.data
 
+import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 
 data class Beacon(
@@ -29,7 +30,9 @@ data class Beacon(
 
         val profileAndTrack = listOf<ProfileTrackAssociation>()
 
+          Log.d("Firestore", "DocumentSnapshot data 3: ${Beacon(id = id, location = location,profileAndTrack = profileAndTrack)}")
         Beacon(id = id, location = location, profileAndTrack = profileAndTrack)
+
       } else {
         null
       }
