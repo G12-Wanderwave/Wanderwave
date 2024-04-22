@@ -21,7 +21,7 @@ constructor(
   val uiState: StateFlow<UiState> = _uiState
 
   suspend fun connectRemote() {
-    if (!authenticationController.isSignedIn()) {
+    if (!authenticationController.refreshTokenIfNecessary()) {
       _uiState.value = UiState(hasResult = true, success = false)
       return
     }
