@@ -42,7 +42,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @HiltAndroidTest
-class LoginAndAddSong : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
+class LoginAndAddSongEndToEndTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
 
   @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
 
@@ -50,9 +50,9 @@ class LoginAndAddSong : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
 
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
-  @RelaxedMockK private lateinit var mockViewModel: SpotifyConnectScreenViewModel
+  @RelaxedMockK private lateinit var mockSpotifyViewModel: SpotifyConnectScreenViewModel
 
-  lateinit var viewModel: ProfileViewModel
+  @RelaxedMockK private lateinit var mockProfileViewModel: ProfileViewModel
 
   @RelaxedMockK private lateinit var profileRepositoryImpl: ProfileRepositoryImpl
 
@@ -65,15 +65,14 @@ class LoginAndAddSong : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
 
   private fun setup(uiState: SpotifyConnectScreenViewModel.UiState) {
     mockDependencies()
-    every { mockViewModel.uiState } returns MutableStateFlow(uiState)
-    viewModel = ProfileViewModel(profileRepositoryImpl, spotifyController)
+    every { mockSpotifyViewModel.uiState } returns MutableStateFlow(uiState)
+    mockProfileViewModel = ProfileViewModel(profileRepositoryImpl, spotifyController)
 
     composeTestRule.setContent {
-      SpotifyConnectScreen(navigationActions = mockNavigationActions, viewModel = mockViewModel)
-      //
+      SpotifyConnectScreen(navigationActions = mockNavigationActions, viewModel = mockSpotifyViewModel)
       MainPlaceHolder(mockNavigationActions)
-      ProfileScreen(mockNavigationActions, viewModel)
-      SelectSongScreen(mockNavigationActions, viewModel)
+      ProfileScreen(mockNavigationActions, mockProfileViewModel)
+      SelectSongScreen(mockNavigationActions, mockProfileViewModel)
     }
   }
 
@@ -117,12 +116,12 @@ class LoginAndAddSong : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
               ListItem("id", "title", null, "subtitle", "", false, true))
         } returns flowOf(listOf(expectedListItem))
 
-        viewModel.retrieveAndAddSubsection(this)
-        viewModel.retrieveChild(expectedListItem, this)
+        mockProfileViewModel.retrieveAndAddSubsection(this)
+        mockProfileViewModel.retrieveChild(expectedListItem, this)
         advanceUntilIdle() // Ensure all coroutines are completed
 
-        val flow = viewModel.spotifySubsectionList
-        val flow2 = viewModel.childrenPlaylistTrackList
+        val flow = mockProfileViewModel.spotifySubsectionList
+        val flow2 = mockProfileViewModel.childrenPlaylistTrackList
         val result = flow.timeout(2.seconds).catch {}.firstOrNull()
         val result2 = flow2.timeout(2.seconds).catch {}.firstOrNull()
 

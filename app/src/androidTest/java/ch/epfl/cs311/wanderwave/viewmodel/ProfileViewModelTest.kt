@@ -119,9 +119,7 @@ class ProfileViewModelTest {
     // Optionally check additional conditions after ensuring Flow had time to collect
     assertFalse(
         "Song list should not be empty after adding a track", viewModel.songLists.value.isEmpty())
-    Log.d("fwefewfew", viewModel.songLists.value.first().tracks.toString())
-    Log.d("fwefewfew2", Track(track2.id, track2.title, track2.subtitle).toString())
-    assertEquals(
+     assertEquals(
         Track(track2.id, track2.title, track2.subtitle),
         viewModel.songLists.value.first().tracks.get(0))
   }
