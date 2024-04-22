@@ -16,3 +16,16 @@ data class PlaceHolderEntity(
     @ColumnInfo(name = "latitude") val latitude: Double,
     @ColumnInfo(name = "longitude") val longitude: Double,
 )
+//@Database(
+//    entities =
+//        [TrackEntity::class, ProfileEntity::class, BeaconEntity::class, AuthTokenEntity::class],
+//    version = 1)
+//abstract class AppDatabase : RoomDatabase() {
+//  abstract fun trackDao(): TrackDao
+//
+//  abstract fun profileDao(): ProfileDao
+//
+//  abstract fun beaconDao(): BeaconDao
+//
+//  abstract fun authTokenDao(): AuthTokenDao
+//}
