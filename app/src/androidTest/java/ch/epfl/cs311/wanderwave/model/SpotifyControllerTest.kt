@@ -580,4 +580,36 @@ class SpotifyControllerTest {
       assertTrue(result)
     }
   }
+
+  @Test
+  fun testStartPeriodicCheckCancellation() {
+    runBlocking {
+      every { mockAppRemote.isConnected } returns true
+      val playerApi = mockk<PlayerApi>()
+      val playerState = mockk<PlayerState>()
+      val callResultPlayerState = mockk<CallResult<PlayerState>>()
+      every { playerApi.playerState } returns callResultPlayerState
+      every { callResultPlayerState.setResultCallback(any()) } answers
+          {
+            firstArg<CallResult.ResultCallback<PlayerState>>().onResult(playerState)
+            callResultPlayerState
+          }
+
+      every { mockAppRemote.playerApi } returns playerApi
+      var slot = slot<CallResult.ResultCallback<Empty>>()
+      var callResult = mockk<CallResult<Empty>>()
+      every { playerApi.pause() } returns callResult
+      every { callResult.setResultCallback(capture(slot)) } answers
+          {
+            slot.captured.onResult(Empty())
+            slot.captured.onResult(Empty())
+            callResult
+          }
+
+      every { callResult.setErrorCallback(any()) } returns callResult
+      every { callResult.cancel() } just Runs
+
+      spotifyController.startPeriodicCheck()
+    }
+  }
 }
