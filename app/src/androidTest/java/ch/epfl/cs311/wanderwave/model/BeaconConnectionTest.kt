@@ -1,9 +1,11 @@
 package ch.epfl.cs311.wanderwave.model
 
+import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
@@ -14,6 +16,7 @@ import io.mockk.every
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
+import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -29,8 +32,6 @@ public class BeaconConnectionTest {
 
   private lateinit var firestore: FirebaseFirestore
   private lateinit var documentReference: DocumentReference
-  private lateinit var documentSnapshotTask: Task<DocumentSnapshot>
-  private lateinit var documentSnapshot: DocumentSnapshot
   private lateinit var collectionReference: CollectionReference
 
   lateinit var beacon: Beacon
@@ -41,8 +42,6 @@ public class BeaconConnectionTest {
     firestore = mockk()
     documentReference = mockk<DocumentReference>(relaxed = true)
     collectionReference = mockk<CollectionReference>(relaxed = true)
-    documentSnapshotTask = mockk<Task<DocumentSnapshot>>(relaxed = true)
-    documentSnapshot = mockk<DocumentSnapshot>(relaxed = true)
 
     // Mock data
     beacon =
@@ -81,31 +80,44 @@ public class BeaconConnectionTest {
   @Test
   fun testGetItem() = runBlocking {
     withTimeout(3000) {
+      // Mock the Task
+      val mockTask = mockk<Task<DocumentSnapshot>>()
+      val mockDocumentSnapshot = mockk<DocumentSnapshot>()
 
-      every { documentReference.get() } returns documentSnapshotTask
-      // Mock the DocumentSnapshotTask
-      documentSnapshotTask = mockk<Task<DocumentSnapshot>>(relaxed = true) {
-        every { isSuccessful } returns true
-        every { result } returns documentSnapshot
-
-
-      }
-      every { documentSnapshot.data } returns mapOf(
-        "id" to "testBeacon",
-        "location" to mapOf(
-          "latitude" to 1.0,
-          "longitude" to 1.0,
-          "name" to "Test Location"
-        ),
-        "tracks" to listOf<DocumentReference>()
+      val getTestBeacon = Beacon(
+        id = "testBeacon",
+        location = Location(1.0, 1.0, "Test Location"),
+        tracks = listOf()
       )
-      every { documentReference.get() } returns documentSnapshotTask
+
+      every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap()
+      every { mockDocumentSnapshot.exists() } returns true
+      every { mockDocumentSnapshot.id } returns getTestBeacon.id
+      every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
+      every { mockDocumentSnapshot.get("tracks") } returns getTestBeacon.tracks
+
+      // Define behavior for the addOnSuccessListener method
+      every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentSnapshot>>()) } answers {
+        val listener = arg<OnSuccessListener<DocumentSnapshot>>(0)
+
+        // Define the behavior of the mock DocumentSnapshot here
+        listener.onSuccess(mockDocumentSnapshot)
+        mockTask
+      }
+      every { mockTask.addOnFailureListener(any()) } answers {
+        mockTask
+      }
+
+      // Define behavior for the get() method on the DocumentReference to return the mock task
+      every { documentReference.get() } returns mockTask
+
 
       // Call the function under test
       val retrievedBeacon = beaconConnection.getItem("testBeacon").first()
 
       // Verify that the get function is called on the document with the correct id
       coVerify { documentReference.get() }
+      assertEquals(getTestBeacon, retrievedBeacon)
     }
   }
 
