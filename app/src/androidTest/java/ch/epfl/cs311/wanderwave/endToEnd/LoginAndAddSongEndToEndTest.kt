@@ -42,7 +42,8 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @HiltAndroidTest
-class LoginAndAddSongEndToEndTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
+class LoginAndAddSongEndToEndTest :
+    TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
 
   @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
 
@@ -69,7 +70,8 @@ class LoginAndAddSongEndToEndTest : TestCase(kaspressoBuilder = Kaspresso.Builde
     mockProfileViewModel = ProfileViewModel(profileRepositoryImpl, spotifyController)
 
     composeTestRule.setContent {
-      SpotifyConnectScreen(navigationActions = mockNavigationActions, viewModel = mockSpotifyViewModel)
+      SpotifyConnectScreen(
+          navigationActions = mockNavigationActions, viewModel = mockSpotifyViewModel)
       MainPlaceHolder(mockNavigationActions)
       ProfileScreen(mockNavigationActions, mockProfileViewModel)
       SelectSongScreen(mockNavigationActions, mockProfileViewModel)

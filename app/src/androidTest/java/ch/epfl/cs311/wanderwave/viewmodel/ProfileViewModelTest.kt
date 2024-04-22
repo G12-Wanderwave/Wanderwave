@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
@@ -119,7 +118,7 @@ class ProfileViewModelTest {
     // Optionally check additional conditions after ensuring Flow had time to collect
     assertFalse(
         "Song list should not be empty after adding a track", viewModel.songLists.value.isEmpty())
-     assertEquals(
+    assertEquals(
         Track(track2.id, track2.title, track2.subtitle),
         viewModel.songLists.value.first().tracks.get(0))
   }
