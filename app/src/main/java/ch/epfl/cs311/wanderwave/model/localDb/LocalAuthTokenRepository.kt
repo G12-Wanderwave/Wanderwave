@@ -7,7 +7,14 @@ class LocalAuthTokenRepository(database: AppDatabase) : AuthTokenRepository {
   private val authTokenDao = database.authTokenDao()
 
   override fun getAuthToken(tokenType: AuthTokenRepository.AuthTokenType): String? {
-    return authTokenDao.getAuthToken(tokenType.id)?.token
+    return authTokenDao.getAuthToken(tokenType.id)?.let { authTokenEntity ->
+      if (authTokenEntity.expirationDate > System.currentTimeMillis() / 1000) {
+        authTokenEntity.token
+      } else {
+        authTokenDao.deleteAuthToken(tokenType.id)
+        null
+      }
+    }
   }
 
   override fun setAuthToken(
