@@ -289,20 +289,18 @@ public class BeaconConnectionTest {
       every { mockDocumentSnapshot.get("tracks") } returns getTestBeacon.profileAndTrack
 
       // Define behavior for the addOnSuccessListener method
-      every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentSnapshot>>()) } answers {
-        val listener = arg<OnSuccessListener<DocumentSnapshot>>(0)
+      every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentSnapshot>>()) } answers
+          {
+            val listener = arg<OnSuccessListener<DocumentSnapshot>>(0)
 
-        // Define the behavior of the mock DocumentSnapshot here
-        listener.onSuccess(mockDocumentSnapshot)
-        mockTask
-      }
-      every { mockTask.addOnFailureListener(any()) } answers {
-        mockTask
-      }
+            // Define the behavior of the mock DocumentSnapshot here
+            listener.onSuccess(mockDocumentSnapshot)
+            mockTask
+          }
+      every { mockTask.addOnFailureListener(any()) } answers { mockTask }
 
       // Define behavior for the get() method on the DocumentReference to return the mock task
       every { documentReference.get() } returns mockTask
-
 
       // Call the function under test
       val retrievedBeacon = beaconConnection.getItem("testBeacon").first()

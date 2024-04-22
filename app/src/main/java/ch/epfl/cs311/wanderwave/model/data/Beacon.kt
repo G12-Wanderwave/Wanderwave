@@ -32,7 +32,6 @@ data class Beacon(
 
           Log.d("Firestore", "DocumentSnapshot data 3: ${Beacon(id = id, location = location,profileAndTrack = profileAndTrack)}")
         Beacon(id = id, location = location, profileAndTrack = profileAndTrack)
-
       } else {
         null
       }
