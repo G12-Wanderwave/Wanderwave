@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.model.auth
 
+import ch.epfl.cs311.wanderwave.model.repository.AuthTokenRepository
 import com.google.firebase.auth.FirebaseAuth
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +15,11 @@ import ru.gildor.coroutines.okhttp.await
 
 class AuthenticationController
 @Inject
-constructor(private val auth: FirebaseAuth, private val httpClient: OkHttpClient) {
+constructor(
+    private val auth: FirebaseAuth,
+    private val httpClient: OkHttpClient,
+    private val tokenRepository: AuthTokenRepository
+) {
 
   private val AUTH_SERVICE_URL = "https://us-central1-wanderwave-95743.cloudfunctions.net"
   private val AUTH_SERVICE_TOKEN = "$AUTH_SERVICE_URL/token"
@@ -54,11 +59,26 @@ constructor(private val auth: FirebaseAuth, private val httpClient: OkHttpClient
       val responseJson = httpClient.newCall(request).execute().body!!.string()
       val response = JSONObject(responseJson)
       val firebaseToken = response.getString("firebase_token")
+      val spotifyAccessToken = response.getString("access_token")
+      val spotifyRefreshToken = response.getString("refresh_token")
 
       val result = auth.signInWithCustomToken(firebaseToken).await()
       if (result.user != null) {
+        tokenRepository.setAuthToken(
+            AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN,
+            spotifyAccessToken,
+            System.currentTimeMillis() / 1000L + 3600)
+        tokenRepository.setAuthToken(
+            AuthTokenRepository.AuthTokenType.SPOTIFY_REFRESH_TOKEN,
+            spotifyRefreshToken,
+            System.currentTimeMillis() / 1000L + 3600 * 100000)
+        tokenRepository.setAuthToken(
+            AuthTokenRepository.AuthTokenType.FIREBASE_TOKEN,
+            firebaseToken,
+            System.currentTimeMillis() / 1000L + 3600)
         emit(true)
       } else {
+        println("Failed to sign in with received firebase token: $result")
         emit(false)
       }
     }

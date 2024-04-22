@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.di
 
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
+import ch.epfl.cs311.wanderwave.model.repository.AuthTokenRepository
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import dagger.Module
@@ -16,7 +17,10 @@ object AuthenticationModule {
 
   @Provides
   @Singleton
-  fun provideAuthenticationController(httpClient: OkHttpClient): AuthenticationController {
-    return AuthenticationController(Firebase.auth, httpClient)
+  fun provideAuthenticationController(
+      httpClient: OkHttpClient,
+      authenticationRepository: AuthTokenRepository
+  ): AuthenticationController {
+    return AuthenticationController(Firebase.auth, httpClient, authenticationRepository)
   }
 }
