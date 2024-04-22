@@ -48,7 +48,9 @@ class BeaconConnection(private val database: FirebaseFirestore? = null) :
         .document(itemId)
         .get()
         .addOnSuccessListener { document ->
+          Log.d("Firestore", "DocumentSnapshot data: ${document.data}")
           if (document != null && document.data != null) {
+            Log.d("Firestore", "DocumentSnapshot data: ${document.data}")
             documentToItem(document)?.let { beacon ->
               val trackRefs = document.get("tracks") as? List<DocumentReference>
               val tracks = mutableListOf<Track>()
