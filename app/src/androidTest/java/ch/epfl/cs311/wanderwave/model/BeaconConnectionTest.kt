@@ -43,6 +43,8 @@ public class BeaconConnectionTest {
 
   private lateinit var firestore: FirebaseFirestore
   private lateinit var documentReference: DocumentReference
+  private lateinit var documentSnapshotTask: Task<DocumentSnapshot>
+  private lateinit var documentSnapshot: DocumentSnapshot
   private lateinit var collectionReference: CollectionReference
 
   lateinit var beacon: Beacon
@@ -53,6 +55,8 @@ public class BeaconConnectionTest {
     firestore = mockk()
     documentReference = mockk<DocumentReference>(relaxed = true)
     collectionReference = mockk<CollectionReference>(relaxed = true)
+    documentSnapshotTask = mockk<Task<DocumentSnapshot>>(relaxed = true)
+    documentSnapshot = mockk<DocumentSnapshot>(relaxed = true)
 
     // Mock data
     beacon = Beacon(
@@ -260,8 +264,28 @@ public class BeaconConnectionTest {
     }
   fun testGetItem() = runBlocking {
     withTimeout(3000) {
+
+      every { documentReference.get() } returns documentSnapshotTask
+      // Mock the DocumentSnapshotTask
+      documentSnapshotTask = mockk<Task<DocumentSnapshot>>(relaxed = true) {
+        every { isSuccessful } returns true
+        every { result } returns documentSnapshot
+
+
+      }
+      every { documentSnapshot.data } returns mapOf(
+        "id" to "testBeacon",
+        "location" to mapOf(
+          "latitude" to 1.0,
+          "longitude" to 1.0,
+          "name" to "Test Location"
+        ),
+        "tracks" to listOf<DocumentReference>()
+      )
+      every { documentReference.get() } returns documentSnapshotTask
+
       // Call the function under test
-      val retrievedBeacon = beaconConnection.getItem("testBeacon")
+      val retrievedBeacon = beaconConnection.getItem("testBeacon").first()
 
       // Verify that the get function is called on the document with the correct id
       coVerify { documentReference.get() }
