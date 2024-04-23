@@ -27,10 +27,15 @@ class SpotifyConnectScreenViewModelTest {
 
   private lateinit var viewModel: SpotifyConnectScreenViewModel
 
-  fun setup(connectResult: SpotifyController.ConnectResult, isSignedIn: Boolean, canRefresh: Boolean) {
+  fun setup(
+      connectResult: SpotifyController.ConnectResult,
+      isSignedIn: Boolean,
+      canRefresh: Boolean
+  ) {
     every { mockSpotifyController.connectRemote() } returns flowOf(connectResult)
     every { mockAuthenticationController.isSignedIn() } returns isSignedIn
-    coEvery { mockAuthenticationController.refreshTokenIfNecessary() } returns (isSignedIn || canRefresh)
+    coEvery { mockAuthenticationController.refreshTokenIfNecessary() } returns
+        (isSignedIn || canRefresh)
     viewModel = SpotifyConnectScreenViewModel(mockSpotifyController, mockAuthenticationController)
   }
 

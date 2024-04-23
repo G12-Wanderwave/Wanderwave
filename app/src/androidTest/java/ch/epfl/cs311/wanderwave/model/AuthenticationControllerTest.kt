@@ -42,7 +42,8 @@ class AuthenticationControllerTest {
 
   @Before
   fun setup() {
-    authenticationController = AuthenticationController(mockFirebaseAuth, mockHttpClient, mockTokenRepository)
+    authenticationController =
+        AuthenticationController(mockFirebaseAuth, mockHttpClient, mockTokenRepository)
   }
 
   fun setupDummyUserSignedIn() {
@@ -71,9 +72,15 @@ class AuthenticationControllerTest {
               }
         }
     every { mockTokenRepository.setAuthToken(any(), any(), any()) } returns Unit
-    every { mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.FIREBASE_TOKEN) } returns "testtoken-firebase"
-    every { mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN) } returns "testtoken-spotify-access"
-    every { mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_REFRESH_TOKEN) } returns "testtoken-spotify-refresh"
+    every {
+      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.FIREBASE_TOKEN)
+    } returns "testtoken-firebase"
+    every {
+      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+    } returns "testtoken-spotify-access"
+    every {
+      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_REFRESH_TOKEN)
+    } returns "testtoken-spotify-refresh"
   }
 
   @Test
@@ -134,21 +141,21 @@ class AuthenticationControllerTest {
   fun useRefreshToken() = runBlocking {
     setupDummyUserSignedIn()
     val mockFirebaseUser =
-      mockk<com.google.firebase.auth.FirebaseUser> {
-        every { uid } returns "testid"
-        every { email } returns null
-        every { displayName } returns null
-        every { photoUrl } returns null
-      }
+        mockk<com.google.firebase.auth.FirebaseUser> {
+          every { uid } returns "testid"
+          every { email } returns null
+          every { displayName } returns null
+          every { photoUrl } returns null
+        }
 
     val task =
-      mockk<Task<AuthResult>> {
-        every { result } returns mockk { every { user } returns mockFirebaseUser }
-        every { isComplete } returns true
-        every { isSuccessful } returns true
-        every { isCanceled } returns false
-        every { exception } returns null
-      }
+        mockk<Task<AuthResult>> {
+          every { result } returns mockk { every { user } returns mockFirebaseUser }
+          every { isComplete } returns true
+          every { isSuccessful } returns true
+          every { isCanceled } returns false
+          every { exception } returns null
+        }
 
     every { mockFirebaseAuth.currentUser } returns null
     every { mockFirebaseAuth.signInWithCustomToken("testtoken-firebase") } returns task
