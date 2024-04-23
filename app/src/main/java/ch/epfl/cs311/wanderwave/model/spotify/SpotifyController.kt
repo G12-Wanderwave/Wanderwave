@@ -1,7 +1,6 @@
 package ch.epfl.cs311.wanderwave.model.spotify
 
 import android.content.Context
-import android.util.Log
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.spotify.android.appremote.api.ConnectionParams
@@ -126,7 +125,6 @@ class SpotifyController(private val context: Context) {
             elapsedTime += checkInterval
             appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
               if (playerState.playbackPosition >= trackDuration - 1000) {
-                Log.d("SpotifyController", "Track is about to end")
                 onTrackEndCallback?.invoke()
                 stopPlaybackTimer()
               }
@@ -171,25 +169,13 @@ class SpotifyController(private val context: Context) {
   }
 
   // Detect when currently playing song has ended (or is going to end) and run onTrackEndCallback
-  private fun onPlayerStateUpdate() {
+  fun onPlayerStateUpdate() {
     appRemote?.let {
-      it.playerApi
-          .subscribeToPlayerState()
-          .setEventCallback { playerState: PlayerState ->
-            Log.d("SpotifyController", "Received player state update")
-            if (playerState.track != null) {
-              Log.d("SpotifyController", "Track duration: ${playerState.track.duration}")
-              Log.d("SpotifyController", "Playback position: ${playerState.playbackPosition}")
-              Log.d(
-                  "SpotifyController",
-                  "Remaining time: ${playerState.track.duration - playerState.playbackPosition}")
-              startPlaybackTimer(playerState.track.duration - playerState.playbackPosition)
-            }
-          }
-          .setErrorCallback { throwable ->
-            // Log any errors received
-            Log.e("SpotifyController", "Error subscribing to player state", throwable)
-          }
+      it.playerApi.subscribeToPlayerState().setEventCallback { playerState: PlayerState ->
+        if (playerState.track != null) {
+          startPlaybackTimer(playerState.track.duration - playerState.playbackPosition)
+        }
+      }
     }
   }
 

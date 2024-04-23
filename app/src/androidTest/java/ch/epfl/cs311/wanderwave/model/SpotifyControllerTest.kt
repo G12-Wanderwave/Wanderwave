@@ -13,9 +13,12 @@ import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.android.appremote.api.error.NotLoggedInException
 import com.spotify.protocol.client.CallResult
 import com.spotify.protocol.client.ErrorCallback
+import com.spotify.protocol.client.Subscription
 import com.spotify.protocol.types.Empty
 import com.spotify.protocol.types.ListItem
 import com.spotify.protocol.types.ListItems
+import com.spotify.protocol.types.PlayerState
+import io.mockk.Awaits
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -657,25 +660,35 @@ class SpotifyControllerTest {
     assertNull(spotifyController.playbackTimer)
   }
 
-  //    @Test
-  //    fun onPlayerStateUpdateSetsPlaybackTimerOnStateChange() = runTest {
-  //        every { (mockPlayerApi.subscribeToPlayerState()) }returns mockk()
-  //        doAnswer { invocation ->
-  //            val callback = invocation.arguments[0] as
-  // PlayerApi.Subscription.EventCallback<PlayerState>
-  //            callback.onEvent(mockPlayerState)
-  //        }.`when`(mockPlayerApi).subscribeToPlayerState()
-  //
-  //        // Trigger
-  //        spotifyController.onPlayerStateUpdate()
-  //
-  //        // Assert
-  //        assertNotNull(spotifyController.playbackTimer)
-  //    }
-
   @Test
   fun setOnTrackEndCallbackSetsTheCallback() {
     val callback: () -> Unit = { println("Track ended") }
     spotifyController.setOnTrackEndCallback(callback)
+  }
+
+  @Test
+  fun testOnPlayerStateUpdate() = runBlocking {
+    // Mock the PlayerApi and Subscription objects
+    val playerApi = mockk<PlayerApi>(relaxed = true)
+    val subscription = mockk<Subscription<PlayerState>>(relaxed = true)
+
+    // When playerApi.subscribeToPlayerState() is called, return the mocked subscription
+    every { playerApi.subscribeToPlayerState() } returns subscription
+
+    // When subscription.setEventCallback(any()) is called, invoke the callback with the test
+    // PlayerState
+    every { subscription.setEventCallback(any()) } answers { subscription }
+
+    // When subscription.setErrorCallback(any()) is called, do nothing
+    every { subscription.setErrorCallback(any()) } just Awaits
+
+    // Set the playerApi in the SpotifyController
+    every { mockAppRemote.playerApi } returns playerApi
+
+    // Call the method to be tested
+    spotifyController.onPlayerStateUpdate()
+
+    // Verify that setEventCallback was called
+    verify { subscription.setEventCallback(any()) }
   }
 }
