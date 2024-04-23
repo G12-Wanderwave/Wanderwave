@@ -2,6 +2,7 @@ package ch.epfl.cs311.wanderwave.viewmodel
 
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
@@ -43,10 +44,13 @@ class ProfileViewModelTest {
 
   @RelaxedMockK private lateinit var spotifyController: SpotifyController
 
+  @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
+
   @Before
   fun setup() {
     Dispatchers.setMain(testDispatcher)
-    viewModel = ProfileViewModel(profileRepositoryImpl, spotifyController)
+    viewModel =
+        ProfileViewModel(profileRepositoryImpl, spotifyController, mockAuthenticationController)
   }
 
   @After
