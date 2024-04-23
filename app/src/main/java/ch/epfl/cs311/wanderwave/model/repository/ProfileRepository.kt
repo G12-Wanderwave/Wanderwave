@@ -5,9 +5,13 @@ import kotlinx.coroutines.flow.Flow
 
 // ProfileRepository.kt
 interface ProfileRepository {
-    fun addItem(profile: Profile)
-    fun updateItem(profile: Profile)
-    fun deleteItem(profile: Profile)
-    fun getItem(profileId: String): Flow<Profile>
-    fun isUidExisting(spotifyUid: String, callback: (Boolean, Profile?) -> Unit)
+  fun addItem(profile: Profile)
+
+  fun updateItem(profile: Profile)
+
+  fun deleteItem(profile: Profile)
+
+  fun getItem(profileId: String): Flow<Profile>
+
+  fun isUidExisting(spotifyUid: String, callback: (Boolean, Profile?) -> Unit)
 }

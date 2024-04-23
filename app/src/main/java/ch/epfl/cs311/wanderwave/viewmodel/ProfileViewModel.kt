@@ -1,10 +1,8 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -87,7 +85,6 @@ class ProfileViewModel @Inject constructor(val profileRepository: ProfileReposit
     // TODO : fetch profile from Spotify
     // _profile.value = spotifyConnection.getProfile()....
     // Fetch profile from Firestore if it doesn't exist, create it
-    Log.d("ProfileViewModel", "Fetching profile from Firestore...")
     profileRepository.isUidExisting(profile.spotifyUid) { isExisting, fetchedProfile ->
       if (isExisting) {
         _profile.value = fetchedProfile ?: profile

@@ -6,16 +6,13 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.RoomDatabase
 
-
-
 @Database(entities = [PlaceHolderEntity::class], version = 1)
-abstract class AppDatabase : RoomDatabase() {
-}
+abstract class AppDatabase : RoomDatabase() {}
 
 // place holder entity
 @Entity(tableName = "beacons")
 data class PlaceHolderEntity(
-  @PrimaryKey @ColumnInfo(name = "id") val id: String,
-  @ColumnInfo(name = "latitude") val latitude: Double,
-  @ColumnInfo(name = "longitude") val longitude: Double,
+    @PrimaryKey @ColumnInfo(name = "id") val id: String,
+    @ColumnInfo(name = "latitude") val latitude: Double,
+    @ColumnInfo(name = "longitude") val longitude: Double,
 )
