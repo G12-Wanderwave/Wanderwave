@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.model.spotify
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.spotify.android.appremote.api.ConnectionParams
@@ -135,21 +136,17 @@ class SpotifyController(private val context: Context) {
   private val handler = Handler(Looper.getMainLooper())
 
   fun startPeriodicCheck() {
-    val updateRunnable =
-        object : Runnable {
-          override fun run() {
-            appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
-              playerState.track?.let { track ->
-                val trackDuration = track.duration
-                val currentPosition = playerState.playbackPosition
-                if (trackDuration - currentPosition <= 1500) {
-                  onTrackEndCallback?.invoke()
-                }
-              }
-              handler.postDelayed(this, 1000)
-            }
+    val updateRunnable = Runnable {
+      appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
+        playerState.track?.let { track ->
+          val timeRemaining = track.duration - playerState.playbackPosition
+          if (timeRemaining <= 1500) {
+            onTrackEndCallback?.invoke()
           }
-        }
+        } ?: Log.w("SpotifyRemote", "Track information is not available.")
+      } ?: Log.e("SpotifyRemote", "Failed to get player state. Ensure appRemote is connected.")
+    }
+    handler.postDelayed(updateRunnable, 1000) // Referencing the lambda by variable name
 
     handler.post(updateRunnable)
   }
