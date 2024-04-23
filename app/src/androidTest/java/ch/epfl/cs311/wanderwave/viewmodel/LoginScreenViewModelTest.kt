@@ -47,8 +47,8 @@ class LoginScreenViewModelTest {
 
     val token = "testing-token"
     val response = mockk<AuthorizationResponse>()
-    every { response.type } returns AuthorizationResponse.Type.TOKEN
-    every { response.accessToken } returns token
+    every { response.type } returns AuthorizationResponse.Type.CODE
+    every { response.code } returns token
 
     viewModel.handleAuthorizationResponse(response)
 
@@ -66,8 +66,8 @@ class LoginScreenViewModelTest {
 
     val token = "testing-token"
     val response = mockk<AuthorizationResponse>()
-    every { response.type } returns AuthorizationResponse.Type.TOKEN
-    every { response.accessToken } returns token
+    every { response.type } returns AuthorizationResponse.Type.CODE
+    every { response.code } returns token
 
     viewModel.handleAuthorizationResponse(response)
 
