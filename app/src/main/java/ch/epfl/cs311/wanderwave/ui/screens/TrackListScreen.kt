@@ -36,7 +36,7 @@ fun TrackListScreen(
           TrackListItem(
               track = track,
               selected = track == uiState.selectedTrack,
-              onClick = { viewModel.playTrack(track) })
+              onClick = { viewModel.selectTrack(track) })
 
           Divider()
         }

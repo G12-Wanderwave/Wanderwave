@@ -15,7 +15,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
-import io.mockk.verify
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -41,6 +41,8 @@ class TrackListScreenTest : TestCase() {
   @RelaxedMockK lateinit var mockSpotifyController: SpotifyController
   @RelaxedMockK lateinit var trackConnection: TrackConnection
 
+  @RelaxedMockK lateinit var viewModel: TrackListViewModel
+
   @RelaxedMockK lateinit var mockShowMessage: (String) -> Unit
 
   @Before
@@ -63,7 +65,8 @@ class TrackListScreenTest : TestCase() {
                 Track("is 2", "Track 2", "Artist 2"),
             ))
 
-    val viewModel = TrackListViewModel(mockSpotifyController, trackConnection)
+    viewModel = TrackListViewModel(mockTrackRepositoryImpl, mockSpotifyController)
+
 
     composeTestRule.setContent { TrackListScreen(mockShowMessage, viewModel) }
   }
@@ -83,31 +86,17 @@ class TrackListScreenTest : TestCase() {
       }
 
   @Test
-  fun tappingTrackPlaysIt() =
+  fun tappingTrackSelectssIt() =
       testDispatcher.runBlockingTest {
         setupViewModel(true)
         onComposeScreen<TrackListScreen>(composeTestRule) {
           trackButton {
             assertIsDisplayed()
             performClick()
+            assertTrue(viewModel.uiState.value.selectedTrack != null)
           }
           advanceUntilIdle()
-          verify { mockSpotifyController.playTrack(any()) }
           coVerify { mockShowMessage wasNot Called }
-        }
-      }
-
-  @Test
-  fun failedToPlayTrackDisplaysMessage() =
-      testDispatcher.runBlockingTest {
-        setupViewModel(false)
-        onComposeScreen<TrackListScreen>(composeTestRule) {
-          trackButton {
-            assertIsDisplayed()
-            performClick()
-          }
-          advanceUntilIdle()
-          verify { mockSpotifyController.playTrack(any()) }
         }
       }
 }

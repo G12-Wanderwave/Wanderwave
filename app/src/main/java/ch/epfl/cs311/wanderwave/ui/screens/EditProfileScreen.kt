@@ -25,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.profile.ImageSelection
@@ -44,8 +43,7 @@ import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
  * @last update 1.0
  */
 @Composable
-fun EditProfileScreen(navActions: NavigationActions) {
-  val viewModel: ProfileViewModel = hiltViewModel()
+fun EditProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
   val profile by viewModel.profile.collectAsState()
   val profile2 = profile.copy()
   var firstName by remember { mutableStateOf(profile2.firstName) }

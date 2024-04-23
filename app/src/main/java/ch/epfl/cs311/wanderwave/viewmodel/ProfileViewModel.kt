@@ -3,17 +3,29 @@ package ch.epfl.cs311.wanderwave.viewmodel
 import androidx.lifecycle.ViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
+import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
+import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 
 // Define a simple class for a song list
-data class SongList(val name: String, val tracks: MutableList<Track> = mutableListOf())
+data class SongList(val name: String, val tracks: List<Track> = mutableListOf())
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor(val profileRepository: ProfileRepository) : ViewModel() {
+class ProfileViewModel
+@Inject
+constructor(
+    private val repository: ProfileRepositoryImpl,
+    private val spotifyController: SpotifyController
+) : ViewModel() {
 
   private val _profile =
       MutableStateFlow(
@@ -38,6 +50,12 @@ class ProfileViewModel @Inject constructor(val profileRepository: ProfileReposit
   private val _songLists = MutableStateFlow<List<SongList>>(emptyList())
   val songLists: StateFlow<List<SongList>> = _songLists
 
+  private val _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
+  val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
+
+  private val _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
+  val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
+
   fun createSpecificSongList(listType: String) {
     val listName =
         when (listType) {
@@ -55,11 +73,12 @@ class ProfileViewModel @Inject constructor(val profileRepository: ProfileReposit
   }
 
   // Function to add a track to a song list
-
   fun addTrackToList(listName: String, track: Track) {
     val updatedLists =
         _songLists.value.map { list ->
           if (list.name == listName) {
+            if (list.tracks.contains(track)) return@map list
+
             list.copy(tracks = ArrayList(list.tracks).apply { add(track) })
           } else {
             list
@@ -81,17 +100,66 @@ class ProfileViewModel @Inject constructor(val profileRepository: ProfileReposit
     _isInPublicMode.value = !_isInPublicMode.value
   }
 
-  fun fetchProfile(profile: Profile) {
-    // TODO : fetch profile from Spotify
-    // _profile.value = spotifyConnection.getProfile()....
-    // Fetch profile from Firestore if it doesn't exist, create it
-    profileRepository.isUidExisting(profile.spotifyUid) { isExisting, fetchedProfile ->
-      if (isExisting) {
-        _profile.value = fetchedProfile ?: profile
-      } else {
-        val newProfile = profile
-        profileRepository.addItem(newProfile)
-        _profile.value = newProfile
+
+  /**
+   * Get all the element of the main screen and add them to the top list
+   *
+   * @author Menzo Bouaissi
+   * @since 2.0
+   * @last update 2.0
+   */
+  fun retrieveTracks() {
+    CoroutineScope(Dispatchers.IO).launch {
+      val track = spotifyController.getAllElementFromSpotify().firstOrNull()
+      if (track != null) {
+        for (i in track) {
+          if (i.hasChildren) {
+            val children = spotifyController.getAllChildren(i).firstOrNull()
+            if (children != null) {
+              for (child in children) {
+                addTrackToList("TOP SONGS", Track(child.id, child.title, child.subtitle))
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Get all the element of the main screen and add them to the top list
+   *
+   * @author Menzo Bouaissi
+   * @since 2.0
+   * @last update 2.0
+   */
+  fun retrieveAndAddSubsection() {
+    CoroutineScope(Dispatchers.IO).launch {
+      _spotifySubsectionList.value = emptyList()
+      val track = spotifyController.getAllElementFromSpotify().firstOrNull()
+      if (track != null) {
+        for (i in track) {
+          _spotifySubsectionList.value += i
+        }
+      }
+    }
+  }
+
+  /**
+   * Get all the element of the main screen and add them to the top list
+   *
+   * @author Menzo Bouaissi
+   * @since 2.0
+   * @last update 2.0
+   */
+  fun retrieveChild(item: ListItem) {
+    CoroutineScope(Dispatchers.IO).launch {
+      _childrenPlaylistTrackList.value = emptyList()
+      val children = spotifyController.getAllChildren(item).firstOrNull()
+      if (children != null) {
+        for (child in children) {
+          _childrenPlaylistTrackList.value += child
+        }
       }
     }
   }
