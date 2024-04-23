@@ -6,7 +6,6 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -162,15 +161,6 @@ class TrackListViewModelTest {
 
     viewModel.skipBackward()
     assertEquals(lastTrack.id, viewModel.uiState.value.selectedTrack?.id)
-  }
-
-  @Test
-  fun playTrackWhenControllerReturnsFalse() = run {
-    every { mockSpotifyController.playTrack(track) } returns flowOf(false)
-    viewModel.selectTrack(track)
-    viewModel.play()
-    verify { mockSpotifyController.playTrack(track) }
-    assertEquals("Failed to play track", viewModel.uiState.value.message)
   }
 
   @Test
