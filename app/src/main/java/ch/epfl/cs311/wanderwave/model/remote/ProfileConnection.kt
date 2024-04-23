@@ -2,11 +2,12 @@ package ch.epfl.cs311.wanderwave.model.remote
 
 import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
 class ProfileConnection(private val database: FirebaseFirestore? = null) :
-    FirebaseConnection<Profile, Profile>() {
+    FirebaseConnection<Profile, Profile>(), ProfileRepository {
 
   override val collectionName: String = "users"
 
@@ -14,7 +15,7 @@ class ProfileConnection(private val database: FirebaseFirestore? = null) :
 
   override val db = database ?: super.db
 
-  fun isUidExisting(spotifyUid: String, callback: (Boolean, Profile?) -> Unit) {
+  override fun isUidExisting(spotifyUid: String, callback: (Boolean, Profile?) -> Unit) {
     Log.d("ProfileConnection", "Checking if Spotify UID exists in Firestore...")
     db.collection("users")
         .whereEqualTo("spotifyUid", spotifyUid)

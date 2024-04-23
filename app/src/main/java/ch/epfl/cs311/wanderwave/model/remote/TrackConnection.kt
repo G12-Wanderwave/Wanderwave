@@ -1,13 +1,14 @@
 package ch.epfl.cs311.wanderwave.model.remote
 
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class TrackConnection(private val database: FirebaseFirestore? = null) :
-    FirebaseConnection<Track, Track>() {
+    FirebaseConnection<Track, Track>(), TrackRepository {
 
   // THe goal is to have the Id of the firebase document to match the id of the spotify track
 
@@ -26,7 +27,7 @@ class TrackConnection(private val database: FirebaseFirestore? = null) :
     return track.toMap()
   }
 
-  fun addItemsIfNotExist(tracks: List<Track>) {
+  override fun addItemsIfNotExist(tracks: List<Track>) {
     // The goal of this function is to add only if the spotify id of the track is not already in the
     // database, for now I just check the normal ID
     tracks.forEach { track ->
@@ -39,7 +40,7 @@ class TrackConnection(private val database: FirebaseFirestore? = null) :
     }
   }
 
-  fun getAll(): Flow<List<Track>> {
+  override fun getAll(): Flow<List<Track>> {
     val stateFlow = MutableStateFlow<List<Track>>(listOf())
     db.collection(collectionName).addSnapshotListener { value, error ->
       if (error != null) {

@@ -13,8 +13,6 @@ interface TrackRepository {
 
   fun getItem(trackId: String): Flow<Track>
 
-  fun getAllItems(): Flow<List<Track>>
-
   fun addItemsIfNotExist(tracks: List<Track>)
 
   fun getAll(): Flow<List<Track>>
