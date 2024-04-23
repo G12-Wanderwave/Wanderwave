@@ -1,8 +1,9 @@
 package ch.epfl.cs311.wanderwave.model
 
+import android.content.Context
 import android.util.Log
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.android.appremote.api.Connector.ConnectionListener
@@ -15,7 +16,6 @@ import com.spotify.protocol.client.ErrorCallback
 import com.spotify.protocol.types.Empty
 import com.spotify.protocol.types.ListItem
 import com.spotify.protocol.types.ListItems
-import com.spotify.protocol.types.PlayerState
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -26,7 +26,10 @@ import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
 import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlin.Exception
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.catch
@@ -35,6 +38,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -46,15 +50,19 @@ class SpotifyControllerTest {
   @get:Rule val mockkRule = MockKRule(this)
 
   @RelaxedMockK private lateinit var mockAppRemote: SpotifyAppRemote
+  @RelaxedMockK private lateinit var mockPlayerApi: PlayerApi
+
 
   private lateinit var spotifyController: SpotifyController
+  private lateinit var context: Context
 
   @Before
   fun setup() {
-    val context = InstrumentationRegistry.getInstrumentation().targetContext
+    context = ApplicationProvider.getApplicationContext()
     spotifyController = SpotifyController(context)
     spotifyController.appRemote = mockAppRemote
     mockkStatic(SpotifyAppRemote::class)
+    every {mockAppRemote.playerApi} returns mockPlayerApi
   }
 
   @Test
@@ -86,7 +94,7 @@ class SpotifyControllerTest {
   }
 
   @Test
-  fun playTrack() = runBlocking {
+  fun playTrackTest() = runBlocking {
     val callResult = mockk<CallResult<Empty>>(relaxed = true)
     val playerApi = mockk<PlayerApi>(relaxed = true)
     every { mockAppRemote.playerApi } returns playerApi
@@ -381,35 +389,6 @@ class SpotifyControllerTest {
     assertTrue(result)
   }
 
-  @Test
-  fun startPeriodicCheckTest() = runBlocking {
-    every { mockAppRemote.isConnected } returns true
-    val playerApi = mockk<PlayerApi>()
-    val playerState = mockk<PlayerState>()
-    val callResultPlayerState = mockk<CallResult<PlayerState>>()
-    every { playerApi.playerState } returns callResultPlayerState
-    every { callResultPlayerState.setResultCallback(any()) } answers
-        {
-          firstArg<CallResult.ResultCallback<PlayerState>>().onResult(playerState)
-          callResultPlayerState
-        }
-
-    every { mockAppRemote.playerApi } returns playerApi
-    var slot = slot<CallResult.ResultCallback<Empty>>()
-    var callResult = mockk<CallResult<Empty>>()
-    every { playerApi.pause() } returns callResult
-    every { callResult.setResultCallback(capture(slot)) } answers
-        {
-          slot.captured.onResult(Empty())
-          slot.captured.onResult(Empty())
-          callResult
-        }
-
-    every { callResult.setErrorCallback(any()) } returns callResult
-    every { callResult.cancel() } just Runs
-
-    spotifyController.startPeriodicCheck()
-  }
 
   @Test
   fun testGetAllElementFromSpotifyCancellation() {
@@ -583,37 +562,6 @@ class SpotifyControllerTest {
     }
   }
 
-  @Test
-  fun testStartPeriodicCheckCancellation() {
-    runBlocking {
-      every { mockAppRemote.isConnected } returns true
-      val playerApi = mockk<PlayerApi>()
-      val playerState = mockk<PlayerState>()
-      val callResultPlayerState = mockk<CallResult<PlayerState>>()
-      every { playerApi.playerState } returns callResultPlayerState
-      every { callResultPlayerState.setResultCallback(any()) } answers
-          {
-            firstArg<CallResult.ResultCallback<PlayerState>>().onResult(playerState)
-            callResultPlayerState
-          }
-
-      every { mockAppRemote.playerApi } returns playerApi
-      var slot = slot<CallResult.ResultCallback<Empty>>()
-      var callResult = mockk<CallResult<Empty>>()
-      every { playerApi.pause() } returns callResult
-      every { callResult.setResultCallback(capture(slot)) } answers
-          {
-            slot.captured.onResult(Empty())
-            slot.captured.onResult(Empty())
-            callResult
-          }
-
-      every { callResult.setErrorCallback(any()) } returns callResult
-      every { callResult.cancel() } just Runs
-
-      spotifyController.startPeriodicCheck()
-    }
-  }
 
   @Test
   fun resumeTrack_Failure() = runBlocking {
@@ -677,4 +625,63 @@ class SpotifyControllerTest {
 
     assertFalse(result)
   }
+//    @Test
+//    fun playTrackTest() = runBlocking {
+//        val callResult = mockk<CallResult<Empty>>(relaxed = true)
+//        val playerApi = mockk<PlayerApi>(relaxed = true)
+//        every { mockAppRemote.playerApi } returns playerApi
+//        every { playerApi.play(any()) } returns callResult
+//        val id = "fakeid"
+//        spotifyController.playTrack(Track(id, "faketitle", "fakeartist"))
+//    }
+
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun startPlaybackTimerCancelsPreviousTimerAndStartsNewOne() = runTest {
+        // Setup
+        spotifyController.startPlaybackTimer(3000) // 3 seconds
+
+        // Assert that initial timer is running
+        assertNotNull(spotifyController.playbackTimer)
+
+        // Start another timer
+        spotifyController.startPlaybackTimer(1000) // 5 seconds
+
+
+    }
+
+    @Test
+    fun stopPlaybackTimerCancelsActiveTimer() = runTest {
+        // Start timer
+        spotifyController.startPlaybackTimer(3000) // 3 seconds
+
+        // Stop the timer
+        spotifyController.stopPlaybackTimer()
+
+        // Verify timer is null
+        assertNull(spotifyController.playbackTimer)
+    }
+
+//    @Test
+//    fun onPlayerStateUpdateSetsPlaybackTimerOnStateChange() = runTest {
+//        every { (mockPlayerApi.subscribeToPlayerState()) }returns mockk()
+//        doAnswer { invocation ->
+//            val callback = invocation.arguments[0] as PlayerApi.Subscription.EventCallback<PlayerState>
+//            callback.onEvent(mockPlayerState)
+//        }.`when`(mockPlayerApi).subscribeToPlayerState()
+//
+//        // Trigger
+//        spotifyController.onPlayerStateUpdate()
+//
+//        // Assert
+//        assertNotNull(spotifyController.playbackTimer)
+//    }
+
+    @Test
+    fun setOnTrackEndCallbackSetsTheCallback() {
+        val callback: () -> Unit = { println("Track ended") }
+        spotifyController.setOnTrackEndCallback(callback)
+
+    }
 }

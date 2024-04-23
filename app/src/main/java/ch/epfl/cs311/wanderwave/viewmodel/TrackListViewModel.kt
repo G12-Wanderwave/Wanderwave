@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepositoryImpl
@@ -27,6 +28,7 @@ constructor(
   init {
     observeTracks()
     spotifyController.setOnTrackEndCallback { skipForward() }
+    Log.d("TrackListViewModel", "Initialized")
   }
 
   private fun observeTracks() {
@@ -36,7 +38,6 @@ constructor(
       }
     }
   }
-
   /**
    * Plays the given track using the SpotifyController.
    *
