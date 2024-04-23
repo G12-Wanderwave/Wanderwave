@@ -24,8 +24,9 @@ import ch.epfl.cs311.wanderwave.viewmodel.SongList
  *
  * @param tracks List of tracks to display.
  * @author Ayman Bakiri
+ * @author Menzo Bouaissi (add the scrollable list)
  * @since 1.0
- * @last update 1.0
+ * @last update 2.0
  */
 @Composable
 fun TracksList(tracks: List<Track>) {
