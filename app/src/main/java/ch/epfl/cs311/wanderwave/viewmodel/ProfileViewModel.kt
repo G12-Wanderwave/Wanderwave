@@ -2,7 +2,6 @@ package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
@@ -26,8 +25,7 @@ class ProfileViewModel
 @Inject
 constructor(
     private val repository: ProfileRepositoryImpl,
-    private val spotifyController: SpotifyController,
-    private val authenticationController: AuthenticationController
+    private val spotifyController: SpotifyController
 ) : ViewModel() {
 
   private val _profile =
@@ -171,10 +169,5 @@ constructor(
         }
       }
     }
-  }
-
-  /** Sign out the user from Firebase / the authentication controller */
-  fun signOut() {
-    authenticationController.deauthenticate()
   }
 }

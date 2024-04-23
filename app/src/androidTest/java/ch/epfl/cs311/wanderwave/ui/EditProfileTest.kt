@@ -3,7 +3,6 @@ package ch.epfl.cs311.wanderwave.ui
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.viewModelScope
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -49,13 +48,10 @@ class EditProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
 
   @RelaxedMockK private lateinit var spotifyController: SpotifyController
 
-  @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
-
   @Before
   fun setup() {
     mockDependencies()
-    viewModel =
-        ProfileViewModel(profileRepositoryImpl, spotifyController, mockAuthenticationController)
+    viewModel = ProfileViewModel(profileRepositoryImpl, spotifyController)
 
     composeTestRule.setContent { EditProfileScreen(mockNavigationActions, viewModel) }
   }
