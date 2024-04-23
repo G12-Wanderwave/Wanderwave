@@ -125,6 +125,7 @@ class TrackListViewModelTest {
     val firstTrack = viewModel.uiState.value.tracks[0]
     val lastTrack = viewModel.uiState.value.tracks[viewModel.uiState.value.tracks.size - 1]
 
+    viewModel.toggleLoop()
     viewModel.selectTrack(lastTrack)
     viewModel.play()
     assertTrue(viewModel.uiState.value.isPlaying)
@@ -155,6 +156,7 @@ class TrackListViewModelTest {
     val firstTrack = viewModel.uiState.value.tracks[0]
     val lastTrack = viewModel.uiState.value.tracks[viewModel.uiState.value.tracks.size - 1]
 
+    viewModel.toggleLoop()
     viewModel.selectTrack(firstTrack)
     viewModel.play()
     assertTrue(viewModel.uiState.value.isPlaying)
