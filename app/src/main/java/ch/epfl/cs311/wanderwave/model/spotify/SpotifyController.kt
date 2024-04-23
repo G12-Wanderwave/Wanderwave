@@ -36,11 +36,9 @@ class SpotifyController(private val context: Context) {
           "user-read-email",
           "user-read-private")
 
-
   var playbackTimer: Job? = null
 
-
-    private val connectionParams =
+  private val connectionParams =
       ConnectionParams.Builder(CLIENT_ID).setRedirectUri(REDIRECT_URI).showAuthView(true).build()
 
   var appRemote: SpotifyAppRemote? = null
@@ -100,45 +98,47 @@ class SpotifyController(private val context: Context) {
     appRemote?.let { SpotifyAppRemote.disconnect(it) }
   }
 
-    fun playTrack(track: Track): Flow<Boolean> {
-        return callbackFlow {
-            appRemote?.let {remote->
-                remote.playerApi
-                    .play(track.id)
-                    .setResultCallback {
-                        remote.playerApi.subscribeToPlayerState()
-                            .setEventCallback {
-                                startPlaybackTimer(it.track.duration - it.playbackPosition)
-                            }
-                        trySend(true)
-                    }
-                    .setErrorCallback { trySend(false) }
+  fun playTrack(track: Track): Flow<Boolean> {
+    return callbackFlow {
+      appRemote?.let { remote ->
+        remote.playerApi
+            .play(track.id)
+            .setResultCallback {
+              remote.playerApi.subscribeToPlayerState().setEventCallback {
+                startPlaybackTimer(it.track.duration - it.playbackPosition)
+              }
+              trySend(true)
             }
-            awaitClose { stopPlaybackTimer() }
-        }
+            .setErrorCallback { trySend(false) }
+      }
+      awaitClose { stopPlaybackTimer() }
     }
-    fun startPlaybackTimer(trackDuration: Long) {
-        stopPlaybackTimer()  // Ensure no previous timers are running
-        playbackTimer = CoroutineScope(Dispatchers.IO).launch {
-            val checkInterval = 1000L // Check every second
-            var elapsedTime = 0L
-            while (elapsedTime < trackDuration) {
-                delay(checkInterval)
-                elapsedTime += checkInterval
-                appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
-                    if (playerState.playbackPosition >= trackDuration - 1000) {
-                        Log.d("SpotifyController", "Track is about to end")
-                        onTrackEndCallback?.invoke()
-                        stopPlaybackTimer()
-                    }
-                }
+  }
+
+  fun startPlaybackTimer(trackDuration: Long) {
+    stopPlaybackTimer() // Ensure no previous timers are running
+    playbackTimer =
+        CoroutineScope(Dispatchers.IO).launch {
+          val checkInterval = 1000L // Check every second
+          var elapsedTime = 0L
+          while (elapsedTime < trackDuration) {
+            delay(checkInterval)
+            elapsedTime += checkInterval
+            appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
+              if (playerState.playbackPosition >= trackDuration - 1000) {
+                Log.d("SpotifyController", "Track is about to end")
+                onTrackEndCallback?.invoke()
+                stopPlaybackTimer()
+              }
             }
+          }
         }
-    }
-    fun stopPlaybackTimer() {
-        playbackTimer?.cancel()
-        playbackTimer = null
-    }
+  }
+
+  fun stopPlaybackTimer() {
+    playbackTimer?.cancel()
+    playbackTimer = null
+  }
   /**
    * Skip to the next track in the queue.
    *
@@ -170,28 +170,32 @@ class SpotifyController(private val context: Context) {
     }
   }
 
-    //Detect when currently playing song has ended (or is going to end) and run onTrackEndCallback
-    private fun onPlayerStateUpdate() {
-        appRemote?.let {
-            it.playerApi.subscribeToPlayerState()
-                .setEventCallback { playerState: PlayerState ->
-                    Log.d("SpotifyController", "Received player state update")
-                    if(playerState.track != null){
-                        Log.d("SpotifyController", "Track duration: ${playerState.track.duration}")
-                        Log.d("SpotifyController", "Playback position: ${playerState.playbackPosition}")
-                        Log.d("SpotifyController", "Remaining time: ${playerState.track.duration - playerState.playbackPosition}")
-                        startPlaybackTimer(playerState.track.duration -playerState.playbackPosition)
-                    }
-                }
-                .setErrorCallback { throwable ->
-                    // Log any errors received
-                    Log.e("SpotifyController", "Error subscribing to player state", throwable)
-                }
-        }
+  // Detect when currently playing song has ended (or is going to end) and run onTrackEndCallback
+  private fun onPlayerStateUpdate() {
+    appRemote?.let {
+      it.playerApi
+          .subscribeToPlayerState()
+          .setEventCallback { playerState: PlayerState ->
+            Log.d("SpotifyController", "Received player state update")
+            if (playerState.track != null) {
+              Log.d("SpotifyController", "Track duration: ${playerState.track.duration}")
+              Log.d("SpotifyController", "Playback position: ${playerState.playbackPosition}")
+              Log.d(
+                  "SpotifyController",
+                  "Remaining time: ${playerState.track.duration - playerState.playbackPosition}")
+              startPlaybackTimer(playerState.track.duration - playerState.playbackPosition)
+            }
+          }
+          .setErrorCallback { throwable ->
+            // Log any errors received
+            Log.e("SpotifyController", "Error subscribing to player state", throwable)
+          }
     }
-    fun setOnTrackEndCallback(callback: () -> Unit) {
-        onTrackEndCallback = callback
-    }
+  }
+
+  fun setOnTrackEndCallback(callback: () -> Unit) {
+    onTrackEndCallback = callback
+  }
   /**
    * Get all the playlist, title, ... from spotify from the home page of the user.
    *
