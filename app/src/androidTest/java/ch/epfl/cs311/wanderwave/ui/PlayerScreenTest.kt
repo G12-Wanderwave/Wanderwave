@@ -40,7 +40,7 @@ class PlayerScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
   fun miniPlayerScreenInteractions() = run {
     composeTestRule.setContent {
       MiniPlayer(
-          isPlaying = false,
+          uiStateFlow = viewModel.uiState,
           onTitleClick = { viewModel.expand() },
           onPlayClick = { viewModel.play() },
           onPauseClick = { viewModel.pause() },
