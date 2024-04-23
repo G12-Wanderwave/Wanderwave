@@ -136,8 +136,13 @@ constructor(
   private fun skip(dir: Int) {
     if (_uiState.value.selectedTrack != null && (dir == 1 || dir == -1)) {
       _uiState.value.tracks.indexOf(_uiState.value.selectedTrack).let { it: Int ->
-        val next = Math.floorMod((it + dir), _uiState.value.tracks.size)
-        selectTrack(_uiState.value.tracks[next])
+        var next = it + dir
+        if(uiState.value.isLooping){
+          next = Math.floorMod((it + dir), _uiState.value.tracks.size)
+        }
+        if(next >= 0 && next < _uiState.value.tracks.size){
+            selectTrack(_uiState.value.tracks[next])
+        }
       }
     }
   }
@@ -152,6 +157,10 @@ constructor(
     skip(-1)
   }
 
+  fun toggleLoop(){
+    _uiState.value = _uiState.value.copy(isLooping = !_uiState.value.isLooping)
+  }
+
   data class UiState(
       val tracks: List<Track> = listOf(),
       val loading: Boolean = false,
@@ -159,6 +168,7 @@ constructor(
       val selectedTrack: Track? = null,
       val pausedTrack: Track? = null,
       val isPlaying: Boolean = false,
+      val isLooping: Boolean = false,
       val currentMillis: Int = 0,
       val expanded: Boolean = false,
       val progress: Float = 0f
