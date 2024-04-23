@@ -20,6 +20,7 @@ object DatabaseModule {
     return Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, "app_database")
         .createFromAsset("demo_data.db")
         .fallbackToDestructiveMigration()
+        .allowMainThreadQueries()
         .build()
   }
 }
