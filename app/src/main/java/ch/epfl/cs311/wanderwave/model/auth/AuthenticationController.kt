@@ -3,9 +3,11 @@ package ch.epfl.cs311.wanderwave.model.auth
 import ch.epfl.cs311.wanderwave.model.repository.AuthTokenRepository
 import com.google.firebase.auth.FirebaseAuth
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -45,7 +47,7 @@ constructor(
 
   suspend fun refreshTokenIfNecessary(): Boolean {
     if (auth.currentUser == null) {
-      return refreshSpotifyToken()
+      return withContext(Dispatchers.IO) { refreshSpotifyToken() }
     }
     return true
   }
