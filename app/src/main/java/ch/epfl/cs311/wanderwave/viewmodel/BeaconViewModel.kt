@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
+import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -20,7 +21,11 @@ class BeaconViewModel @Inject constructor(private val beaconRepository: BeaconRe
   val uiState: StateFlow<UIState> = _uiState
 
   init {
-    val sampleBeacon = Beacon(id = "Sample ID", location = Location(0.0, 0.0), tracks = emptyList())
+    val sampleBeacon =
+        Beacon(
+            id = "Sample ID",
+            location = Location(0.0, 0.0, "Sample Location"),
+            tracks = listOf(Track("Sample Track ID", "Sample Track Title", "Sample Artist Name")))
 
     _uiState.value = UIState(beacon = sampleBeacon, isLoading = false)
   }
