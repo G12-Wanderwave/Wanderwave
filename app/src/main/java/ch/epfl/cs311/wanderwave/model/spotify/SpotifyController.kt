@@ -106,7 +106,11 @@ class SpotifyController(private val context: Context) {
       awaitClose { callResult?.cancel() }
     }
   }
-
+  /**
+   * Skip to the next track in the queue.
+   *
+   * @return a Flow of Boolean which is true if the operation was successful, false otherwise.
+   */
   fun pauseTrack(): Flow<Boolean> {
     return callbackFlow {
       val callResult =
