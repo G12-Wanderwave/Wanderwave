@@ -2,6 +2,7 @@ package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
@@ -22,8 +23,9 @@ data class SongList(val name: String, val tracks: List<Track> = mutableListOf())
 class ProfileViewModel
 @Inject
 constructor(
-    private val profileRepository: ProfileRepository,
-    private val spotifyController: SpotifyController
+    private val repository: ProfileRepositoryImpl,
+    private val spotifyController: SpotifyController,
+    private val authenticationController: AuthenticationController
 ) : ViewModel() {
 
   private val _profile =
@@ -165,7 +167,6 @@ constructor(
     }
   }
 
-  // TODO: See agaim, i just adapt what was in BeaconViewModel
   fun getProfileByID(id: String) {
     viewModelScope.launch {
       profileRepository.getItem(id).collect { fetchedProfile ->
@@ -179,4 +180,8 @@ constructor(
       val isLoading: Boolean = true,
       val error: String? = null
   )
+  /** Sign out the user from Firebase / the authentication controller */
+  fun signOut() {
+    authenticationController.deauthenticate()
+  }
 }
