@@ -6,7 +6,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
-import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
@@ -46,13 +45,10 @@ class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSup
 
   @RelaxedMockK private lateinit var spotifyController: SpotifyController
 
-  @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
-
   @Before
   fun setup() {
     mockDependencies()
-    viewModel =
-        ProfileViewModel(profileRepositoryImpl, spotifyController, mockAuthenticationController)
+    viewModel = ProfileViewModel(profileRepository, spotifyController)
 
     composeTestRule.setContent { ProfileScreen(mockNavigationActions, viewModel) }
   }

@@ -52,13 +52,10 @@ class EditProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
 
   @RelaxedMockK private lateinit var spotifyController: SpotifyController
 
-  @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
-
   @Before
   fun setup() {
     mockDependencies()
-    viewModel =
-        ProfileViewModel(profileRepositoryImpl, spotifyController, mockAuthenticationController)
+    viewModel = ProfileViewModel(profileRepository, spotifyController)
 
     composeTestRule.setContent { EditProfileScreen(mockNavigationActions, viewModel) }
   }

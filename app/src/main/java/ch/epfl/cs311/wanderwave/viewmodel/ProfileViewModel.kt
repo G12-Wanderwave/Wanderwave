@@ -2,9 +2,9 @@ package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.protocol.types.ListItem
@@ -23,9 +23,8 @@ data class SongList(val name: String, val tracks: List<Track> = mutableListOf())
 class ProfileViewModel
 @Inject
 constructor(
-    private val repository: ProfileRepositoryImpl,
-    private val spotifyController: SpotifyController,
-    private val authenticationController: AuthenticationController
+  private val repository: ProfileConnection,//TODO revoir
+  private val spotifyController: SpotifyController
 ) : ViewModel() {
 
   private val _profile =
@@ -93,11 +92,11 @@ constructor(
 
   fun updateProfile(updatedProfile: Profile) {
     _profile.value = updatedProfile
-    profileRepository.updateItem(updatedProfile)
+    repository.updateItem(updatedProfile)
   }
 
   fun deleteProfile() {
-    profileRepository.deleteItem(_profile.value)
+    repository.deleteItem(_profile.value)
   }
 
   fun togglePublicMode() {
@@ -167,21 +166,17 @@ constructor(
     }
   }
 
-  fun getProfileByID(id: String) {
-    viewModelScope.launch {
-      profileRepository.getItem(id).collect { fetchedProfile ->
-        _uiState.value = ProfileViewModel.UIState(profile = fetchedProfile, isLoading = false)
-      }
-    }
-  }
+//  fun getProfileByID(id: String) {
+//    viewModelScope.launch {
+//      repository.getItem(id).collect { fetchedProfile ->
+//        _uiState.value = ProfileViewModel.UIState(profile = fetchedProfile, isLoading = false)
+//      }
+//    }
+//  }
 
   data class UIState(
       val profile: Profile? = null,
       val isLoading: Boolean = true,
       val error: String? = null
   )
-  /** Sign out the user from Firebase / the authentication controller */
-  fun signOut() {
-    authenticationController.deauthenticate()
-  }
 }
