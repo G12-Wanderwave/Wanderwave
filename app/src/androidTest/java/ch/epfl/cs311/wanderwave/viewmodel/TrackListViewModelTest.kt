@@ -191,4 +191,27 @@ class TrackListViewModelTest {
     viewModel.collapse()
     assertFalse(viewModel.uiState.value.expanded)
   }
+
+  @Test
+  fun testToggleShuffle() = run {
+    viewModel.toggleShuffle()
+    assertTrue(viewModel.uiState.value.isShuffled)
+    viewModel.toggleShuffle()
+    assertFalse(viewModel.uiState.value.isShuffled)
+  }
+
+  @Test
+  fun testIfQueueHasBeenShuffled() = run {
+    assertEquals(viewModel.uiState.value.tracks, viewModel.uiState.value.queue)
+    viewModel.toggleShuffle()
+    assertNotEquals(viewModel.uiState.value.tracks, viewModel.uiState.value.queue)
+  }
+
+  @Test
+  fun testIfQueueHasBeenUnshuffled() = run {
+    assertEquals(viewModel.uiState.value.tracks, viewModel.uiState.value.queue)
+    viewModel.toggleShuffle()
+    viewModel.toggleShuffle()
+    assertEquals(viewModel.uiState.value.tracks, viewModel.uiState.value.queue)
+  }
 }
