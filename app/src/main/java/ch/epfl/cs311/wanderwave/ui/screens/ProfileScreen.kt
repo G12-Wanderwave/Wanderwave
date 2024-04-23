@@ -125,7 +125,12 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
         }
       }
 
-  SignOutButton(modifier = Modifier, navActions = navActions)
+  SignOutButton(
+      modifier = Modifier,
+      signOut = {
+        viewModel.signOut()
+        navActions.navigateTo(Route.LOGIN)
+      })
 }
 
 /**
@@ -202,11 +207,9 @@ fun ProfileButton(
  * @author Imade Bouhamria
  */
 @Composable
-fun SignOutButton(modifier: Modifier, navActions: NavigationActions) {
+fun SignOutButton(modifier: Modifier, signOut: () -> Unit = {}) {
   // TODO: Implement actual user sign out
-  Button(
-      onClick = { navActions.navigateToTopLevel(Route.LOGIN) },
-      modifier = modifier.testTag("signOutButton")) {
-        Text(text = "Sign Out")
-      }
+  Button(onClick = signOut, modifier = modifier.testTag("signOutButton")) {
+    Text(text = "Sign Out")
+  }
 }
