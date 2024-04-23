@@ -191,4 +191,44 @@ class TrackListViewModelTest {
     viewModel.collapse()
     assertFalse(viewModel.uiState.value.expanded)
   }
+
+  @Test
+  fun testLoopToggle() = run {
+    viewModel.toggleLoop()
+    assertTrue(viewModel.uiState.value.isLooping)
+    viewModel.toggleLoop()
+    assertFalse(viewModel.uiState.value.isLooping)
+  }
+
+  @Test
+  fun testSkipForwardWhenLooping() = run {
+    viewModel.toggleLoop()
+    viewModel.selectTrack(viewModel.uiState.value.tracks[viewModel.uiState.value.tracks.size - 1])
+    viewModel.skipForward()
+    assertEquals(viewModel.uiState.value.tracks[0], viewModel.uiState.value.selectedTrack)
+  }
+
+  @Test
+  fun testSkipForwardWhenNotLooping() = run {
+    viewModel.selectTrack(viewModel.uiState.value.tracks[viewModel.uiState.value.tracks.size - 1])
+    viewModel.skipForward()
+    assertNull(viewModel.uiState.value.selectedTrack)
+  }
+
+  @Test
+  fun testSkipBackwardWhenLooping() = run {
+    viewModel.toggleLoop()
+    viewModel.selectTrack(viewModel.uiState.value.tracks[0])
+    viewModel.skipBackward()
+    assertEquals(
+        viewModel.uiState.value.tracks[viewModel.uiState.value.tracks.size - 1],
+        viewModel.uiState.value.selectedTrack)
+  }
+
+  @Test
+  fun testSkipBackwardWhenNotLooping() = run {
+    viewModel.selectTrack(viewModel.uiState.value.tracks[0])
+    viewModel.skipBackward()
+    assertNull(viewModel.uiState.value.selectedTrack)
+  }
 }

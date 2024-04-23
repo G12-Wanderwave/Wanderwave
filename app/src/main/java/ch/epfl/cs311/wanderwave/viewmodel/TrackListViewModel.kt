@@ -137,11 +137,14 @@ constructor(
     if (_uiState.value.selectedTrack != null && (dir == 1 || dir == -1)) {
       _uiState.value.tracks.indexOf(_uiState.value.selectedTrack).let { it: Int ->
         var next = it + dir
-        if(uiState.value.isLooping){
+        if (uiState.value.isLooping) {
           next = Math.floorMod((it + dir), _uiState.value.tracks.size)
         }
-        if(next >= 0 && next < _uiState.value.tracks.size){
-            selectTrack(_uiState.value.tracks[next])
+        if (next >= 0 && next < _uiState.value.tracks.size) {
+          selectTrack(_uiState.value.tracks[next])
+        } else {
+          pause()
+          _uiState.value = _uiState.value.copy(selectedTrack = null)
         }
       }
     }
@@ -157,7 +160,7 @@ constructor(
     skip(-1)
   }
 
-  fun toggleLoop(){
+  fun toggleLoop() {
     _uiState.value = _uiState.value.copy(isLooping = !_uiState.value.isLooping)
   }
 
