@@ -30,8 +30,8 @@ constructor(
 
   fun handleAuthorizationResponse(response: AuthorizationResponse) {
     when (response.type) {
-      AuthorizationResponse.Type.TOKEN -> {
-        authenticate(response.accessToken)
+      AuthorizationResponse.Type.CODE -> {
+        authenticate(response.code)
       }
       AuthorizationResponse.Type.ERROR -> {
         _uiState.value =
@@ -45,9 +45,9 @@ constructor(
     }
   }
 
-  private fun authenticate(token: String) {
+  private fun authenticate(authenticationCode: String) {
     CoroutineScope(Dispatchers.IO).launch {
-      authenticationController.authenticate(token).collect { success ->
+      authenticationController.authenticate(authenticationCode).collect { success ->
         if (success) {
           _uiState.value = uiState.value.copy(hasResult = true, success = true, message = null)
         } else {
