@@ -33,8 +33,7 @@ constructor(
     viewModelScope.launch {
       trackRepository.getAll().collect {
         _uiState.value = _uiState.value.copy(tracks = it, loading = false)
-      } // TODO : update to get only useful tracks
-
+      }
       // deal with the flow
     }
   }
