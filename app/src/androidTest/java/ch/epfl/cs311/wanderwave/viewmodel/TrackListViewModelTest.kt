@@ -234,4 +234,14 @@ class TrackListViewModelTest {
     viewModel.skipForward()
     assertEquals(viewModel.uiState.value.selectedTrack, viewModel.uiState.value.tracks[3])
   }
+
+  @Test
+  fun tracksPlayOneAfterAnother() = run {
+    viewModel.selectTrack(viewModel.uiState.value.queue[0])
+    viewModel.play()
+    assertTrue(viewModel.uiState.value.isPlaying)
+    assertEquals(viewModel.uiState.value.queue[0].id, viewModel.uiState.value.selectedTrack?.id)
+
+    testDispatcher.scheduler.advanceUntilIdle()
+  }
 }
