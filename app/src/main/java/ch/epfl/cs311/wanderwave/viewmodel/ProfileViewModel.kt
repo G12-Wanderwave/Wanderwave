@@ -98,7 +98,6 @@ constructor(
     _isInPublicMode.value = !_isInPublicMode.value
   }
 
-
   /**
    * Get all the element of the main screen and add them to the top list
    *
