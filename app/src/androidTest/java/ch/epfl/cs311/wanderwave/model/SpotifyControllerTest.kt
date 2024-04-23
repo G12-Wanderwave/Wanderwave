@@ -691,37 +691,38 @@ class SpotifyControllerTest {
     // Verify that setEventCallback was called
     verify { subscription.setEventCallback(any()) }
   }
-//    @Test
-//    fun testOnPlayerStateUpdate_trackEnds() = runTest {
-//        // Arrange
-//        val playerApi = mockk<PlayerApi>()
-//        val subscription = mockk<Subscription<PlayerState>>()
-//        val playerState = mockk<PlayerState>(relaxed = true)
-//        val onTrackEndCallback: () -> Unit = mockk(relaxed = true)
-//        val slot = slot<Subscription.EventCallback<PlayerState>>()
-//
-//        spotifyController.setOnTrackEndCallback(onTrackEndCallback)
-//
-//        every { mockAppRemote.playerApi } returns playerApi
-//        every { playerApi.subscribeToPlayerState() } returns subscription
-//
-//        // Capture the EventCallback lambda when setEventCallback is called
-//        every { subscription.setEventCallback(capture(slot)) } answers {
-//            // Invoke the captured callback with playerState indicating track is playing
-//            every { playerState.track } returns mockk(relaxed = true)
-//            slot.captured.onEvent(playerState)
-//
-//            // Invoke the captured callback with playerState indicating track has ended
-//            every { playerState.track } returns null
-//            slot.captured.onEvent(playerState)
-//            subscription
-//        }
-//
-//        // Act - Trigger the onPlayerStateUpdate which should in turn trigger the captured callbacks
-//        spotifyController.onPlayerStateUpdate()
-//
-//        // Assert - Verify that the onTrackEndCallback was called
-//        verify(exactly = 1) { onTrackEndCallback.invoke() }
-//    }
+  //    @Test
+  //    fun testOnPlayerStateUpdate_trackEnds() = runTest {
+  //        // Arrange
+  //        val playerApi = mockk<PlayerApi>()
+  //        val subscription = mockk<Subscription<PlayerState>>()
+  //        val playerState = mockk<PlayerState>(relaxed = true)
+  //        val onTrackEndCallback: () -> Unit = mockk(relaxed = true)
+  //        val slot = slot<Subscription.EventCallback<PlayerState>>()
+  //
+  //        spotifyController.setOnTrackEndCallback(onTrackEndCallback)
+  //
+  //        every { mockAppRemote.playerApi } returns playerApi
+  //        every { playerApi.subscribeToPlayerState() } returns subscription
+  //
+  //        // Capture the EventCallback lambda when setEventCallback is called
+  //        every { subscription.setEventCallback(capture(slot)) } answers {
+  //            // Invoke the captured callback with playerState indicating track is playing
+  //            every { playerState.track } returns mockk(relaxed = true)
+  //            slot.captured.onEvent(playerState)
+  //
+  //            // Invoke the captured callback with playerState indicating track has ended
+  //            every { playerState.track } returns null
+  //            slot.captured.onEvent(playerState)
+  //            subscription
+  //        }
+  //
+  //        // Act - Trigger the onPlayerStateUpdate which should in turn trigger the captured
+  // callbacks
+  //        spotifyController.onPlayerStateUpdate()
+  //
+  //        // Assert - Verify that the onTrackEndCallback was called
+  //        verify(exactly = 1) { onTrackEndCallback.invoke() }
+  //    }
 
 }
