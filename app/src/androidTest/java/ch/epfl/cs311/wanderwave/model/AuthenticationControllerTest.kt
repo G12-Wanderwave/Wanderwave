@@ -129,4 +129,32 @@ class AuthenticationControllerTest {
     verify { mockFirebaseAuth.signInWithCustomToken("testtoken-firebase") }
     assert(result)
   }
+
+  @Test
+  fun useRefreshToken() = runBlocking {
+    setupDummyUserSignedIn()
+    val mockFirebaseUser =
+      mockk<com.google.firebase.auth.FirebaseUser> {
+        every { uid } returns "testid"
+        every { email } returns null
+        every { displayName } returns null
+        every { photoUrl } returns null
+      }
+
+    val task =
+      mockk<Task<AuthResult>> {
+        every { result } returns mockk { every { user } returns mockFirebaseUser }
+        every { isComplete } returns true
+        every { isSuccessful } returns true
+        every { isCanceled } returns false
+        every { exception } returns null
+      }
+
+    every { mockFirebaseAuth.currentUser } returns null
+    every { mockFirebaseAuth.signInWithCustomToken("testtoken-firebase") } returns task
+
+    val result = authenticationController.refreshTokenIfNecessary()
+    verify { mockFirebaseAuth.signInWithCustomToken("testtoken-firebase") }
+    assert(result)
+  }
 }
