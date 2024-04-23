@@ -1,4 +1,5 @@
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import io.mockk.every
@@ -21,7 +22,7 @@ class TrackListViewModelTest {
   @get:Rule val mockkRule = MockKRule(this)
 
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
-  @RelaxedMockK private lateinit var repository: TrackRepositoryImpl
+  @RelaxedMockK private lateinit var repository: TrackRepository
 
   private lateinit var track: Track
 
@@ -52,7 +53,7 @@ class TrackListViewModelTest {
 
     every { repository.getAll() } returns flowOf(trackList)
 
-    viewModel = TrackListViewModel(repository, mockSpotifyController)
+    viewModel = TrackListViewModel(mockSpotifyController, repository)
 
     runBlocking { viewModel.uiState.first { !it.loading } }
   }

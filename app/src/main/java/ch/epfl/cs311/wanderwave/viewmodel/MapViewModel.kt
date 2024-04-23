@@ -9,7 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Beacon
-import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import com.google.android.gms.maps.LocationSource
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class MapViewModel
 @Inject
-constructor(val locationSource: LocationSource, private val beaconConnection: BeaconConnection) :
+constructor(val locationSource: LocationSource, private val beaconRepository: BeaconRepository) :
     ViewModel() {
   val cameraPosition = MutableLiveData<CameraPosition?>()
 
@@ -35,7 +35,7 @@ constructor(val locationSource: LocationSource, private val beaconConnection: Be
 
   private fun observeBeacons() {
     viewModelScope.launch {
-      beaconConnection.getAll().collect { beacons ->
+      beaconRepository.getAll().collect { beacons ->
         _uiState.value = BeaconListUiState(beacons = beacons, loading = false)
       }
     }

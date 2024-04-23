@@ -3,6 +3,8 @@ package ch.epfl.cs311.wanderwave.ui
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.viewModelScope
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
@@ -43,14 +45,14 @@ class EditProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
 
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
   val testDispatcher = CoroutineScope(Dispatchers.Unconfined)
-  @RelaxedMockK private lateinit var profileRepositoryImpl: ProfileRepositoryImpl
+  @RelaxedMockK private lateinit var profileRepository: ProfileConnection
 
   @RelaxedMockK private lateinit var spotifyController: SpotifyController
 
   @Before
   fun setup() {
     mockDependencies()
-    viewModel = ProfileViewModel(profileRepositoryImpl, spotifyController)
+    viewModel = ProfileViewModel(profileRepository, spotifyController)
 
     composeTestRule.setContent { EditProfileScreen(mockNavigationActions, viewModel) }
   }
@@ -74,8 +76,9 @@ class EditProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
 
   private fun mockDependencies() {
     // Mocking ProfileRepositoryImpl
-    coEvery { profileRepositoryImpl.insert(any()) } just Runs
-    coEvery { profileRepositoryImpl.delete() } just Runs
+    coEvery { profileRepository.addItem(any()) } just Runs
+    coEvery { profileRepository.deleteItem(any<String>()) } just Runs
+    coEvery { profileRepository.deleteItem(any<Profile>()) } just Runs
 
     // Mocking SpotifyController
     coEvery { spotifyController.getChildren(any()) } returns

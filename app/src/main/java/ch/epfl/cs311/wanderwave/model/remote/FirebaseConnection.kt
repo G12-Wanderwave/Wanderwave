@@ -70,12 +70,12 @@ abstract class FirebaseConnection<T, U> {
         .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully updated!") }
   }
 
-  open fun deleteItem(item: T) {
+  fun deleteItem(item: T) {
     val itemId = getItemId(item)
     deleteItem(itemId)
   }
 
-  open fun deleteItem(itemId: String) {
+  fun deleteItem(itemId: String) {
     db.collection(collectionName)
         .document(itemId)
         .delete()
@@ -83,7 +83,7 @@ abstract class FirebaseConnection<T, U> {
         .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully deleted!") }
   }
 
-  open fun getItem(item: T): Flow<T> = getItem(getItemId(item))
+  fun getItem(item: T): Flow<T> = getItem(getItemId(item))
 
   open fun getItem(itemId: String): Flow<T> {
     val dataFlow = MutableStateFlow<T?>(null)
