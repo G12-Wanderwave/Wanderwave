@@ -3,6 +3,8 @@ package ch.epfl.cs311.wanderwave.ui
 import androidx.compose.ui.test.junit4.createComposeRule
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
+import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -35,8 +37,13 @@ class BeaconScreenTest {
             Beacon(
                 beaconId,
                 Location(46.519653, 6.632273, "Lausanne"),
-                listOf<Track>(Track("Some Track ID", "Track Title", "Artist Name")),
-            ))
+                profileAndTrack = listOf(
+                    ProfileTrackAssociation(
+                        Profile("Sample First Name", "Sample last name", "Sample desc", 0, false, null, "Sample Profile ID", "Sample Track ID"),
+                        Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))
+                ))
+
+        )
     coEvery { beaconConnection.getItem(any<Beacon>()) } returns beaconFlow
     coEvery { beaconConnection.getItem(any<String>()) } returns beaconFlow
 

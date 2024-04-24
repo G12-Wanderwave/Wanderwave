@@ -11,7 +11,7 @@ data class Beacon(
     val location: Location,
 
     /** List of tracks that are broadcast from the beacon */
-    val tracks: List<Track> = listOf<Track>(),
+    val profileAndTrack: List<ProfileTrackAssociation> = listOf<ProfileTrackAssociation>(),
 ) {
   fun toMap(): Map<String, Any> {
     return hashMapOf("id" to id, "location" to location.toMap(), "tracks" to listOf<Track>())
@@ -27,9 +27,9 @@ data class Beacon(
         val name = locationMap?.get("name") as? String ?: ""
         val location = Location(latitude, longitude, name)
 
-        val tracks = listOf<Track>()
+        val profileAndTrack = listOf<ProfileTrackAssociation>()
 
-        Beacon(id = id, location = location, tracks = tracks)
+        Beacon(id = id, location = location, profileAndTrack = profileAndTrack)
       } else {
         null
       }

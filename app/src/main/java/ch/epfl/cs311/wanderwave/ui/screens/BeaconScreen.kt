@@ -35,6 +35,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
+import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
@@ -78,11 +80,12 @@ private fun BeaconScreenPreview() {
       Beacon(
           id = "a",
           location = Location(latitude = 46.519962, longitude = 6.633597, name = "EPFL"),
-          tracks =
+          profileAndTrack =
               listOf(
-                  Track("a", "Never gonna give you up", "Rick Astley"),
-                  Track("b", "Take on me", "A-ha"),
-                  Track("c", "Africa", "Toto"),
+                  ProfileTrackAssociation(Profile("e","a","a",0,false,null,"1","2"),
+                      Track("a", "Never gonna give you up", "Rick Astley")),
+//                  Track("b", "Take on me", "A-ha"),
+//                  Track("c", "Africa", "Toto"),
               ),
       )
   WanderwaveTheme { BeaconScreen(previewBeacon) }
@@ -137,11 +140,13 @@ fun SongList(beacon: Beacon) {
       text = stringResource(R.string.beaconTracksTitle),
       style = MaterialTheme.typography.displayMedium,
       modifier = Modifier.testTag("beaconTracksTitle"))
-  LazyColumn { items(beacon.tracks) { TrackItem(it) } }
+  LazyColumn { items(beacon.profileAndTrack) { TrackItem(it) } }
 }
 
 @Composable
-internal fun TrackItem(track: Track) {
+internal fun TrackItem(profileAndTrack: ProfileTrackAssociation) {
+
+    //TODO: recover the track and profile from firebase : val track =
   Card(
       colors =
           CardColors(
@@ -164,11 +169,11 @@ internal fun TrackItem(track: Track) {
               }
           Column(modifier = Modifier.padding(8.dp)) {
             Text(
-                text = track.title,
+                text = profileAndTrack.track.title,
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.titleMedium)
             Text(
-                text = track.artist,
+                text = profileAndTrack.track.artist,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium,
             )

@@ -6,6 +6,8 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
+import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.localDb.PlaceHolderEntity
@@ -43,7 +45,11 @@ public class BeaconConnectionTest {
           Beacon(
               id = "testBeacon",
               location = Location(1.0, 1.0, "Test Location"),
-              tracks = listOf(Track("testTrack", "Test Title", "Test Artist")))
+            profileAndTrack = listOf(
+              ProfileTrackAssociation(
+                Profile("Sample First Name", "Sample last name", "Sample desc", 0, false, null, "Sample Profile ID", "Sample Track ID"),
+                Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))
+            ))
 
       beaconConnection.addItemWithId(beacon)
 
@@ -60,7 +66,9 @@ public class BeaconConnectionTest {
         Beacon(
             id = "testBeacon",
             location = Location(1.0, 1.0, "Test Location"),
-            tracks = listOf(Track("testTrack", "Test Title", "Test Artist")))
+          profileAndTrack = listOf(
+            ProfileTrackAssociation(Profile("Sample First Name", "Sample last name", "Sample desc", 0, false, null, "Sample Profile ID", "Sample Track ID"),
+              Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
     // Call the function under test
     beaconConnection.addItem(beacon)
@@ -83,7 +91,9 @@ public class BeaconConnectionTest {
         Beacon(
             id = "testBeacon",
             location = Location(1.0, 1.0, "Test Location"),
-            tracks = listOf(Track("testTrack", "Test Title", "Test Artist")))
+          profileAndTrack = listOf(
+            ProfileTrackAssociation(Profile("Sample First Name", "Sample last name", "Sample desc", 0, false, null, "Sample Profile ID", "Sample Track ID"),
+              Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
     val track = Track("testTrack2", "Test Title 2", "Test Artist 2")
 
@@ -100,7 +110,9 @@ public class BeaconConnectionTest {
         Beacon(
             id = "testBeacon",
             location = Location(1.0, 1.0, "Test Location"),
-            tracks = listOf(Track("testTrack", "Test Title", "Test Artist")))
+          profileAndTrack = listOf(
+            ProfileTrackAssociation(Profile("Sample First Name", "Sample last name", "Sample desc", 0, false, null, "Sample Profile ID", "Sample Track ID"),
+              Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
     // Call the function under test
     beaconConnection.updateItem(beacon)
@@ -138,7 +150,9 @@ public class BeaconConnectionTest {
           Beacon(
               id = "testBeacon",
               location = Location(1.0, 1.0, "Test Location"),
-              tracks = listOf(Track("testTrack", "Test Title", "Test Artist")))
+            profileAndTrack = listOf(
+              ProfileTrackAssociation(Profile("Sample First Name", "Sample last name", "Sample desc", 0, false, null, "Sample Profile ID", "Sample Track ID"),
+                Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
       beaconConnection.addItemWithId(beacon)
       beaconConnection.addItemWithId(beacon)
@@ -156,7 +170,9 @@ public class BeaconConnectionTest {
           Beacon(
               id = "testBeacon1",
               location = Location(1.0, 1.0, "Test Location"),
-              tracks = listOf(Track("testTrack", "Test Title", "Test Artist")))
+            profileAndTrack = listOf(
+              ProfileTrackAssociation(Profile("Sample First Name", "Sample last name", "Sample desc", 0, false, null, "Sample Profile ID", "Sample Track ID"),
+                Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
       beaconConnection.addItemWithId(beacon)
       beaconConnection.deleteItem("testBeacon1")

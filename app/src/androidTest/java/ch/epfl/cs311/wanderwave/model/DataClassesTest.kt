@@ -132,10 +132,10 @@ class DataClassesTest {
     // test beacon behaviour
     assertEquals("Test Id", beacon.id)
     assertEquals(location, beacon.location)
-    assertEquals(listOf<Track>(), beacon.tracks)
+    assertEquals(listOf<ProfileTrackAssociation>(), beacon.profileAndTrack)
     assertEquals("Test Id", beaconMap["id"])
     assertEquals(location.toMap(), beaconMap["location"])
-    assertEquals(listOf<Track>(), beaconMap["tracks"])
+    assertEquals(listOf<ProfileTrackAssociation>(), beaconMap["tracks"])
   }
 
   @Test
