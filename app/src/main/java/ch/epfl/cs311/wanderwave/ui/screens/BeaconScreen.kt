@@ -22,9 +22,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,7 +38,7 @@ import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
-import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveMapMarker
+import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
 import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
@@ -49,14 +48,22 @@ import com.google.maps.android.compose.CameraPositionState
 
 @Composable
 fun BeaconScreen(
+    beaconId: String?,
     navigationActions: NavigationActions,
     viewModel: BeaconViewModel = hiltViewModel()
 ) {
-  // id value remebered for the text field
-  // Here is the id of a good beacon for testing : UAn8OUadgrUOKYagf8a2
+  LaunchedEffect(beaconId) {
+    println(beaconId)
+    if (beaconId != null) {
+      viewModel.getBeaconById(beaconId)
+    }
+  }
+
   val uiState = viewModel.uiState.collectAsState().value
   Column(
-      modifier = Modifier.fillMaxSize().padding(16.dp),
+      modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         if (!uiState.isLoading) {
           BeaconScreen(beacon = uiState.beacon!!)
@@ -86,7 +93,10 @@ private fun BeaconScreenPreview() {
 @Composable
 private fun BeaconScreen(beacon: Beacon) {
   Column(
-      modifier = Modifier.fillMaxSize().padding(8.dp).testTag("beaconScreen"),
+      modifier = Modifier
+        .fillMaxSize()
+        .padding(8.dp)
+        .testTag("beaconScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
         SongList(beacon)
@@ -113,14 +123,15 @@ fun BeaconInformation(location: Location) {
                 CameraPosition(LatLng(location.latitude, location.longitude), 15f, 0f, 0f)),
         locationSource = null,
         modifier =
-            Modifier.fillMaxWidth()
-                .aspectRatio(4f / 3)
-                .padding(4.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .testTag("beaconMap"),
+        Modifier
+          .fillMaxWidth()
+          .aspectRatio(4f / 3)
+          .padding(4.dp)
+          .clip(RoundedCornerShape(8.dp))
+          .testTag("beaconMap"),
         controlsEnabled = false,
     ) {
-      WanderwaveMapMarker(location.toLatLng(), location.name)
+      BeaconMapMarker(location.toLatLng(), location.name)
     }
   }
 }
@@ -144,12 +155,18 @@ internal fun TrackItem(track: Track) {
               CardDefaults.cardColors().contentColor,
               CardDefaults.cardColors().disabledContainerColor,
               CardDefaults.cardColors().disabledContentColor),
-      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem")) {
+      modifier = Modifier
+        .height(80.dp)
+        .fillMaxWidth()
+        .padding(4.dp)
+        .testTag("trackItem")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
           Box(
-              modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+              modifier = Modifier
+                .fillMaxHeight()
+                .aspectRatio(1f),
               contentAlignment = Alignment.Center) {
                 Image(
                     imageVector = Icons.Default.PlayArrow,

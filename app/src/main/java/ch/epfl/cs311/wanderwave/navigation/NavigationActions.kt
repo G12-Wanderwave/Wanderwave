@@ -69,6 +69,11 @@ class NavigationActions(navController: NavHostController) {
     _currentRouteFlow.value = route
   }
 
+  fun navigateToBeacon(beaconId: String) {
+    navigationController.navigate("${Route.BEACON.routeString}/$beaconId")
+    _currentRouteFlow.value = Route.BEACON
+  }
+
   fun goBack() {
     navigationController.popBackStack()
   }

@@ -8,6 +8,6 @@ import com.google.maps.android.compose.MarkerState
 
 @Composable
 @GoogleMapComposable
-fun WanderwaveMapMarker(position: LatLng, title: String? = null, snippet: String? = null) {
-  Marker(state = MarkerState(position = position), title = title, snippet = snippet)
+fun BeaconMapMarker(position: LatLng, title: String? = null, snippet: String? = null, onClick: () -> Unit = {}) {
+  Marker(state = MarkerState(position = position), title = title, snippet = snippet, onClick = { onClick(); true })
 }
