@@ -233,4 +233,12 @@ class TrackListViewModelTest {
     viewModel.skipBackward()
     assertNull(viewModel.uiState.value.selectedTrack)
   }
+
+  @Test
+  fun testSetLoop() {
+    viewModel.setLoop(true)
+    assertTrue(viewModel.uiState.value.isLooping)
+    viewModel.setLoop(false)
+    assertFalse(viewModel.uiState.value.isLooping)
+  }
 }

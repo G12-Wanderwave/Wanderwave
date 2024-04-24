@@ -160,8 +160,14 @@ constructor(
     skip(-1)
   }
 
+  /** Toggles the looping state of the player. */
   fun toggleLoop() {
-    _uiState.value = _uiState.value.copy(isLooping = !_uiState.value.isLooping)
+    setLoop(!_uiState.value.isLooping)
+  }
+
+  /** Sets the looping state of the player. */
+  fun setLoop(isLooping: Boolean) {
+    _uiState.value = _uiState.value.copy(isLooping = isLooping)
   }
 
   data class UiState(
