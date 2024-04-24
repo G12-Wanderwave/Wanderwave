@@ -28,11 +28,12 @@ class BeaconScreenTest {
 
   @Before
   fun setup() {
+    val beaconId = "UAn8OUadgrUOKYagf8a2"
 
     val beaconFlow =
         flowOf(
             Beacon(
-                "UAn8OUadgrUOKYagf8a2",
+                beaconId,
                 Location(46.519653, 6.632273, "Lausanne"),
                 listOf<Track>(Track("Some Track ID", "Track Title", "Artist Name")),
             ))
@@ -41,7 +42,7 @@ class BeaconScreenTest {
 
     val viewModel = BeaconViewModel(beaconConnection)
 
-    composeTestRule.setContent { BeaconScreen(mockNavigationActions, viewModel) }
+    composeTestRule.setContent { BeaconScreen(beaconId, mockNavigationActions, viewModel) }
   }
 
   @Test
