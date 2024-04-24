@@ -160,9 +160,6 @@ constructor(
       _uiState.value =
           _uiState.value.copy(queue = _uiState.value.tracks.shuffled(), isShuffled = true)
     }
-    
-  fun toggleShuffle() {
-    _uiState.value = _uiState.value.copy(shuffleOn = !_uiState.value.shuffleOn)
   }
 
   fun toggleRepeat() {
@@ -186,7 +183,6 @@ constructor(
       val currentMillis: Int = 0,
       val expanded: Boolean = false,
       val progress: Float = 0f,
-      val shuffleOn: Boolean = false,
       val repeatMode: RepeatMode = RepeatMode.NONE
   )
 }
