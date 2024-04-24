@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.model
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -32,11 +33,12 @@ public class ProfileConnectionTest {
   @RelaxedMockK private lateinit var documentSnapshot: DocumentSnapshot
   private lateinit var profileConnection: ProfileConnection
 
+  @RelaxedMockK private lateinit var firebaseFirestore: FirebaseFirestore
+
   @Before
   fun setup() {
-
     MockKAnnotations.init(this)
-    profileConnection = ProfileConnection()
+    profileConnection = ProfileConnection(firebaseFirestore)
   }
 
   @Test

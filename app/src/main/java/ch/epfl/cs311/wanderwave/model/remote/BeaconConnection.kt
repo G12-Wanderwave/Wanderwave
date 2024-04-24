@@ -50,6 +50,7 @@ class BeaconConnection(private val database: FirebaseFirestore? = null) :
         .addOnSuccessListener { document ->
           if (document != null && document.data != null) {
             documentToItem(document)?.let { beacon ->
+              dataFlow.value = beacon
               val trackRefs = document.get("tracks") as? List<DocumentReference>
               val tracks = mutableListOf<Track>()
               trackRefs?.forEach { trackRef ->
@@ -71,6 +72,8 @@ class BeaconConnection(private val database: FirebaseFirestore? = null) :
           dataFlow.value = null
           Log.e("Firestore", "Error getting document: ", e)
         }
+
+    Log.d("Firestore", "DocumentSnapshot data 4: ${dataFlow.value}")
 
     return dataFlow.filterNotNull()
   }
