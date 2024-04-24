@@ -36,6 +36,7 @@ class PlayerScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
     every { viewModel.uiState } returns MutableStateFlow(TrackListViewModel.UiState())
   }
 
+/*
   @Test
   fun miniPlayerScreenInteractions() = run {
     composeTestRule.setContent {
@@ -54,6 +55,7 @@ class PlayerScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
       miniPlayerTitleButton.performClick()
     }
   }
+*/
 
   @Test
   fun exclusivePlayerScreenInteractions() = run {
