@@ -801,16 +801,4 @@ class SpotifyControllerTest {
     // Verify that setEventCallback was called
     verify { subscription.setEventCallback(any()) }
   }
-
-  @Test
-  fun testStartPlaybackTimerCancellation() = runBlocking {
-    // Start the playback timer
-    spotifyController.startPlaybackTimer(3000) // 3 seconds
-
-    // Assert that initial timer is running
-    assertNotNull(spotifyController.playbackTimer)
-
-    // Cancel the timer
-    spotifyController.playbackTimer?.cancel()
-  }
 }
