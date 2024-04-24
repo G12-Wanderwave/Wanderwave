@@ -152,7 +152,7 @@ constructor(
     skip(-1)
   }
 
-  /** Toggles the shuffle state of the queue. */
+  /** Toggles the shuffle state of the queue.*/
   fun toggleShuffle() {
     if (_uiState.value.isShuffled) {
       _uiState.value = _uiState.value.copy(queue = _uiState.value.tracks, isShuffled = false)
