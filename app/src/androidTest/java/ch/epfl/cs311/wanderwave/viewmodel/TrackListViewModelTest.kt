@@ -1,6 +1,7 @@
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepositoryImpl
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.viewmodel.LoopMode
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -197,14 +198,6 @@ class TrackListViewModelTest {
   }
 
   @Test
-  fun testLoopToggle() = run {
-    viewModel.toggleLoop()
-    assertTrue(viewModel.uiState.value.isLooping)
-    viewModel.toggleLoop()
-    assertFalse(viewModel.uiState.value.isLooping)
-  }
-
-  @Test
   fun testSkipForwardWhenLooping() = run {
     viewModel.toggleLoop()
     viewModel.selectTrack(viewModel.uiState.value.tracks[viewModel.uiState.value.tracks.size - 1])
@@ -233,14 +226,27 @@ class TrackListViewModelTest {
   fun testSkipBackwardWhenNotLooping() = run {
     viewModel.selectTrack(viewModel.uiState.value.tracks[0])
     viewModel.skipBackward()
-     assertNull(viewModel.uiState.value.selectedTrack)
+    assertNull(viewModel.uiState.value.selectedTrack)
+  }
+
+  @Test
+  fun testLoopToggle() {
+    assertEquals(LoopMode.NONE, viewModel.uiState.value.loopMode)
+    viewModel.toggleLoop()
+    assertEquals(LoopMode.ALL, viewModel.uiState.value.loopMode)
+    viewModel.toggleLoop()
+    assertEquals(LoopMode.ONE, viewModel.uiState.value.loopMode)
+    viewModel.toggleLoop()
+    assertEquals(LoopMode.NONE, viewModel.uiState.value.loopMode)
   }
 
   @Test
   fun testSetLoop() {
-    viewModel.setLoop(true)
-    assertTrue(viewModel.uiState.value.isLooping)
-    viewModel.setLoop(false)
-    assertFalse(viewModel.uiState.value.isLooping)
+    viewModel.setLoop(LoopMode.ALL)
+    assertEquals(LoopMode.ALL, viewModel.uiState.value.loopMode)
+    viewModel.setLoop(LoopMode.ONE)
+    assertEquals(LoopMode.ONE, viewModel.uiState.value.loopMode)
+    viewModel.setLoop(LoopMode.NONE)
+    assertEquals(LoopMode.NONE, viewModel.uiState.value.loopMode)
   }
 }
