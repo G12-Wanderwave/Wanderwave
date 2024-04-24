@@ -7,9 +7,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.ui.TestActivity
 import ch.epfl.cs311.wanderwave.ui.components.player.ExclusivePlayer
-import ch.epfl.cs311.wanderwave.ui.components.player.MiniPlayer
 import ch.epfl.cs311.wanderwave.ui.screens.components.ExclusivePlayerScreen
-import ch.epfl.cs311.wanderwave.ui.screens.components.MiniPlayerScreen
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
@@ -36,26 +34,26 @@ class PlayerScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
     every { viewModel.uiState } returns MutableStateFlow(TrackListViewModel.UiState())
   }
 
-/*
-  @Test
-  fun miniPlayerScreenInteractions() = run {
-    composeTestRule.setContent {
-      MiniPlayer(
-          uiStateFlow = viewModel.uiState,
-          onTitleClick = { viewModel.expand() },
-          onPlayClick = { viewModel.play() },
-          onPauseClick = { viewModel.pause() },
-          progress = 0f)
-    }
+  /*
+    @Test
+    fun miniPlayerScreenInteractions() = run {
+      composeTestRule.setContent {
+        MiniPlayer(
+            uiStateFlow = viewModel.uiState,
+            onTitleClick = { viewModel.expand() },
+            onPlayClick = { viewModel.play() },
+            onPauseClick = { viewModel.pause() },
+            progress = 0f)
+      }
 
-    onComposeScreen<MiniPlayerScreen>(composeTestRule) {
-      assertIsDisplayed()
-      playPauseButton.performClick()
-      playPauseButton.performClick()
-      miniPlayerTitleButton.performClick()
+      onComposeScreen<MiniPlayerScreen>(composeTestRule) {
+        assertIsDisplayed()
+        playPauseButton.performClick()
+        playPauseButton.performClick()
+        miniPlayerTitleButton.performClick()
+      }
     }
-  }
-*/
+  */
 
   @Test
   fun exclusivePlayerScreenInteractions() = run {
