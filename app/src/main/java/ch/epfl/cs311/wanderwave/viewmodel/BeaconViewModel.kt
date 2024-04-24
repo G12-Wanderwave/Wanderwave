@@ -19,7 +19,6 @@ class BeaconViewModel @Inject constructor(private val beaconRepository: BeaconRe
     ViewModel() {
 
   private var _uiState = MutableStateFlow(UIState())
-
   val uiState: StateFlow<UIState> = _uiState
 
   init {
@@ -27,19 +26,9 @@ class BeaconViewModel @Inject constructor(private val beaconRepository: BeaconRe
         Beacon(
             id = "Sample ID",
             location = Location(0.0, 0.0, "Sample Location"),
-            profileAndTrack =
-                listOf(
-                    ProfileTrackAssociation(
-                        Profile(
-                            "Sample First Name",
-                            "Sample last name",
-                            "Sample desc",
-                            0,
-                            false,
-                            null,
-                            "Sample Profile ID",
-                            "Sample Track ID"),
-                        Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
+            profileAndTrack = listOf(
+                ProfileTrackAssociation(Profile("Sample First Name", "Sample last name", "Sample desc", 0, false, null, "Sample Profile ID", "Sample Track ID"),
+                Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
     _uiState.value = UIState(beacon = sampleBeacon, isLoading = false)
   }

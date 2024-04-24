@@ -85,22 +85,12 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
                 Beacon(
                     "UAn8OUadgrUOKYagf8a2",
                     ch.epfl.cs311.wanderwave.model.data.Location(46.519653, 6.632273, "Lausanne"),
-                    profileAndTrack =
-                        listOf(
-                            ProfileTrackAssociation(
-                                Profile(
-                                    "Sample First Name",
-                                    "Sample last name",
-                                    "Sample desc",
-                                    0,
-                                    false,
-                                    null,
-                                    "Sample Profile ID",
-                                    "Sample Track ID"),
-                                Track(
-                                    "Sample Track ID",
-                                    "Sample Track Title",
-                                    "Sample Artist Name"))))))
+                  profileAndTrack = listOf(
+                    ProfileTrackAssociation(
+                      Profile("Sample First Name", "Sample last name", "Sample desc", 0, false, null, "Sample Profile ID", "Sample Track ID"),
+                      Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))
+                  ))
+                ))
 
     mockMapViewModel = MapViewModel(mockLocationSource, mockBeaconConnection)
     every { mockNavController.navigate(any<String>()) } returns Unit
