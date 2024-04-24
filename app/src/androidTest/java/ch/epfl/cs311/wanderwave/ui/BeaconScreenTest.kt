@@ -41,7 +41,7 @@ class BeaconScreenTest {
 
     val viewModel = BeaconViewModel(beaconConnection)
 
-    composeTestRule.setContent { BeaconScreen(mockNavigationActions, viewModel) }
+    composeTestRule.setContent { BeaconScreen("UAn8OUadgrUOKYagf8a2", mockNavigationActions, viewModel) }
   }
 
   @Test
