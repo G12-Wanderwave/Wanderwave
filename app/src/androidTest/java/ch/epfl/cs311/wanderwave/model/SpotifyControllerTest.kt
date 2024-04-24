@@ -743,4 +743,38 @@ class SpotifyControllerTest {
     spotifyController.setOnTrackEndCallback(callback)
     assertNotNull(spotifyController.getOnTrackEndCallback())
   }
+
+    @Test
+    fun testOnPlayerStateUpdateCancellation() = runBlocking {
+        // Mock the PlayerApi and Subscription objects
+        val playerApi = mockk<PlayerApi>(relaxed = true)
+        val subscription = mockk<Subscription<PlayerState>>(relaxed = true)
+
+        // When playerApi.subscribeToPlayerState() is called, return the mocked subscription
+        every { playerApi.subscribeToPlayerState() } returns subscription
+
+        // When subscription.setEventCallback(any()) is called, invoke the callback with the test
+        // PlayerState
+        every { subscription.setEventCallback(any()) } answers { subscription }
+
+        // When subscription.setErrorCallback(any()) is called, do nothing
+        every { subscription.setErrorCallback(any()) } just Awaits
+
+        // Set the playerApi in the SpotifyController
+        every { mockAppRemote.playerApi } returns playerApi
+
+        // Call the method to be tested
+        spotifyController.onPlayerStateUpdate()
+
+        // Verify that setEventCallback was called
+        verify { subscription.setEventCallback(any()) }
+
+        // Cancel the subscription
+        subscription.cancel()
+
+        // Verify that the cancellation was called
+        verify { subscription.cancel() }
+    }
+
+
 }
