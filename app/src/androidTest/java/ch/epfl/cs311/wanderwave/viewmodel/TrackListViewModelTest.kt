@@ -1,6 +1,7 @@
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepositoryImpl
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.viewmodel.LoopMode
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -124,6 +125,7 @@ class TrackListViewModelTest {
     val firstTrack = viewModel.uiState.value.tracks[0]
     val lastTrack = viewModel.uiState.value.tracks[viewModel.uiState.value.tracks.size - 1]
 
+    viewModel.toggleLoop()
     viewModel.selectTrack(lastTrack)
     viewModel.play()
     assertTrue(viewModel.uiState.value.isPlaying)
@@ -154,6 +156,7 @@ class TrackListViewModelTest {
     val firstTrack = viewModel.uiState.value.tracks[0]
     val lastTrack = viewModel.uiState.value.tracks[viewModel.uiState.value.tracks.size - 1]
 
+    viewModel.toggleLoop()
     viewModel.selectTrack(firstTrack)
     viewModel.play()
     assertTrue(viewModel.uiState.value.isPlaying)
@@ -197,5 +200,58 @@ class TrackListViewModelTest {
     viewModel.toggleShuffle()
     viewModel.toggleShuffle()
     assertEquals(viewModel.uiState.value.tracks, viewModel.uiState.value.queue)
+  }
+
+  @Test
+  fun testSkipForwardWhenLooping() = run {
+    viewModel.toggleLoop()
+    viewModel.selectTrack(viewModel.uiState.value.tracks[viewModel.uiState.value.tracks.size - 1])
+    viewModel.skipForward()
+    assertEquals(viewModel.uiState.value.tracks[0], viewModel.uiState.value.selectedTrack)
+  }
+
+  @Test
+  fun testSkipForwardWhenNotLooping() = run {
+    viewModel.selectTrack(viewModel.uiState.value.tracks[viewModel.uiState.value.tracks.size - 1])
+    viewModel.skipForward()
+    assertNull(viewModel.uiState.value.selectedTrack)
+  }
+
+  @Test
+  fun testSkipBackwardWhenLooping() = run {
+    viewModel.toggleLoop()
+    viewModel.selectTrack(viewModel.uiState.value.tracks[0])
+    viewModel.skipBackward()
+    assertEquals(
+        viewModel.uiState.value.tracks[viewModel.uiState.value.tracks.size - 1],
+        viewModel.uiState.value.selectedTrack)
+  }
+
+  @Test
+  fun testSkipBackwardWhenNotLooping() = run {
+    viewModel.selectTrack(viewModel.uiState.value.tracks[0])
+    viewModel.skipBackward()
+    assertNull(viewModel.uiState.value.selectedTrack)
+  }
+
+  @Test
+  fun testLoopToggle() {
+    assertEquals(LoopMode.NONE, viewModel.uiState.value.loopMode)
+    viewModel.toggleLoop()
+    assertEquals(LoopMode.ALL, viewModel.uiState.value.loopMode)
+    viewModel.toggleLoop()
+    assertEquals(LoopMode.ONE, viewModel.uiState.value.loopMode)
+    viewModel.toggleLoop()
+    assertEquals(LoopMode.NONE, viewModel.uiState.value.loopMode)
+  }
+
+  @Test
+  fun testSetLoop() {
+    viewModel.setLoop(LoopMode.ALL)
+    assertEquals(LoopMode.ALL, viewModel.uiState.value.loopMode)
+    viewModel.setLoop(LoopMode.ONE)
+    assertEquals(LoopMode.ONE, viewModel.uiState.value.loopMode)
+    viewModel.setLoop(LoopMode.NONE)
+    assertEquals(LoopMode.NONE, viewModel.uiState.value.loopMode)
   }
 }

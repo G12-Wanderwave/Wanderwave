@@ -136,8 +136,18 @@ constructor(
   private fun skip(dir: Int) {
     if (_uiState.value.selectedTrack != null && (dir == 1 || dir == -1)) {
       _uiState.value.tracks.indexOf(_uiState.value.selectedTrack).let { it: Int ->
-        val next = Math.floorMod((it + dir), _uiState.value.tracks.size)
-        selectTrack(_uiState.value.tracks[next])
+        var next = it + dir
+        when (_uiState.value.loopMode) {
+          LoopMode.ONE -> next = it
+          LoopMode.ALL -> next = Math.floorMod((it + dir), _uiState.value.tracks.size)
+          else -> {}
+        }
+        if (next >= 0 && next < _uiState.value.tracks.size) {
+          selectTrack(_uiState.value.tracks[next])
+        } else {
+          pause()
+          _uiState.value = _uiState.value.copy(selectedTrack = null)
+        }
       }
     }
   }
@@ -162,13 +172,19 @@ constructor(
     }
   }
 
-  fun toggleRepeat() {
+  /** Toggles the looping state of the player. */
+  fun toggleLoop() {
     _uiState.value =
-        when (_uiState.value.repeatMode) {
-          RepeatMode.NONE -> _uiState.value.copy(repeatMode = RepeatMode.ALL)
-          RepeatMode.ALL -> _uiState.value.copy(repeatMode = RepeatMode.ONE)
-          else -> _uiState.value.copy(repeatMode = RepeatMode.NONE)
+        when (_uiState.value.loopMode) {
+          LoopMode.NONE -> _uiState.value.copy(loopMode = LoopMode.ALL)
+          LoopMode.ALL -> _uiState.value.copy(loopMode = LoopMode.ONE)
+          else -> _uiState.value.copy(loopMode = LoopMode.NONE)
         }
+  }
+
+  /** Sets the looping state of the player. */
+  fun setLoop(loopMode: LoopMode) {
+    _uiState.value = _uiState.value.copy(loopMode = loopMode)
   }
 
   data class UiState(
@@ -179,15 +195,15 @@ constructor(
       val selectedTrack: Track? = null,
       val pausedTrack: Track? = null,
       val isPlaying: Boolean = false,
-      val isShuffled: Boolean = false,
       val currentMillis: Int = 0,
       val expanded: Boolean = false,
       val progress: Float = 0f,
-      val repeatMode: RepeatMode = RepeatMode.NONE
+      val isShuffled: Boolean = false,
+      val loopMode: LoopMode = LoopMode.NONE
   )
 }
 
-enum class RepeatMode {
+enum class LoopMode {
   NONE,
   ONE,
   ALL
