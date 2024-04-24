@@ -38,6 +38,7 @@ constructor(
       }
     }
   }
+
   /**
    * Plays the given track using the SpotifyController.
    *
@@ -137,12 +138,23 @@ constructor(
    */
   private fun skip(dir: Int) {
     if (_uiState.value.selectedTrack != null && (dir == 1 || dir == -1)) {
-      _uiState.value.queue.indexOf(_uiState.value.selectedTrack).let { it: Int ->
-        val next = Math.floorMod((it + dir), _uiState.value.queue.size)
-        selectTrack(_uiState.value.queue[next])
+      _uiState.value.tracks.indexOf(_uiState.value.selectedTrack).let { it: Int ->
+        var next = it + dir
+        when (_uiState.value.loopMode) {
+          LoopMode.ONE -> next = it
+          LoopMode.ALL -> next = Math.floorMod((it + dir), _uiState.value.tracks.size)
+          else -> {}
+        }
+        if (next >= 0 && next < _uiState.value.tracks.size) {
+          selectTrack(_uiState.value.tracks[next])
+        } else {
+          pause()
+          _uiState.value = _uiState.value.copy(selectedTrack = null)
+        }
       }
     }
   }
+
   /** Skips to the next track in the list. */
   fun skipForward() {
     skip(1)
@@ -151,6 +163,31 @@ constructor(
   /** Skips to the previous track in the list. */
   fun skipBackward() {
     skip(-1)
+  }
+
+  /** Toggles the shuffle state of the queue. */
+  fun toggleShuffle() {
+    if (_uiState.value.isShuffled) {
+      _uiState.value = _uiState.value.copy(queue = _uiState.value.tracks, isShuffled = false)
+    } else {
+      _uiState.value =
+          _uiState.value.copy(queue = _uiState.value.tracks.shuffled(), isShuffled = true)
+    }
+  }
+
+  /** Toggles the looping state of the player. */
+  fun toggleLoop() {
+    _uiState.value =
+        when (_uiState.value.loopMode) {
+          LoopMode.NONE -> _uiState.value.copy(loopMode = LoopMode.ALL)
+          LoopMode.ALL -> _uiState.value.copy(loopMode = LoopMode.ONE)
+          else -> _uiState.value.copy(loopMode = LoopMode.NONE)
+        }
+  }
+
+  /** Sets the looping state of the player. */
+  fun setLoop(loopMode: LoopMode) {
+    _uiState.value = _uiState.value.copy(loopMode = loopMode)
   }
 
   data class UiState(
@@ -163,6 +200,14 @@ constructor(
       val isPlaying: Boolean = false,
       val currentMillis: Int = 0,
       val expanded: Boolean = false,
-      val progress: Float = 0f
+      val progress: Float = 0f,
+      val isShuffled: Boolean = false,
+      val loopMode: LoopMode = LoopMode.NONE
   )
+}
+
+enum class LoopMode {
+  NONE,
+  ONE,
+  ALL
 }
