@@ -166,13 +166,13 @@ fun PlayerControlRowComponent(viewModel: TrackListViewModel, uiState: TrackListV
       modifier = Modifier.fillMaxWidth()) {
         ShuffleButton(viewModel, uiState)
         PlayerIconButton(
-            onClick = {},
+            onClick = { viewModel.skipBackward() },
             testTag = "previousButton",
             painterId = R.drawable.previous_track_icon,
             tint = MaterialTheme.colorScheme.onSurface)
         PlayPauseButton(viewModel, uiState)
         PlayerIconButton(
-            onClick = {},
+            onClick = { viewModel.skipForward() },
             testTag = "nextButton",
             painterId = R.drawable.next_track_icon,
             tint = MaterialTheme.colorScheme.onSurface)
