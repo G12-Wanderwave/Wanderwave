@@ -691,38 +691,64 @@ class SpotifyControllerTest {
     // Verify that setEventCallback was called
     verify { subscription.setEventCallback(any()) }
   }
-  //    @Test
-  //    fun testOnPlayerStateUpdate_trackEnds() = runTest {
-  //        // Arrange
-  //        val playerApi = mockk<PlayerApi>()
-  //        val subscription = mockk<Subscription<PlayerState>>()
-  //        val playerState = mockk<PlayerState>(relaxed = true)
-  //        val onTrackEndCallback: () -> Unit = mockk(relaxed = true)
-  //        val slot = slot<Subscription.EventCallback<PlayerState>>()
-  //
-  //        spotifyController.setOnTrackEndCallback(onTrackEndCallback)
-  //
-  //        every { mockAppRemote.playerApi } returns playerApi
-  //        every { playerApi.subscribeToPlayerState() } returns subscription
-  //
-  //        // Capture the EventCallback lambda when setEventCallback is called
-  //        every { subscription.setEventCallback(capture(slot)) } answers {
-  //            // Invoke the captured callback with playerState indicating track is playing
-  //            every { playerState.track } returns mockk(relaxed = true)
-  //            slot.captured.onEvent(playerState)
-  //
-  //            // Invoke the captured callback with playerState indicating track has ended
-  //            every { playerState.track } returns null
-  //            slot.captured.onEvent(playerState)
-  //            subscription
-  //        }
-  //
-  //        // Act - Trigger the onPlayerStateUpdate which should in turn trigger the captured
-  // callbacks
-  //        spotifyController.onPlayerStateUpdate()
-  //
-  //        // Assert - Verify that the onTrackEndCallback was called
-  //        verify(exactly = 1) { onTrackEndCallback.invoke() }
-  //    }
+
+    @Test
+    fun authorizationRequestContainsCallbackAndScopes() {
+        val request = spotifyController.getAuthorizationRequest()
+        assertTrue(request.redirectUri.contains("callback"))
+        assertTrue(request.scopes.isNotEmpty())
+    }
+
+    @Test
+    fun logoutRequestContainsCallbackAndNoScopes() {
+        val request = spotifyController.getLogoutRequest()
+        assertTrue(request.redirectUri.contains("callback"))
+        assertTrue(request.scopes.isEmpty())
+    }
+
+    @Test
+    fun connectionStatusReflectsAppRemoteStatus() {
+        every { mockAppRemote.isConnected } returns true
+        assertTrue(spotifyController.isConnected())
+        every { mockAppRemote.isConnected } returns false
+        assertFalse(spotifyController.isConnected())
+    }
+
+    @Test
+    fun disconnectCallsAppRemoteDisconnect() {
+        spotifyController.disconnectRemote()
+        verify { SpotifyAppRemote.disconnect(mockAppRemote) }
+    }
+
+    @Test
+    fun playbackTimerIsCancelledOnNewStart() {
+        spotifyController.startPlaybackTimer(3000)
+        val initialTimer = spotifyController.playbackTimer
+        spotifyController.startPlaybackTimer(5000)
+        assertTrue(initialTimer?.isCancelled ?: false)
+        assertNotNull(spotifyController.playbackTimer)
+    }
+
+    @Test
+    fun playbackTimerIsCancelledOnStop() {
+        spotifyController.startPlaybackTimer(3000)
+        assertNotNull(spotifyController.playbackTimer)
+        spotifyController.stopPlaybackTimer()
+        assertNull(spotifyController.playbackTimer)
+    }
+
+    @Test
+    fun onTrackEndCallbackIsSet() {
+        val callback: () -> Unit = { println("Track ended") }
+        spotifyController.setOnTrackEndCallback(callback)
+        assertNotNull(spotifyController.getOnTrackEndCallback())
+    }
+
+    @Test
+    fun getAllElementFromSpotifyReturnsItems() = runBlocking {
+        val flow = spotifyController.getAllElementFromSpotify()
+        val result = flow.first()
+        assertTrue(result.isNotEmpty())
+    }
 
 }

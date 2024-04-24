@@ -179,9 +179,12 @@ class SpotifyController(private val context: Context) {
     }
   }
 
-  fun setOnTrackEndCallback(callback: () -> Unit) {
-    onTrackEndCallback = callback
-  }
+    fun setOnTrackEndCallback(callback: () -> Unit) {
+        onTrackEndCallback = callback
+    }
+    fun getOnTrackEndCallback(): (() -> Unit)? {
+        return onTrackEndCallback
+    }
   /**
    * Get all the playlist, title, ... from spotify from the home page of the user.
    *

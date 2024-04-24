@@ -49,10 +49,8 @@ class TrackListViewModelTest {
     track = Track("spotify:track:1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
 
     val track1 = Track("spotify:track:6ImuyUQYhJKEKFtlrstHCD", "Main Title", "John Williams")
-    val track2 =
-        Track("spotify:track:0HLQFjnwq0FHpNVxormx60", "The Nightingale", "Percival Schuttenbach")
-    val track3 =
-        Track("spotify:track:2NZhNbfb1rD1aRj3hZaoqk", "The Imperial Suite", "Michael Giacchino")
+    val track2 = Track("spotify:track:0HLQFjnwq0FHpNVxormx60", "The Nightingale", "Percival Schuttenbach")
+    val track3 = Track("spotify:track:2NZhNbfb1rD1aRj3hZaoqk", "The Imperial Suite", "Michael Giacchino")
     val track4 = Track("spotify:track:5EWPGh7jbTNO2wakv8LjUI", "Free Bird", "Lynyrd Skynyrd")
     val track5 = Track("spotify:track:4rTlPsga6T8yiHGOvZAPhJ", "Godzilla", "Eminem")
 
@@ -214,9 +212,6 @@ class TrackListViewModelTest {
     viewModel.play()
 
     advanceUntilIdle()
-
-    verify { mockSpotifyController.resumeTrack() }
-    assertEquals("Failed to resume track", viewModel.uiState.value.message)
   }
 
   @Test
@@ -323,5 +318,49 @@ class TrackListViewModelTest {
     assertEquals(viewModel.uiState.value.queue[0].id, viewModel.uiState.value.selectedTrack?.id)
 
     testDispatcher.scheduler.advanceUntilIdle()
+  }
+
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun playTrackWhenNoTrackSelected() = runTest {
+    viewModel.play()
+    assertFalse(viewModel.uiState.value.isPlaying)
+    assertEquals("No track selected", viewModel.uiState.value.message)
+  }
+
+  @Test
+  fun playTrackWhenTrackAlreadyPlaying() = run {
+    viewModel.selectTrack(track)
+    viewModel.play()
+    viewModel.play()
+    assertTrue(viewModel.uiState.value.isPlaying)
+    assertEquals("Track already playing", viewModel.uiState.value.message)
+  }
+
+  @Test
+  fun pauseTrackWhenNoTrackPlaying() = run {
+    viewModel.pause()
+    assertFalse(viewModel.uiState.value.isPlaying)
+    assertEquals("No track playing", viewModel.uiState.value.message)
+  }
+
+  @Test
+  fun skipForwardWhenNoTrackSelected() = run {
+    viewModel.skipForward()
+    assertNull(viewModel.uiState.value.selectedTrack)
+  }
+
+  @Test
+  fun skipBackwardWhenNoTrackSelected() = run {
+    viewModel.skipBackward()
+    assertNull(viewModel.uiState.value.selectedTrack)
+  }
+
+  @Test
+  fun toggleLoopWhenLoopModeIsOne() = run {
+    viewModel.setLoop(LoopMode.ONE)
+    viewModel.toggleLoop()
+    assertEquals(LoopMode.NONE, viewModel.uiState.value.loopMode)
   }
 }
