@@ -141,7 +141,9 @@ constructor(
         when (_uiState.value.loopMode) {
           LoopMode.ONE -> next = it
           LoopMode.ALL -> next = Math.floorMod((it + dir), _uiState.value.queue.size)
-          else -> {/** Do nothing */}
+          else -> {
+            /** Do nothing */
+          }
         }
         if (next >= 0 && next < _uiState.value.queue.size) {
           selectTrack(_uiState.value.queue[next])
