@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.model
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import com.google.android.gms.maps.model.LatLng
@@ -11,7 +12,9 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -164,5 +167,46 @@ class DataClassesTest {
 
     // assert if the track is null
     assert(track2 == null)
+  }
+
+  @Test
+  fun profileTrackAssociation_initializesCorrectly() {
+    val mockProfile = mockk<Profile>()
+    val mockTrack = mockk<Track>()
+    val association = ProfileTrackAssociation(mockProfile, mockTrack)
+
+    assertEquals(mockProfile, association.profile)
+    assertEquals(mockTrack, association.track)
+  }
+
+  @Test
+  fun profileTrackAssociation_equalsReturnsTrueForSameData() {
+    val mockProfile = mockk<Profile>()
+    val mockTrack = mockk<Track>()
+    val association1 = ProfileTrackAssociation(mockProfile, mockTrack)
+    val association2 = ProfileTrackAssociation(mockProfile, mockTrack)
+
+    assertEquals(association1, association2)
+  }
+
+  @Test
+  fun profileTrackAssociation_equalsReturnsFalseForDifferentData() {
+    val mockProfile1 = mockk<Profile>()
+    val mockProfile2 = mockk<Profile>()
+    val mockTrack = mockk<Track>()
+    val association1 = ProfileTrackAssociation(mockProfile1, mockTrack)
+    val association2 = ProfileTrackAssociation(mockProfile2, mockTrack)
+
+    assertNotEquals(association1, association2)
+  }
+
+  @Test
+  fun profileTrackAssociation_hashCodeIsConsistent() {
+    val mockProfile = mockk<Profile>()
+    val mockTrack = mockk<Track>()
+    val association = ProfileTrackAssociation(mockProfile, mockTrack)
+
+    val initialHashCode = association.hashCode()
+    assertEquals(initialHashCode, association.hashCode())
   }
 }
