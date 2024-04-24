@@ -231,7 +231,7 @@ class TrackListViewModelTest {
   fun testSkipBackwardWhenNotLooping() = run {
     viewModel.selectTrack(viewModel.uiState.value.tracks[0])
     viewModel.skipBackward()
-    assertNull(viewModel.uiState.value.selectedTrack)
+     assertNull(viewModel.uiState.value.selectedTrack)
   }
 
   @Test
