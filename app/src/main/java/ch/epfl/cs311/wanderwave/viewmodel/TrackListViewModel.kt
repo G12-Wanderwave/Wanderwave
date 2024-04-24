@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepositoryImpl
@@ -28,7 +27,6 @@ constructor(
   init {
     observeTracks()
     spotifyController.setOnTrackEndCallback { skipForward() }
-    Log.d("TrackListViewModel", "Initialized")
   }
 
   private fun observeTracks() {
@@ -138,15 +136,15 @@ constructor(
    */
   private fun skip(dir: Int) {
     if (_uiState.value.selectedTrack != null && (dir == 1 || dir == -1)) {
-      _uiState.value.tracks.indexOf(_uiState.value.selectedTrack).let { it: Int ->
+      _uiState.value.queue.indexOf(_uiState.value.selectedTrack).let { it: Int ->
         var next = it + dir
         when (_uiState.value.loopMode) {
           LoopMode.ONE -> next = it
-          LoopMode.ALL -> next = Math.floorMod((it + dir), _uiState.value.tracks.size)
+          LoopMode.ALL -> next = Math.floorMod((it + dir), _uiState.value.queue.size)
           else -> {}
         }
-        if (next >= 0 && next < _uiState.value.tracks.size) {
-          selectTrack(_uiState.value.tracks[next])
+        if (next >= 0 && next < _uiState.value.queue.size) {
+          selectTrack(_uiState.value.queue[next])
         } else {
           pause()
           _uiState.value = _uiState.value.copy(selectedTrack = null)
