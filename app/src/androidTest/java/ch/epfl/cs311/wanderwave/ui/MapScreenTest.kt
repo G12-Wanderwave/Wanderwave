@@ -7,6 +7,7 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Looper
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
@@ -15,6 +16,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import com.google.android.gms.maps.LocationSource
@@ -44,6 +46,7 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   @get:Rule val mockkRule = MockKRule(this)
 
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
+  @RelaxedMockK private lateinit var mockNavController: NavHostController
 
   @RelaxedMockK private lateinit var mockLocationSource: LocationSource
   @RelaxedMockK private lateinit var mockMapViewModel: MapViewModel
@@ -84,6 +87,8 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
                 )))
 
     mockMapViewModel = MapViewModel(mockLocationSource, mockBeaconConnection)
+    every { mockNavController.navigate(any<String>()) } returns Unit
+    mockNavigationActions = NavigationActions(mockNavController)
 
     composeTestRule.setContent { MapScreen(mockNavigationActions, mockMapViewModel) }
 
@@ -137,5 +142,11 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
       circularProgressIndicator { assertIsNotDisplayed() } // This line is the difference
       assertIsDisplayed()
     }
+  }
+
+  @Test
+  fun canNavigateToBeaconScreen() = run {
+    mockNavigationActions.navigateToBeacon("abc")
+    verify { mockNavController.navigate("${Route.BEACON.routeString}/abc") }
   }
 }
