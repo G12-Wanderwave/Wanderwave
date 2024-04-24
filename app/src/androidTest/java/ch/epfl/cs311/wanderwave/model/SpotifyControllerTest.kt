@@ -35,7 +35,6 @@ import junit.framework.TestCase.assertTrue
 import kotlin.Exception
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -805,14 +804,13 @@ class SpotifyControllerTest {
 
   @Test
   fun testStartPlaybackTimerCancellation() = runBlocking {
-      // Start the playback timer
-      spotifyController.startPlaybackTimer(3000) // 3 seconds
+    // Start the playback timer
+    spotifyController.startPlaybackTimer(3000) // 3 seconds
 
-      // Assert that initial timer is running
-      assertNotNull(spotifyController.playbackTimer)
+    // Assert that initial timer is running
+    assertNotNull(spotifyController.playbackTimer)
 
-      // Cancel the timer
-      spotifyController.playbackTimer?.cancel()
+    // Cancel the timer
+    spotifyController.playbackTimer?.cancel()
   }
-
 }
