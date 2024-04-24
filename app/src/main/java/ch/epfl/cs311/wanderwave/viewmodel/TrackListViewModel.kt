@@ -31,7 +31,7 @@ constructor(
   private fun observeTracks() {
     CoroutineScope(Dispatchers.IO).launch {
       repository.getAll().collect { tracks ->
-        _uiState.value = UiState(tracks = tracks, loading = false)
+        _uiState.value = UiState(tracks = tracks, queue = tracks, loading = false)
       }
     }
   }
@@ -152,8 +152,14 @@ constructor(
     skip(-1)
   }
 
+  /** Toggles the shuffle state of the queue. */
   fun toggleShuffle() {
-    _uiState.value = _uiState.value.copy(shuffleOn = !_uiState.value.shuffleOn)
+    if (_uiState.value.isShuffled) {
+      _uiState.value = _uiState.value.copy(queue = _uiState.value.tracks, isShuffled = false)
+    } else {
+      _uiState.value =
+          _uiState.value.copy(queue = _uiState.value.tracks.shuffled(), isShuffled = true)
+    }
   }
 
   fun toggleRepeat() {
@@ -167,15 +173,16 @@ constructor(
 
   data class UiState(
       val tracks: List<Track> = listOf(),
+      val queue: List<Track> = listOf(),
       val loading: Boolean = false,
       val message: String? = null,
       val selectedTrack: Track? = null,
       val pausedTrack: Track? = null,
       val isPlaying: Boolean = false,
+      val isShuffled: Boolean = false,
       val currentMillis: Int = 0,
       val expanded: Boolean = false,
       val progress: Float = 0f,
-      val shuffleOn: Boolean = false,
       val repeatMode: RepeatMode = RepeatMode.NONE
   )
 }
