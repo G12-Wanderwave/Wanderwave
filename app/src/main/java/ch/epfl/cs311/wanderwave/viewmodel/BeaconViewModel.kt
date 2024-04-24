@@ -21,13 +21,7 @@ class BeaconViewModel @Inject constructor(private val beaconRepository: BeaconRe
   val uiState: StateFlow<UIState> = _uiState
 
   init {
-    val sampleBeacon =
-        Beacon(
-            id = "Sample ID",
-            location = Location(0.0, 0.0, "Sample Location"),
-            tracks = listOf(Track("Sample Track ID", "Sample Track Title", "Sample Artist Name")))
-
-    _uiState.value = UIState(beacon = sampleBeacon, isLoading = false)
+    _uiState.value = UIState(beacon = null, isLoading = true)
   }
 
   fun getBeaconById(id: String) {
