@@ -160,6 +160,18 @@ constructor(
       _uiState.value =
           _uiState.value.copy(queue = _uiState.value.tracks.shuffled(), isShuffled = true)
     }
+    
+  fun toggleShuffle() {
+    _uiState.value = _uiState.value.copy(shuffleOn = !_uiState.value.shuffleOn)
+  }
+
+  fun toggleRepeat() {
+    _uiState.value =
+        when (_uiState.value.repeatMode) {
+          RepeatMode.NONE -> _uiState.value.copy(repeatMode = RepeatMode.ALL)
+          RepeatMode.ALL -> _uiState.value.copy(repeatMode = RepeatMode.ONE)
+          else -> _uiState.value.copy(repeatMode = RepeatMode.NONE)
+        }
   }
 
   data class UiState(
@@ -173,6 +185,14 @@ constructor(
       val isShuffled: Boolean = false,
       val currentMillis: Int = 0,
       val expanded: Boolean = false,
-      val progress: Float = 0f
+      val progress: Float = 0f,
+      val shuffleOn: Boolean = false,
+      val repeatMode: RepeatMode = RepeatMode.NONE
   )
+}
+
+enum class RepeatMode {
+  NONE,
+  ONE,
+  ALL
 }
