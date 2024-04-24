@@ -19,9 +19,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.navigation.Route
-import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
+import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
@@ -125,7 +124,10 @@ fun moveCamera(
 @Composable
 fun DisplayBeacons(navigationActions: NavigationActions, beacons: List<Beacon>) {
   // Create each beacon from the list
-  beacons.forEach() { BeaconMapMarker(it.location.toLatLng(), title = it.id, onClick = {
-    navigationActions.navigateToBeacon(it.id)
-  }) }
+  beacons.forEach() {
+    BeaconMapMarker(
+        it.location.toLatLng(),
+        title = it.id,
+        onClick = { navigationActions.navigateToBeacon(it.id) })
+  }
 }

@@ -37,8 +37,8 @@ import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
+import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
 import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
@@ -61,9 +61,7 @@ fun BeaconScreen(
 
   val uiState = viewModel.uiState.collectAsState().value
   Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp),
+      modifier = Modifier.fillMaxSize().padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         if (!uiState.isLoading) {
           BeaconScreen(beacon = uiState.beacon!!)
@@ -93,10 +91,7 @@ private fun BeaconScreenPreview() {
 @Composable
 private fun BeaconScreen(beacon: Beacon) {
   Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(8.dp)
-        .testTag("beaconScreen"),
+      modifier = Modifier.fillMaxSize().padding(8.dp).testTag("beaconScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
         SongList(beacon)
@@ -123,12 +118,11 @@ fun BeaconInformation(location: Location) {
                 CameraPosition(LatLng(location.latitude, location.longitude), 15f, 0f, 0f)),
         locationSource = null,
         modifier =
-        Modifier
-          .fillMaxWidth()
-          .aspectRatio(4f / 3)
-          .padding(4.dp)
-          .clip(RoundedCornerShape(8.dp))
-          .testTag("beaconMap"),
+            Modifier.fillMaxWidth()
+                .aspectRatio(4f / 3)
+                .padding(4.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .testTag("beaconMap"),
         controlsEnabled = false,
     ) {
       BeaconMapMarker(location.toLatLng(), location.name)
@@ -155,18 +149,12 @@ internal fun TrackItem(track: Track) {
               CardDefaults.cardColors().contentColor,
               CardDefaults.cardColors().disabledContainerColor,
               CardDefaults.cardColors().disabledContentColor),
-      modifier = Modifier
-        .height(80.dp)
-        .fillMaxWidth()
-        .padding(4.dp)
-        .testTag("trackItem")) {
+      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
           Box(
-              modifier = Modifier
-                .fillMaxHeight()
-                .aspectRatio(1f),
+              modifier = Modifier.fillMaxHeight().aspectRatio(1f),
               contentAlignment = Alignment.Center) {
                 Image(
                     imageVector = Icons.Default.PlayArrow,

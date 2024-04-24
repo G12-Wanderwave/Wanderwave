@@ -8,6 +8,18 @@ import com.google.maps.android.compose.MarkerState
 
 @Composable
 @GoogleMapComposable
-fun BeaconMapMarker(position: LatLng, title: String? = null, snippet: String? = null, onClick: () -> Unit = {}) {
-  Marker(state = MarkerState(position = position), title = title, snippet = snippet, onClick = { onClick(); true })
+fun BeaconMapMarker(
+    position: LatLng,
+    title: String? = null,
+    snippet: String? = null,
+    onClick: () -> Unit = {}
+) {
+  Marker(
+      state = MarkerState(position = position),
+      title = title,
+      snippet = snippet,
+      onClick = {
+        onClick()
+        true
+      })
 }
