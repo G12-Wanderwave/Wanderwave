@@ -184,7 +184,7 @@ fun PlayerControlRowComponent(viewModel: TrackListViewModel, uiState: TrackListV
 fun ShuffleButton(viewModel: TrackListViewModel, uiState: TrackListViewModel.UiState) {
   IconButton(
       onClick = { viewModel.toggleShuffle() }, modifier = Modifier.testTag("toggleShuffle")) {
-        if (!uiState.shuffleOn) {
+        if (!uiState.isShuffled) {
           Icon(
               painter = painterResource(id = R.drawable.shuffle_off_icon),
               contentDescription = "",
