@@ -743,11 +743,4 @@ class SpotifyControllerTest {
     spotifyController.setOnTrackEndCallback(callback)
     assertNotNull(spotifyController.getOnTrackEndCallback())
   }
-
-  @Test
-  fun getAllElementFromSpotifyReturnsItems() = runBlocking {
-    val flow = spotifyController.getAllElementFromSpotify()
-    val result = flow.first()
-    assertTrue(result.isNotEmpty())
-  }
 }

@@ -1,7 +1,6 @@
 package ch.epfl.cs311.wanderwave.model.spotify
 
 import android.content.Context
-import android.util.Log
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.spotify.android.appremote.api.ConnectionParams
@@ -98,7 +97,13 @@ class SpotifyController(private val context: Context) {
     appRemote?.let { SpotifyAppRemote.disconnect(it) }
   }
 
-  fun playTrack(track: Track): Flow<Boolean> {
+  /**
+   * Play a track on Spotify.
+   *
+   * @param track the track to play
+   * @return a Flow of Boolean which is true if the operation was successful, false otherwise.
+   */
+  fun playTrack(track: Track): Flow<Boolean> { // TODO: Coverage
     return callbackFlow {
       appRemote?.let { remote ->
         remote.playerApi
@@ -115,7 +120,7 @@ class SpotifyController(private val context: Context) {
     }
   }
 
-  fun startPlaybackTimer(trackDuration: Long) {
+  fun startPlaybackTimer(trackDuration: Long) { // TODO: Coverage
     stopPlaybackTimer() // Ensure no previous timers are running
     playbackTimer =
         CoroutineScope(Dispatchers.IO).launch {
@@ -126,10 +131,6 @@ class SpotifyController(private val context: Context) {
             elapsedTime += checkInterval
             appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
               if ((trackDuration - playerState.playbackPosition) <= 1000) {
-                Log.d("SpotifyController", "Track ended")
-                Log.d("SpotifyController", "TrackDuration: $trackDuration")
-                Log.d("SpotifyController", "PlaybackPosition: ${playerState.playbackPosition}")
-                Log.d("SpotifyController", "Elapsed Time: $elapsedTime")
                 onTrackEndCallback?.invoke()
                 stopPlaybackTimer()
               }
@@ -173,8 +174,7 @@ class SpotifyController(private val context: Context) {
     }
   }
 
-  // Detect when currently playing song has ended (or is going to end) and run onTrackEndCallback
-  fun onPlayerStateUpdate() {
+  fun onPlayerStateUpdate() { // TODO: Coverage
     appRemote?.let {
       it.playerApi.subscribeToPlayerState().setEventCallback { playerState: PlayerState ->
         if (playerState.track != null) {
