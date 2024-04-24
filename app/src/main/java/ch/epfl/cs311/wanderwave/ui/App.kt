@@ -32,6 +32,7 @@ import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
 import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
+import ch.epfl.cs311.wanderwave.ui.screens.ProfileViewOnlyScreen
 import ch.epfl.cs311.wanderwave.ui.screens.SelectSongScreen
 import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
@@ -93,9 +94,12 @@ fun AppScaffold(navController: NavHostController) {
                 composable(Route.EDIT_PROFILE.routeString) {
                   EditProfileScreen(navActions, viewModel)
                 }
-                composable(Route.SELECT_SONG.routeString) {
+              composable(Route.SELECT_SONG.routeString) {
                   SelectSongScreen(navActions, viewModel)
-                }
+              }
+              composable("${Route.VIEW_PROFILE.routeString}/{profileId}") {
+                  ProfileViewOnlyScreen(it.arguments?.getString("profileId") ?: "",navActions)
+              }
                 composable("${Route.BEACON.routeString}/{beaconId}") {
                   BeaconScreen(it.arguments?.getString("beaconId") ?: "", navActions)
                 }

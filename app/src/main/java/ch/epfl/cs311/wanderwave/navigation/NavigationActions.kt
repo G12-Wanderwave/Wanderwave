@@ -16,6 +16,7 @@ enum class Route(val routeString: String, val showBottomBar: Boolean) {
   PROFILE("profile", false),
   EDIT_PROFILE("editprofile", false),
   BEACON("beacon", false),
+  VIEW_PROFILE("viewProfile", false),
   SELECT_SONG("selectsong", false);
 
   companion object {

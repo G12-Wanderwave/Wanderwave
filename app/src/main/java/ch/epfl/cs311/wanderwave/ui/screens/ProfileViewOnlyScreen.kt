@@ -5,9 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,10 +21,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.ui.components.profile.ClickableIcon
 import ch.epfl.cs311.wanderwave.ui.components.profile.SongsListDisplay
 import ch.epfl.cs311.wanderwave.ui.components.profile.VisitCard
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.SongList
 
 /**
@@ -33,11 +41,29 @@ import ch.epfl.cs311.wanderwave.viewmodel.SongList
  * @last update 2.0
  */
 @Composable
-fun ProfileViewOnlyScreen(profile: Profile) {
+fun ProfileViewOnlyScreen(profileId: String, navigationActions: NavigationActions) {
+
+    val viewModel: ProfileViewModel = hiltViewModel()
+    LaunchedEffect(profileId) {
+        println(profileId)
+        if (profileId != null) {
+            viewModel.getProfileByID(profileId)
+        }
+    }
+
+    val uiState = viewModel.uiState.collectAsState().value
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(modifier = Modifier.fillMaxWidth()) { VisitCard(Modifier, profile) }
+        Box(modifier = Modifier.fillMaxWidth()) {
+            ClickableIcon(
+                modifier = Modifier.align(Alignment.CenterEnd),
+                icon = Icons.Default.ArrowBack,
+                onClick = {
+                    navigationActions?.goBack()
+                })
+            VisitCard(Modifier, uiState.profile!!)
+        }
         val mockSongLists =
             listOf(
                 SongList(
@@ -72,17 +98,17 @@ fun showListSong(songLists: List<SongList>) {
   SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
 }
 
-@Preview
-@Composable
-fun ProfileViewOnlyScreenPreview() {
-  ProfileViewOnlyScreen(
-      Profile(
-          "My FirstName",
-          "My LastName",
-          "My Description",
-          0,
-          true,
-          null,
-          "My Firebase UID",
-          "My Spotify UID"))
-}
+//@Preview
+//@Composable
+//fun ProfileViewOnlyScreenPreview() {
+//  ProfileViewOnlyScreen(
+//      Profile(
+//          "My FirstName",
+//          "My LastName",
+//          "My Description",
+//          0,
+//          true,
+//          null,
+//          "My Firebase UID",
+//          "My Spotify UID"))
+//}

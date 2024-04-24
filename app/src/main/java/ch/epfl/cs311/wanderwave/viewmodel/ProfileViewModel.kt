@@ -1,6 +1,8 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
@@ -53,6 +55,9 @@ constructor(
 
   private val _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
+
+  private var _uiState = MutableStateFlow(ProfileViewModel.UIState())
+  val uiState: StateFlow<ProfileViewModel.UIState> = _uiState
 
   fun createSpecificSongList(listType: String) {
     val listName =
@@ -160,4 +165,18 @@ constructor(
       }
     }
   }
+
+  //TODO: See agaim, i just adapt what was in BeaconViewModel
+  fun getProfileByID(id: String) {
+    viewModelScope.launch {
+      profileRepository.getItem(id).collect { fetchedProfile ->
+        _uiState.value = ProfileViewModel.UIState(profile = fetchedProfile, isLoading = false)
+      }
+    }
+  }
+  data class UIState(
+    val profile: Profile? = null,
+    val isLoading: Boolean = true,
+    val error: String? = null
+  )
 }
