@@ -1,9 +1,14 @@
 package ch.epfl.cs311.wanderwave.model
 
+import android.content.Context
 import android.util.Log
+import androidx.room.Room
+import androidx.test.core.app.ApplicationProvider
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
+import ch.epfl.cs311.wanderwave.model.localDb.PlaceHolderEntity
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.RelaxedMockK
@@ -59,6 +64,31 @@ public class BeaconConnectionTest {
 
     // Call the function under test
     beaconConnection.addItem(beacon)
+
+    // No verification is needed for interactions with the real object
+  }
+
+  @Test
+  fun testGetAll() = runBlocking {
+    // Place holder test before we merge with the main for coverage
+    val retrievedBeacons = beaconConnection.getAll().first()
+
+    // Assert nothing
+  }
+
+  @Test
+  fun testAddTrackToBeacon() {
+    // Mock data
+    val beacon =
+        Beacon(
+            id = "testBeacon",
+            location = Location(1.0, 1.0, "Test Location"),
+            tracks = listOf(Track("testTrack", "Test Title", "Test Artist")))
+
+    val track = Track("testTrack2", "Test Title 2", "Test Artist 2")
+
+    // Call the function under test
+    beaconConnection.addTrackToBeacon(beacon.id, track, {})
 
     // No verification is needed for interactions with the real object
   }
@@ -146,6 +176,17 @@ public class BeaconConnectionTest {
       // Assert that the flow didn't emit anything within the timeout
       assert(valueEmitted.not()) { "Flow emitted unexpected value" }
     }
+  }
+
+  // TODO : To be deleted after a real entry is added to the database
+  private lateinit var db: AppDatabase
+
+  @Test
+  fun createDb() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
+
+    val placeHolderEntity = PlaceHolderEntity("1", 0.5, 0.5)
   }
 
   @After

@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.model.remote
 import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -16,7 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class BeaconConnection(private val database: FirebaseFirestore? = null) :
-    FirebaseConnection<Beacon, Beacon>() {
+    FirebaseConnection<Beacon, Beacon>(), BeaconRepository {
 
   override val collectionName: String = "beacons"
 
@@ -97,6 +98,23 @@ class BeaconConnection(private val database: FirebaseFirestore? = null) :
     return dataFlow.filterNotNull()
   }
 
+  override fun getAll(): Flow<List<Beacon>> {
+    val dataFlow = MutableStateFlow<List<Beacon>?>(null)
+
+    db.collection(collectionName)
+        .get()
+        .addOnSuccessListener { documents ->
+          val beacons = documents.mapNotNull { documentToItem(it) }
+          dataFlow.value = beacons
+        }
+        .addOnFailureListener { e ->
+          dataFlow.value = null
+          Log.e("Firestore", "Error getting documents: ", e)
+        }
+
+    return dataFlow.filterNotNull()
+  }
+
   override fun itemToMap(beacon: Beacon): Map<String, Any> {
     val beaconMap: HashMap<String, Any> =
         hashMapOf(
@@ -109,7 +127,7 @@ class BeaconConnection(private val database: FirebaseFirestore? = null) :
     return beaconMap
   }
 
-  fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
+  override fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
     val beaconRef = db.collection("beacons").document(beaconId)
 
     db.runTransaction { transaction ->

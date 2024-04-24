@@ -1,8 +1,9 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.repository.TrackRepositoryImpl
+import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -17,8 +18,8 @@ import kotlinx.coroutines.launch
 class TrackListViewModel
 @Inject
 constructor(
-    private val repository: TrackRepositoryImpl,
-    private val spotifyController: SpotifyController
+    private val spotifyController: SpotifyController,
+    private val trackRepository: TrackRepository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(UiState(loading = true))
@@ -29,10 +30,11 @@ constructor(
   }
 
   private fun observeTracks() {
-    CoroutineScope(Dispatchers.IO).launch {
-      repository.getAll().collect { tracks ->
-        _uiState.value = UiState(tracks = tracks, loading = false)
+    viewModelScope.launch {
+      trackRepository.getAll().collect {
+        _uiState.value = _uiState.value.copy(tracks = it, loading = false)
       }
+      // deal with the flow
     }
   }
 

@@ -20,11 +20,20 @@ abstract class FirebaseConnection<T, U> {
       FirebaseFirestore.getInstance().apply {
         firestoreSettings =
             FirebaseFirestoreSettings.Builder()
-                .setLocalCacheSettings(memoryCacheSettings {}) // Use memory cache
+                .setLocalCacheSettings(memoryCacheSettings {}) // Memory cache settings
                 .setLocalCacheSettings(
-                    persistentCacheSettings {}) // Use persistent disk cache (default)
+                    persistentCacheSettings {
+                      FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED
+                    } // Persistence cache settings (default)
+                    )
                 .build()
       }
+
+  // If you want to use data exclusively from the local cache, you can use the following code:
+  // db.disableNetwork().addOnCompleteListener {
+  //   // Do offline things
+  //   // ...
+  // }
 
   abstract fun documentToItem(document: DocumentSnapshot): T?
 
@@ -61,12 +70,12 @@ abstract class FirebaseConnection<T, U> {
         .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully updated!") }
   }
 
-  open fun deleteItem(item: T) {
+  fun deleteItem(item: T) {
     val itemId = getItemId(item)
     deleteItem(itemId)
   }
 
-  open fun deleteItem(itemId: String) {
+  fun deleteItem(itemId: String) {
     db.collection(collectionName)
         .document(itemId)
         .delete()
@@ -74,7 +83,7 @@ abstract class FirebaseConnection<T, U> {
         .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully deleted!") }
   }
 
-  open fun getItem(item: T): Flow<T> = getItem(getItemId(item))
+  fun getItem(item: T): Flow<T> = getItem(getItemId(item))
 
   open fun getItem(itemId: String): Flow<T> {
     val dataFlow = MutableStateFlow<T?>(null)
