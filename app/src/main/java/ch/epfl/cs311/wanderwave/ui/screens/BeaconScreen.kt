@@ -2,7 +2,7 @@ package ch.epfl.cs311.wanderwave.ui.screens
 
 import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -50,7 +52,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
-import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
+import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
 import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
@@ -72,10 +74,12 @@ fun BeaconScreen(
 
   val uiState = viewModel.uiState.collectAsState().value
   Column(
-      modifier = Modifier.fillMaxSize().padding(16.dp),
+      modifier = Modifier
+          .fillMaxSize()
+          .padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         if (!uiState.isLoading) {
-          BeaconScreen(beacon = uiState.beacon!!, viewModel::addTrackToBeacon)
+          BeaconScreen(beacon = uiState.beacon!!,navigationActions = navigationActions)
         } else {
           LoadingScreen()
         }
@@ -92,7 +96,7 @@ private fun BeaconScreenPreview() {
           profileAndTrack =
               listOf(
                   ProfileTrackAssociation(Profile("e","a","a",0,false,null,"1","2"),
-                      Track("a", "Never gonna give you up", "Rick Astley")),
+                      Track("a", "Never gonna let you mn,mn,mn,mn,mn,mn,nmn,m", "Rick Astley")),
 //                  Track("b", "Take on me", "A-ha"),
 //                  Track("c", "Africa", "Toto"),
               ),
@@ -101,12 +105,12 @@ private fun BeaconScreenPreview() {
 }
 
 @Composable
-private fun BeaconScreen(
-    beacon: Beacon,
-    addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit = { _, _, _ -> }
-) {
+private fun BeaconScreen(beacon: Beacon, navigationActions: NavigationActions? = null){
   Column(
-      modifier = Modifier.fillMaxSize().padding(8.dp).testTag("beaconScreen"),
+      modifier = Modifier
+          .fillMaxSize()
+          .padding(8.dp)
+          .testTag("beaconScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
         SongList(beacon)
@@ -133,11 +137,12 @@ fun BeaconInformation(location: Location) {
                 CameraPosition(LatLng(location.latitude, location.longitude), 15f, 0f, 0f)),
         locationSource = null,
         modifier =
-            Modifier.fillMaxWidth()
-                .aspectRatio(4f / 3)
-                .padding(4.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .testTag("beaconMap"),
+        Modifier
+            .fillMaxWidth()
+            .aspectRatio(4f / 3)
+            .padding(4.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .testTag("beaconMap"),
         controlsEnabled = false,
     ) {
       BeaconMapMarker(location.toLatLng(), location.name)
@@ -145,20 +150,18 @@ fun BeaconInformation(location: Location) {
   }
 }
 
-
-    @Composable
-fun SongList(beacon: Beacon) {
+@Composable
+fun SongList(beacon: Beacon, navigationActions: NavigationActions? = null) {
   HorizontalDivider()
   Text(
       text = stringResource(R.string.beaconTracksTitle),
       style = MaterialTheme.typography.displayMedium,
       modifier = Modifier.testTag("beaconTracksTitle"))
   LazyColumn { items(beacon.profileAndTrack) { TrackItem(it) } }
-//>>>>>>> 2d18a03 (Make the code compile with the ProfileTrackAssociation)
 }
 
 @Composable
-fun TrackItem(profileAndTrack: ProfileTrackAssociation) {
+internal fun TrackItem(profileAndTrack: ProfileTrackAssociation, navigationActions: NavigationActions? = null) {
 
     //TODO: recover the track and profile from firebase : val track =
   Card(
@@ -168,12 +171,18 @@ fun TrackItem(profileAndTrack: ProfileTrackAssociation) {
               CardDefaults.cardColors().contentColor,
               CardDefaults.cardColors().disabledContainerColor,
               CardDefaults.cardColors().disabledContentColor),
-      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem")) {
+      modifier = Modifier
+          .height(80.dp)
+          .fillMaxWidth()
+          .padding(4.dp)
+          .testTag("trackItem")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
           Box(
-              modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+              modifier = Modifier
+                  .fillMaxHeight()
+                  .aspectRatio(1f),
               contentAlignment = Alignment.Center) {
                 Image(
                     imageVector = Icons.Default.PlayArrow,
@@ -181,16 +190,35 @@ fun TrackItem(profileAndTrack: ProfileTrackAssociation) {
                     modifier = Modifier.fillMaxSize(.8f),
                 )
               }
-          Column(modifier = Modifier.padding(8.dp)) {
-            Text(
-                text = profileAndTrack.track.title,
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.titleMedium)
-            Text(
-                text = profileAndTrack.track.artist,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium,
-            )
+          Row( modifier = Modifier
+              .padding(0.dp)
+              .weight(3f)
+          ) {
+              Column(
+                  modifier = Modifier
+                      .padding(8.dp)
+                      .weight(1f)
+                      .horizontalScroll(rememberScrollState())
+              ) {
+                  Text(
+                      text = profileAndTrack.track.title,
+                      color = MaterialTheme.colorScheme.onSurface,
+                      style = MaterialTheme.typography.titleMedium
+                  )
+                  Text(
+                      text = profileAndTrack.track.artist,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant,
+                      style = MaterialTheme.typography.bodyMedium
+                  )
+              }
+              SelectImage(
+                  modifier = Modifier
+                      .size(width = 150.dp, height = 100.dp),
+                  profile = profileAndTrack.profile,
+                  onClick = {
+                      navigationActions?.navigateToBeacon(profileAndTrack.profile.firebaseUid)
+                  }
+                  )
           }
         }
       }

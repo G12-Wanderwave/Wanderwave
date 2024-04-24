@@ -50,6 +50,7 @@ fun ProfileViewOnlyScreen(profileId: String, navigationActions: NavigationAction
   }
 
   val uiState = viewModel.uiState.collectAsState().value
+
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
@@ -59,6 +60,7 @@ fun ProfileViewOnlyScreen(profileId: String, navigationActions: NavigationAction
               icon = Icons.Default.ArrowBack,
               onClick = { navigationActions?.goBack() })
           VisitCard(Modifier, uiState.profile!!)
+
         val mockSongLists =
             listOf(
                 SongList(

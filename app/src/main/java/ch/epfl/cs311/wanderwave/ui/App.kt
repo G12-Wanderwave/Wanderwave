@@ -93,7 +93,7 @@ fun AppScaffold(navController: NavHostController) {
                 composable(Route.EDIT_PROFILE.routeString) {
                   EditProfileScreen(navActions, viewModel)
                 }
-                composable(Route.SELECT_SONG.routeString) {
+              composable(Route.SELECT_SONG.routeString) {
                   SelectSongScreen(navActions, viewModel)
                 }
                 composable("${Route.VIEW_PROFILE.routeString}/{profileId}") {
