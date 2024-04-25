@@ -1,7 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
@@ -9,6 +8,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
@@ -19,23 +20,42 @@ class TrackListViewModel
 @Inject
 constructor(
     private val spotifyController: SpotifyController,
-    private val trackRepository: TrackRepository
+    private val repository: TrackRepository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(UiState(loading = true))
   val uiState: StateFlow<UiState> = _uiState
+
+  private var _searchQuery = MutableStateFlow("")
 
   init {
     observeTracks()
   }
 
   private fun observeTracks() {
-    viewModelScope.launch {
-      trackRepository.getAll().collect {
-        _uiState.value = _uiState.value.copy(tracks = it, loading = false)
+    CoroutineScope(Dispatchers.IO).launch {
+      repository.getAll().collect { tracks ->
+        _uiState.value = UiState(tracks = tracks.filter { matchesSearchQuery(it) }, loading = false)
       }
       // deal with the flow
     }
+  }
+
+  private fun matchesSearchQuery(track: Track): Boolean {
+    return track.title.contains(_searchQuery.value, ignoreCase = true) ||
+        track.artist.contains(_searchQuery.value, ignoreCase = true)
+  }
+
+  private var searchJob: Job? = null
+
+  fun setSearchQuery(query: String) {
+    searchJob?.cancel()
+    searchJob =
+        CoroutineScope(Dispatchers.IO).launch {
+          delay(300) // Debounce time in milliseconds
+          _searchQuery.value = query
+          observeTracks() // Re-filter tracks when search query changes
+        }
   }
 
   /**

@@ -7,9 +7,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -24,23 +29,39 @@ fun TrackListScreen(
     viewModel: TrackListViewModel = hiltViewModel()
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+  var searchQuery by remember { mutableStateOf("") }
 
   LaunchedEffect(uiState) { uiState.message?.let { message -> showMessage(message) } }
 
   Surface(modifier = Modifier.fillMaxSize()) {
-    LazyColumn(modifier = Modifier.testTag("trackListScreen")) {
-      items(uiState.tracks.size) { index ->
-        val track = uiState.tracks[index]
+    Column {
+      TextField(
+          value = searchQuery,
+          onValueChange = { query ->
+            searchQuery = query
+            viewModel.setSearchQuery(query)
+          },
+          label = { Text("Search Tracks") },
+          modifier =
+              Modifier.fillMaxWidth()
+                  .padding(16.dp)
+                  .testTag("searchBar") // Adding a test tag for the search bar
+          )
+      LazyColumn(
+          modifier = Modifier.testTag("trackListScreen")) { // Maintaining the LazyColumn test tag
+            items(uiState.tracks.size) { index ->
+              val track = uiState.tracks[index]
 
-        Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
-          TrackListItem(
-              track = track,
-              selected = track == uiState.selectedTrack,
-              onClick = { viewModel.selectTrack(track) })
+              Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
+                TrackListItem(
+                    track = track,
+                    selected = track == uiState.selectedTrack,
+                    onClick = { viewModel.selectTrack(track) })
 
-          Divider()
-        }
-      }
+                Divider()
+              }
+            }
+          }
     }
   }
 }
