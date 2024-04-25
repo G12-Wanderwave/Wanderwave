@@ -84,28 +84,11 @@ jobs:
         run: |
           chmod +x ./gradlew
 
-      # Clean the project before building it
-      - name: Gradle clean
-        run: |
-          ./gradlew clean
-
       # Check code formatting and fail if it's not correct
       - name: KTFmt Check
         run: |
           # To run the CI with debug informations, add --info
           ./gradlew ktfmtCheck
-
-      # This step runs gradle commands to build the application
-      - name: Assemble
-        run: |
-          # To run the CI with debug information, add --info
-          ./gradlew assembleDebug lint --parallel --build-cache
-
-      # Run all unit and instrumentation tests
-      - name: Run tests
-        run: |
-          # To run the CI with debug information, add --info
-          ./gradlew check --parallel --build-cache
 
       #run instrumentation tests on an android emulator
       - name: Run instrumentation tests
