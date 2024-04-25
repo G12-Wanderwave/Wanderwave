@@ -62,9 +62,9 @@ fun BeaconScreen(
     viewModel: BeaconViewModel = hiltViewModel()
 ) {
   LaunchedEffect(beaconId) {
-    println(beaconId)
     if (beaconId != null) {
       viewModel.getBeaconById(beaconId)
+      Log.d("BeaconScreen", "uiState : ${viewModel.uiState.value}")
     }
   }
 
@@ -73,7 +73,8 @@ fun BeaconScreen(
       modifier = Modifier.fillMaxSize().padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         if (!uiState.isLoading) {
-          BeaconScreen(beacon = uiState.beacon!!)
+          Log.d("BeaconScreen", "uiState : ${uiState}")
+          BeaconScreen(beacon = uiState.beacon!!,viewModel)
         } else {
           LoadingScreen()
         }
@@ -152,7 +153,7 @@ fun SongList(beacon: Beacon, viewModel: BeaconViewModel) {
           Text(
               text = stringResource(R.string.beaconTracksTitle),
               style = MaterialTheme.typography.headlineMedium,
-              modifier = Modifier)
+              modifier = Modifier.testTag("beaconTracksTitle"))
           IconButton(onClick = { showDialog = true }) { // Toggle dialog visibility
             Icon(
                 imageVector = Icons.Filled.Add,
