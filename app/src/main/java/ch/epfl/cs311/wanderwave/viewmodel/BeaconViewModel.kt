@@ -47,7 +47,6 @@ class BeaconViewModel @Inject constructor(private val beaconRepository: BeaconRe
 
   fun getBeaconById(id: String) {
     viewModelScope.launch {
-      Log.d("BeaconViewModel", "Fetching beacon with id: $id")
       beaconRepository.getItem(id).collect { fetchedBeacon ->
         _uiState.value = UIState(beacon = fetchedBeacon, isLoading = false)
       }

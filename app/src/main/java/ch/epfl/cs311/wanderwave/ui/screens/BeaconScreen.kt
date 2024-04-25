@@ -79,7 +79,6 @@ fun BeaconScreen(
   LaunchedEffect(beaconId) {
     if (beaconId != null) {
       viewModel.getBeaconById(beaconId)
-      Log.d("BeaconScreen", "uiState : ${viewModel.uiState.value}")
     }
   }
 
