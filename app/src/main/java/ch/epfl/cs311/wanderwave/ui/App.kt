@@ -84,7 +84,7 @@ fun AppScaffold(navController: NavHostController) {
                 composable(Route.ABOUT.routeString) { AboutScreen(navActions) }
                 composable(Route.MAIN.routeString) { MainPlaceHolder(navActions) }
                 composable(Route.TRACK_LIST.routeString) {
-              //    TrackListScreen(showSnackbar, trackListViewModel)
+                  //    TrackListScreen(showSnackbar, trackListViewModel)
                 }
                 composable(Route.MAP.routeString) { MapScreen(navActions) }
                 composable(Route.PROFILE.routeString) { ProfileScreen(navActions, viewModel) }

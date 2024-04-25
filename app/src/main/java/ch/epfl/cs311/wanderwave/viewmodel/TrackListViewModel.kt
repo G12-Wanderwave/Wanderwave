@@ -5,6 +5,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepositoryImpl
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -13,18 +14,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
-class TrackListViewModel @Inject constructor(
-  private val repository: TrackRepositoryImpl,
-  private val spotifyController: SpotifyController
+class TrackListViewModel
+@Inject
+constructor(
+    private val repository: TrackRepositoryImpl,
+    private val spotifyController: SpotifyController
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(UiState(loading = true))
-    val uiState: StateFlow<UiState> = _uiState
+  private val _uiState = MutableStateFlow(UiState(loading = true))
+  val uiState: StateFlow<UiState> = _uiState
 
-    private var _searchQuery = MutableStateFlow("")
+  private var _searchQuery = MutableStateFlow("")
 
   init {
     observeTracks()
@@ -40,18 +42,19 @@ class TrackListViewModel @Inject constructor(
 
   private fun matchesSearchQuery(track: Track): Boolean {
     return track.title.contains(_searchQuery.value, ignoreCase = true) ||
-            track.artist.contains(_searchQuery.value, ignoreCase = true)
+        track.artist.contains(_searchQuery.value, ignoreCase = true)
   }
 
   private var searchJob: Job? = null
 
   fun setSearchQuery(query: String) {
     searchJob?.cancel()
-    searchJob = CoroutineScope(Dispatchers.IO).launch {
-      delay(3000) // Debounce time in milliseconds
-      _searchQuery.value = query
-      observeTracks() // Re-filter tracks when search query changes
-    }
+    searchJob =
+        CoroutineScope(Dispatchers.IO).launch {
+          delay(300) // Debounce time in milliseconds
+          _searchQuery.value = query
+          observeTracks() // Re-filter tracks when search query changes
+        }
   }
 
   /**
