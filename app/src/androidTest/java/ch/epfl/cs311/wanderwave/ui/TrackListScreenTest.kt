@@ -19,6 +19,7 @@ import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -57,7 +58,7 @@ class TrackListScreenTest : TestCase() {
   }
 
   @Test
-  fun trackListScreenIsDisplayed() = runBlockingTest {
+  fun trackListScreenIsDisplayed() = runTest {
     setupViewModel(true)
     onComposeScreen<TrackListScreen>(composeTestRule) {
       assertIsDisplayed()
@@ -76,7 +77,7 @@ class TrackListScreenTest : TestCase() {
   }
 
   @Test
-  fun tappingTrackSelectssIt() = runBlockingTest {
+  fun tappingTrackSelectssIt() = runTest {
     setupViewModel(true)
 
     onComposeScreen<TrackListScreen>(composeTestRule) {
