@@ -35,6 +35,7 @@ class BeaconScreenTest {
 
   @Before
   fun setup() {
+    // comment
     val beaconId = "UAn8OUadgrUOKYagf8a2"
 
     val beaconFlow =
