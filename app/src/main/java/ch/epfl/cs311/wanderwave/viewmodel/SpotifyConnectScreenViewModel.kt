@@ -14,24 +14,26 @@ class SpotifyConnectScreenViewModel
 @Inject
 constructor(
     private val spotifyController: SpotifyController,
-    val authenticationController: AuthenticationController
+    private val authenticationController: AuthenticationController
 ) : ViewModel() {
 
   private var _uiState = MutableStateFlow(UiState())
   val uiState: StateFlow<UiState> = _uiState
 
   suspend fun connectRemote() {
-    if (!authenticationController.isSignedIn()) {
+    if (!authenticationController.refreshTokenIfNecessary()) {
       _uiState.value = UiState(hasResult = true, success = false)
       return
     }
 
-    val connectResult = spotifyController.connectRemote().single()
-    if (connectResult == SpotifyController.ConnectResult.SUCCESS) {
+    if (spotifyController.isConnected()) {
       _uiState.value = UiState(hasResult = true, success = true)
-    } else {
-      _uiState.value = UiState(hasResult = true, success = false)
+      return
     }
+
+    val connectSuccess =
+        spotifyController.connectRemote().single() == SpotifyController.ConnectResult.SUCCESS
+    _uiState.value = UiState(hasResult = true, success = connectSuccess)
   }
 
   data class UiState(
