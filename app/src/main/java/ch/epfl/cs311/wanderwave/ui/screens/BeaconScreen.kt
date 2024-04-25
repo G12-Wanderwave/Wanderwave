@@ -167,6 +167,7 @@ fun SongList(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit
       modifier = Modifier.testTag("beaconTracksTitle"))
   LazyColumn { items(beacon.profileAndTrack) { TrackItem(it, navigationActions) } }
 
+
   Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
