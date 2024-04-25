@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,20 +12,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class BeaconViewModel @Inject constructor() : ViewModel() {
-  private val beaconConnection = BeaconConnection()
-  private val id = "UAn8OUadgrUOKYagf8a2"
+class BeaconViewModel @Inject constructor(private val beaconRepository: BeaconRepository) :
+    ViewModel() {
 
   private var _uiState = MutableStateFlow(UIState())
   val uiState: StateFlow<UIState> = _uiState
 
   init {
-    getBeaconById(id)
+    _uiState.value = UIState(beacon = null, isLoading = true)
   }
 
   fun getBeaconById(id: String) {
     viewModelScope.launch {
-      beaconConnection.getItem(id).collect { fetchedBeacon ->
+      beaconRepository.getItem(id).collect { fetchedBeacon ->
         _uiState.value = UIState(beacon = fetchedBeacon, isLoading = false)
       }
     }
@@ -33,7 +32,7 @@ class BeaconViewModel @Inject constructor() : ViewModel() {
 
   fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
     // Call the BeaconConnection's addTrackToBeacon with the provided beaconId and track
-    beaconConnection.addTrackToBeacon(beaconId, track, onComplete)
+    beaconRepository.addTrackToBeacon(beaconId, track, onComplete)
   }
 
   data class UIState(
