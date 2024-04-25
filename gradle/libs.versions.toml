@@ -1,7 +1,8 @@
 [versions]
-accompanistPermissions = "0.35.0-alpha"
+accompanistPermissions = "0.34.0"
 coilCompose = "2.6.0"
 agp = "8.3.1"
+firebaseBom = "32.8.0"
 hiltNavigationCompose = "1.2.0"
 googleHiltAndroidCompiler = "2.49"
 hiltAndroidTestingVersion = "2.49"
@@ -29,6 +30,8 @@ mockkAgent = "1.13.10"
 mockkAndroid = "1.13.10"
 mockk = "1.13.10"
 navigationCompose = "2.7.7"
+okhttp = "4.12.0"
+okhttp-coroutines = "1.0"
 playServicesLocation = "21.1.0"
 roomRuntime = "2.6.1"
 secretsGradlePlugin = "2.0.1"
@@ -50,6 +53,10 @@ coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose"
 google-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "googleHiltAndroidCompiler" }
 dagger-hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTestingVersion" }
 dagger-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompilerVersion" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-database = { module = "com.google.firebase:firebase-database", version = "" }
+firebase-firestore = { module = "com.google.firebase:firebase-firestore", version = "" }
+firebase-auth = { module = "com.google.firebase:firebase-auth", version = "" }
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTesting" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
@@ -60,6 +67,8 @@ maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = 
 mockk-agent = { module = "io.mockk:mockk-agent", version.ref = "mockkAgent" }
 mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockkAndroid" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+okhttp-coroutines = { module = "ru.gildor.coroutines:kotlin-coroutines-okhttp", version.ref = "okhttp-coroutines" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
 spotify-auth = { module = "com.spotify.android:auth", version.ref = "auth" }

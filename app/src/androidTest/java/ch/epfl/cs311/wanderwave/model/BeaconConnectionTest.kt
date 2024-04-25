@@ -1,24 +1,24 @@
 package ch.epfl.cs311.wanderwave.model
 
-import android.content.Context
-import android.util.Log
-import androidx.room.Room
-import androidx.test.core.app.ApplicationProvider
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
-import ch.epfl.cs311.wanderwave.model.localDb.PlaceHolderEntity
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
-import io.mockk.MockKAnnotations
-import io.mockk.impl.annotations.RelaxedMockK
+import com.google.android.gms.tasks.OnSuccessListener
+import com.google.android.gms.tasks.Task
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
+import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.junit4.MockKRule
-import kotlin.system.measureTimeMillis
+import io.mockk.mockk
+import io.mockk.verify
+import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
-import kotlinx.coroutines.withTimeoutOrNull
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -28,173 +28,98 @@ public class BeaconConnectionTest {
   @get:Rule val mockkRule = MockKRule(this)
   private lateinit var beaconConnection: BeaconConnection
 
-  @RelaxedMockK private lateinit var beaconConnectionMock: BeaconConnection
+  private lateinit var firestore: FirebaseFirestore
+  private lateinit var documentReference: DocumentReference
+  private lateinit var collectionReference: CollectionReference
+
+  lateinit var beacon: Beacon
 
   @Before
   fun setup() {
-    MockKAnnotations.init(this)
-    beaconConnection = BeaconConnection()
-  }
+    // Create the mocks
+    firestore = mockk()
+    documentReference = mockk<DocumentReference>(relaxed = true)
+    collectionReference = mockk<CollectionReference>(relaxed = true)
 
-  @Test
-  fun testAddAndGetItem() = runBlocking {
-    withTimeout(30000) { // Increase the timeout to 30 seconds
-      val beacon =
-          Beacon(
-              id = "testBeacon",
-              location = Location(1.0, 1.0, "Test Location"),
-              tracks = listOf(Track("testTrack", "Test Title", "Test Artist")))
-
-      beaconConnection.addItemWithId(beacon)
-
-      val retrievedBeacon = beaconConnection.getItem("testBeacon").first()
-      Log.d("Firestore", "$retrievedBeacon $beacon")
-      assert(beacon == retrievedBeacon)
-    }
-  }
-
-  @Test
-  fun testAddItem() = runBlocking {
     // Mock data
-    val beacon =
+    beacon =
         Beacon(
             id = "testBeacon",
             location = Location(1.0, 1.0, "Test Location"),
             tracks = listOf(Track("testTrack", "Test Title", "Test Artist")))
 
+    // Define behavior for the mocks
+    every { firestore.collection(any()) } returns mockk(relaxed = true)
+    every { collectionReference.document(beacon.id) } returns documentReference
+    every { firestore.collection(any()) } returns collectionReference
+
+    // Pass the mock Firestore instance to your BeaconConnection
+    beaconConnection = BeaconConnection(firestore)
+  }
+
+  @Test
+  fun testAddItem() {
     // Call the function under test
     beaconConnection.addItem(beacon)
 
-    // No verification is needed for interactions with the real object
-  }
-
-  @Test
-  fun testGetAll() = runBlocking {
-    // Place holder test before we merge with the main for coverage
-    val retrievedBeacons = beaconConnection.getAll().first()
-
-    // Assert nothing
-  }
-
-  @Test
-  fun testAddTrackToBeacon() {
-    // Mock data
-    val beacon =
-        Beacon(
-            id = "testBeacon",
-            location = Location(1.0, 1.0, "Test Location"),
-            tracks = listOf(Track("testTrack", "Test Title", "Test Artist")))
-
-    val track = Track("testTrack2", "Test Title 2", "Test Artist 2")
-
-    // Call the function under test
-    beaconConnection.addTrackToBeacon(beacon.id, track, {})
-
-    // No verification is needed for interactions with the real object
+    // Verify that either the set function is called
+    verify { collectionReference.add(any()) }
   }
 
   @Test
   fun testUpdateItem() = runBlocking {
-    // Mock data
-    val beacon =
-        Beacon(
-            id = "testBeacon",
-            location = Location(1.0, 1.0, "Test Location"),
-            tracks = listOf(Track("testTrack", "Test Title", "Test Artist")))
-
     // Call the function under test
     beaconConnection.updateItem(beacon)
 
-    // No verification is needed for interactions with the real object
-  }
-
-  // If someone knows how to deal with the flow already being null and how to test it, please let me
-  // know
-  @Test
-  fun testGetNonexistentItem() = runBlocking {
-    // By default the test passes, if a value is emitted the test fails
-    withTimeout(20000) {
-      // Flag to indicate if the flow emits any value
-      var valueEmitted = false
-
-      // Collect the flow within a 2-second timeout
-      measureTimeMillis {
-        withTimeoutOrNull(2000) {
-          beaconConnection.getItem("nonexistentBeacon").collect {
-            valueEmitted = true // Set the flag if the flow emits any value
-          }
-        }
-      }
-
-      // Assert that the flow didn't emit anything within the timeout
-      assert(valueEmitted.not()) { "Flow emitted unexpected value" }
-    }
+    // Verify that the set function is called on the document with the correct id
+    verify { documentReference.set(any()) }
   }
 
   @Test
-  fun testAddItemTwice() = runBlocking {
-    withTimeout(20000) {
-      val beacon =
+  fun testGetItem() = runBlocking {
+    withTimeout(3000) {
+      // Mock the Task
+      val mockTask = mockk<Task<DocumentSnapshot>>()
+      val mockDocumentSnapshot = mockk<DocumentSnapshot>()
+
+      val getTestBeacon =
           Beacon(
-              id = "testBeacon",
-              location = Location(1.0, 1.0, "Test Location"),
-              tracks = listOf(Track("testTrack", "Test Title", "Test Artist")))
+              id = "testBeacon", location = Location(1.0, 1.0, "Test Location"), tracks = listOf())
 
-      beaconConnection.addItemWithId(beacon)
-      beaconConnection.addItemWithId(beacon)
+      every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap()
+      every { mockDocumentSnapshot.exists() } returns true
+      every { mockDocumentSnapshot.id } returns getTestBeacon.id
+      every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
+      every { mockDocumentSnapshot.get("tracks") } returns getTestBeacon.tracks
 
+      // Define behavior for the addOnSuccessListener method
+      every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentSnapshot>>()) } answers
+          {
+            val listener = arg<OnSuccessListener<DocumentSnapshot>>(0)
+
+            // Define the behavior of the mock DocumentSnapshot here
+            listener.onSuccess(mockDocumentSnapshot)
+            mockTask
+          }
+      every { mockTask.addOnFailureListener(any()) } answers { mockTask }
+
+      // Define behavior for the get() method on the DocumentReference to return the mock task
+      every { documentReference.get() } returns mockTask
+
+      // Call the function under test
       val retrievedBeacon = beaconConnection.getItem("testBeacon").first()
 
-      assert(beacon == retrievedBeacon)
+      // Verify that the get function is called on the document with the correct id
+      coVerify { documentReference.get() }
+      assertEquals(getTestBeacon, retrievedBeacon)
     }
   }
 
   @Test
-  fun AddDeleteAndGetItem() = runBlocking {
-    withTimeout(20000) {
-      val beacon =
-          Beacon(
-              id = "testBeacon1",
-              location = Location(1.0, 1.0, "Test Location"),
-              tracks = listOf(Track("testTrack", "Test Title", "Test Artist")))
-
-      beaconConnection.addItemWithId(beacon)
-      beaconConnection.deleteItem("testBeacon1")
-
-      // Flag to indicate if the flow emits any value
-      var valueEmitted = false
-
-      // Collect the flow within a 2-second timeout
-      measureTimeMillis {
-        withTimeoutOrNull(2000) {
-          beaconConnection.getItem("testBeacon1").collect {
-            valueEmitted = true // Set the flag if the flow emits any value
-          }
-        }
-      }
-
-      // Assert that the flow didn't emit anything within the timeout
-      assert(valueEmitted.not()) { "Flow emitted unexpected value" }
-    }
-  }
-
-  // TODO : To be deleted after a real entry is added to the database
-  private lateinit var db: AppDatabase
-
-  @Test
-  fun createDb() {
-    val context = ApplicationProvider.getApplicationContext<Context>()
-    db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
-
-    val placeHolderEntity = PlaceHolderEntity("1", 0.5, 0.5)
-  }
-
-  @After
-  fun cleanupTestData() = runBlocking {
-    // Remove the test data
-    beaconConnection.deleteItem("testBeacon")
-    beaconConnection.deleteItem("testBeacon1")
-    beaconConnection.deleteItem("testBeacon2")
-    beaconConnection.deleteItem("nonexistentBeacon")
+  fun testDeleteItem() {
+    // Call the function under test
+    beaconConnection.deleteItem(beacon)
+    // Verify that the delete function is called on the document with the correct id
+    verify { documentReference.delete() }
   }
 }
