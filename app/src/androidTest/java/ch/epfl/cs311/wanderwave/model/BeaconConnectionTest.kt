@@ -12,6 +12,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.localDb.PlaceHolderEntity
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
@@ -42,6 +43,7 @@ public class BeaconConnectionTest {
 
   @get:Rule val mockkRule = MockKRule(this)
   private lateinit var beaconConnection: BeaconConnection
+  private lateinit var trackConnection: TrackConnection
 
   private lateinit var firestore: FirebaseFirestore
   private lateinit var documentReference: DocumentReference
@@ -55,6 +57,7 @@ public class BeaconConnectionTest {
     firestore = mockk()
     documentReference = mockk<DocumentReference>(relaxed = true)
     collectionReference = mockk<CollectionReference>(relaxed = true)
+    trackConnection = mockk<TrackConnection>(relaxed = true)
 
     // Mock data
     beacon = Beacon(
@@ -75,12 +78,11 @@ public class BeaconConnectionTest {
                 Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
     // Define behavior for the mocks
-    every { firestore.collection(any()) } returns mockk(relaxed = true)
     every { collectionReference.document(beacon.id) } returns documentReference
     every { firestore.collection(any()) } returns collectionReference
 
     // Pass the mock Firestore instance to your BeaconConnection
-    beaconConnection = BeaconConnection(firestore)
+    beaconConnection = BeaconConnection(firestore,trackConnection)
   }
 
   @Test
@@ -322,8 +324,22 @@ public class BeaconConnectionTest {
       val mockDocumentSnapshot = mockk<QueryDocumentSnapshot>()
 
       val getTestBeacon =
-        Beacon(
-          id = "testBeacon", location = Location(1.0, 1.0, "Test Location"), tracks = listOf())
+          Beacon(
+              id = "testBeacon",
+              location = Location(1.0, 1.0, "Test Location"),
+              profileAndTrack =
+              listOf(
+                  ProfileTrackAssociation(
+                      Profile(
+                          "Sample First Name",
+                          "Sample last name",
+                          "Sample desc",
+                          0,
+                          false,
+                          null,
+                          "Sample Profile ID",
+                          "Sample Track ID"),
+                      Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
       val getTestBeaconList = listOf(getTestBeacon, getTestBeacon)
 
@@ -332,7 +348,7 @@ public class BeaconConnectionTest {
       every { mockDocumentSnapshot.exists() } returns true
       every { mockDocumentSnapshot.id } returns getTestBeacon.id
       every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
-      every { mockDocumentSnapshot.get("tracks") } returns getTestBeacon.tracks
+      every { mockDocumentSnapshot.get("tracks") } returns getTestBeacon.profileAndTrack
 
       every { mockQuerySnapshot.documents } returns listOf(mockDocumentSnapshot,mockDocumentSnapshot)
       every { mockQuerySnapshot.iterator() } returns mutableListOf(mockDocumentSnapshot,mockDocumentSnapshot).iterator()
@@ -358,6 +374,15 @@ public class BeaconConnectionTest {
       coVerify { collectionReference.get() }
       assertEquals(getTestBeaconList, retrievedBeacons)
     }
+  }
+
+  @Test
+  fun testAddItemWithId() {
+    // Call the function under test
+    beaconConnection.addItemWithId(beacon)
+
+    // Verify that the set function is called on the document with the correct id
+    verify { collectionReference.document(any()) }
   }
 
   @Test
