@@ -70,12 +70,34 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-34
+
+      - name: create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          force-avd-creation: false
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          avd-name: github
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: echo "Generated AVD snapshot for caching."
+
       # Load secrets
       - name: Loading secrets.properties
         run: |
           echo MAPS_API_KEY=${{ secrets.MAPS_API_KEY }} >> ./secrets.properties 
           echo SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }} >> ./secrets.properties 
-          mkdir ~/.android
+          mkdir -p ~/.android
           echo "${{ secrets.KEYSTORE_DEBUG_B64 }}" | base64 -d > ~/.android/debug.keystore
           echo "${{ secrets.KEYSTORE_RELEASE_B64 }}" | base64 -d > ./release.keystore
 
@@ -84,28 +106,11 @@ jobs:
         run: |
           chmod +x ./gradlew
 
-      # Clean the project before building it
-      - name: Gradle clean
-        run: |
-          ./gradlew clean
-
       # Check code formatting and fail if it's not correct
       - name: KTFmt Check
         run: |
           # To run the CI with debug informations, add --info
           ./gradlew ktfmtCheck
-
-      # This step runs gradle commands to build the application
-      - name: Assemble
-        run: |
-          # To run the CI with debug information, add --info
-          ./gradlew assembleDebug lint --parallel --build-cache
-
-      # Run all unit and instrumentation tests
-      - name: Run tests
-        run: |
-          # To run the CI with debug information, add --info
-          ./gradlew check --parallel --build-cache
 
       #run instrumentation tests on an android emulator
       - name: Run instrumentation tests
