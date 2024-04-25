@@ -1,6 +1,9 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import io.mockk.called
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -20,14 +23,36 @@ class SpotifyConnectScreenViewModelTest {
 
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
 
-  fun setup(connectResult: SpotifyController.ConnectResult) {
+  @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
+
+  private lateinit var viewModel: SpotifyConnectScreenViewModel
+
+  fun setup(
+      connectResult: SpotifyController.ConnectResult,
+      isSignedIn: Boolean,
+      canRefresh: Boolean
+  ) {
     every { mockSpotifyController.connectRemote() } returns flowOf(connectResult)
+    every { mockAuthenticationController.isSignedIn() } returns isSignedIn
+    coEvery { mockAuthenticationController.refreshTokenIfNecessary() } returns
+        (isSignedIn || canRefresh)
+    viewModel = SpotifyConnectScreenViewModel(mockSpotifyController, mockAuthenticationController)
   }
 
   @Test
   fun connectSuccess() = runBlocking {
-    setup(SpotifyController.ConnectResult.SUCCESS)
-    val viewModel = SpotifyConnectScreenViewModel(mockSpotifyController)
+    setup(SpotifyController.ConnectResult.SUCCESS, true, true)
+    viewModel.connectRemote()
+
+    verify { mockSpotifyController.connectRemote() }
+
+    val uiState = viewModel.uiState.first()
+    assert(uiState.hasResult)
+    assert(uiState.success)
+  }
+
+  fun connectUsingRefresh() = runBlocking {
+    setup(SpotifyController.ConnectResult.SUCCESS, false, true)
     viewModel.connectRemote()
 
     verify { mockSpotifyController.connectRemote() }
@@ -39,8 +64,7 @@ class SpotifyConnectScreenViewModelTest {
 
   @Test
   fun connectFailure() = runBlocking {
-    setup(SpotifyController.ConnectResult.FAILED)
-    val viewModel = SpotifyConnectScreenViewModel(mockSpotifyController)
+    setup(SpotifyController.ConnectResult.FAILED, true, false)
     viewModel.connectRemote()
 
     verify { mockSpotifyController.connectRemote() }
@@ -52,11 +76,22 @@ class SpotifyConnectScreenViewModelTest {
 
   @Test
   fun connectNotLoggedIn() = runBlocking {
-    setup(SpotifyController.ConnectResult.NOT_LOGGED_IN)
-    val viewModel = SpotifyConnectScreenViewModel(mockSpotifyController)
+    setup(SpotifyController.ConnectResult.NOT_LOGGED_IN, true, false)
     viewModel.connectRemote()
 
     verify { mockSpotifyController.connectRemote() }
+
+    val uiState = viewModel.uiState.first()
+    assert(uiState.hasResult)
+    assert(uiState.success.not())
+  }
+
+  @Test
+  fun notAuthenticated() = runBlocking {
+    setup(SpotifyController.ConnectResult.SUCCESS, false, false)
+    viewModel.connectRemote()
+
+    verify { mockSpotifyController.connectRemote() wasNot called }
 
     val uiState = viewModel.uiState.first()
     assert(uiState.hasResult)
