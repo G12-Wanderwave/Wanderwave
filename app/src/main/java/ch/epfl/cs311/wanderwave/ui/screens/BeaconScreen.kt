@@ -97,7 +97,10 @@ private fun BeaconScreenPreview() {
 }
 
 @Composable
-private fun BeaconScreen(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit = { _, _, _ -> }) {
+private fun BeaconScreen(
+    beacon: Beacon,
+    addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit = { _, _, _ -> }
+) {
   Column(
       modifier = Modifier.fillMaxSize().padding(8.dp).testTag("beaconScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
@@ -139,7 +142,7 @@ fun BeaconInformation(location: Location) {
 }
 
 @Composable
-fun SongList(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit ) -> Unit){
+fun SongList(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit) {
   // State to control the visibility of the add track dialog
   var showDialog by remember { mutableStateOf(false) }
 
