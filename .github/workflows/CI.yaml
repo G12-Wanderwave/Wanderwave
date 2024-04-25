@@ -97,7 +97,7 @@ jobs:
         run: |
           echo MAPS_API_KEY=${{ secrets.MAPS_API_KEY }} >> ./secrets.properties 
           echo SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }} >> ./secrets.properties 
-          mkdir ~/.android
+          mkdir -p ~/.android
           echo "${{ secrets.KEYSTORE_DEBUG_B64 }}" | base64 -d > ~/.android/debug.keystore
           echo "${{ secrets.KEYSTORE_RELEASE_B64 }}" | base64 -d > ./release.keystore
 
