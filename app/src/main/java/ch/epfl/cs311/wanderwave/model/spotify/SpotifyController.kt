@@ -1,7 +1,6 @@
 package ch.epfl.cs311.wanderwave.model.spotify
 
 import android.content.Context
-import android.util.Log
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.spotify.android.appremote.api.ConnectionParams
@@ -132,9 +131,6 @@ class SpotifyController(private val context: Context) {
           var elapsedTime = 0L
           while (elapsedTime < trackDuration) {
             delay(checkInterval)
-            appRemote?.playerApi?.toString()?.let { Log.d("fwefewfewfwefew2", it) }
-
-            appRemote?.playerApi?.playerState?.toString()?.let { Log.d("fwefewfewfwefew", it) }
             appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
               if ((trackDuration - playerState.playbackPosition) <= 1000) {
                 onTrackEndCallback?.invoke()
