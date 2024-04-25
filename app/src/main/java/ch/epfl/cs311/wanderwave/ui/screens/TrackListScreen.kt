@@ -35,6 +35,7 @@ fun TrackListScreen(
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Column {
+
             TextField(
                 value = searchQuery,
                 onValueChange = { query ->
@@ -46,7 +47,7 @@ fun TrackListScreen(
                     .fillMaxWidth()
                     .padding(16.dp)
                     .testTag("searchBar") // Adding a test tag for the search bar
-            )
+            )       
             LazyColumn(modifier = Modifier
                 .testTag("trackListScreen")) { // Maintaining the LazyColumn test tag
                 items(uiState.tracks.size) { index ->

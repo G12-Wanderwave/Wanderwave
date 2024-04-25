@@ -24,10 +24,10 @@ constructor(
     private val trackRepository: TrackRepository
 ) : ViewModel() {
 
-  private val _uiState = MutableStateFlow(UiState(loading = true))
-  val uiState: StateFlow<UiState> = _uiState
+    private val _uiState = MutableStateFlow(UiState(loading = true))
+    val uiState: StateFlow<UiState> = _uiState
 
-  private var _searchQuery = MutableStateFlow("")
+    private var _searchQuery = MutableStateFlow("")
 
   init {
     observeTracks()
@@ -52,7 +52,7 @@ constructor(
   fun setSearchQuery(query: String) {
     searchJob?.cancel()
     searchJob = CoroutineScope(Dispatchers.IO).launch {
-      delay(300) // Debounce time in milliseconds
+      delay(3000) // Debounce time in milliseconds
       _searchQuery.value = query
       observeTracks() // Re-filter tracks when search query changes
     }
