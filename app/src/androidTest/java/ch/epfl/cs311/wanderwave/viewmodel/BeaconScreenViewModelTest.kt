@@ -1,8 +1,10 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.verify
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,5 +19,13 @@ class BeaconScreenViewModelTest {
   @Test
   fun canConstructWithNoErrors() {
     BeaconViewModel(beaconConnection)
+  }
+
+  @Test
+  fun addTrackToBeaconTest() {
+    val viewModel = BeaconViewModel(beaconConnection)
+    val track = Track("trackId", "trackName", "trackArtist")
+    viewModel.addTrackToBeacon("beaconId", track, {})
+    verify { beaconConnection.addTrackToBeacon("beaconId", track, any()) }
   }
 }
