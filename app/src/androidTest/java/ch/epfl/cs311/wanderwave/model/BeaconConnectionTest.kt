@@ -4,6 +4,7 @@ import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.CollectionReference
@@ -29,6 +30,7 @@ public class BeaconConnectionTest {
 
   @get:Rule val mockkRule = MockKRule(this)
   private lateinit var beaconConnection: BeaconConnection
+  private lateinit var trackConnection: TrackConnection
 
   private lateinit var firestore: FirebaseFirestore
   private lateinit var documentReference: DocumentReference
@@ -42,6 +44,7 @@ public class BeaconConnectionTest {
     firestore = mockk()
     documentReference = mockk<DocumentReference>(relaxed = true)
     collectionReference = mockk<CollectionReference>(relaxed = true)
+    trackConnection = mockk<TrackConnection>(relaxed = true)
 
     // Mock data
     beacon =
@@ -51,12 +54,11 @@ public class BeaconConnectionTest {
             tracks = listOf(Track("testTrack", "Test Title", "Test Artist")))
 
     // Define behavior for the mocks
-    every { firestore.collection(any()) } returns mockk(relaxed = true)
     every { collectionReference.document(beacon.id) } returns documentReference
     every { firestore.collection(any()) } returns collectionReference
 
     // Pass the mock Firestore instance to your BeaconConnection
-    beaconConnection = BeaconConnection(firestore)
+    beaconConnection = BeaconConnection(firestore,trackConnection)
   }
 
   @Test
@@ -163,6 +165,15 @@ public class BeaconConnectionTest {
       coVerify { collectionReference.get() }
       assertEquals(getTestBeaconList, retrievedBeacons)
     }
+  }
+
+  @Test
+  fun testAddItemWithId() {
+    // Call the function under test
+    beaconConnection.addItemWithId(beacon)
+
+    // Verify that the set function is called on the document with the correct id
+    verify { collectionReference.document(any()) }
   }
 
   @Test

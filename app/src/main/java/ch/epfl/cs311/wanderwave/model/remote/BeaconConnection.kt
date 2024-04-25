@@ -15,15 +15,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class BeaconConnection(private val database: FirebaseFirestore? = null) :
+class BeaconConnection @Inject constructor(private val database: FirebaseFirestore? = null, val trackConnection:TrackConnection) :
     FirebaseConnection<Beacon, Beacon>(), BeaconRepository {
 
   override val collectionName: String = "beacons"
 
   override val getItemId = { beacon: Beacon -> beacon.id }
 
-  val trackConnection = TrackConnection()
+
 
   override val db = database ?: super.db
 
