@@ -22,6 +22,8 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.Transaction
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.junit4.MockKRule
@@ -383,6 +385,53 @@ public class BeaconConnectionTest {
 
     // Verify that the set function is called on the document with the correct id
     verify { collectionReference.document(beacon.id) }
+  }
+
+  @Test
+  fun testAddTrackToBeacon() {
+    // Mock data
+    val track = Track("testTrackId", "Test Title", "Test Artist")
+    val beacon = Beacon("testBeaconId", Location(1.0, 1.0, "Test Location"), listOf(track))
+
+    // Mock the Task
+    val mockTask = mockk<Task<Transaction>>()
+    val mockTransaction = mockk<Transaction>()
+    val mockDocumentSnapshot = mockk<DocumentSnapshot>()
+
+    val getTestBeacon =
+        Beacon(id = "testBeacon", location = Location(1.0, 1.0, "Test Location"), tracks = listOf())
+
+    every { mockTransaction.get(any<DocumentReference>()) } returns mockDocumentSnapshot
+    every { mockTransaction.update(any<DocumentReference>(), any<String>(), any()) } answers
+        {
+          mockTransaction
+        }
+    every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap()
+    every { mockDocumentSnapshot.exists() } returns true
+    every { mockDocumentSnapshot.id } returns getTestBeacon.id
+    every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
+    every { mockDocumentSnapshot.get("tracks") } returns getTestBeacon.tracks
+
+    // Define behavior for the addOnSuccessListener method
+    every { mockTask.addOnSuccessListener(any<OnSuccessListener<Transaction>>()) } answers
+        {
+          val listener = arg<OnSuccessListener<Transaction>>(0)
+
+          // Define the behavior of the mock QuerySnapshot here
+          listener.onSuccess(mockTransaction)
+          mockTask
+        }
+    every { mockTask.addOnFailureListener(any()) } answers { mockTask }
+
+    coEvery { firestore.runTransaction<Transaction>(any()) } returns mockTask
+
+    // Call the function under test
+    beaconConnection.addTrackToBeacon(beacon.id, track, {})
+
+    verify { firestore.runTransaction<Transaction>(any()) }
+    // unfortunately I have no idea how to test in a better way this, I've let the start of the
+    // framework but that's all
+    // verify { mockTransaction.update(any<DocumentReference>(),"tracks", Any()) }
   }
 
   @Test
