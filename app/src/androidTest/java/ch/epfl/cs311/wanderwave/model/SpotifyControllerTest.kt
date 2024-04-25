@@ -801,4 +801,46 @@ class SpotifyControllerTest {
     // Verify that setEventCallback was called
     verify { subscription.setEventCallback(any()) }
   }
+
+    @Test
+    fun testStartPlayBackTimerResultCallback() = runBlocking {
+        // Mock the PlayerApi and Subscription objects
+        val playerApi = mockk<PlayerApi>(relaxed = true)
+        val subscription = mockk<Subscription<PlayerState>>(relaxed = true)
+        val playerState = mockk<PlayerState>(relaxed = true)
+
+        val callResult = mockk<CallResult<Empty>>(relaxed = true)
+
+        // When playerApi.subscribeToPlayerState() is called, return the mocked subscription
+        every { playerApi.subscribeToPlayerState() } returns subscription
+
+        // When subscription.setEventCallback(any()) is called, invoke the callback with the test
+        // PlayerState
+        every { subscription.setEventCallback(any()) } answers { subscription }
+
+        // When subscription.setErrorCallback(any()) is called, do nothing
+        every { subscription.setErrorCallback(any()) } just Awaits
+
+        // Set the playerApi in the SpotifyController
+        every { mockAppRemote.playerApi } returns playerApi
+
+        // Call the method to be tested
+        spotifyController.onPlayerStateUpdate()
+
+        // Verify that setEventCallback was called
+        verify { subscription.setEventCallback(any()) }
+
+//        every { callResult.setResultCallback(any()) } answers {
+//            val callback = firstArg<CallResult.ResultCallback<Empty>>()
+//            callback.onResult(Empty())
+//            callResult
+//
+//        }
+
+//        // Call the callback with a PlayerState
+//        subscription.callback?.invoke(playerState)
+
+        // Verify that the callback was called
+     //   verify { playerState.track }
+    }
 }

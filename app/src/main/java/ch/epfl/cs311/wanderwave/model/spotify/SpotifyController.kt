@@ -129,7 +129,8 @@ class SpotifyController(private val context: Context) {
           while (elapsedTime < trackDuration) {
             delay(checkInterval)
             elapsedTime += checkInterval
-            appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
+            appRemote?.playerApi?.playerState?.
+            setResultCallback { playerState ->
               if ((trackDuration - playerState.playbackPosition) <= 1000) {
                 onTrackEndCallback?.invoke()
                 stopPlaybackTimer()
