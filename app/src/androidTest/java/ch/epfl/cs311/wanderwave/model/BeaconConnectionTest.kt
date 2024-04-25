@@ -58,7 +58,7 @@ public class BeaconConnectionTest {
     every { firestore.collection(any()) } returns collectionReference
 
     // Pass the mock Firestore instance to your BeaconConnection
-    beaconConnection = BeaconConnection(firestore,trackConnection)
+    beaconConnection = BeaconConnection(firestore, trackConnection)
   }
 
   @Test
@@ -119,7 +119,6 @@ public class BeaconConnectionTest {
     }
   }
 
-
   @Test
   fun testGetAllItems() = runBlocking {
     withTimeout(3000) {
@@ -129,11 +128,10 @@ public class BeaconConnectionTest {
       val mockDocumentSnapshot = mockk<QueryDocumentSnapshot>()
 
       val getTestBeacon =
-        Beacon(
-          id = "testBeacon", location = Location(1.0, 1.0, "Test Location"), tracks = listOf())
+          Beacon(
+              id = "testBeacon", location = Location(1.0, 1.0, "Test Location"), tracks = listOf())
 
       val getTestBeaconList = listOf(getTestBeacon, getTestBeacon)
-
 
       every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap()
       every { mockDocumentSnapshot.exists() } returns true
@@ -141,8 +139,10 @@ public class BeaconConnectionTest {
       every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
       every { mockDocumentSnapshot.get("tracks") } returns getTestBeacon.tracks
 
-      every { mockQuerySnapshot.documents } returns listOf(mockDocumentSnapshot,mockDocumentSnapshot)
-      every { mockQuerySnapshot.iterator() } returns mutableListOf(mockDocumentSnapshot,mockDocumentSnapshot).iterator()
+      every { mockQuerySnapshot.documents } returns
+          listOf(mockDocumentSnapshot, mockDocumentSnapshot)
+      every { mockQuerySnapshot.iterator() } returns
+          mutableListOf(mockDocumentSnapshot, mockDocumentSnapshot).iterator()
 
       // Define behavior for the addOnSuccessListener method
       every { mockTask.addOnSuccessListener(any<OnSuccessListener<QuerySnapshot>>()) } answers
