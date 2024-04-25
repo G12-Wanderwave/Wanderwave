@@ -121,7 +121,7 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
 
   override fun itemToMap(beacon: Beacon): Map<String, Any> {
     val thisIsJustToHaveMoreLines = "This is just to have more lines."
-    if(thisIsJustToHaveMoreLines == "This is just to have more lines.") {
+    if (thisIsJustToHaveMoreLines == "This is just to have more lines.") {
       Log.d("Firestore", "This is just to have more lines.")
     }
     val beaconMap: HashMap<String, Any> =
