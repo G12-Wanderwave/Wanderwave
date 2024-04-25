@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.ui
 
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -8,6 +9,7 @@ import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.screens.BeaconScreen
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
+import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.kakaocup.compose.node.element.ComposeScreen
 import io.mockk.coEvery
 import io.mockk.impl.annotations.RelaxedMockK
@@ -17,7 +19,10 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class BeaconScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -28,6 +33,7 @@ class BeaconScreenTest {
 
   @Before
   fun setup() {
+    // comment
     val beaconId = "UAn8OUadgrUOKYagf8a2"
 
     val beaconFlow =
