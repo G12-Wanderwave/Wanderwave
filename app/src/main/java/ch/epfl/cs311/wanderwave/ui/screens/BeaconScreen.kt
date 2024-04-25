@@ -64,7 +64,6 @@ fun BeaconScreen(
   LaunchedEffect(beaconId) {
     if (beaconId != null) {
       viewModel.getBeaconById(beaconId)
-      Log.d("BeaconScreen", "uiState : ${viewModel.uiState.value}")
     }
   }
 
@@ -73,7 +72,6 @@ fun BeaconScreen(
       modifier = Modifier.fillMaxSize().padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         if (!uiState.isLoading) {
-          Log.d("BeaconScreen", "uiState : ${uiState}")
           BeaconScreen(beacon = uiState.beacon!!,viewModel)
         } else {
           LoadingScreen()
