@@ -48,6 +48,7 @@ class TrackListScreenTest : TestCase() {
   }
 
   private fun setupViewModel(result: Boolean) {
+
     every { mockTrackRepositoryImpl.getAll() } returns
         flowOf(listOf(Track("id1", "title1", "artist1")))
     every { mockSpotifyController.playTrack(any()) } returns flowOf(result)
