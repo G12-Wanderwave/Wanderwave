@@ -7,9 +7,17 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
@@ -24,25 +32,36 @@ class TrackListViewModelTest {
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
   @RelaxedMockK private lateinit var repository: TrackRepositoryImpl
 
+  private val testDispatcher = TestCoroutineDispatcher()
   private lateinit var track: Track
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Before
   fun setup() {
+    Dispatchers.setMain(testDispatcher)
+
     val connectResult = SpotifyController.ConnectResult.SUCCESS
     every { mockSpotifyController.connectRemote() } returns flowOf(connectResult)
 
     repository = mockk()
 
-    track = Track("1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
+    track = Track("spotify:track:1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
 
-    val track1 = Track("6ImuyUQYhJKEKFtlrstHCD", "Main Title", "John Williams")
-    val track2 = Track("0HLQFjnwq0FHpNVxormx60", "The Nightingale", "Percival Schuttenbach")
-    val track3 = Track("2NZhNbfb1rD1aRj3hZaoqk", "The Imperial Suite", "Michael Giacchino")
-    val track4 = Track("5EWPGh7jbTNO2wakv8LjUI", "Free Bird", "Lynyrd Skynyrd")
-    val track5 = Track("4rTlPsga6T8yiHGOvZAPhJ", "Godzilla", "Eminem")
+    val track1 = Track("spotify:track:6ImuyUQYhJKEKFtlrstHCD", "Main Title", "John Williams")
+    val track2 =
+        Track("spotify:track:0HLQFjnwq0FHpNVxormx60", "The Nightingale", "Percival Schuttenbach")
+    val track3 =
+        Track("spotify:track:2NZhNbfb1rD1aRj3hZaoqk", "The Imperial Suite", "Michael Giacchino")
+    val track4 = Track("spotify:track:5EWPGh7jbTNO2wakv8LjUI", "Free Bird", "Lynyrd Skynyrd")
+    val track5 = Track("spotify:track:4rTlPsga6T8yiHGOvZAPhJ", "Godzilla", "Eminem")
+
+    val trackA = Track("spotify:track:5PbMSJZcNA3p2LZv7C56cm", "Yeah", "Queen")
+    val trackB = Track("spotify:track:3C7RbG9Co0zjO7CsuEOqRa", "Sing for the Moment", "Eminem")
 
     val trackList =
         listOf(
+            trackA,
+            trackB,
             track,
             track1,
             track2,
@@ -56,6 +75,13 @@ class TrackListViewModelTest {
     viewModel = TrackListViewModel(repository, mockSpotifyController)
 
     runBlocking { viewModel.uiState.first { !it.loading } }
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @After
+  fun tearDown() {
+    Dispatchers.resetMain()
+    testDispatcher.cleanupTestCoroutines()
   }
 
   @Test
@@ -173,6 +199,20 @@ class TrackListViewModelTest {
     viewModel.play()
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun resumeTrackWhenControllerReturnsFalse() = runTest {
+    every { mockSpotifyController.pauseTrack() } returns flowOf(true)
+    every { mockSpotifyController.playTrack(track) } returns flowOf(true)
+    every { mockSpotifyController.resumeTrack() } returns flowOf(false)
+    viewModel.selectTrack(track)
+    viewModel.play()
+    viewModel.pause()
+    viewModel.play()
+
+    advanceUntilIdle()
+  }
+
   @Test
   fun collapseTrackList() = run {
     viewModel.collapse()
@@ -252,6 +292,73 @@ class TrackListViewModelTest {
     viewModel.setLoop(LoopMode.ONE)
     assertEquals(LoopMode.ONE, viewModel.uiState.value.loopMode)
     viewModel.setLoop(LoopMode.NONE)
+    assertEquals(LoopMode.NONE, viewModel.uiState.value.loopMode)
+  }
+
+  @Test
+  fun expandTrackList() = run {
+    viewModel.expand()
+    assertTrue(viewModel.uiState.value.expanded)
+  }
+
+  @Test
+  fun queueNextTrack() = run {
+    viewModel.selectTrack(track)
+    viewModel.play()
+    viewModel.skipForward()
+    assertEquals(viewModel.uiState.value.selectedTrack, viewModel.uiState.value.tracks[3])
+  }
+
+  @Test
+  fun tracksPlayOneAfterAnother() = run {
+    viewModel.selectTrack(viewModel.uiState.value.queue[0])
+    viewModel.play()
+    assertTrue(viewModel.uiState.value.isPlaying)
+    assertEquals(viewModel.uiState.value.queue[0].id, viewModel.uiState.value.selectedTrack?.id)
+
+    testDispatcher.scheduler.advanceUntilIdle()
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun playTrackWhenNoTrackSelected() = runTest {
+    viewModel.play()
+    assertFalse(viewModel.uiState.value.isPlaying)
+    assertEquals("No track selected", viewModel.uiState.value.message)
+  }
+
+  @Test
+  fun playTrackWhenTrackAlreadyPlaying() = run {
+    viewModel.selectTrack(track)
+    viewModel.play()
+    viewModel.play()
+    assertTrue(viewModel.uiState.value.isPlaying)
+    assertEquals("Track already playing", viewModel.uiState.value.message)
+  }
+
+  @Test
+  fun pauseTrackWhenNoTrackPlaying() = run {
+    viewModel.pause()
+    assertFalse(viewModel.uiState.value.isPlaying)
+    assertEquals("No track playing", viewModel.uiState.value.message)
+  }
+
+  @Test
+  fun skipForwardWhenNoTrackSelected() = run {
+    viewModel.skipForward()
+    assertNull(viewModel.uiState.value.selectedTrack)
+  }
+
+  @Test
+  fun skipBackwardWhenNoTrackSelected() = run {
+    viewModel.skipBackward()
+    assertNull(viewModel.uiState.value.selectedTrack)
+  }
+
+  @Test
+  fun toggleLoopWhenLoopModeIsOne() = run {
+    viewModel.setLoop(LoopMode.ONE)
+    viewModel.toggleLoop()
     assertEquals(LoopMode.NONE, viewModel.uiState.value.loopMode)
   }
 }
