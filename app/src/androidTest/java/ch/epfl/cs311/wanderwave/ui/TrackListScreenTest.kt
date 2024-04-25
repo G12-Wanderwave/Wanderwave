@@ -16,13 +16,9 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import junit.framework.TestCase.assertTrue
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -31,8 +27,6 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class TrackListScreenTest : TestCase() {
-
-  private val testDispatcher = TestCoroutineDispatcher()
 
   @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
 
@@ -45,53 +39,55 @@ class TrackListScreenTest : TestCase() {
 
   @RelaxedMockK lateinit var mockShowMessage: (String) -> Unit
 
-  @Before
-  fun setup() {
-    Dispatchers.setMain(testDispatcher)
-  }
+  @Before fun setup() {}
 
   @After
   fun tearDown() {
-    Dispatchers.resetMain()
-    testDispatcher.cleanupTestCoroutines()
+    // Dispatchers.resetMain()
+    // comment
   }
 
   private fun setupViewModel(result: Boolean) {
+
     every { mockTrackRepositoryImpl.getAll() } returns
         flowOf(listOf(Track("id1", "title1", "artist1")))
     every { mockSpotifyController.playTrack(any()) } returns flowOf(result)
 
     viewModel = TrackListViewModel(mockTrackRepositoryImpl, mockSpotifyController)
-
     composeTestRule.setContent { TrackListScreen(mockShowMessage, viewModel) }
   }
 
   @Test
-  fun trackListScreenIsDisplayed() =
-      testDispatcher.runBlockingTest {
-        setupViewModel(true)
-        onComposeScreen<TrackListScreen>(composeTestRule) {
-          assertIsDisplayed()
+  fun trackListScreenIsDisplayed() = runBlockingTest {
+    setupViewModel(true)
+    onComposeScreen<TrackListScreen>(composeTestRule) {
+      assertIsDisplayed()
 
-          trackButton {
-            assertIsDisplayed()
-            assert(hasClickAction())
-          }
-        }
+      // add text to the search bar :
+      searchBar {
+        assertIsDisplayed()
+        performTextInput("search")
       }
+
+      trackButton {
+        assertIsDisplayed()
+        assert(hasClickAction())
+      }
+    }
+  }
 
   @Test
-  fun tappingTrackSelectssIt() =
-      testDispatcher.runBlockingTest {
-        setupViewModel(true)
-        onComposeScreen<TrackListScreen>(composeTestRule) {
-          trackButton {
-            assertIsDisplayed()
-            performClick()
-            assertTrue(viewModel.uiState.value.selectedTrack != null)
-          }
-          advanceUntilIdle()
-          coVerify { mockShowMessage wasNot Called }
-        }
+  fun tappingTrackSelectssIt() = runBlockingTest {
+    setupViewModel(true)
+
+    onComposeScreen<TrackListScreen>(composeTestRule) {
+      trackButton {
+        assertIsDisplayed()
+        performClick()
+        assertTrue(viewModel.uiState.value.selectedTrack != null)
       }
+      advanceUntilIdle()
+      coVerify { mockShowMessage wasNot Called }
+    }
+  }
 }
