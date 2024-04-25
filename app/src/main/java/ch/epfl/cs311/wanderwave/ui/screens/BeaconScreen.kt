@@ -72,7 +72,7 @@ fun BeaconScreen(
       modifier = Modifier.fillMaxSize().padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         if (!uiState.isLoading) {
-          BeaconScreen(beacon = uiState.beacon!!, viewModel)
+          BeaconScreen(beacon = uiState.beacon!!, viewModel::addTrackToBeacon)
         } else {
           LoadingScreen()
         }
@@ -97,12 +97,12 @@ private fun BeaconScreenPreview() {
 }
 
 @Composable
-private fun BeaconScreen(beacon: Beacon, viewModel: BeaconViewModel = hiltViewModel()) {
+private fun BeaconScreen(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit = { _, _, _ -> }) {
   Column(
       modifier = Modifier.fillMaxSize().padding(8.dp).testTag("beaconScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
-        SongList(beacon, viewModel)
+        SongList(beacon, addTrackToBeacon)
       }
 }
 
@@ -139,7 +139,7 @@ fun BeaconInformation(location: Location) {
 }
 
 @Composable
-fun SongList(beacon: Beacon, viewModel: BeaconViewModel) {
+fun SongList(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit ) -> Unit){
   // State to control the visibility of the add track dialog
   var showDialog by remember { mutableStateOf(false) }
 
@@ -163,7 +163,7 @@ fun SongList(beacon: Beacon, viewModel: BeaconViewModel) {
     if (showDialog) {
       AddTrackDialog(
           onAddTrack = { id, title, artist ->
-            viewModel.addTrackToBeacon(beacon.id, Track(id, title, artist)) { success ->
+            addTrackToBeacon(beacon.id, Track(id, title, artist)) { success ->
               if (success) {
                 Log.d("SongList", "Track added successfully.")
               } else {
