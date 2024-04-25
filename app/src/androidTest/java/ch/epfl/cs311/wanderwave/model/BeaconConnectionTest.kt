@@ -1,5 +1,8 @@
 package ch.epfl.cs311.wanderwave.model
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import ch.epfl.cs311.wanderwave.di.ConnectionModule
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -24,6 +27,7 @@ import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -223,6 +227,14 @@ public class BeaconConnectionTest {
     // unfortunately I have no idea how to test in a better way this, I've let the start of the
     // framework but that's all
     // verify { mockTransaction.update(any<DocumentReference>(),"tracks", Any()) }
+  }
+
+  @Test
+  fun provideBeaconRepository_returnsBeaconConnection() {
+    // delete as soon as possible
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    val beaconRepository = ConnectionModule.provideBeaconRepository(context)
+    assertEquals(BeaconConnection::class.java, beaconRepository::class.java)
   }
 
   @Test
