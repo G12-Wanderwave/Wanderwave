@@ -121,15 +121,19 @@ class SpotifyController(private val context: Context) {
     }
   }
 
-  fun startPlaybackTimer(trackDuration: Long) { // TODO: Coverage
+  fun startPlaybackTimer(
+      trackDuration: Long,
+      scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+  ) { // TODO: Coverage
     stopPlaybackTimer() // Ensure no previous timers are running
     playbackTimer =
-        CoroutineScope(Dispatchers.IO).launch {
+        scope.launch {
           val checkInterval = 1000L // Check every second
           var elapsedTime = 0L
           while (elapsedTime < trackDuration) {
             delay(checkInterval)
-            elapsedTime += checkInterval
+            appRemote?.playerApi?.toString()?.let { Log.d("fwefewfewfwefew2", it) }
+
             appRemote?.playerApi?.playerState?.toString()?.let { Log.d("fwefewfewfwefew", it) }
             appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
               if ((trackDuration - playerState.playbackPosition) <= 1000) {
