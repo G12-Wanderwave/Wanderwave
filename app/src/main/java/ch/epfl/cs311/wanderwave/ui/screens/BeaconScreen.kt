@@ -88,38 +88,39 @@ fun BeaconScreen(
       horizontalAlignment = Alignment.CenterHorizontally) {
         if (!uiState.isLoading) {
           BeaconScreen(beacon = uiState.beacon!!, navigationActions = navigationActions)
+          //BeaconScreen(beacon = uiState.beacon!!, viewModel::addTrackToBeacon)
         } else {
           LoadingScreen()
         }
       }
 }
 
-@Composable
-@Preview(showBackground = true)
-private fun BeaconScreenPreview() {
-  val previewBeacon =
-      Beacon(
-          id = "a",
-          location = Location(latitude = 46.519962, longitude = 6.633597, name = "EPFL"),
-          profileAndTrack =
-              listOf(
-                  ProfileTrackAssociation(
-                      Profile("e", "a", "a", 0, false, null, "1", "2"),
-                      Track("a", "Never gonna let you mn,mn,mn,mn,mn,mn,nmn,m", "Rick Astley")),
-              ),
-      )
-  val navController = rememberNavController()
-  val actions = remember(navController) { NavigationActions(navController) }
-  WanderwaveTheme { BeaconScreen(previewBeacon, actions) }
-}
+//@Composable
+//@Preview(showBackground = true)
+//private fun BeaconScreenPreview() {
+//  val previewBeacon =
+//      Beacon(
+//          id = "a",
+//          location = Location(latitude = 46.519962, longitude = 6.633597, name = "EPFL"),
+//          profileAndTrack =
+//              listOf(
+//                  ProfileTrackAssociation(
+//                      Profile("e", "a", "a", 0, false, null, "1", "2"),
+//                      Track("a", "Never gonna let you mn,mn,mn,mn,mn,mn,nmn,m", "Rick Astley")),
+//              ),
+//      )
+//  val navController = rememberNavController()
+//  val actions = remember(navController) { NavigationActions(navController) }
+//  WanderwaveTheme { BeaconScreen(previewBeacon, actions) }
+//}
 
 @Composable
-private fun BeaconScreen(beacon: Beacon, navigationActions: NavigationActions) {
+private fun BeaconScreen(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit = { _, _, _ -> }, navigationActions: NavigationActions) {
   Column(
       modifier = Modifier.fillMaxSize().padding(8.dp).testTag("beaconScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
-        SongList(beacon, navigationActions)
+        SongList(beacon, addTrackToBeacon,navigationActions)
       }
 }
 
@@ -156,7 +157,7 @@ fun BeaconInformation(location: Location) {
 }
 
 @Composable
-fun SongList(beacon: Beacon, navigationActions: NavigationActions) {
+fun SongList(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit = { _, _, _ -> },navigationActions: NavigationActions) {
     var showDialog by remember { mutableStateOf(false) }
 
     HorizontalDivider()
@@ -185,13 +186,13 @@ fun SongList(beacon: Beacon, navigationActions: NavigationActions) {
     if (showDialog) {
       AddTrackDialog(
           onAddTrack = { id, title, artist ->
-//            viewModel.addTrackToBeacon(beacon.id, Track(id, title, artist)) { success ->
-//              if (success) {
-//                Log.d("SongList", "Track added successfully.")
-//              } else {
-//                Log.e("SongList", "Failed to add track.")
-//              }
-//            }
+            addTrackToBeacon(beacon.id, Track(id, title, artist)) { success ->
+              if (success) {
+                Log.d("SongList", "Track added successfully.")
+              } else {
+                Log.e("SongList", "Failed to add track.")
+              }
+            }
             showDialog = false // Close dialog after adding track
           },
           onDismiss = {
