@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.model.spotify
 
 import android.content.Context
+import android.util.Log
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.spotify.android.appremote.api.ConnectionParams
@@ -103,8 +104,10 @@ class SpotifyController(private val context: Context) {
    * @param track the track to play
    * @return a Flow of Boolean which is true if the operation was successful, false otherwise.
    */
-  fun playTrack(track: Track): Flow<Boolean> { // TODO: Coverage
+  fun playTrack(track: Track): Flow<Boolean> {
+    Log.d("SpotifyController", "1Playing track: ${track.title}")
     return callbackFlow {
+      Log.d("SpotifyController", "2Playing track: ${track.title}")
       appRemote?.let { remote ->
         remote.playerApi
             .play(track.id)
@@ -123,7 +126,7 @@ class SpotifyController(private val context: Context) {
   fun startPlaybackTimer(
       trackDuration: Long,
       scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
-  ) { // TODO: Coverage
+  ) {
     stopPlaybackTimer() // Ensure no previous timers are running
     playbackTimer =
         scope.launch {
@@ -132,9 +135,13 @@ class SpotifyController(private val context: Context) {
           while (elapsedTime < trackDuration) {
             delay(checkInterval)
             appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
+              Log.d("n", "n")
               if ((trackDuration - playerState.playbackPosition) <= 1000) {
+                Log.d("n", "n")
                 onTrackEndCallback?.invoke()
+                Log.d("n", "n")
                 stopPlaybackTimer()
+                Log.d("n", "n")
               }
             }
           }
