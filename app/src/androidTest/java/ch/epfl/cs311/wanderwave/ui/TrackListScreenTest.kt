@@ -77,6 +77,12 @@ class TrackListScreenTest : TestCase() {
         onComposeScreen<TrackListScreen>(composeTestRule) {
           assertIsDisplayed()
 
+          // add text to the search bar :
+          searchBar {
+            assertIsDisplayed()
+            performTextInput("search")
+          }
+
           trackButton {
             assertIsDisplayed()
             assert(hasClickAction())

@@ -58,8 +58,6 @@ constructor(
     }
   }
 
-
-
   /**
    * Plays the given track using the SpotifyController.
    *
