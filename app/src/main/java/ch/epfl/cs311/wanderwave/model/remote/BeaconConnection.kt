@@ -6,6 +6,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -14,16 +15,15 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
 
-class BeaconConnection @Inject constructor(private val database: FirebaseFirestore? = null, val trackConnection:TrackConnection) :
+class BeaconConnection
+@Inject
+constructor(private val database: FirebaseFirestore? = null, val trackConnection: TrackConnection) :
     FirebaseConnection<Beacon, Beacon>(), BeaconRepository {
 
   override val collectionName: String = "beacons"
 
   override val getItemId = { beacon: Beacon -> beacon.id }
-
-
 
   override val db = database ?: super.db
 

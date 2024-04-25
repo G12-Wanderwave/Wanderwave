@@ -36,7 +36,6 @@ class DataClassesTest {
 
     beaconConnection = BeaconConnection(trackConnection = trackConnection)
 
-
     // Set up the document mock to return some tracks
     every { document.id } returns "someId"
     every { document["title"] } returns "someTitle"
