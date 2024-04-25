@@ -173,7 +173,7 @@ public class BeaconConnectionTest {
     beaconConnection.addItemWithId(beacon)
 
     // Verify that the set function is called on the document with the correct id
-    verify { collectionReference.document(any()) }
+    verify { collectionReference.document(beacon.id) }
   }
 
   @Test
