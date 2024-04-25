@@ -143,14 +143,14 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
   }
 
   override fun itemToMap(beacon: Beacon): Map<String, Any> {
-    val beaconMap: HashMap<String, Any> = beacon.toMap() as HashMap<String, Any>
-    //            hashMapOf(
-    //                "id" to beacon.id,
-    //                "location" to beacon.location.toMap(),
-    //                "tracks" to
-    //                        beacon.tracks.map { track ->
-    //                            db.collection(trackConnection.collectionName).document(track.id)
-    //                        })
+    val beaconMap: HashMap<String, Any> =
+        hashMapOf(
+            "id" to beacon.id,
+            "location" to beacon.location.toMap(),
+            "tracks" to
+                beacon.profileAndTrack.map { track ->
+                  db.collection(trackConnection.collectionName).document(track.track.id)
+                })
     return beaconMap
   }
 
@@ -162,7 +162,7 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
           val beacon = Beacon.from(snapshot)
           beacon?.let {
             val newTracks = ArrayList(it.profileAndTrack).apply { add(track) }
-            transaction.update(beaconRef, "tracks", newTracks.map { it.toMap() })
+            transaction.update(beaconRef, "tracks", newTracks.map { it.track.toMap() })
           } ?: throw Exception("Beacon not found")
         }
         .addOnSuccessListener { onComplete(true) }
