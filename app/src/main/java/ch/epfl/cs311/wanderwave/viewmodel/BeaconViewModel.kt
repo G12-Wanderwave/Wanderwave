@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Beacon
@@ -46,6 +47,7 @@ class BeaconViewModel @Inject constructor(private val beaconRepository: BeaconRe
 
   fun getBeaconById(id: String) {
     viewModelScope.launch {
+      Log.d("BeaconViewModel", "Fetching beacon with id: $id")
       beaconRepository.getItem(id).collect { fetchedBeacon ->
         _uiState.value = UIState(beacon = fetchedBeacon, isLoading = false)
       }

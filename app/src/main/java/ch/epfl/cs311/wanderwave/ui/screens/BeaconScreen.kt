@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
+import android.util.Log
 import androidx.compose.material3.HorizontalDivider
 
 import androidx.compose.animation.core.AnimationSpec
@@ -76,9 +77,9 @@ fun BeaconScreen(
     viewModel: BeaconViewModel = hiltViewModel()
 ) {
   LaunchedEffect(beaconId) {
-    println(beaconId)
     if (beaconId != null) {
       viewModel.getBeaconById(beaconId)
+      Log.d("BeaconScreen", "uiState : ${viewModel.uiState.value}")
     }
   }
 
@@ -174,7 +175,7 @@ fun SongList(beacon: Beacon, navigationActions: NavigationActions) {
           Text(
               text = stringResource(R.string.beaconTracksTitle),
               style = MaterialTheme.typography.headlineMedium,
-              modifier = Modifier)
+              modifier = Modifier.testTag("beaconTracksTitle"))
           IconButton(onClick = { showDialog = true }) { // Toggle dialog visibility
             Icon(
                 imageVector = Icons.Filled.Add,
