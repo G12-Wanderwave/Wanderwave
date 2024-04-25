@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import ch.epfl.cs311.wanderwave.di.ConnectionModule
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
@@ -391,7 +392,23 @@ public class BeaconConnectionTest {
   fun testAddTrackToBeacon() {
     // Mock data
     val track = Track("testTrackId", "Test Title", "Test Artist")
-    val beacon = Beacon("testBeaconId", Location(1.0, 1.0, "Test Location"), listOf(track))
+    val beacon =
+        Beacon(
+            id = "testBeacon",
+            location = Location(1.0, 1.0, "Test Location"),
+            profileAndTrack =
+            listOf(
+                ProfileTrackAssociation(
+                    Profile(
+                        "Sample First Name",
+                        "Sample last name",
+                        "Sample desc",
+                        0,
+                        false,
+                        null,
+                        "Sample Profile ID",
+                        "Sample Track ID"),
+                    Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
     // Mock the Task
     val mockTask = mockk<Task<Transaction>>()
@@ -399,7 +416,22 @@ public class BeaconConnectionTest {
     val mockDocumentSnapshot = mockk<DocumentSnapshot>()
 
     val getTestBeacon =
-        Beacon(id = "testBeacon", location = Location(1.0, 1.0, "Test Location"), tracks = listOf())
+        Beacon(
+            id = "testBeacon",
+            location = Location(1.0, 1.0, "Test Location"),
+            profileAndTrack =
+            listOf(
+                ProfileTrackAssociation(
+                    Profile(
+                        "Sample First Name",
+                        "Sample last name",
+                        "Sample desc",
+                        0,
+                        false,
+                        null,
+                        "Sample Profile ID",
+                        "Sample Track ID"),
+                    Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
     every { mockTransaction.get(any<DocumentReference>()) } returns mockDocumentSnapshot
     every { mockTransaction.update(any<DocumentReference>(), any<String>(), any()) } answers
@@ -410,7 +442,7 @@ public class BeaconConnectionTest {
     every { mockDocumentSnapshot.exists() } returns true
     every { mockDocumentSnapshot.id } returns getTestBeacon.id
     every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
-    every { mockDocumentSnapshot.get("tracks") } returns getTestBeacon.tracks
+    every { mockDocumentSnapshot.get("tracks") } returns getTestBeacon.profileAndTrack
 
     // Define behavior for the addOnSuccessListener method
     every { mockTask.addOnSuccessListener(any<OnSuccessListener<Transaction>>()) } answers
@@ -432,6 +464,14 @@ public class BeaconConnectionTest {
     // unfortunately I have no idea how to test in a better way this, I've let the start of the
     // framework but that's all
     // verify { mockTransaction.update(any<DocumentReference>(),"tracks", Any()) }
+  }
+
+  @Test
+  fun provideBeaconRepository_returnsBeaconConnection() {
+    // delete as soon as possible
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    val beaconRepository = ConnectionModule.provideBeaconRepository(context)
+    assertEquals(BeaconConnection::class.java, beaconRepository::class.java)
   }
 
   @Test
