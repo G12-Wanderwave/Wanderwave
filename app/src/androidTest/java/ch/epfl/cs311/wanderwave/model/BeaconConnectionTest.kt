@@ -14,6 +14,7 @@ import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.localDb.PlaceHolderEntity
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
+import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
@@ -314,6 +315,37 @@ public class BeaconConnectionTest {
       // Verify that the get function is called on the document with the correct id
       coVerify { documentReference.get() }
       assertEquals(getTestBeacon, retrievedBeacon)
+    }
+  }
+
+  @Test
+  fun testGetItemFailure() {
+    runBlocking {
+      withTimeout(3000) {
+        // Mock the Task
+        val mockTask = mockk<Task<DocumentSnapshot>>()
+
+        // Define behavior for the addOnSuccessListener method
+        every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentSnapshot>>()) } answers
+            {
+              mockTask
+            }
+        every { mockTask.addOnFailureListener(any()) } answers
+            {
+              val listener = arg<OnFailureListener>(0)
+              listener.onFailure(Exception("Test Exception"))
+
+              mockTask
+            }
+
+        // Define behavior for the get() method on the DocumentReference to return the mock task
+        every { documentReference.get() } returns mockTask
+
+        beaconConnection.getItem("testBeacon")
+
+        // Verify that the get function is called on the document with the correct id
+        coVerify { documentReference.get() }
+      }
     }
   }
 
