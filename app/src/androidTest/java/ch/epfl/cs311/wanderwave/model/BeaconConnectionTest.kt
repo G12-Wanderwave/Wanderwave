@@ -32,6 +32,7 @@ import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.fail
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
@@ -501,6 +502,52 @@ public class BeaconConnectionTest {
     verify { firestore.runTransaction<Transaction>(any()) }
     verify { mockTransaction.get(any<DocumentReference>()) }
     verify { mockTransaction.update(any<DocumentReference>(), "tracks", any()) }
+  }
+
+  @Test
+  fun testAddNullTrackToBeacon() {
+    // Mock data
+    val track = Track("testTrackId", "Test Title", "Test Artist")
+    val beacon = Beacon("testBeaconId", Location(1.0, 1.0, "Test Location"), listOf(track))
+
+    // Mock the Task
+    val mockTask = mockk<Task<Transaction>>()
+    val mockTransaction = mockk<Transaction>()
+    val mockDocumentSnapshot = mockk<DocumentSnapshot>()
+
+    val getTestBeacon =
+        Beacon(id = "testBeacon", location = Location(1.0, 1.0, "Test Location"), tracks = listOf())
+
+    every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap()
+    every { mockDocumentSnapshot.exists() } returns false
+
+    // Define behavior for the addOnSuccessListener method
+    every { mockTask.addOnSuccessListener(any<OnSuccessListener<Transaction>>()) } answers
+        {
+          val listener = arg<OnSuccessListener<Transaction>>(0)
+
+          // Define the behavior of the mock QuerySnapshot here
+          listener.onSuccess(mockTransaction)
+          mockTask
+        }
+    every { mockTask.addOnFailureListener(any()) } answers { mockTask }
+
+    coEvery { firestore.runTransaction<Transaction>(any()) } answers
+        {
+          val lambda = firstArg<Transaction.Function<Unit>>()
+          lambda.apply(mockTransaction)
+
+          mockk(relaxed = true)
+        }
+
+    // Call the function under test
+    try {
+      beaconConnection.addTrackToBeacon(beacon.id, track, {})
+      fail("Should have thrown an exception")
+    } catch (e: Exception) {
+      // Verify that the exception is thrown
+      verify { firestore.runTransaction<Transaction>(any()) }
+    }
   }
 
   @Test
