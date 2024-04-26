@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.model
 
 import android.content.Context
+import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import ch.epfl.cs311.wanderwave.di.ConnectionModule
 import ch.epfl.cs311.wanderwave.model.data.Beacon
@@ -26,6 +27,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -155,6 +157,46 @@ public class BeaconConnectionTest {
         coVerify { documentReference.get() }
       }
     }
+  }
+
+  @Test
+  fun testFetchTrack() = runBlocking {
+    // Mock the DocumentReference
+    val mockDocumentReference = mockk<DocumentReference>()
+
+    // Mock the DocumentSnapshot
+    val mockDocumentSnapshot = mockk<DocumentSnapshot>()
+
+    // Mock the Track
+    val mockTrack = Track("testTrackId", "Test Title", "Test Artist")
+
+    // Define behavior for the get() method on the DocumentReference to return the mock task
+    coEvery { mockDocumentReference.get() } returns mockk {
+      every { isComplete } returns true
+      every { isSuccessful } returns true
+      every { result } returns mockDocumentSnapshot
+      every { getException() } returns null
+      every { isCanceled } returns false
+    }
+
+    // Define behavior for the DocumentSnapshot
+    every { mockDocumentSnapshot.exists() } returns true
+    every { mockDocumentSnapshot.id } returns mockTrack.id
+    every { mockDocumentSnapshot.getString("title") } returns mockTrack.title
+    every { mockDocumentSnapshot.getString("artist") } returns mockTrack.artist
+
+    var retrievedTrack: Track? = null
+
+    // Call the function under test
+    async {
+      retrievedTrack = beaconConnection.fetchTrack(mockDocumentReference)
+    }.await()
+
+    // Verify that the get function is called on the document with the correct id
+    coVerify { mockDocumentReference.get() }
+
+    // Assert that the retrieved track is the same as the mock track
+    assertEquals(mockTrack, retrievedTrack)
   }
 
   @Test
