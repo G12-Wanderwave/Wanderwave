@@ -63,9 +63,9 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
             documentToItem(document)?.let { beacon ->
               dataFlow.value = beacon
 
-              val tracksObject = document.get("tracks")
+              val tracksObject = document["tracks"]
 
-              var trackRefs: List<Map<String, DocumentReference>>? = null
+              var trackRefs: List<Map<String, DocumentReference>>?
 
               if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
                 trackRefs = tracksObject as List<Map<String, DocumentReference>>
@@ -76,7 +76,7 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
                       trackRefs?.map { trackRef ->
                         // track ref is a map with a single key "track" and a DocumentReference
                         // value
-                        async { fetchTrack(trackRef.get("track")) }
+                        async { fetchTrack(trackRef["track"]) }
                       }
 
                   // Wait for all tracks to be fetched
