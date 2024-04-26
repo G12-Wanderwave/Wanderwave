@@ -455,12 +455,13 @@ public class BeaconConnectionTest {
         }
     every { mockTask.addOnFailureListener(any()) } answers { mockTask }
 
-    coEvery { firestore.runTransaction<Transaction>(any()) } answers {
-      val lambda = firstArg<Transaction.Function<Unit>>()
-      lambda.apply(mockTransaction)
+    coEvery { firestore.runTransaction<Transaction>(any()) } answers
+        {
+          val lambda = firstArg<Transaction.Function<Unit>>()
+          lambda.apply(mockTransaction)
 
-      mockk(relaxed = true)
-    }
+          mockk(relaxed = true)
+        }
 
     // Call the function under test
     beaconConnection.addTrackToBeacon(beacon.id, track, {})
