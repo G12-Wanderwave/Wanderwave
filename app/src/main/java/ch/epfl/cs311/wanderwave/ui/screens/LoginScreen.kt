@@ -2,7 +2,6 @@ package ch.epfl.cs311.wanderwave.ui.screens
 
 import android.content.Context
 import android.content.ContextWrapper
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,7 +20,6 @@ import ch.epfl.cs311.wanderwave.ui.components.login.LoginAppLogo
 import ch.epfl.cs311.wanderwave.ui.components.login.SignInButton
 import ch.epfl.cs311.wanderwave.ui.components.login.WelcomeTitle
 import ch.epfl.cs311.wanderwave.viewmodel.LoginScreenViewModel
-import com.google.firebase.firestore.FirebaseFirestore
 import com.spotify.sdk.android.auth.AuthorizationClient
 
 @Composable
@@ -61,8 +59,6 @@ fun LoginScreen(
           AuthorizationClient.createLoginActivityIntent(
               context.getActivity(), viewModel.getAuthorizationRequest())
       launcher.launch(intent)
-
-
     }
   }
 }
