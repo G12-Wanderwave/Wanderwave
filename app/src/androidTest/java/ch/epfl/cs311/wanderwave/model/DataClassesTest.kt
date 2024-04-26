@@ -170,4 +170,30 @@ class DataClassesTest {
     // assert if the track is null
     assert(track2 == null)
   }
+
+  @Test
+  fun noArgumentConstructorCreatesEmptyTrack() {
+    val track = Track()
+    assertEquals("", track.id)
+    assertEquals("", track.title)
+    assertEquals("", track.artist)
+  }
+
+  @Test
+  fun documentToTrackExistWithNullValues() {
+    every { document.exists() } returns true
+    every { document.id } returns "someId"
+    every { document.getString("title") } returns null
+    every { document.getString("artist") } returns null
+
+    val track = Track.from(document)
+    // assert if the track is not null
+    assert(track != null)
+    // assert if the track has the default values
+    assertEquals("someId", track!!.id)
+    assertEquals("", track.title)
+    assertEquals("", track.artist)
+  }
+
+
 }
