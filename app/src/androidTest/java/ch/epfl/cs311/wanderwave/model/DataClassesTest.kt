@@ -194,6 +194,4 @@ class DataClassesTest {
     assertEquals("", track.title)
     assertEquals("", track.artist)
   }
-
-
 }
