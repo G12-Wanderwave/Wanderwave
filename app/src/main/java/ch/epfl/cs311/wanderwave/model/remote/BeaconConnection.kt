@@ -137,10 +137,8 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
     db.runTransaction { transaction ->
           val snapshot = transaction.get(beaconRef)
           val beacon = Beacon.from(snapshot)
-          Log.d("Debug", "Beacon: $beacon")
           beacon?.let {
             val newTracks = ArrayList(it.tracks).apply { add(track) }
-            Log.d("Debug", "New Tracks: $newTracks")
             transaction.update(beaconRef, "tracks", newTracks.map { it.toMap() })
           } ?: throw Exception("Beacon not found")
         }
