@@ -71,7 +71,9 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
                 trackRefs = tracksObject as List<Map<String, DocumentReference>>
                 // Continue with your code
               } else {
-                Log.e("Firestore", "tracks is not a List<Map<String, DocumentReference>> (Wrong Firebase Format)")
+                Log.e(
+                    "Firestore",
+                    "tracks is not a List<Map<String, DocumentReference>> (Wrong Firebase Format)")
               }
 
               // Use a coroutine to perform asynchronous operations
@@ -79,7 +81,7 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
                 val tracksDeferred =
                     trackRefs?.map { trackRef ->
                       // track ref is a map with a single key "track" and a DocumentReference value
-                        async { fetchTrack(trackRef.get("track")) }
+                      async { fetchTrack(trackRef.get("track")) }
                     }
 
                 // Wait for all tracks to be fetched
@@ -104,7 +106,7 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
 
   // Fetch a track from a DocumentReference asynchronously
   suspend fun fetchTrack(trackRef: DocumentReference?): Track? {
-    if(trackRef == null) return null
+    if (trackRef == null) return null
     return withContext(Dispatchers.IO) {
       try {
         val trackDocument = trackRef?.get()?.await()
