@@ -160,6 +160,7 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
     db.runTransaction { transaction ->
           val snapshot = transaction.get(beaconRef)
           val beacon = Beacon.from(snapshot)
+          Log.d("Debug", "Beacon: $beacon")
           beacon?.let {
             val newTracks = ArrayList(it.profileAndTrack).apply { add(track) }
             transaction.update(beaconRef, "tracks", newTracks.map { it.track.toMap() })
