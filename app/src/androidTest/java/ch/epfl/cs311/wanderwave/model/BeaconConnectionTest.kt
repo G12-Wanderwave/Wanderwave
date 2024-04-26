@@ -1,7 +1,6 @@
 package ch.epfl.cs311.wanderwave.model
 
 import android.content.Context
-import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import ch.epfl.cs311.wanderwave.di.ConnectionModule
 import ch.epfl.cs311.wanderwave.model.data.Beacon
@@ -171,13 +170,14 @@ public class BeaconConnectionTest {
     val mockTrack = Track("testTrackId", "Test Title", "Test Artist")
 
     // Define behavior for the get() method on the DocumentReference to return the mock task
-    coEvery { mockDocumentReference.get() } returns mockk {
-      every { isComplete } returns true
-      every { isSuccessful } returns true
-      every { result } returns mockDocumentSnapshot
-      every { getException() } returns null
-      every { isCanceled } returns false
-    }
+    coEvery { mockDocumentReference.get() } returns
+        mockk {
+          every { isComplete } returns true
+          every { isSuccessful } returns true
+          every { result } returns mockDocumentSnapshot
+          every { getException() } returns null
+          every { isCanceled } returns false
+        }
 
     // Define behavior for the DocumentSnapshot
     every { mockDocumentSnapshot.exists() } returns true
@@ -188,9 +188,7 @@ public class BeaconConnectionTest {
     var retrievedTrack: Track? = null
 
     // Call the function under test
-    async {
-      retrievedTrack = beaconConnection.fetchTrack(mockDocumentReference)
-    }.await()
+    async { retrievedTrack = beaconConnection.fetchTrack(mockDocumentReference) }.await()
 
     // Verify that the get function is called on the document with the correct id
     coVerify { mockDocumentReference.get() }
