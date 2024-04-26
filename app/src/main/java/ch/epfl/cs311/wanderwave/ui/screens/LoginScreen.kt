@@ -2,6 +2,7 @@ package ch.epfl.cs311.wanderwave.ui.screens
 
 import android.content.Context
 import android.content.ContextWrapper
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,6 +21,7 @@ import ch.epfl.cs311.wanderwave.ui.components.login.LoginAppLogo
 import ch.epfl.cs311.wanderwave.ui.components.login.SignInButton
 import ch.epfl.cs311.wanderwave.ui.components.login.WelcomeTitle
 import ch.epfl.cs311.wanderwave.viewmodel.LoginScreenViewModel
+import com.google.firebase.firestore.FirebaseFirestore
 import com.spotify.sdk.android.auth.AuthorizationClient
 
 @Composable
@@ -55,10 +57,24 @@ fun LoginScreen(
     LoginAppLogo(modifier = Modifier.weight(1f))
     WelcomeTitle(modifier = Modifier.weight(4f))
     SignInButton(modifier = Modifier.weight(1f)) {
-      val intent =
-          AuthorizationClient.createLoginActivityIntent(
-              context.getActivity(), viewModel.getAuthorizationRequest())
-      launcher.launch(intent)
+      // val intent =
+      //     AuthorizationClient.createLoginActivityIntent(
+      //         context.getActivity(), viewModel.getAuthorizationRequest())
+      // launcher.launch(intent)
+
+      // clean up firebase
+      val db = FirebaseFirestore.getInstance()
+
+      db.collection("beacons")
+          .whereEqualTo("name", "STCC")
+          .get()
+          .addOnSuccessListener { documents ->
+            for (document in documents) {
+              db.collection("beacons").document(document.id).delete()
+              Log.d("Firestore", "Deleted ${document.id} => ${document.data}")
+            }
+          }
+          .addOnFailureListener { e -> Log.e("Firestore", "Error deleting document: ", e) }
     }
   }
 }
