@@ -133,7 +133,6 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
 
   override fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
     val beaconRef = db.collection("beacons").document(beaconId)
-
     db.runTransaction { transaction ->
           val snapshot = transaction.get(beaconRef)
           val beacon = Beacon.from(snapshot)

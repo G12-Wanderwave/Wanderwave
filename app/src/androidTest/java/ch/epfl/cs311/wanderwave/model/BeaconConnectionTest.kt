@@ -283,6 +283,8 @@ public class BeaconConnectionTest {
     every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap()
     every { mockDocumentSnapshot.exists() } returns false
 
+    every { mockTransaction.get(any<DocumentReference>()) } returns mockDocumentSnapshot
+
     // Define behavior for the addOnSuccessListener method
     every { mockTask.addOnSuccessListener(any<OnSuccessListener<Transaction>>()) } answers
         {
