@@ -128,6 +128,51 @@ public class BeaconConnectionTest {
   }
 
   @Test
+  fun testGetItemTrackObjectIsNotList() = runBlocking {
+    withTimeout(3000) {
+      // Mock the Task
+      val mockTask = mockk<Task<DocumentSnapshot>>()
+      val mockDocumentSnapshot = mockk<DocumentSnapshot>()
+
+      val getTestBeacon =
+          Beacon(
+              id = "testBeacon", location = Location(1.0, 1.0, "Test Location"), tracks = listOf())
+
+      every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap()
+      every { mockDocumentSnapshot.exists() } returns true
+      every { mockDocumentSnapshot.id } returns getTestBeacon.id
+      every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
+
+      // not a list of maps, doesn't pass the if
+      every { mockDocumentSnapshot.get("tracks") } returns listOf("String1", "String2")
+
+      // Define behavior for the addOnSuccessListener method
+      every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentSnapshot>>()) } answers
+          {
+            val listener = arg<OnSuccessListener<DocumentSnapshot>>(0)
+
+            // Define the behavior of the mock DocumentSnapshot here
+            listener.onSuccess(mockDocumentSnapshot)
+            mockTask
+          }
+      every { mockTask.addOnFailureListener(any()) } answers { mockTask }
+
+      // Define behavior for the get() method on the DocumentReference to return the mock task
+      every { documentReference.get() } returns mockTask
+
+      // Call the function under test
+      beaconConnection.getItem("testBeacon").first()
+
+      // val retrievedBeacon = beaconConnection.getItem("testBeacon").first()
+
+      // Verify that the get function is called on the document with the correct id
+      coVerify { documentReference.get() }
+      // verify that fetchTrack is not called
+      // coVerify(exactly = 0) { beaconConnection.fetchTrack(any<DocumentReference>()) }
+    }
+  }
+
+  @Test
   fun testGetItemFailure() {
     runBlocking {
       withTimeout(3000) {
