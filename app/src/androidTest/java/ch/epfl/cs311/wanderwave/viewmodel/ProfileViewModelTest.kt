@@ -3,7 +3,7 @@ package ch.epfl.cs311.wanderwave.viewmodel
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.protocol.types.ListItem
 import io.mockk.clearAllMocks
@@ -39,14 +39,14 @@ class ProfileViewModelTest {
   lateinit var viewModel: ProfileViewModel
   val testDispatcher = TestCoroutineDispatcher()
   @get:Rule val mockkRule = MockKRule(this)
-  @RelaxedMockK private lateinit var profileRepositoryImpl: ProfileRepositoryImpl
+  @RelaxedMockK private lateinit var profileRepository: ProfileRepository
 
   @RelaxedMockK private lateinit var spotifyController: SpotifyController
 
   @Before
   fun setup() {
     Dispatchers.setMain(testDispatcher)
-    viewModel = ProfileViewModel(profileRepositoryImpl, spotifyController)
+    viewModel = ProfileViewModel(profileRepository, spotifyController)
   }
 
   @After
