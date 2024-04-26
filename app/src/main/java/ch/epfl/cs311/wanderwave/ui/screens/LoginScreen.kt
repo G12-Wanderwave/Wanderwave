@@ -57,24 +57,12 @@ fun LoginScreen(
     LoginAppLogo(modifier = Modifier.weight(1f))
     WelcomeTitle(modifier = Modifier.weight(4f))
     SignInButton(modifier = Modifier.weight(1f)) {
-      // val intent =
-      //     AuthorizationClient.createLoginActivityIntent(
-      //         context.getActivity(), viewModel.getAuthorizationRequest())
-      // launcher.launch(intent)
+      val intent =
+          AuthorizationClient.createLoginActivityIntent(
+              context.getActivity(), viewModel.getAuthorizationRequest())
+      launcher.launch(intent)
 
-      // clean up firebase
-      val db = FirebaseFirestore.getInstance()
 
-      db.collection("beacons")
-          .whereEqualTo("name", "STCC")
-          .get()
-          .addOnSuccessListener { documents ->
-            for (document in documents) {
-              db.collection("beacons").document(document.id).delete()
-              Log.d("Firestore", "Deleted ${document.id} => ${document.data}")
-            }
-          }
-          .addOnFailureListener { e -> Log.e("Firestore", "Error deleting document: ", e) }
     }
   }
 }
