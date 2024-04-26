@@ -229,9 +229,8 @@ public class BeaconConnectionTest {
     beaconConnection.addTrackToBeacon(beacon.id, track, {})
 
     verify { firestore.runTransaction<Transaction>(any()) }
-    // unfortunately I have no idea how to test in a better way this, I've let the start of the
-    // framework but that's all
-    // verify { mockTransaction.update(any<DocumentReference>(),"tracks", Any()) }
+    verify { mockTransaction.get(any<DocumentReference>()) }
+    verify { mockTransaction.update(any<DocumentReference>(), "tracks", any()) }
   }
 
   @Test
