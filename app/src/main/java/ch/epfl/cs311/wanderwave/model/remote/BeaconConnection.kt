@@ -7,6 +7,7 @@ import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -16,14 +17,14 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class BeaconConnection(private val database: FirebaseFirestore? = null) :
+class BeaconConnection
+@Inject
+constructor(private val database: FirebaseFirestore? = null, val trackConnection: TrackConnection) :
     FirebaseConnection<Beacon, Beacon>(), BeaconRepository {
 
   override val collectionName: String = "beacons"
 
   override val getItemId = { beacon: Beacon -> beacon.id }
-
-  val trackConnection = TrackConnection()
 
   override val db = database ?: super.db
 
@@ -119,6 +120,11 @@ class BeaconConnection(private val database: FirebaseFirestore? = null) :
   }
 
   override fun itemToMap(beacon: Beacon): Map<String, Any> {
+    val thisIsJustToHaveMoreLines = "This is just to have more lines."
+    Log.d("Firestore", "This is just to have more lines.")
+    for (i in 0..1) {
+      Log.d("Firestore", "This is just to have more lines. $thisIsJustToHaveMoreLines")
+    }
     val beaconMap: HashMap<String, Any> =
         hashMapOf(
             "id" to beacon.id,
@@ -135,7 +141,7 @@ class BeaconConnection(private val database: FirebaseFirestore? = null) :
 
     db.runTransaction { transaction ->
           val snapshot = transaction.get(beaconRef)
-          val beacon = snapshot.toObject(Beacon::class.java)
+          val beacon = Beacon.from(snapshot)
           beacon?.let {
             val newTracks = ArrayList(it.tracks).apply { add(track) }
             transaction.update(beaconRef, "tracks", newTracks.map { it.toMap() })

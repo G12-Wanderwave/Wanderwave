@@ -5,12 +5,14 @@ import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.DocumentSnapshot
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -20,14 +22,17 @@ class DataClassesTest {
   // Testing of all the data classes, I think it's better to test them all together
   @get:Rule val mockkRule = MockKRule(this)
   private lateinit var beaconConnection: BeaconConnection
+  private lateinit var trackConnection: TrackConnection
 
   @RelaxedMockK private lateinit var document: DocumentSnapshot
 
   @Before
   fun setup() {
-    beaconConnection = BeaconConnection()
-
     MockKAnnotations.init(this)
+
+    trackConnection = mockk<TrackConnection>(relaxed = true)
+
+    beaconConnection = BeaconConnection(trackConnection = trackConnection)
 
     // Set up the document mock to return some tracks
     every { document.id } returns "someId"
