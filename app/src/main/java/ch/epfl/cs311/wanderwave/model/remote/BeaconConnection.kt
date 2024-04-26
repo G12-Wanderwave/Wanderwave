@@ -69,27 +69,25 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
 
               if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
                 trackRefs = tracksObject as List<Map<String, DocumentReference>>
-                // Continue with your code
+                // Continue with the code
+                // Use a coroutine to perform asynchronous operations
+                coroutineScope.launch {
+                  val tracksDeferred =
+                      trackRefs?.map { trackRef ->
+                        // track ref is a map with a single key "track" and a DocumentReference
+                        // value
+                        async { fetchTrack(trackRef.get("track")) }
+                      }
+
+                  // Wait for all tracks to be fetched
+                  val tracks = tracksDeferred?.mapNotNull { it?.await() }
+
+                  // Update the beacon with the complete list of tracks
+                  val updatedBeacon = beacon.copy(tracks = tracks ?: emptyList())
+                  dataFlow.value = updatedBeacon
+                }
               } else {
-                Log.e(
-                    "Firestore",
-                    "tracks is not a List<Map<String, DocumentReference>> (Wrong Firebase Format)")
-              }
-
-              // Use a coroutine to perform asynchronous operations
-              coroutineScope.launch {
-                val tracksDeferred =
-                    trackRefs?.map { trackRef ->
-                      // track ref is a map with a single key "track" and a DocumentReference value
-                      async { fetchTrack(trackRef.get("track")) }
-                    }
-
-                // Wait for all tracks to be fetched
-                val tracks = tracksDeferred?.mapNotNull { it?.await() }
-
-                // Update the beacon with the complete list of tracks
-                val updatedBeacon = beacon.copy(tracks = tracks ?: emptyList())
-                dataFlow.value = updatedBeacon
+                Log.e("Firestore", "tracks has Wrong Firebase Format")
               }
             }
           } else {
