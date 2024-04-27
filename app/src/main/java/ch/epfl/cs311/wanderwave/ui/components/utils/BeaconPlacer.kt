@@ -1,23 +1,18 @@
-package ch.epfl.cs311.wanderwave.ui.components.beacons
+package ch.epfl.cs311.wanderwave.ui.components.utils
 
-import androidx.compose.runtime.Composable
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
-import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import com.google.android.gms.maps.model.LatLng
-import java.lang.Math.random
 import kotlin.math.*
 import kotlin.random.Random
 
 private const val EARTH_RADIUS_M = 6371000.0
 private const val BEACON_RADIUS = 1000.0
 private const val BEACON_COUNT = 20
-@Composable
-fun placeBeaconRandomly( viewModel: MapViewModel,location: LatLng){
-    val beacons: List<Beacon> = viewModel.uiState.collectAsStateWithLifecycle().value.beacons
+
+fun placeBeaconsRandomly( beacons:List<Beacon>,location: LatLng):List<Beacon>{
+    var finalBeacons = mutableListOf<Beacon>()
     if (countNearbyBeacons(location,beacons, BEACON_RADIUS) < BEACON_COUNT) {
-        var finalBeacons = beacons.toMutableList()
         var currentMaxDistance = 0.0
         repeat (5){
             val newBeacons = mutableListOf<Beacon>()
@@ -25,17 +20,16 @@ fun placeBeaconRandomly( viewModel: MapViewModel,location: LatLng){
                 findRandomBeacon(location, newBeacons, it)
             }
             var newMaxDistance = computeDistanceBetweenBeacons(newBeacons, beacons)
-
-            if(newMaxDistance>currentMaxDistance){
+            if(newMaxDistance>currentMaxDistance || finalBeacons.isEmpty()){
                 currentMaxDistance = newMaxDistance
                 finalBeacons = newBeacons
             }
         }
-
         //TODO: add the beacons to the repo or firebase or whatever
         //These are the beacons that are to be added : finalBeacons
     }
 
+    return finalBeacons
 
 }
 fun computeDistanceBetweenBeacons(newBeacons: MutableList<Beacon>, beacons: List<Beacon>):Double{
@@ -79,7 +73,7 @@ fun randomLatLongFromPosition(userPosition: LatLng, distance: Double): LatLng{
     val lonRad = Math.toRadians(userPosition.longitude)
 
     val bearing = Random.nextDouble(0.0, 2 * Math.PI)
-    val angularDistance = distance / EARTH_RADIUS_M
+    val angularDistance = Random.nextDouble(distance) / EARTH_RADIUS_M
 
     // New latitude in radians
     val newLat = asin(sin(latRad) * cos(angularDistance) +
