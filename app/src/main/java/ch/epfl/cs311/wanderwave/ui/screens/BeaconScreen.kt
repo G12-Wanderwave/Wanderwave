@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
-import android.util.Log
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.Image
@@ -219,9 +218,6 @@ internal fun TrackItem(
                 Modifier.size(width = 150.dp, height = 100.dp)
                     .clickable(
                         onClick = {
-                          Log.d(
-                              "BeaconScreen",
-                              "Navigating to profile ${profileAndTrack.profile.firebaseUid}")
                           navigationActions.navigateToProfile(profileAndTrack.profile.firebaseUid)
                         }),
             profile = profileAndTrack.profile,
