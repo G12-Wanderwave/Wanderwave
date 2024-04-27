@@ -99,8 +99,6 @@ private fun BeaconScreenPreview() {
               listOf(
                   ProfileTrackAssociation(Profile("e","a","a",0,false,null,"1","2"),
                       Track("a", "Never gonna let you mn,mn,mn,mn,mn,mn,nmn,m", "Rick Astley")),
-//                  Track("b", "Take on me", "A-ha"),
-//                  Track("c", "Africa", "Toto"),
               ),
       )
     val navController = rememberNavController()
