@@ -1,0 +1,96 @@
+package ch.epfl.cs311.wanderwave.ui.components.beacons
+
+import androidx.compose.runtime.Composable
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ch.epfl.cs311.wanderwave.model.data.Beacon
+import ch.epfl.cs311.wanderwave.model.data.Location
+import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
+import com.google.android.gms.maps.model.LatLng
+import java.lang.Math.random
+import kotlin.math.*
+import kotlin.random.Random
+
+private const val EARTH_RADIUS_M = 6371000.0
+private const val BEACON_RADIUS = 1000.0
+private const val BEACON_COUNT = 20
+@Composable
+fun placeBeaconRandomly( viewModel: MapViewModel,location: LatLng){
+    val beacons: List<Beacon> = viewModel.uiState.collectAsStateWithLifecycle().value.beacons
+    if (countNearbyBeacons(location,beacons, BEACON_RADIUS) < BEACON_COUNT) {
+        var finalBeacons = beacons.toMutableList()
+        var currentMaxDistance = 0.0
+        repeat (5){
+            val newBeacons = mutableListOf<Beacon>()
+            repeat(BEACON_COUNT - countNearbyBeacons(location,beacons, BEACON_RADIUS)) {
+                findRandomBeacon(location, newBeacons, it)
+            }
+            var newMaxDistance = computeDistanceBetweenBeacons(newBeacons, beacons)
+
+            if(newMaxDistance>currentMaxDistance){
+                currentMaxDistance = newMaxDistance
+                finalBeacons = newBeacons
+            }
+        }
+
+        //TODO: add the beacons to the repo or firebase or whatever
+        //These are the beacons that are to be added : finalBeacons
+    }
+
+
+}
+fun computeDistanceBetweenBeacons(newBeacons: MutableList<Beacon>, beacons: List<Beacon>):Double{
+    var distance = 0.0
+    newBeacons.forEach { beacon ->
+        beacons.forEach{ existingBeacon ->
+            distance+= haversine(beacon.location.toLatLng(), existingBeacon.location.toLatLng())
+        }
+    }
+    return distance
+}
+fun findRandomBeacon(location: LatLng, newBeacons: MutableList<Beacon>, it: Int) {
+    val randomLocation = randomLatLongFromPosition(
+        location,
+        BEACON_RADIUS
+    )
+    val newBeacon = Beacon(
+        id = "beacon${newBeacons.size + it}",//TODO: modify the ID!!!!!!!!
+        location = Location(randomLocation.latitude, randomLocation.longitude)
+    )
+    newBeacons.add(newBeacon)
+}
+fun haversine(position1:LatLng, position2:LatLng): Double {
+    val latDistance = Math.toRadians(position2.latitude - position1.latitude)
+    val lonDistance = Math.toRadians(position2.longitude - position1.longitude)
+    val a = sin(latDistance / 2).pow(2) +
+            (cos(Math.toRadians(position1.latitude)) * cos(Math.toRadians(position2.latitude)) *
+                    sin(lonDistance / 2).pow(2))
+    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    return EARTH_RADIUS_M * c
+}
+
+fun countNearbyBeacons(userPosition: LatLng, beacons:List<Beacon>,  radius: Double): Int {
+    var count = 0
+    beacons.forEach { beacon-> if( (haversine(userPosition,beacon.location.toLatLng()))<radius){ count++ }}
+    return count
+}
+
+fun randomLatLongFromPosition(userPosition: LatLng, distance: Double): LatLng{
+    val latRad = Math.toRadians(userPosition.latitude)
+    val lonRad = Math.toRadians(userPosition.longitude)
+
+    val bearing = Random.nextDouble(0.0, 2 * Math.PI)
+    val angularDistance = distance / EARTH_RADIUS_M
+
+    // New latitude in radians
+    val newLat = asin(sin(latRad) * cos(angularDistance) +
+            cos(latRad) * sin(angularDistance) * cos(bearing))
+
+    // New longitude in radians
+    val newLon = lonRad + atan2(sin(bearing) * sin(angularDistance) * cos(latRad),
+        cos(angularDistance) - sin(latRad) * sin(newLat))
+
+    val newLatDeg = Math.toDegrees(newLat)
+    val newLonDeg = Math.toDegrees(newLon)
+
+    return LatLng(newLatDeg, newLonDeg)
+}
