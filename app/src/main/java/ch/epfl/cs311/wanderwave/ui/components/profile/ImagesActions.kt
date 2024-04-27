@@ -30,7 +30,7 @@ import coil.compose.AsyncImage
  * @last update 1.0
  */
 @Composable
-fun SelectImage(modifier: Modifier, profile: Profile){
+fun SelectImage(modifier: Modifier, profile: Profile) {
   if (profile.profilePictureUri != null) {
     AsyncImage(
         model = profile.profilePictureUri,
