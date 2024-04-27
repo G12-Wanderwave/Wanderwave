@@ -5,7 +5,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.ui.components.utils.computeDistanceBetweenBeacons
-import ch.epfl.cs311.wanderwave.ui.components.utils.countNearbyBeacons
+import ch.epfl.cs311.wanderwave.ui.components.utils.findNearbyBeacons
 import ch.epfl.cs311.wanderwave.ui.components.utils.findRandomBeacon
 import ch.epfl.cs311.wanderwave.ui.components.utils.haversine
 import ch.epfl.cs311.wanderwave.ui.components.utils.placeBeaconsRandomly
@@ -101,18 +101,45 @@ fun haversine_returnsCorrectDistance() {
     assertTrue(result > 0)
 }
 
-@Test
-fun countNearbyBeacons_returnsCorrectCount() {
-    val userPosition = LatLng(46.519962, 6.633597)
-    val beacons = listOf(
-        Beacon("beacon1", Location(46.51992, 6.63357)),
-        Beacon("beacon2", Location(46.52096, 6.63459))
-    )
+    @Test
+    fun findNearbyBeacons_returnsOnlyBeaconsWithinRadius() {
+        val userPosition = LatLng(46.519962, 6.633597)
+        val beacons = listOf(
+            Beacon("beacon1", Location(46.519962, 6.633597)),  // within radius
+            Beacon("beacon2", Location(46.520962, 6.634597)),  // within radius
+            Beacon("beacon3", Location(46.529962, 6.644597))   // outside radius
+        )
 
-    val result = countNearbyBeacons(userPosition, beacons, 1000.0)
+        val result = findNearbyBeacons(userPosition, beacons, 1000.0)
 
-    assertEquals(2, result)
-}
+        assertEquals(2, result.size)
+    }
+
+    @Test
+    fun findNearbyBeacons_returnsEmptyListWhenNoBeaconsWithinRadius() {
+        val userPosition = LatLng(46.519962, 6.633597)
+        val beacons = listOf(
+            Beacon("beacon1", Location(46.529962, 6.644597)),  // outside radius
+            Beacon("beacon2", Location(46.539962, 6.654597))   // outside radius
+        )
+
+        val result = findNearbyBeacons(userPosition, beacons, 1000.0)
+
+        assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun findNearbyBeacons_returnsAllBeaconsWhenAllWithinRadius() {
+        val userPosition = LatLng(46.519962, 6.633597)
+        val beacons = listOf(
+            Beacon("beacon1", Location(46.519962, 6.633597)),  // within radius
+            Beacon("beacon2", Location(46.520962, 6.634597))   // within radius
+        )
+
+        val result = findNearbyBeacons(userPosition, beacons, 1000.0)
+
+        assertEquals(beacons.size, result.size)
+    }
 
 @Test
 fun randomLatLongFromPosition_returnsLocationWithinDistance() {

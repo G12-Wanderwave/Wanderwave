@@ -9,14 +9,15 @@ import kotlin.random.Random
 private const val EARTH_RADIUS_M = 6371000.0
 private const val BEACON_RADIUS = 1000.0
 private const val BEACON_COUNT = 20
-
+private const val NUMBER_ITERATION = 5
 fun placeBeaconsRandomly( beacons:List<Beacon>,location: LatLng):List<Beacon>{
     var finalBeacons = mutableListOf<Beacon>()
-    if (countNearbyBeacons(location,beacons, BEACON_RADIUS) < BEACON_COUNT) {
+    var nearbyBeacons = findNearbyBeacons(location,beacons, BEACON_RADIUS)
+    if ( nearbyBeacons.size< BEACON_COUNT) {
         var currentMaxDistance = 0.0
-        repeat (5){
+        repeat (NUMBER_ITERATION){
             val newBeacons = mutableListOf<Beacon>()
-            repeat(BEACON_COUNT - countNearbyBeacons(location,beacons, BEACON_RADIUS)) {
+            repeat(BEACON_COUNT - nearbyBeacons.size) {
                 findRandomBeacon(location, newBeacons, it)
             }
             var newMaxDistance = computeDistanceBetweenBeacons(newBeacons, beacons)
@@ -62,10 +63,10 @@ fun haversine(position1:LatLng, position2:LatLng): Double {
     return EARTH_RADIUS_M * c
 }
 
-fun countNearbyBeacons(userPosition: LatLng, beacons:List<Beacon>,  radius: Double): Int {
-    var count = 0
-    beacons.forEach { beacon-> if( (haversine(userPosition,beacon.location.toLatLng()))<radius){ count++ }}
-    return count
+fun findNearbyBeacons(userPosition: LatLng, beacons:List<Beacon>,  radius: Double): List<Beacon> {
+    var nearbyBeacons = mutableListOf<Beacon>()
+    beacons.forEach { beacon-> if( (haversine(userPosition,beacon.location.toLatLng()))<radius){ nearbyBeacons+=beacon } }
+    return nearbyBeacons
 }
 
 fun randomLatLongFromPosition(userPosition: LatLng, distance: Double): LatLng{
