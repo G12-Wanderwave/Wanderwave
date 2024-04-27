@@ -74,6 +74,10 @@ class NavigationActions(navController: NavHostController) {
     navigationController.navigate("${Route.BEACON.routeString}/$beaconId")
     _currentRouteFlow.value = Route.BEACON
   }
+  fun navigateToProfile(profileId: String) {
+    navigationController.navigate("${Route.PROFILE.routeString}/$profileId")
+    _currentRouteFlow.value = Route.PROFILE
+  }
 
   fun navigateToProfile(profileId: String) {
     navigationController.navigate("${Route.PROFILE.routeString}/$profileId")
