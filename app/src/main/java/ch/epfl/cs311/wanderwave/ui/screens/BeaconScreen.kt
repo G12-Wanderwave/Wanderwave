@@ -76,12 +76,10 @@ fun BeaconScreen(
 
   val uiState = viewModel.uiState.collectAsState().value
   Column(
-      modifier = Modifier
-          .fillMaxSize()
-          .padding(16.dp),
+      modifier = Modifier.fillMaxSize().padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         if (!uiState.isLoading) {
-          BeaconScreen(beacon = uiState.beacon!!,navigationActions = navigationActions)
+          BeaconScreen(beacon = uiState.beacon!!, navigationActions = navigationActions)
         } else {
           LoadingScreen()
         }
@@ -97,25 +95,23 @@ private fun BeaconScreenPreview() {
           location = Location(latitude = 46.519962, longitude = 6.633597, name = "EPFL"),
           profileAndTrack =
               listOf(
-                  ProfileTrackAssociation(Profile("e","a","a",0,false,null,"1","2"),
+                  ProfileTrackAssociation(
+                      Profile("e", "a", "a", 0, false, null, "1", "2"),
                       Track("a", "Never gonna let you mn,mn,mn,mn,mn,mn,nmn,m", "Rick Astley")),
               ),
       )
-    val navController = rememberNavController()
-    val actions = remember(navController) { NavigationActions(navController) }
-    WanderwaveTheme { BeaconScreen(previewBeacon,actions) }
+  val navController = rememberNavController()
+  val actions = remember(navController) { NavigationActions(navController) }
+  WanderwaveTheme { BeaconScreen(previewBeacon, actions) }
 }
 
 @Composable
-private fun BeaconScreen(beacon: Beacon, navigationActions: NavigationActions){
+private fun BeaconScreen(beacon: Beacon, navigationActions: NavigationActions) {
   Column(
-      modifier = Modifier
-          .fillMaxSize()
-          .padding(8.dp)
-          .testTag("beaconScreen"),
+      modifier = Modifier.fillMaxSize().padding(8.dp).testTag("beaconScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
-        SongList(beacon,navigationActions)
+        SongList(beacon, navigationActions)
       }
 }
 
@@ -139,12 +135,11 @@ fun BeaconInformation(location: Location) {
                 CameraPosition(LatLng(location.latitude, location.longitude), 15f, 0f, 0f)),
         locationSource = null,
         modifier =
-        Modifier
-            .fillMaxWidth()
-            .aspectRatio(4f / 3)
-            .padding(4.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .testTag("beaconMap"),
+            Modifier.fillMaxWidth()
+                .aspectRatio(4f / 3)
+                .padding(4.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .testTag("beaconMap"),
         controlsEnabled = false,
     ) {
       BeaconMapMarker(location.toLatLng(), location.name)
@@ -159,36 +154,29 @@ fun SongList(beacon: Beacon, navigationActions: NavigationActions) {
       text = stringResource(R.string.beaconTracksTitle),
       style = MaterialTheme.typography.displayMedium,
       modifier = Modifier.testTag("beaconTracksTitle"))
-  LazyColumn { items(beacon.profileAndTrack) { TrackItem(it,navigationActions) } }
+  LazyColumn { items(beacon.profileAndTrack) { TrackItem(it, navigationActions) } }
 }
 
 @Composable
-internal fun TrackItem(profileAndTrack: ProfileTrackAssociation, navigationActions: NavigationActions) {
-    val scrollState = rememberScrollState()
-    val scope = rememberCoroutineScope()
-    val slowScrollAnimation: AnimationSpec<Float> = TweenSpec(
-        durationMillis = 5000,
-        easing = { it }
-    )
+internal fun TrackItem(
+    profileAndTrack: ProfileTrackAssociation,
+    navigationActions: NavigationActions
+) {
+  val scrollState = rememberScrollState()
+  val scope = rememberCoroutineScope()
+  val slowScrollAnimation: AnimationSpec<Float> = TweenSpec(durationMillis = 5000, easing = { it })
 
-    LaunchedEffect(key1 = true) {
-        while (true) {
-            scope.launch {
-                scrollState.animateScrollTo(
-                    value = scrollState.maxValue,
-                    animationSpec = slowScrollAnimation
-                )
-            }
-            delay(6000)
-            scope.launch {
-                scrollState.animateScrollTo(
-                    value = 0,
-                    animationSpec = slowScrollAnimation
-                )
-            }
-            delay(6000)
-        }
+  LaunchedEffect(key1 = true) {
+    while (true) {
+      scope.launch {
+        scrollState.animateScrollTo(
+            value = scrollState.maxValue, animationSpec = slowScrollAnimation)
+      }
+      delay(6000)
+      scope.launch { scrollState.animateScrollTo(value = 0, animationSpec = slowScrollAnimation) }
+      delay(6000)
     }
+  }
 
   Card(
       colors =
@@ -197,58 +185,44 @@ internal fun TrackItem(profileAndTrack: ProfileTrackAssociation, navigationActio
               CardDefaults.cardColors().contentColor,
               CardDefaults.cardColors().disabledContainerColor,
               CardDefaults.cardColors().disabledContentColor),
-      modifier = Modifier
-          .height(80.dp)
-          .fillMaxWidth()
-          .padding(4.dp)
-          .testTag("trackItem"),
-      ){
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Box(
-              modifier = Modifier
-                  .fillMaxHeight()
-                  .aspectRatio(1f),
-              contentAlignment = Alignment.Center) {
-                Image(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Album Cover",
-                    modifier = Modifier.fillMaxSize(.8f),
-                )
-              }
-          Row( modifier = Modifier
-              .padding(0.dp)
-              .weight(3f)
-          ) {
-              Column(
-                  modifier = Modifier
-                      .padding(8.dp)
-                      .weight(1f)
-                      .horizontalScroll(scrollState)
-              ) {
-                  Text(
-                      text = profileAndTrack.track.title,
-                      color = MaterialTheme.colorScheme.onSurface,
-                      style = MaterialTheme.typography.titleMedium
-                  )
-                  Text(
-                      text = profileAndTrack.track.artist,
-                      color = MaterialTheme.colorScheme.onSurfaceVariant,
-                      style = MaterialTheme.typography.bodyMedium
-                  )
-              }
-              SelectImage(
-                  modifier = Modifier
-                      .size(width = 150.dp, height = 100.dp)
-                      .clickable(onClick = {
-                          Log.d("BeaconScreen", "Navigating to profile ${profileAndTrack.profile.firebaseUid}")
-                          navigationActions.navigateToProfile(profileAndTrack.profile.firebaseUid)
-                      }),
-                  profile = profileAndTrack.profile,
-
-                  )
+      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem"),
+  ) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Box(
+          modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+          contentAlignment = Alignment.Center) {
+            Image(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = "Album Cover",
+                modifier = Modifier.fillMaxSize(.8f),
+            )
           }
+      Row(modifier = Modifier.padding(0.dp).weight(3f)) {
+        Column(modifier = Modifier.padding(8.dp).weight(1f).horizontalScroll(scrollState)) {
+          Text(
+              text = profileAndTrack.track.title,
+              color = MaterialTheme.colorScheme.onSurface,
+              style = MaterialTheme.typography.titleMedium)
+          Text(
+              text = profileAndTrack.track.artist,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              style = MaterialTheme.typography.bodyMedium)
         }
+        SelectImage(
+            modifier =
+                Modifier.size(width = 150.dp, height = 100.dp)
+                    .clickable(
+                        onClick = {
+                          Log.d(
+                              "BeaconScreen",
+                              "Navigating to profile ${profileAndTrack.profile.firebaseUid}")
+                          navigationActions.navigateToProfile(profileAndTrack.profile.firebaseUid)
+                        }),
+            profile = profileAndTrack.profile,
+        )
       }
+    }
+  }
 }

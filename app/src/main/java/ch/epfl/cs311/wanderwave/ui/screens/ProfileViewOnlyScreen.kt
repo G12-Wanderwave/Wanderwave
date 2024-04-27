@@ -19,10 +19,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.profile.ClickableIcon
@@ -43,26 +41,24 @@ import ch.epfl.cs311.wanderwave.viewmodel.SongList
 @Composable
 fun ProfileViewOnlyScreen(profileId: String, navigationActions: NavigationActions) {
 
-    val viewModel: ProfileViewModel = hiltViewModel()
-    LaunchedEffect(profileId) {
-        println(profileId)
-        if (profileId != null) {
-            viewModel.getProfileByID(profileId)
-        }
+  val viewModel: ProfileViewModel = hiltViewModel()
+  LaunchedEffect(profileId) {
+    println(profileId)
+    if (profileId != null) {
+      viewModel.getProfileByID(profileId)
     }
+  }
 
-    val uiState = viewModel.uiState.collectAsState().value
+  val uiState = viewModel.uiState.collectAsState().value
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            ClickableIcon(
-                modifier = Modifier.align(Alignment.CenterEnd),
-                icon = Icons.Default.ArrowBack,
-                onClick = {
-                    navigationActions?.goBack()
-                })
-            VisitCard(Modifier, uiState.profile!!)
+          ClickableIcon(
+              modifier = Modifier.align(Alignment.CenterEnd),
+              icon = Icons.Default.ArrowBack,
+              onClick = { navigationActions?.goBack() })
+          VisitCard(Modifier, uiState.profile!!)
         }
         val mockSongLists =
             listOf(
@@ -98,9 +94,9 @@ fun showListSong(songLists: List<SongList>) {
   SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
 }
 
-//@Preview
-//@Composable
-//fun ProfileViewOnlyScreenPreview() {
+// @Preview
+// @Composable
+// fun ProfileViewOnlyScreenPreview() {
 //  ProfileViewOnlyScreen(
 //      Profile(
 //          "My FirstName",
@@ -111,4 +107,4 @@ fun showListSong(songLists: List<SongList>) {
 //          null,
 //          "My Firebase UID",
 //          "My Spotify UID"))
-//}
+// }

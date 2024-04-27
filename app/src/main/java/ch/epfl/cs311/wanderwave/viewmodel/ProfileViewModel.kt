@@ -2,7 +2,6 @@ package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
@@ -166,7 +165,7 @@ constructor(
     }
   }
 
-  //TODO: See agaim, i just adapt what was in BeaconViewModel
+  // TODO: See agaim, i just adapt what was in BeaconViewModel
   fun getProfileByID(id: String) {
     viewModelScope.launch {
       profileRepository.getItem(id).collect { fetchedProfile ->
@@ -174,9 +173,10 @@ constructor(
       }
     }
   }
+
   data class UIState(
-    val profile: Profile? = null,
-    val isLoading: Boolean = true,
-    val error: String? = null
+      val profile: Profile? = null,
+      val isLoading: Boolean = true,
+      val error: String? = null
   )
 }
