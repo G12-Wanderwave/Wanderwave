@@ -1,6 +1,10 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
+import android.util.Log
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +31,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.rememberNavController
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
@@ -51,6 +58,8 @@ import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun BeaconScreen(
@@ -94,11 +103,13 @@ private fun BeaconScreenPreview() {
 //                  Track("c", "Africa", "Toto"),
               ),
       )
-  WanderwaveTheme { BeaconScreen(previewBeacon) }
+    val navController = rememberNavController()
+    val actions = remember(navController) { NavigationActions(navController) }
+    WanderwaveTheme { BeaconScreen(previewBeacon,actions) }
 }
 
 @Composable
-private fun BeaconScreen(beacon: Beacon, navigationActions: NavigationActions? = null){
+private fun BeaconScreen(beacon: Beacon, navigationActions: NavigationActions){
   Column(
       modifier = Modifier
           .fillMaxSize()
@@ -106,7 +117,7 @@ private fun BeaconScreen(beacon: Beacon, navigationActions: NavigationActions? =
           .testTag("beaconScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
-        SongList(beacon)
+        SongList(beacon,navigationActions)
       }
 }
 
@@ -144,19 +155,43 @@ fun BeaconInformation(location: Location) {
 }
 
 @Composable
-fun SongList(beacon: Beacon, navigationActions: NavigationActions? = null) {
+fun SongList(beacon: Beacon, navigationActions: NavigationActions) {
   HorizontalDivider()
   Text(
       text = stringResource(R.string.beaconTracksTitle),
       style = MaterialTheme.typography.displayMedium,
       modifier = Modifier.testTag("beaconTracksTitle"))
-  LazyColumn { items(beacon.profileAndTrack) { TrackItem(it) } }
+  LazyColumn { items(beacon.profileAndTrack) { TrackItem(it,navigationActions) } }
 }
 
 @Composable
-internal fun TrackItem(profileAndTrack: ProfileTrackAssociation, navigationActions: NavigationActions? = null) {
+internal fun TrackItem(profileAndTrack: ProfileTrackAssociation, navigationActions: NavigationActions) {
+    val scrollState = rememberScrollState()
+    val scope = rememberCoroutineScope()
+    val slowScrollAnimation: AnimationSpec<Float> = TweenSpec(
+        durationMillis = 5000,
+        easing = { it }
+    )
 
-    //TODO: recover the track and profile from firebase : val track =
+    LaunchedEffect(key1 = true) {
+        while (true) {
+            scope.launch {
+                scrollState.animateScrollTo(
+                    value = scrollState.maxValue,
+                    animationSpec = slowScrollAnimation
+                )
+            }
+            delay(6000)
+            scope.launch {
+                scrollState.animateScrollTo(
+                    value = 0,
+                    animationSpec = slowScrollAnimation
+                )
+            }
+            delay(6000)
+        }
+    }
+
   Card(
       colors =
           CardColors(
@@ -168,7 +203,8 @@ internal fun TrackItem(profileAndTrack: ProfileTrackAssociation, navigationActio
           .height(80.dp)
           .fillMaxWidth()
           .padding(4.dp)
-          .testTag("trackItem")) {
+          .testTag("trackItem"),
+      ){
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -191,7 +227,7 @@ internal fun TrackItem(profileAndTrack: ProfileTrackAssociation, navigationActio
                   modifier = Modifier
                       .padding(8.dp)
                       .weight(1f)
-                      .horizontalScroll(rememberScrollState())
+                      .horizontalScroll(scrollState)
               ) {
                   Text(
                       text = profileAndTrack.track.title,
@@ -206,11 +242,13 @@ internal fun TrackItem(profileAndTrack: ProfileTrackAssociation, navigationActio
               }
               SelectImage(
                   modifier = Modifier
-                      .size(width = 150.dp, height = 100.dp),
+                      .size(width = 150.dp, height = 100.dp)
+                      .clickable(onClick = {
+                          Log.d("BeaconScreen", "Navigating to profile ${profileAndTrack.profile.firebaseUid}")
+                          navigationActions.navigateToProfile(profileAndTrack.profile.firebaseUid)
+                      }),
                   profile = profileAndTrack.profile,
-                  onClick = {
-                      navigationActions?.navigateToBeacon(profileAndTrack.profile.firebaseUid)
-                  }
+
                   )
           }
         }
