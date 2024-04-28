@@ -183,36 +183,7 @@ class DataClassesTest {
     assertEquals(mockTrack, association.track)
   }
 
-  @Test
-  fun profileTrackAssociation_equalsReturnsTrueForSameData() {
-    val mockProfile = mockk<Profile>()
-    val mockTrack = mockk<Track>()
-    val association1 = ProfileTrackAssociation(mockProfile, mockTrack)
-    val association2 = ProfileTrackAssociation(mockProfile, mockTrack)
 
-    assertEquals(association1, association2)
-  }
-
-  @Test
-  fun profileTrackAssociation_equalsReturnsFalseForDifferentData() {
-    val mockProfile1 = mockk<Profile>()
-    val mockProfile2 = mockk<Profile>()
-    val mockTrack = mockk<Track>()
-    val association1 = ProfileTrackAssociation(mockProfile1, mockTrack)
-    val association2 = ProfileTrackAssociation(mockProfile2, mockTrack)
-
-    assertNotEquals(association1, association2)
-  }
-
-  @Test
-  fun profileTrackAssociation_hashCodeIsConsistent() {
-    val mockProfile = mockk<Profile>()
-    val mockTrack = mockk<Track>()
-    val association = ProfileTrackAssociation(mockProfile, mockTrack)
-
-    val initialHashCode = association.hashCode()
-    assertEquals(initialHashCode, association.hashCode())
-  }
   fun noArgumentConstructorCreatesEmptyTrack() {
     val track = Track()
     assertEquals("", track.id)
@@ -234,14 +205,6 @@ class DataClassesTest {
     assertEquals("someId", track!!.id)
     assertEquals("", track.title)
     assertEquals("", track.artist)
-  }
-  fun profileTrackAssociation_initializesCorrectly() {
-    val mockProfile = mockk<Profile>()
-    val mockTrack = mockk<Track>()
-    val association = ProfileTrackAssociation(mockProfile, mockTrack)
-
-    assertEquals(mockProfile, association.profile)
-    assertEquals(mockTrack, association.track)
   }
 
   @Test

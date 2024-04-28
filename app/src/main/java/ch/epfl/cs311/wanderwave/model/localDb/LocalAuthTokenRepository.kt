@@ -18,9 +18,9 @@ class LocalAuthTokenRepository(database: AppDatabase) : AuthTokenRepository {
   }
 
   override fun setAuthToken(
-      tokenType: AuthTokenRepository.AuthTokenType,
-      token: String,
-      expirationTime: Long
+    tokenType: AuthTokenRepository.AuthTokenType,
+    token: String,
+    expirationTime: Long
   ) {
     authTokenDao.setAuthToken(AuthTokenEntity(token, expirationTime, tokenType.id))
   }

@@ -24,7 +24,7 @@ data class SongList(val name: String, val tracks: List<Track> = mutableListOf())
 class ProfileViewModel
 @Inject
 constructor(
-  private val repository: ProfileConnection,//TODO revoir
+  private val repository: ProfileRepository,//TODO revoir
   private val spotifyController: SpotifyController
 ) : ViewModel() {
 

@@ -80,11 +80,6 @@ class NavigationActions(navController: NavHostController) {
     _currentRouteFlow.value = Route.PROFILE
   }
 
-  fun navigateToProfile(profileId: String) {
-    navigationController.navigate("${Route.PROFILE.routeString}/$profileId")
-    _currentRouteFlow.value = Route.PROFILE
-  }
-
   fun goBack() {
     navigationController.popBackStack()
   }

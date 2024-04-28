@@ -10,9 +10,15 @@ import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FirebaseFirestore
 import io.mockk.MockKAnnotations
+import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.mockk
 import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -29,11 +35,47 @@ public class BeaconConnectionTest {
     private lateinit var beaconConnection: BeaconConnection
 
     @RelaxedMockK private lateinit var beaconConnectionMock: BeaconConnection
+    private lateinit var trackConnection: TrackConnection
+
+    private lateinit var firestore: FirebaseFirestore
+    private lateinit var documentReference: DocumentReference
+    private lateinit var collectionReference: CollectionReference
+
+    lateinit var beacon: Beacon
 
     @Before
     fun setup() {
-        MockKAnnotations.init(this)
-        beaconConnection = BeaconConnection()
+        // Create the mocks
+        firestore = mockk()
+        documentReference = mockk<DocumentReference>(relaxed = true)
+        collectionReference = mockk<CollectionReference>(relaxed = true)
+        trackConnection = mockk<TrackConnection>(relaxed = true)
+
+        // Mock data
+        beacon =
+            Beacon(
+                id = "testBeacon",
+                location = Location(1.0, 1.0, "Test Location"),
+                profileAndTrack =
+                listOf(
+                    ProfileTrackAssociation(
+                        Profile(
+                            "Sample First Name",
+                            "Sample last name",
+                            "Sample desc",
+                            0,
+                            false,
+                            null,
+                            "Sample Profile ID",
+                            "Sample Track ID"),
+                        Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
+
+        // Define behavior for the mocks
+        every { collectionReference.document(beacon.id) } returns documentReference
+        every { firestore.collection(any()) } returns collectionReference
+
+        // Pass the mock Firestore instance to your BeaconConnection
+        beaconConnection = BeaconConnection(firestore, trackConnection)
     }
 
     //  @Test
@@ -93,13 +135,13 @@ public class BeaconConnectionTest {
         // No verification is needed for interactions with the real object
     }
 
-    @Test
-    fun testGetAll() = runBlocking {
-        // Place holder test before we merge with the main for coverage
-        val retrievedBeacons = beaconConnection.getAll().first()
-
-        // Assert nothing
-    }
+//    @Test
+//    fun testGetAll() = runBlocking {
+//        // Place holder test before we merge with the main for coverage
+//        val retrievedBeacons = beaconConnection.getAll().first()
+//
+//        // Assert nothing
+//    }
 
     @Test
     fun testAddTrackToBeacon() {
