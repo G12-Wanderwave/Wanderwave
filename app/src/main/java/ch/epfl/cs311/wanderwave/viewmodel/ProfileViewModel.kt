@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.protocol.types.ListItem
@@ -24,8 +23,8 @@ data class SongList(val name: String, val tracks: List<Track> = mutableListOf())
 class ProfileViewModel
 @Inject
 constructor(
-  private val repository: ProfileRepository,//TODO revoir
-  private val spotifyController: SpotifyController
+    private val repository: ProfileRepository, // TODO revoir
+    private val spotifyController: SpotifyController
 ) : ViewModel() {
 
   private val _profile =

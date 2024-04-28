@@ -21,14 +21,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -77,10 +74,10 @@ fun BeaconScreen(
     if (beaconId != null) {
       viewModel.getBeaconById(beaconId)
     } else {
-        withContext(Dispatchers.Main) {
-            navigationActions.navigateTo(Route.MAIN)
-            Log.e("No beacons found", "No beacons found for the given id")
-        }
+      withContext(Dispatchers.Main) {
+        navigationActions.navigateTo(Route.MAIN)
+        Log.e("No beacons found", "No beacons found for the given id")
+      }
     }
   }
 
@@ -108,8 +105,8 @@ private fun BeaconScreenPreview() {
                   ProfileTrackAssociation(
                       Profile("e", "a", "a", 0, false, null, "1", "2"),
                       Track("a", "Never gonna let you mn,mn,mn,mn,mn,mn,nmn,m", "Rick Astley")),
-//                  Track("b", "Take on me", "A-ha"),
-//                  Track("c", "Africa", "Toto"),
+                  //                  Track("b", "Take on me", "A-ha"),
+                  //                  Track("c", "Africa", "Toto"),
               ),
       )
   val navController = rememberNavController()
@@ -235,4 +232,3 @@ internal fun TrackItem(
     }
   }
 }
-

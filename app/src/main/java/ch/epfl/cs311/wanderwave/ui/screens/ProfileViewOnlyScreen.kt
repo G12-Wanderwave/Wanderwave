@@ -49,11 +49,11 @@ fun ProfileViewOnlyScreen(profileId: String, navigationActions: NavigationAction
   LaunchedEffect(profileId) {
     if (profileId != null) {
       viewModel.getProfileByID(profileId)
-    }else {
-        withContext(Dispatchers.Main) {
-            navigationActions.navigateTo(Route.MAIN)
-            Log.e("No profile found", "No beacons found for the given id")
-        }
+    } else {
+      withContext(Dispatchers.Main) {
+        navigationActions.navigateTo(Route.MAIN)
+        Log.e("No profile found", "No beacons found for the given id")
+      }
     }
   }
 
@@ -69,21 +69,21 @@ fun ProfileViewOnlyScreen(profileId: String, navigationActions: NavigationAction
               onClick = { navigationActions?.goBack() })
           VisitCard(Modifier, uiState.profile!!)
 
-        val mockSongLists =
-            listOf(
-                SongList(
-                    "TOP SONGS",
-                    listOf(Track("1", "Track 1", "Artist 1"), Track("2", "Track 2", "Artist 2"))),
-                SongList(
-                    "CHOSEN SONGS",
-                    listOf(Track("3", "Track 3", "Artist 3"), Track("4", "Track 4", "Artist 4"))))
-        // TODO: modify this, because the profile.songLists is not available
-        showListSong(
-            mockSongLists) // TODO: change to actually recover the profile.songLists, but related to #127
+          val mockSongLists =
+              listOf(
+                  SongList(
+                      "TOP SONGS",
+                      listOf(Track("1", "Track 1", "Artist 1"), Track("2", "Track 2", "Artist 2"))),
+                  SongList(
+                      "CHOSEN SONGS",
+                      listOf(Track("3", "Track 3", "Artist 3"), Track("4", "Track 4", "Artist 4"))))
+          // TODO: modify this, because the profile.songLists is not available
+          showListSong(
+              mockSongLists) // TODO: change to actually recover the profile.songLists, but related
+                             // to #127
+        }
       }
-  }
 }
-
 
 /**
  * Composable that displays a list of tracks. Each track is represented by the TrackItem composable.

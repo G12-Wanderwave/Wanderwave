@@ -14,13 +14,11 @@ import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
-import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import kotlin.system.measureTimeMillis
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
@@ -31,32 +29,32 @@ import org.junit.Test
 
 public class BeaconConnectionTest {
 
-    @get:Rule val mockkRule = MockKRule(this)
-    private lateinit var beaconConnection: BeaconConnection
+  @get:Rule val mockkRule = MockKRule(this)
+  private lateinit var beaconConnection: BeaconConnection
 
-    @RelaxedMockK private lateinit var beaconConnectionMock: BeaconConnection
-    private lateinit var trackConnection: TrackConnection
+  @RelaxedMockK private lateinit var beaconConnectionMock: BeaconConnection
+  private lateinit var trackConnection: TrackConnection
 
-    private lateinit var firestore: FirebaseFirestore
-    private lateinit var documentReference: DocumentReference
-    private lateinit var collectionReference: CollectionReference
+  private lateinit var firestore: FirebaseFirestore
+  private lateinit var documentReference: DocumentReference
+  private lateinit var collectionReference: CollectionReference
 
-    lateinit var beacon: Beacon
+  lateinit var beacon: Beacon
 
-    @Before
-    fun setup() {
-        // Create the mocks
-        firestore = mockk()
-        documentReference = mockk<DocumentReference>(relaxed = true)
-        collectionReference = mockk<CollectionReference>(relaxed = true)
-        trackConnection = mockk<TrackConnection>(relaxed = true)
+  @Before
+  fun setup() {
+    // Create the mocks
+    firestore = mockk()
+    documentReference = mockk<DocumentReference>(relaxed = true)
+    collectionReference = mockk<CollectionReference>(relaxed = true)
+    trackConnection = mockk<TrackConnection>(relaxed = true)
 
-        // Mock data
-        beacon =
-            Beacon(
-                id = "testBeacon",
-                location = Location(1.0, 1.0, "Test Location"),
-                profileAndTrack =
+    // Mock data
+    beacon =
+        Beacon(
+            id = "testBeacon",
+            location = Location(1.0, 1.0, "Test Location"),
+            profileAndTrack =
                 listOf(
                     ProfileTrackAssociation(
                         Profile(
@@ -70,52 +68,52 @@ public class BeaconConnectionTest {
                             "Sample Track ID"),
                         Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
-        // Define behavior for the mocks
-        every { collectionReference.document(beacon.id) } returns documentReference
-        every { firestore.collection(any()) } returns collectionReference
+    // Define behavior for the mocks
+    every { collectionReference.document(beacon.id) } returns documentReference
+    every { firestore.collection(any()) } returns collectionReference
 
-        // Pass the mock Firestore instance to your BeaconConnection
-        beaconConnection = BeaconConnection(firestore, trackConnection)
-    }
+    // Pass the mock Firestore instance to your BeaconConnection
+    beaconConnection = BeaconConnection(firestore, trackConnection)
+  }
 
-    //  @Test
-    //  fun testAddAndGetItem() = runBlocking {
-    //    withTimeout(30000) { // Increase the timeout to 30 seconds
-    //      val beacon =
-    //          Beacon(
-    //              id = "testBeacon",
-    //              location = Location(1.0, 1.0, "Test Location"),
-    //              profileAndTrack =
-    //                  listOf(
-    //                      ProfileTrackAssociation(
-    //                          Profile(
-    //                              "Sample First Name",
-    //                              "Sample last name",
-    //                              "Sample desc",
-    //                              0,
-    //                              false,
-    //                              null,
-    //                              "Sample Profile ID",
-    //                              "Sample Track ID"),
-    //                          Track("Sample Track ID", "Sample Track Title", "Sample Artist
-    // Name"))))
-    //
-    //      beaconConnection.addItemWithId(beacon)
-    //
-    //      val retrievedBeacon = beaconConnection.getItem("testBeacon").first()
-    //      Log.d("Firestore", "$retrievedBeacon $beacon")
-    //      assert(beacon == retrievedBeacon)
-    //    }
-    //  }
+  //  @Test
+  //  fun testAddAndGetItem() = runBlocking {
+  //    withTimeout(30000) { // Increase the timeout to 30 seconds
+  //      val beacon =
+  //          Beacon(
+  //              id = "testBeacon",
+  //              location = Location(1.0, 1.0, "Test Location"),
+  //              profileAndTrack =
+  //                  listOf(
+  //                      ProfileTrackAssociation(
+  //                          Profile(
+  //                              "Sample First Name",
+  //                              "Sample last name",
+  //                              "Sample desc",
+  //                              0,
+  //                              false,
+  //                              null,
+  //                              "Sample Profile ID",
+  //                              "Sample Track ID"),
+  //                          Track("Sample Track ID", "Sample Track Title", "Sample Artist
+  // Name"))))
+  //
+  //      beaconConnection.addItemWithId(beacon)
+  //
+  //      val retrievedBeacon = beaconConnection.getItem("testBeacon").first()
+  //      Log.d("Firestore", "$retrievedBeacon $beacon")
+  //      assert(beacon == retrievedBeacon)
+  //    }
+  //  }
 
-    @Test
-    fun testAddItem() = runBlocking {
-        // Mock data
-        val beacon =
-            Beacon(
-                id = "testBeacon",
-                location = Location(1.0, 1.0, "Test Location"),
-                profileAndTrack =
+  @Test
+  fun testAddItem() = runBlocking {
+    // Mock data
+    val beacon =
+        Beacon(
+            id = "testBeacon",
+            location = Location(1.0, 1.0, "Test Location"),
+            profileAndTrack =
                 listOf(
                     ProfileTrackAssociation(
                         Profile(
@@ -129,28 +127,28 @@ public class BeaconConnectionTest {
                             "Sample Track ID"),
                         Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
-        // Call the function under test
-        beaconConnection.addItem(beacon)
+    // Call the function under test
+    beaconConnection.addItem(beacon)
 
-        // No verification is needed for interactions with the real object
-    }
+    // No verification is needed for interactions with the real object
+  }
 
-//    @Test
-//    fun testGetAll() = runBlocking {
-//        // Place holder test before we merge with the main for coverage
-//        val retrievedBeacons = beaconConnection.getAll().first()
-//
-//        // Assert nothing
-//    }
+  //    @Test
+  //    fun testGetAll() = runBlocking {
+  //        // Place holder test before we merge with the main for coverage
+  //        val retrievedBeacons = beaconConnection.getAll().first()
+  //
+  //        // Assert nothing
+  //    }
 
-    @Test
-    fun testAddTrackToBeacon() {
-        // Mock data
-        val beacon =
-            Beacon(
-                id = "testBeacon",
-                location = Location(1.0, 1.0, "Test Location"),
-                profileAndTrack =
+  @Test
+  fun testAddTrackToBeacon() {
+    // Mock data
+    val beacon =
+        Beacon(
+            id = "testBeacon",
+            location = Location(1.0, 1.0, "Test Location"),
+            profileAndTrack =
                 listOf(
                     ProfileTrackAssociation(
                         Profile(
@@ -164,22 +162,22 @@ public class BeaconConnectionTest {
                             "Sample Track ID"),
                         Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
-        val track = Track("testTrack2", "Test Title 2", "Test Artist 2")
+    val track = Track("testTrack2", "Test Title 2", "Test Artist 2")
 
-        // Call the function under test
-        beaconConnection.addTrackToBeacon(beacon.id, track, {})
+    // Call the function under test
+    beaconConnection.addTrackToBeacon(beacon.id, track, {})
 
-        // No verification is needed for interactions with the real object
-    }
+    // No verification is needed for interactions with the real object
+  }
 
-    @Test
-    fun testUpdateItem() = runBlocking {
-        // Mock data
-        val beacon =
-            Beacon(
-                id = "testBeacon",
-                location = Location(1.0, 1.0, "Test Location"),
-                profileAndTrack =
+  @Test
+  fun testUpdateItem() = runBlocking {
+    // Mock data
+    val beacon =
+        Beacon(
+            id = "testBeacon",
+            location = Location(1.0, 1.0, "Test Location"),
+            profileAndTrack =
                 listOf(
                     ProfileTrackAssociation(
                         Profile(
@@ -193,123 +191,122 @@ public class BeaconConnectionTest {
                             "Sample Track ID"),
                         Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
-        // Call the function under test
-        beaconConnection.updateItem(beacon)
+    // Call the function under test
+    beaconConnection.updateItem(beacon)
 
-        // No verification is needed for interactions with the real object
-    }
+    // No verification is needed for interactions with the real object
+  }
 
-    // If someone knows how to deal with the flow already being null and how to test it, please let me
-    // know
-    @Test
-    fun testGetNonexistentItem() = runBlocking {
-        // By default the test passes, if a value is emitted the test fails
-        withTimeout(20000) {
-            // Flag to indicate if the flow emits any value
-            var valueEmitted = false
+  // If someone knows how to deal with the flow already being null and how to test it, please let me
+  // know
+  @Test
+  fun testGetNonexistentItem() = runBlocking {
+    // By default the test passes, if a value is emitted the test fails
+    withTimeout(20000) {
+      // Flag to indicate if the flow emits any value
+      var valueEmitted = false
 
-            // Collect the flow within a 2-second timeout
-            measureTimeMillis {
-                withTimeoutOrNull(2000) {
-                    beaconConnection.getItem("nonexistentBeacon").collect {
-                        valueEmitted = true // Set the flag if the flow emits any value
-                    }
-                }
-            }
-
-            // Assert that the flow didn't emit anything within the timeout
-            assert(valueEmitted.not()) { "Flow emitted unexpected value" }
+      // Collect the flow within a 2-second timeout
+      measureTimeMillis {
+        withTimeoutOrNull(2000) {
+          beaconConnection.getItem("nonexistentBeacon").collect {
+            valueEmitted = true // Set the flag if the flow emits any value
+          }
         }
+      }
+
+      // Assert that the flow didn't emit anything within the timeout
+      assert(valueEmitted.not()) { "Flow emitted unexpected value" }
     }
+  }
 
-    //  @Test
-    //  fun testAddItemTwice() = runBlocking {
-    //    withTimeout(20000) {
-    //      val beacon =
-    //          Beacon(
-    //              id = "testBeacon",
-    //              location = Location(1.0, 1.0, "Test Location"),
-    //              profileAndTrack =
-    //                  listOf(
-    //                      ProfileTrackAssociation(
-    //                          Profile(
-    //                              "Sample First Name",
-    //                              "Sample last name",
-    //                              "Sample desc",
-    //                              0,
-    //                              false,
-    //                              null,
-    //                              "Sample Profile ID",
-    //                              "Sample Track ID"),
-    //                          Track("Sample Track ID", "Sample Track Title", "Sample Artist
-    // Name"))))
-    //
-    //      beaconConnection.addItemWithId(beacon)
-    //      beaconConnection.addItemWithId(beacon)
-    //
-    //      val retrievedBeacon = beaconConnection.getItem("testBeacon").first()
-    //
-    //      assert(beacon == retrievedBeacon)
-    //    }
-    //  }
+  //  @Test
+  //  fun testAddItemTwice() = runBlocking {
+  //    withTimeout(20000) {
+  //      val beacon =
+  //          Beacon(
+  //              id = "testBeacon",
+  //              location = Location(1.0, 1.0, "Test Location"),
+  //              profileAndTrack =
+  //                  listOf(
+  //                      ProfileTrackAssociation(
+  //                          Profile(
+  //                              "Sample First Name",
+  //                              "Sample last name",
+  //                              "Sample desc",
+  //                              0,
+  //                              false,
+  //                              null,
+  //                              "Sample Profile ID",
+  //                              "Sample Track ID"),
+  //                          Track("Sample Track ID", "Sample Track Title", "Sample Artist
+  // Name"))))
+  //
+  //      beaconConnection.addItemWithId(beacon)
+  //      beaconConnection.addItemWithId(beacon)
+  //
+  //      val retrievedBeacon = beaconConnection.getItem("testBeacon").first()
+  //
+  //      assert(beacon == retrievedBeacon)
+  //    }
+  //  }
 
-    @Test
-    fun AddDeleteAndGetItem() = runBlocking {
-        withTimeout(20000) {
-            val beacon =
-                Beacon(
-                    id = "testBeacon1",
-                    location = Location(1.0, 1.0, "Test Location"),
-                    profileAndTrack =
-                    listOf(
-                        ProfileTrackAssociation(
-                            Profile(
-                                "Sample First Name",
-                                "Sample last name",
-                                "Sample desc",
-                                0,
-                                false,
-                                null,
-                                "Sample Profile ID",
-                                "Sample Track ID"),
-                            Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
+  @Test
+  fun AddDeleteAndGetItem() = runBlocking {
+    withTimeout(20000) {
+      val beacon =
+          Beacon(
+              id = "testBeacon1",
+              location = Location(1.0, 1.0, "Test Location"),
+              profileAndTrack =
+                  listOf(
+                      ProfileTrackAssociation(
+                          Profile(
+                              "Sample First Name",
+                              "Sample last name",
+                              "Sample desc",
+                              0,
+                              false,
+                              null,
+                              "Sample Profile ID",
+                              "Sample Track ID"),
+                          Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
-            beaconConnection.addItemWithId(beacon)
-            beaconConnection.deleteItem("testBeacon1")
+      beaconConnection.addItemWithId(beacon)
+      beaconConnection.deleteItem("testBeacon1")
 
-            // Flag to indicate if the flow emits any value
-            var valueEmitted = false
+      // Flag to indicate if the flow emits any value
+      var valueEmitted = false
 
-            // Collect the flow within a 2-second timeout
-            measureTimeMillis {
-                withTimeoutOrNull(2000) {
-                    beaconConnection.getItem("testBeacon1").collect {
-                        valueEmitted = true // Set the flag if the flow emits any value
-                    }
-                }
-            }
-
-            // Assert that the flow didn't emit anything within the timeout
-            assert(valueEmitted.not()) { "Flow emitted unexpected value" }
+      // Collect the flow within a 2-second timeout
+      measureTimeMillis {
+        withTimeoutOrNull(2000) {
+          beaconConnection.getItem("testBeacon1").collect {
+            valueEmitted = true // Set the flag if the flow emits any value
+          }
         }
+      }
+
+      // Assert that the flow didn't emit anything within the timeout
+      assert(valueEmitted.not()) { "Flow emitted unexpected value" }
     }
+  }
 
-    // TODO : To be deleted after a real entry is added to the database
-    private lateinit var db: AppDatabase
+  // TODO : To be deleted after a real entry is added to the database
+  private lateinit var db: AppDatabase
 
-    @Test
-    fun createDb() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
+  @Test
+  fun createDb() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
+  }
 
-    }
-
-    @After
-    fun cleanupTestData() = runBlocking {
-        // Remove the test data
-        beaconConnection.deleteItem("testBeacon")
-        beaconConnection.deleteItem("testBeacon1")
-        beaconConnection.deleteItem("testBeacon2")
-        beaconConnection.deleteItem("nonexistentBeacon")
-    }
+  @After
+  fun cleanupTestData() = runBlocking {
+    // Remove the test data
+    beaconConnection.deleteItem("testBeacon")
+    beaconConnection.deleteItem("testBeacon1")
+    beaconConnection.deleteItem("testBeacon2")
+    beaconConnection.deleteItem("nonexistentBeacon")
+  }
 }

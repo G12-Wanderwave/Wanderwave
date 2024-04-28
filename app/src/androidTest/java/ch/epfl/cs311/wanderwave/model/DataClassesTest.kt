@@ -183,7 +183,6 @@ class DataClassesTest {
     assertEquals(mockTrack, association.track)
   }
 
-
   fun noArgumentConstructorCreatesEmptyTrack() {
     val track = Track()
     assertEquals("", track.id)
