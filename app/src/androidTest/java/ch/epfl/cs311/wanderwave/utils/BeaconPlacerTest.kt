@@ -4,12 +4,12 @@ import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
-import ch.epfl.cs311.wanderwave.ui.components.utils.computeDistanceBetweenBeacons
-import ch.epfl.cs311.wanderwave.ui.components.utils.findNearbyBeacons
-import ch.epfl.cs311.wanderwave.ui.components.utils.findRandomBeacon
-import ch.epfl.cs311.wanderwave.ui.components.utils.haversine
-import ch.epfl.cs311.wanderwave.ui.components.utils.placeBeaconsRandomly
-import ch.epfl.cs311.wanderwave.ui.components.utils.randomLatLongFromPosition
+import ch.epfl.cs311.wanderwave.model.utils.computeDistanceBetweenBeacons
+import ch.epfl.cs311.wanderwave.model.utils.findNearbyBeacons
+import ch.epfl.cs311.wanderwave.model.utils.findRandomBeacon
+import ch.epfl.cs311.wanderwave.model.utils.haversine
+import ch.epfl.cs311.wanderwave.model.utils.placeBeaconsRandomly
+import ch.epfl.cs311.wanderwave.model.utils.randomLatLongFromPosition
 import com.google.android.gms.maps.model.LatLng
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import junit.framework.TestCase.assertEquals
@@ -19,7 +19,6 @@ import org.junit.runner.RunWith
 
 private const val BEACON_COUNT = 20
 
-@RunWith(AndroidJUnit4::class)
 class BeaconPlacerTest : TestCase() {
 
   @Test

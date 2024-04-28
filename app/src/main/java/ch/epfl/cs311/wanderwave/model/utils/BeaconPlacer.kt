@@ -1,4 +1,4 @@
-package ch.epfl.cs311.wanderwave.ui.components.utils
+package ch.epfl.cs311.wanderwave.model.utils
 
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
@@ -38,8 +38,6 @@ fun placeBeaconsRandomly(beacons: List<Beacon>, location: LatLng): List<Beacon> 
         finalBeacons = newBeacons
       }
     }
-    // TODO: add the beacons to the repo or firebase or whatever
-    // These are the beacons that are to be added : finalBeacons
   }
   return finalBeacons
 }
@@ -90,7 +88,11 @@ fun findRandomBeacon(location: LatLng, newBeacons: MutableList<Beacon>, it: Int)
  * @param position2 the second location
  * @return the haversine distance between the two locations in meters
  * @see <a href="https://en.wikipedia.org/wiki/Haversine_formula">Haversine formula</a>
- */
+ * @author Menzo Bouaissi
+ * @since 2.0
+ * @last update 2.0
+ *
+ * */
 fun haversine(position1: LatLng, position2: LatLng): Double {
   val latDistance = Math.toRadians(position2.latitude - position1.latitude)
   val lonDistance = Math.toRadians(position2.longitude - position1.longitude)
