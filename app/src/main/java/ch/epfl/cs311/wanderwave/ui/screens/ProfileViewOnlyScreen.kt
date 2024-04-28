@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,11 +24,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.profile.ClickableIcon
 import ch.epfl.cs311.wanderwave.ui.components.profile.SongsListDisplay
 import ch.epfl.cs311.wanderwave.ui.components.profile.VisitCard
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.SongList
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * This is the screen composable which can only show the profile of the user. It includes a visit
@@ -43,9 +47,13 @@ fun ProfileViewOnlyScreen(profileId: String, navigationActions: NavigationAction
 
   val viewModel: ProfileViewModel = hiltViewModel()
   LaunchedEffect(profileId) {
-    println(profileId)
     if (profileId != null) {
       viewModel.getProfileByID(profileId)
+    }else {
+        withContext(Dispatchers.Main) {
+            navigationActions.navigateTo(Route.MAIN)
+            Log.e("No profile found", "No beacons found for the given id")
+        }
     }
   }
 
