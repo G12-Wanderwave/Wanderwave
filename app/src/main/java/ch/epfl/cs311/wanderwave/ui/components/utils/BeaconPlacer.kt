@@ -11,6 +11,19 @@ private const val BEACON_RADIUS = 1000.0
 private const val BEACON_COUNT = 20
 private const val NUMBER_ITERATION = 5
 
+/**
+ * This function places beacons randomly in the vicinity of the user's location.
+ * It first checks if there are enough beacons in the vicinity of the user's location.
+ * If not, it generates random beacons and computes the distance between the new beacons and the existing beacons.
+ * It then returns the beacons that are to be added.
+ *
+ * @param beacons the list of existing beacons
+ * @param location the user's location
+ * @return the beacons that are to be added
+ * @author Menzo Bouaissi
+ * @since 2.0
+ * @last update 2.0
+ */
 fun placeBeaconsRandomly(beacons: List<Beacon>, location: LatLng): List<Beacon> {
   var finalBeacons = mutableListOf<Beacon>()
   var nearbyBeacons = findNearbyBeacons(location, beacons, BEACON_RADIUS)
@@ -28,10 +41,19 @@ fun placeBeaconsRandomly(beacons: List<Beacon>, location: LatLng): List<Beacon> 
     // TODO: add the beacons to the repo or firebase or whatever
     // These are the beacons that are to be added : finalBeacons
   }
-
   return finalBeacons
 }
 
+/**
+ * This function computes the distance between the new beacons and the existing beacons.
+ *
+ * @param newBeacons the list of new beacons
+ * @param beacons the list of existing beacons
+ * @return the distance between the new beacons and the existing beacons
+ * @author Menzo Bouaissi
+ * @since 2.0
+ * @last update 2.0
+ */
 fun computeDistanceBetweenBeacons(newBeacons: MutableList<Beacon>, beacons: List<Beacon>): Double {
   var distance = 0.0
   newBeacons.forEach { beacon ->
@@ -42,6 +64,16 @@ fun computeDistanceBetweenBeacons(newBeacons: MutableList<Beacon>, beacons: List
   return distance
 }
 
+/**
+ * This function generates a random beacon in the vicinity of the user's location.
+ *
+ * @param location the user's location
+ * @param newBeacons the list of new beacons
+ * @param it the iteration number
+ * @author Menzo Bouaissi
+ * @since 2.0
+ * @last update 2.0
+ */
 fun findRandomBeacon(location: LatLng, newBeacons: MutableList<Beacon>, it: Int) {
   val randomLocation = randomLatLongFromPosition(location, BEACON_RADIUS)
   val newBeacon =
@@ -51,6 +83,14 @@ fun findRandomBeacon(location: LatLng, newBeacons: MutableList<Beacon>, it: Int)
   newBeacons.add(newBeacon)
 }
 
+/**
+ * This function computes the haversine distance between two locations.
+ *
+ * @param position1 the first location
+ * @param position2 the second location
+ * @return the haversine distance between the two locations in meters
+ * @see <a href="https://en.wikipedia.org/wiki/Haversine_formula">Haversine formula</a>
+ */
 fun haversine(position1: LatLng, position2: LatLng): Double {
   val latDistance = Math.toRadians(position2.latitude - position1.latitude)
   val lonDistance = Math.toRadians(position2.longitude - position1.longitude)
@@ -63,6 +103,20 @@ fun haversine(position1: LatLng, position2: LatLng): Double {
   return EARTH_RADIUS_M * c
 }
 
+/**
+ * This function finds the beacons that are in the vicinity of the user's location.
+ * It computes the haversine distance between the user's location and each beacon's location.
+ * If the distance is less than the radius, the beacon is added to the list of nearby beacons.
+ * The function then returns the list of nearby beacons.
+ *
+ * @param userPosition the user's location
+ * @param beacons the list of existing beacons
+ * @param radius the radius in which the beacons are considered to be nearby
+ * @return the list of nearby beacons
+ * @author Menzo Bouaissi
+ * @since 2.0
+ * @last update 2.0
+ */
 fun findNearbyBeacons(userPosition: LatLng, beacons: List<Beacon>, radius: Double): List<Beacon> {
   var nearbyBeacons = mutableListOf<Beacon>()
   beacons.forEach { beacon ->
@@ -73,6 +127,17 @@ fun findNearbyBeacons(userPosition: LatLng, beacons: List<Beacon>, radius: Doubl
   return nearbyBeacons
 }
 
+/**
+ * This function generates a random latitude and longitude from a given position and distance.
+ * It uses the haversine formula to compute the new latitude and longitude.
+ *
+ * @param userPosition the user's location
+ * @param distance the distance from the user's location
+ * @return the random latitude and longitude from the user's location and distance
+ * @author Menzo Bouaissi
+ * @since 2.0
+ * @last update 2.0
+ */
 fun randomLatLongFromPosition(userPosition: LatLng, distance: Double): LatLng {
   val latRad = Math.toRadians(userPosition.latitude)
   val lonRad = Math.toRadians(userPosition.longitude)
