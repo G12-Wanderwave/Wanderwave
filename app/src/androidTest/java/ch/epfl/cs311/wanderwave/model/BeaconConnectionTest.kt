@@ -277,6 +277,31 @@ public class BeaconConnectionTest {
   }
 
   @Test
+  fun testFetchTrackException() = runBlocking {
+    // Mock the DocumentReference
+    val mockDocumentReference = mockk<DocumentReference>()
+
+    // Define behavior for the get() method on the DocumentReference to return the mock task
+    coEvery { mockDocumentReference.get() } returns
+        mockk {
+          every { isComplete } returns true
+          every { isSuccessful } returns false
+          every { result } returns null
+          every { getException() } returns Exception("Test Exception")
+          every { isCanceled } returns false
+        }
+
+    // Call the function under test
+    val retrievedTrack = beaconConnection.fetchTrack(mockDocumentReference)
+
+    // Verify that the get function is called on the document with the correct id
+    coVerify { mockDocumentReference.get() }
+
+    // Assert that the retrieved track is null
+    assertEquals(null, retrievedTrack)
+  }
+
+  @Test
   fun testGetAllItems() = runBlocking {
     withTimeout(3000) {
       // Mock the Task
