@@ -1,7 +1,6 @@
 package ch.epfl.cs311.wanderwave.utils
 
 import android.util.Log
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.utils.computeDistanceBetweenBeacons
@@ -15,7 +14,6 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import org.junit.Test
-import org.junit.runner.RunWith
 
 private const val BEACON_COUNT = 20
 

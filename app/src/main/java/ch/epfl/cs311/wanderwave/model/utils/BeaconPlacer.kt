@@ -12,10 +12,10 @@ private const val BEACON_COUNT = 20
 private const val NUMBER_ITERATION = 5
 
 /**
- * This function places beacons randomly in the vicinity of the user's location.
- * It first checks if there are enough beacons in the vicinity of the user's location.
- * If not, it generates random beacons and computes the distance between the new beacons and the existing beacons.
- * It then returns the beacons that are to be added.
+ * This function places beacons randomly in the vicinity of the user's location. It first checks if
+ * there are enough beacons in the vicinity of the user's location. If not, it generates random
+ * beacons and computes the distance between the new beacons and the existing beacons. It then
+ * returns the beacons that are to be added.
  *
  * @param beacons the list of existing beacons
  * @param location the user's location
@@ -91,8 +91,7 @@ fun findRandomBeacon(location: LatLng, newBeacons: MutableList<Beacon>, it: Int)
  * @author Menzo Bouaissi
  * @since 2.0
  * @last update 2.0
- *
- * */
+ */
 fun haversine(position1: LatLng, position2: LatLng): Double {
   val latDistance = Math.toRadians(position2.latitude - position1.latitude)
   val lonDistance = Math.toRadians(position2.longitude - position1.longitude)
@@ -106,10 +105,10 @@ fun haversine(position1: LatLng, position2: LatLng): Double {
 }
 
 /**
- * This function finds the beacons that are in the vicinity of the user's location.
- * It computes the haversine distance between the user's location and each beacon's location.
- * If the distance is less than the radius, the beacon is added to the list of nearby beacons.
- * The function then returns the list of nearby beacons.
+ * This function finds the beacons that are in the vicinity of the user's location. It computes the
+ * haversine distance between the user's location and each beacon's location. If the distance is
+ * less than the radius, the beacon is added to the list of nearby beacons. The function then
+ * returns the list of nearby beacons.
  *
  * @param userPosition the user's location
  * @param beacons the list of existing beacons
@@ -130,8 +129,8 @@ fun findNearbyBeacons(userPosition: LatLng, beacons: List<Beacon>, radius: Doubl
 }
 
 /**
- * This function generates a random latitude and longitude from a given position and distance.
- * It uses the haversine formula to compute the new latitude and longitude.
+ * This function generates a random latitude and longitude from a given position and distance. It
+ * uses the haversine formula to compute the new latitude and longitude.
  *
  * @param userPosition the user's location
  * @param distance the distance from the user's location
