@@ -48,6 +48,7 @@ import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
 import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
+import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
@@ -143,83 +144,14 @@ fun BeaconInformation(location: Location) {
 
 @Composable
 fun SongList(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit) {
-  // State to control the visibility of the add track dialog
-  var showDialog by remember { mutableStateOf(false) }
-
-  Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween) {
-          Text(
-              text = stringResource(R.string.beaconTracksTitle),
-              style = MaterialTheme.typography.headlineMedium,
-              modifier = Modifier.testTag("beaconTracksTitle"))
-          IconButton(onClick = { showDialog = true }) { // Toggle dialog visibility
-            Icon(
-                imageVector = Icons.Filled.Add,
-                contentDescription = stringResource(R.string.beaconTitle))
-          }
-        }
-    LazyColumn { items(beacon.tracks) { TrackItem(it) } }
-
-    if (showDialog) {
-      AddTrackDialog(
-          onAddTrack = { id, title, artist ->
-            addTrackToBeacon(beacon.id, Track(id, title, artist)) { success ->
-              if (success) {
-                Log.d("SongList", "Track added successfully.")
-              } else {
-                Log.e("SongList", "Failed to add track.")
-              }
-            }
-            showDialog = false // Close dialog after adding track
-          },
-          onDismiss = {
-            showDialog = false // Close dialog on dismiss
-          },
-          initialTrackId = "",
-          initialTrackTitle = "",
-          initialTrackArtist = "",
-          dialogTestTag = "addTrackDialog" // For testing purposes
-          )
-    }
-  }
-}
-
-@Composable
-internal fun TrackItem(track: Track) {
-  Card(
-      colors =
-          CardColors(
-              containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-              CardDefaults.cardColors().contentColor,
-              CardDefaults.cardColors().disabledContainerColor,
-              CardDefaults.cardColors().disabledContentColor),
-      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem")) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Box(
-              modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-              contentAlignment = Alignment.Center) {
-                Image(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Album Cover",
-                    modifier = Modifier.fillMaxSize(.8f),
-                )
-              }
-          Column(modifier = Modifier.padding(8.dp)) {
-            Text(
-                text = track.title,
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.titleMedium)
-            Text(
-                text = track.artist,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-          }
-        }
+  TrackList(beacon.tracks, title = stringResource(R.string.beaconTracksTitle), onAddTrack = {
+    addTrackToBeacon(beacon.id, it) { success ->
+      if (success) {
+        Log.d("SongList", "Track added successfully.")
+      } else {
+        Log.e("SongList", "Failed to add track.")
       }
+    }
+  })
 }
+

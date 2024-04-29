@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackListItem
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
@@ -47,21 +48,7 @@ fun TrackListScreen(
                   .padding(16.dp)
                   .testTag("searchBar") // Adding a test tag for the search bar
           )
-      LazyColumn(
-          modifier = Modifier.testTag("trackListScreen")) { // Maintaining the LazyColumn test tag
-            items(uiState.tracks.size) { index ->
-              val track = uiState.tracks[index]
-
-              Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
-                TrackListItem(
-                    track = track,
-                    selected = track == uiState.selectedTrack,
-                    onClick = { viewModel.selectTrack(track) })
-
-                Divider()
-              }
-            }
-          }
+      TrackList(uiState.tracks, title = "All Tracks", onAddTrack = {}, onSelectTrack = viewModel::selectTrack)
     }
   }
 }

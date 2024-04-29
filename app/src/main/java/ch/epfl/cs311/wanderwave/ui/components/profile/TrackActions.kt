@@ -65,7 +65,7 @@ fun TrackItem(track: Track) {
  */
 @Composable
 fun AddTrackDialog(
-    onAddTrack: (String, String, String) -> Unit,
+    onAddTrack: (Track) -> Unit,
     onDismiss: () -> Unit,
     initialTrackId: String,
     initialTrackTitle: String,
@@ -101,7 +101,7 @@ fun AddTrackDialog(
       confirmButton = {
         Button(
             onClick = {
-              onAddTrack(newTrackId, newTrackTitle, newTrackArtist)
+              onAddTrack(Track(newTrackId, newTrackTitle, newTrackArtist))
               newTrackId = "" // Resetting the state
               newTrackTitle = ""
               newTrackArtist = ""

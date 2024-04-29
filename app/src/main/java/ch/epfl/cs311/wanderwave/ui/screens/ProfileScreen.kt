@@ -112,9 +112,9 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
         // Show dialog for adding a new track and add the track to the appropriate list
         if (showDialog) {
           AddTrackDialog(
-              onAddTrack = { id, title, artist ->
+              onAddTrack = { track ->
                 viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
-                viewModel.addTrackToList(dialogListType, Track(id, title, artist))
+                viewModel.addTrackToList(dialogListType, track)
                 showDialog = false
               },
               onDismiss = { showDialog = false },
