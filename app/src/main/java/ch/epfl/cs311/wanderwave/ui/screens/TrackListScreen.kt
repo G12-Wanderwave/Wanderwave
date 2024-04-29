@@ -1,12 +1,8 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -21,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
-import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackListItem
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
 @Composable
@@ -47,6 +42,10 @@ fun TrackListScreen(
                 .padding(16.dp)
                 .testTag("searchBar") // Adding a test tag for the search bar
         )
-    TrackList(uiState.tracks, title = "All Tracks", onAddTrack = {}, onSelectTrack = viewModel::selectTrack)
+    TrackList(
+        uiState.tracks,
+        title = "All Tracks",
+        onAddTrack = {},
+        onSelectTrack = viewModel::selectTrack)
   }
 }

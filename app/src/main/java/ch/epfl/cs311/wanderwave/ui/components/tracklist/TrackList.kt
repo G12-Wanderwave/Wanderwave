@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.ui.components.tracklist
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,14 +26,13 @@ import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
-import ch.epfl.cs311.wanderwave.ui.screens.TrackItem
 
 @Composable
 fun TrackList(
-  tracks: List<Track>,
-  title: String? = null,
-  onAddTrack: (Track) -> Unit,
-  onSelectTrack: (Track) -> Unit = {},
+    tracks: List<Track>,
+    title: String? = null,
+    onAddTrack: (Track) -> Unit,
+    onSelectTrack: (Track) -> Unit = {},
 ) {
 
   Column {
@@ -42,39 +40,46 @@ fun TrackList(
     var selectedTrack by remember { mutableStateOf<Track?>(null) }
 
     Row(
-      modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 16.dp, vertical = 8.dp),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.SpaceBetween) {
-      if (title != null) {
-        Text(
-          text = title,
-          style = MaterialTheme.typography.headlineMedium,
-          modifier = Modifier.testTag("trackListTitle"))
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween) {
+          if (title != null) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.testTag("trackListTitle"))
+          }
+          IconButton(onClick = { showDialog = true }) { // Toggle dialog visibility
+            Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = stringResource(R.string.beaconTitle))
+          }
+        }
+    LazyColumn {
+      items(tracks) { track ->
+        TrackListItem(
+            track,
+            track == selectedTrack,
+            onClick = {
+              selectedTrack = track
+              onSelectTrack(track)
+            })
       }
-      IconButton(onClick = { showDialog = true }) { // Toggle dialog visibility
-        Icon(
-          imageVector = Icons.Filled.Add,
-          contentDescription = stringResource(R.string.beaconTitle)
-        )
-      }
-    }
-    LazyColumn { items(tracks) { track ->
-      TrackListItem(track, track == selectedTrack, onClick = { selectedTrack = track; onSelectTrack(track)}) }
     }
     if (showDialog) {
       AddTrackDialog(
-        onAddTrack = { onAddTrack(it); showDialog = false },
-        onDismiss = {
-          showDialog = false // Close dialog on dismiss
-        },
-        initialTrackId = "",
-        initialTrackTitle = "",
-        initialTrackArtist = "",
-        dialogTestTag = "addTrackDialog" // For testing purposes
-      )
+          onAddTrack = {
+            onAddTrack(it)
+            showDialog = false
+          },
+          onDismiss = {
+            showDialog = false // Close dialog on dismiss
+          },
+          initialTrackId = "",
+          initialTrackTitle = "",
+          initialTrackArtist = "",
+          dialogTestTag = "addTrackDialog" // For testing purposes
+          )
     }
-
   }
 }
