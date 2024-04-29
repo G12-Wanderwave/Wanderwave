@@ -1,4 +1,4 @@
-package ch.epfl.cs311.wanderwave.ui.components.utils
+package ch.epfl.cs311.wanderwave.model.utils
 
 import android.Manifest
 import android.content.Context
