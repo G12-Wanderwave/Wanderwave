@@ -34,21 +34,19 @@ fun TrackListScreen(
 
   LaunchedEffect(uiState) { uiState.message?.let { message -> showMessage(message) } }
 
-  Surface(modifier = Modifier.fillMaxSize()) {
-    Column {
-      TextField(
-          value = searchQuery,
-          onValueChange = { query ->
-            searchQuery = query
-            viewModel.setSearchQuery(query)
-          },
-          label = { Text("Search Tracks") },
-          modifier =
-              Modifier.fillMaxWidth()
-                  .padding(16.dp)
-                  .testTag("searchBar") // Adding a test tag for the search bar
-          )
-      TrackList(uiState.tracks, title = "All Tracks", onAddTrack = {}, onSelectTrack = viewModel::selectTrack)
-    }
+  Column {
+    TextField(
+        value = searchQuery,
+        onValueChange = { query ->
+          searchQuery = query
+          viewModel.setSearchQuery(query)
+        },
+        label = { Text("Search Tracks") },
+        modifier =
+            Modifier.fillMaxWidth()
+                .padding(16.dp)
+                .testTag("searchBar") // Adding a test tag for the search bar
+        )
+    TrackList(uiState.tracks, title = "All Tracks", onAddTrack = {}, onSelectTrack = viewModel::selectTrack)
   }
 }
