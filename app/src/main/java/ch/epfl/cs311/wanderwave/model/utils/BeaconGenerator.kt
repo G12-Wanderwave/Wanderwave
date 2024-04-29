@@ -118,13 +118,13 @@ fun getNearbyPOIs(context: Context, location: Location, radius: Double): List<Lo
                 } // Check if the place is of a certain type
             ) {
               nearbyPOIs.add(placeLoc)
-              Log.d("PlacesApi", "Place found: ${place.name} at ${place.latLng}")
+              Log.i("PlacesApi", "Place found: ${place.name} at ${place.latLng}")
             }
           }
         }
         .addOnFailureListener { exception ->
           if (exception is ApiException) {
-            Log.d("PlacesApi", "Place not found: ${exception.statusCode}")
+            Log.e("PlacesApi", "Place not found: ${exception.statusCode}")
           }
         }
   }
