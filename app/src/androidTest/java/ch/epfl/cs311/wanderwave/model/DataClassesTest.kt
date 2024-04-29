@@ -6,6 +6,7 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.DocumentSnapshot
 import io.mockk.MockKAnnotations
@@ -23,14 +24,17 @@ class DataClassesTest {
   // Testing of all the data classes, I think it's better to test them all together
   @get:Rule val mockkRule = MockKRule(this)
   private lateinit var beaconConnection: BeaconConnection
+  private lateinit var trackConnection: TrackConnection
 
   @RelaxedMockK private lateinit var document: DocumentSnapshot
 
   @Before
   fun setup() {
-    beaconConnection = BeaconConnection()
-
     MockKAnnotations.init(this)
+
+    trackConnection = mockk<TrackConnection>(relaxed = true)
+
+    beaconConnection = BeaconConnection(trackConnection = trackConnection)
 
     // Set up the document mock to return some tracks
     every { document.id } returns "someId"
@@ -132,10 +136,10 @@ class DataClassesTest {
     // test beacon behaviour
     assertEquals("Test Id", beacon.id)
     assertEquals(location, beacon.location)
-    assertEquals(listOf<Track>(), beacon.tracks)
+    assertEquals(listOf<ProfileTrackAssociation>(), beacon.profileAndTrack)
     assertEquals("Test Id", beaconMap["id"])
     assertEquals(location.toMap(), beaconMap["location"])
-    assertEquals(listOf<Track>(), beaconMap["tracks"])
+    assertEquals(listOf<ProfileTrackAssociation>(), beaconMap["tracks"])
   }
 
   @Test
@@ -177,6 +181,29 @@ class DataClassesTest {
 
     assertEquals(mockProfile, association.profile)
     assertEquals(mockTrack, association.track)
+  }
+
+  fun noArgumentConstructorCreatesEmptyTrack() {
+    val track = Track()
+    assertEquals("", track.id)
+    assertEquals("", track.title)
+    assertEquals("", track.artist)
+  }
+
+  @Test
+  fun documentToTrackExistWithNullValues() {
+    every { document.exists() } returns true
+    every { document.id } returns "someId"
+    every { document.getString("title") } returns null
+    every { document.getString("artist") } returns null
+
+    val track = Track.from(document)
+    // assert if the track is not null
+    assert(track != null)
+    // assert if the track has the default values
+    assertEquals("someId", track!!.id)
+    assertEquals("", track.title)
+    assertEquals("", track.artist)
   }
 
   @Test

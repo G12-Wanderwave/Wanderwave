@@ -1,13 +1,16 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.repository.TrackRepositoryImpl
+import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
@@ -17,23 +20,43 @@ import kotlinx.coroutines.launch
 class TrackListViewModel
 @Inject
 constructor(
-    private val repository: TrackRepositoryImpl,
-    private val spotifyController: SpotifyController
+    private val spotifyController: SpotifyController,
+    private val trackRepository: TrackRepository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(UiState(loading = true))
   val uiState: StateFlow<UiState> = _uiState
+
+  private var _searchQuery = MutableStateFlow("")
 
   init {
     observeTracks()
   }
 
   private fun observeTracks() {
-    CoroutineScope(Dispatchers.IO).launch {
-      repository.getAll().collect { tracks ->
-        _uiState.value = UiState(tracks = tracks, loading = false)
+    viewModelScope.launch {
+      trackRepository.getAll().collect {
+        _uiState.value = _uiState.value.copy(tracks = it, loading = false)
       }
+      // deal with the flow
     }
+  }
+
+  private fun matchesSearchQuery(track: Track): Boolean {
+    return track.title.contains(_searchQuery.value, ignoreCase = true) ||
+        track.artist.contains(_searchQuery.value, ignoreCase = true)
+  }
+
+  private var searchJob: Job? = null
+
+  fun setSearchQuery(query: String) {
+    searchJob?.cancel()
+    searchJob =
+        CoroutineScope(Dispatchers.IO).launch {
+          delay(300) // Debounce time in milliseconds
+          _searchQuery.value = query
+          observeTracks() // Re-filter tracks when search query changes
+        }
   }
 
   /**
@@ -152,6 +175,19 @@ constructor(
     skip(-1)
   }
 
+  fun toggleShuffle() {
+    _uiState.value = _uiState.value.copy(shuffleOn = !_uiState.value.shuffleOn)
+  }
+
+  fun toggleRepeat() {
+    _uiState.value =
+        when (_uiState.value.repeatMode) {
+          RepeatMode.NONE -> _uiState.value.copy(repeatMode = RepeatMode.ALL)
+          RepeatMode.ALL -> _uiState.value.copy(repeatMode = RepeatMode.ONE)
+          else -> _uiState.value.copy(repeatMode = RepeatMode.NONE)
+        }
+  }
+
   data class UiState(
       val tracks: List<Track> = listOf(),
       val loading: Boolean = false,
@@ -161,6 +197,14 @@ constructor(
       val isPlaying: Boolean = false,
       val currentMillis: Int = 0,
       val expanded: Boolean = false,
-      val progress: Float = 0f
+      val progress: Float = 0f,
+      val shuffleOn: Boolean = false,
+      val repeatMode: RepeatMode = RepeatMode.NONE
   )
+}
+
+enum class RepeatMode {
+  NONE,
+  ONE,
+  ALL
 }

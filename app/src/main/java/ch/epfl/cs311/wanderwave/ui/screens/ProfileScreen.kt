@@ -97,6 +97,8 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
         }
         showSongList(navActions, viewModel)
       }
+
+  SignOutButton(modifier = Modifier, navActions = navActions)
 }
 
 /**
@@ -231,6 +233,7 @@ fun ProfileButton(
  */
 @Composable
 fun SignOutButton(modifier: Modifier, navActions: NavigationActions) {
+  // TODO: Implement actual user sign out
   Button(
       onClick = { navActions.navigateToTopLevel(Route.LOGIN) },
       modifier = modifier.testTag("signOutButton")) {

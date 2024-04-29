@@ -2,7 +2,7 @@ package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
+import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.protocol.types.ListItem
 import io.mockk.clearAllMocks
@@ -40,14 +40,14 @@ class ProfileViewModelTest {
   lateinit var viewModel: ProfileViewModel
   val testDispatcher = TestCoroutineDispatcher()
   @get:Rule val mockkRule = MockKRule(this)
-  @RelaxedMockK private lateinit var profileRepositoryImpl: ProfileRepositoryImpl
+  @RelaxedMockK private lateinit var profileRepository: ProfileConnection
 
   @RelaxedMockK private lateinit var spotifyController: SpotifyController
 
   @Before
   fun setup() {
     Dispatchers.setMain(testDispatcher)
-    viewModel = ProfileViewModel(profileRepositoryImpl, spotifyController)
+    viewModel = ProfileViewModel(profileRepository, spotifyController)
   }
 
   @After
@@ -115,6 +115,7 @@ class ProfileViewModelTest {
     advanceUntilIdle()
 
     // Optionally check additional conditions after ensuring Flow had time to collect
+
     assertFalse(
         "Song list should not be empty after adding a track", viewModel.songLists.value.isEmpty())
     assertEquals(
