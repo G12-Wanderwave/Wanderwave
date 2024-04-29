@@ -163,12 +163,12 @@ public class BeaconConnectionTest {
       // Call the function under test
       beaconConnection.getItem("testBeacon").first()
 
-      // val retrievedBeacon = beaconConnection.getItem("testBeacon").first()
 
       // Verify that the get function is called on the document with the correct id
       coVerify { documentReference.get() }
+
       // verify that fetchTrack is not called
-      // coVerify(exactly = 0) { beaconConnection.fetchTrack(any<DocumentReference>()) }
+      // I don't know how to do this didn't work : coVerify(exactly = 0) { beaconConnection.fetchTrack(any<DocumentReference>()) }
     }
   }
 
