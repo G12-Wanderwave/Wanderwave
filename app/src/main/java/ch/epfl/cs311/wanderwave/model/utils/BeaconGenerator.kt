@@ -103,8 +103,10 @@ fun getNearbyPOIs(context: Context, location: Location, radius: Double): List<Lo
   val placesClient = Places.createClient(context)
 
   // Define the fields to request
-
-  val placeFields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
+  val placeFieldID = Place.Field.ID
+  val placeFieldName = Place.Field.NAME
+  val placeFieldLatLng = Place.Field.LAT_LNG
+  val placeFields = listOf(placeFieldID, placeFieldName, placeFieldLatLng)
 
   // Create a new FindCurrentPlaceRequest
   val request = FindCurrentPlaceRequest.newInstance(placeFields)
