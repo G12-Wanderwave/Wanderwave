@@ -39,7 +39,7 @@ abstract class FirebaseConnection<T, U> {
 
   abstract fun itemToMap(item: T): Map<String, Any>
 
-  open fun addItem(item: T):String? {
+  open fun addItem(item: T): String? {
     val itemMap = itemToMap(item)
     var id: String? = null
 
