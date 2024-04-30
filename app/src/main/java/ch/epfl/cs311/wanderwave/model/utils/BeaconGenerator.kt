@@ -105,6 +105,7 @@ fun getNearbyPOIs(context: Context, location: Location, radius: Double): List<Lo
     placesClient
         .findCurrentPlace(request)
         .addOnSuccessListener { response ->
+          Log.d("PlacesApi", "Place found: ${response.placeLikelihoods}")
           for (placeLikelihood in response.placeLikelihoods) {
             val place = placeLikelihood.place
             // Conversion to make computing distances easier

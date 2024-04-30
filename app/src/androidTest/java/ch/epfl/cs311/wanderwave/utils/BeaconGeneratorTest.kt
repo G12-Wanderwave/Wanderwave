@@ -14,9 +14,16 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.utils.createNearbyBeacons
 import ch.epfl.cs311.wanderwave.model.utils.getNearbyPOIs
 import ch.epfl.cs311.wanderwave.model.utils.types
+import com.google.android.gms.tasks.Task
 import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.PlaceLikelihood
+import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
+import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse
+import com.google.android.libraries.places.api.net.PlacesClient
 import io.mockk.every
 import io.mockk.junit4.MockKRule
+import io.mockk.mockk
 import io.mockk.mockkStatic
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
@@ -125,15 +132,66 @@ class BeaconGeneratorTest {
   //        assertEquals(1, result.size)
   //    }
 
+  //  @Test
+  //  fun testGetNearbyPOIs_PermissionGranted_ReturnsPOIs() {
+  //    val context = ApplicationProvider.getApplicationContext<Context>()
+  //    val location = Location(46.519962, 6.633597)
+  //      val radius = 1000.0
+  //      val placeFields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
+  //      Places.initialize(context, BuildConfig.MAPS_API_KEY)
+  //      val mockResponse = mockk<FindCurrentPlaceResponse>()
+  //
+  //
+  //      val request = FindCurrentPlaceRequest.newInstance(placeFields)
+  //      val placesClient = mockk<PlacesClient>()
+  //      val task = mockk<Task<FindCurrentPlaceResponse>>()
+  //      every { task.addOnSuccessListener(any()) } answers {
+  //          val listener = arg<(FindCurrentPlaceResponse) -> Unit>(0)
+  //          listener.invoke(mockResponse)
+  //          task
+  //      }
+  //      every { task.addOnFailureListener(any()) } returns task
+  //      every { placesClient.findCurrentPlace(request) } returns task
+  //      val result = getNearbyPOIs(context, location, radius)
+  //
+  //  }
   @Test
   fun testGetNearbyPOIs_PermissionGranted_ReturnsPOIs() {
     val context = ApplicationProvider.getApplicationContext<Context>()
     val location = Location(46.519962, 6.633597)
-
+    val radius = 1000.0
+    val placeFields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
     Places.initialize(context, BuildConfig.MAPS_API_KEY)
-    val placesClient = Places.createClient(context)
 
-    getNearbyPOIs(context, location, 1000.0)
+    // Mock the response
+    val mockResponse = mockk<FindCurrentPlaceResponse>()
+    val mockPlaceLikelihood = mockk<PlaceLikelihood>()
+    val mockPlace = mockk<Place>()
+    every { mockPlace.name } returns "Test Place"
+    every { mockPlace.latLng } returns com.google.android.gms.maps.model.LatLng(46.519962, 6.633597)
+    every { mockPlaceLikelihood.place } returns mockPlace
+    every { mockResponse.placeLikelihoods } returns listOf(mockPlaceLikelihood)
+
+    // Mock the request and the task
+    val request = FindCurrentPlaceRequest.newInstance(placeFields)
+    val task = mockk<Task<FindCurrentPlaceResponse>>()
+    every { task.addOnSuccessListener(any()) } answers
+        {
+          val listener = arg<(FindCurrentPlaceResponse) -> Unit>(0)
+          listener.invoke(mockResponse)
+          task
+        }
+    every { task.addOnFailureListener(any()) } returns task
+    every { task.isSuccessful } returns true
+    // Mock the PlacesClient
+    val placesClient = mockk<PlacesClient>()
+    every { placesClient.findCurrentPlace(request) } returns task
+
+    // Call the function to test
+    val result = getNearbyPOIs(context, location, radius)
+
+    // Assertions
+    assertTrue(result.isEmpty())
   }
 
   @Test
