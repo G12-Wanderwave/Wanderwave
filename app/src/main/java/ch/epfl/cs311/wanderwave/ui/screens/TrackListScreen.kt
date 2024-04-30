@@ -29,7 +29,7 @@ fun TrackListScreen(
 
   LaunchedEffect(uiState) { uiState.message?.let { message -> showMessage(message) } }
 
-  Column {
+  Column(modifier = Modifier.testTag("trackListScreen")) {
     TextField(
         value = searchQuery,
         onValueChange = { query ->
