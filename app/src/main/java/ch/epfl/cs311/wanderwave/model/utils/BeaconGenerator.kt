@@ -49,6 +49,15 @@ val types: List<String> =
         "university",
         "zoo")
 
+/**
+ * Create new beacons at nearby points of interest.
+ *
+ * @param location The current location of the user.
+ * @param nearbyBeacons The list of existing beacons.
+ * @param radius The radius in which to search for points of interest.
+ * @param context The context of the application.
+ * @return A list of new beacons.
+ */
 fun createNearbyBeacons(
     location: Location,
     nearbyBeacons: List<Beacon>,
@@ -64,9 +73,10 @@ fun createNearbyBeacons(
   // Place new beacons at the nearby points of interest
   for (poi in nearbyPOIs) {
     // Check if POI is far enough from existing beacons
-    if (nearbyBeacons.any { beacon ->
+    if (nearbyBeacons.all() { beacon ->
       beacon.location.distanceBetween(poi) > MIN_BEACON_DISTANCE
-    }) {
+    } &&
+        newBeacons.all() { beacon -> beacon.location.distanceBetween(poi) > MIN_BEACON_DISTANCE }) {
       newBeacons.add(Beacon("", poi))
     }
   }
@@ -117,6 +127,7 @@ fun getNearbyPOIs(context: Context, location: Location, radius: Double): List<Lo
                 } // Check if the place is of a certain type
             ) {
               nearbyPOIs.add(placeLoc)
+              Log.i("PlacesApi", "Place found: ${place.name} at ${place.latLng}")
             }
           }
         }
