@@ -230,7 +230,7 @@ internal fun TrackItem(
                             navigationActions.navigateToProfile(profileAndTrack.profile.firebaseUid)
                           } else {
                             // if the profile is private , output a message that say the profile is
-                            // private
+                            // private, you cannot access to profile informations
                             Log.d(
                                 "Profile Access",
                                 "This profile is private, You cannot access to profile informations")
