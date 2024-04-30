@@ -1,7 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui.components.map
 
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
@@ -40,5 +39,8 @@ fun BeaconMapMarker(
       },
       icon =
           BitmapDescriptorFactory.fromBitmap(
-              resizeBitmap(bitmapFromResource(R.drawable.beaconlogo, context = LocalContext.current), 100, 100)))
+              resizeBitmap(
+                  bitmapFromResource(R.drawable.beaconlogo, context = LocalContext.current),
+                  100,
+                  100)))
 }
