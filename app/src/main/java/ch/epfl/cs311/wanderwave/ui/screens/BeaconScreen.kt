@@ -27,6 +27,8 @@ import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -70,6 +72,7 @@ fun BeaconScreen(
     navigationActions: NavigationActions,
     viewModel: BeaconViewModel = hiltViewModel()
 ) {
+
   LaunchedEffect(beaconId) {
     if (beaconId != null) {
       viewModel.getBeaconById(beaconId)
@@ -174,6 +177,7 @@ internal fun TrackItem(
   val scrollState = rememberScrollState()
   val scope = rememberCoroutineScope()
   val slowScrollAnimation: AnimationSpec<Float> = TweenSpec(durationMillis = 5000, easing = { it })
+  val snackbarHostState = remember { SnackbarHostState() }
 
   LaunchedEffect(key1 = true) {
     while (true) {
@@ -231,9 +235,10 @@ internal fun TrackItem(
                           } else {
                             // if the profile is private , output a message that say the profile is
                             // private, you cannot access to profile informations
-                            Log.d(
-                                "Profile Access",
-                                "This profile is private, You cannot access to profile informations")
+                            scope.launch {
+                              snackbarHostState.showSnackbar(
+                                  "This profile is private, you cannot access profile information.")
+                            }
                           }
                         }),
             profile = profileAndTrack.profile,
@@ -241,4 +246,5 @@ internal fun TrackItem(
       }
     }
   }
+  SnackbarHost(hostState = snackbarHostState)
 }
