@@ -132,29 +132,6 @@ class BeaconGeneratorTest {
   //        assertEquals(1, result.size)
   //    }
 
-  //  @Test
-  //  fun testGetNearbyPOIs_PermissionGranted_ReturnsPOIs() {
-  //    val context = ApplicationProvider.getApplicationContext<Context>()
-  //    val location = Location(46.519962, 6.633597)
-  //      val radius = 1000.0
-  //      val placeFields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
-  //      Places.initialize(context, BuildConfig.MAPS_API_KEY)
-  //      val mockResponse = mockk<FindCurrentPlaceResponse>()
-  //
-  //
-  //      val request = FindCurrentPlaceRequest.newInstance(placeFields)
-  //      val placesClient = mockk<PlacesClient>()
-  //      val task = mockk<Task<FindCurrentPlaceResponse>>()
-  //      every { task.addOnSuccessListener(any()) } answers {
-  //          val listener = arg<(FindCurrentPlaceResponse) -> Unit>(0)
-  //          listener.invoke(mockResponse)
-  //          task
-  //      }
-  //      every { task.addOnFailureListener(any()) } returns task
-  //      every { placesClient.findCurrentPlace(request) } returns task
-  //      val result = getNearbyPOIs(context, location, radius)
-  //
-  //  }
   @Test
   fun testGetNearbyPOIs_PermissionGranted_ReturnsPOIs() {
     val context = ApplicationProvider.getApplicationContext<Context>()
