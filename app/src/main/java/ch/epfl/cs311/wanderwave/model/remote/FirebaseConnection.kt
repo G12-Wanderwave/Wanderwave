@@ -39,13 +39,19 @@ abstract class FirebaseConnection<T, U> {
 
   abstract fun itemToMap(item: T): Map<String, Any>
 
-  open fun addItem(item: T) {
+  open fun addItem(item: T):String? {
     val itemMap = itemToMap(item)
+    var id: String? = null
 
     db.collection(collectionName)
         .add(itemMap)
         .addOnFailureListener { e -> Log.e("Firestore", "Error adding document: ", e) }
-        .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully added!") }
+        .addOnSuccessListener {
+          Log.d("Firestore", "DocumentSnapshot successfully added!")
+          id = it.id
+        }
+
+    return id
   }
 
   open fun addItemWithId(item: T) {
