@@ -223,8 +223,18 @@ internal fun TrackItem(
             modifier =
                 Modifier.size(width = 150.dp, height = 100.dp)
                     .clickable(
+                        enabled = profileAndTrack.profile.isPublic,
                         onClick = {
-                          navigationActions.navigateToProfile(profileAndTrack.profile.firebaseUid)
+                          if (profileAndTrack.profile.isPublic) {
+                            // if the profile is public, navigate to the profile view screen
+                            navigationActions.navigateToProfile(profileAndTrack.profile.firebaseUid)
+                          } else {
+                            // if the profile is private , output a message that say the profile is
+                            // private
+                            Log.d(
+                                "Profile Access",
+                                "This profile is private, You cannot access to profile informations")
+                          }
                         }),
             profile = profileAndTrack.profile,
         )
