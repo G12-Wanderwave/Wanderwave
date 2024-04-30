@@ -52,19 +52,6 @@ class BeaconGeneratorTest {
         elapsedRealtimeNanos = System.nanoTime()
       }
 
-  //  @Composable
-  //  @Before
-  //  fun setup() {
-  //    MockKAnnotations.init(this)
-  //
-  //    try {
-  //      locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true)
-  //      locationManager.setTestProviderLocation(LocationManager.GPS_PROVIDER, location)
-  //    } catch (e: SecurityException) {
-  //      e.printStackTrace()
-  //    }
-  //  }
-
   @Test
   fun createNearbyBeacons_addsNewBeaconsWhenNearbyPOIsAreFarFromExistingBeacons() {
     val location = Location(46.519962, 6.633597)
@@ -110,27 +97,28 @@ class BeaconGeneratorTest {
 
     assertTrue(result.isEmpty())
   }
-  //    @Test
-  //    fun createNearbyBeacons_addsOneBeaconOnly() {
-  //        val location = Location(46.519962, 6.633597)
-  //
-  //        val nearbyBeacons = listOf(
-  //            Beacon(
-  //                id = "testBeacon",
-  //                location = Location(46.519962, 6.633597, "Test Location"),
-  //                tracks = listOf(Track("testTrack", "Test Title", "Test Artist")))
-  //
-  //        )
-  //        val context = ApplicationProvider.getApplicationContext<Context>()
-  //
-  //        mockkStatic("ch.epfl.cs311.wanderwave.model.utils.BeaconGeneratorKt")
-  //        every { getNearbyPOIs(any(), any(), any()) } returns listOf(Location(0.0000001,
-  // 6.2),Location(0.0, 6.2))
-  //        val result = createNearbyBeacons(location, nearbyBeacons, 1000.0, context)
-  //
-  //        assertTrue(result.isNotEmpty())
-  //        assertEquals(1, result.size)
-  //    }
+
+  @Test
+  fun createNearbyBeacons_addsOneBeaconOnly() {
+    val location = Location(46.519962, 6.633597)
+
+    val nearbyBeacons =
+        listOf(
+            Beacon(
+                id = "testBeacon",
+                location = Location(46.519962, 6.633597, "Test Location"),
+                tracks = listOf(Track("testTrack", "Test Title", "Test Artist"))))
+
+    val context = ApplicationProvider.getApplicationContext<Context>()
+
+    mockkStatic("ch.epfl.cs311.wanderwave.model.utils.BeaconGeneratorKt")
+    every { getNearbyPOIs(any(), any(), any()) } returns
+        listOf(Location(0.0000001, 6.2), Location(0.0, 6.2))
+    val result = createNearbyBeacons(location, nearbyBeacons, 1000.0, context)
+
+    assertTrue(result.isNotEmpty())
+    assertEquals(1, result.size)
+  }
 
   @Test
   fun testGetNearbyPOIs_PermissionGranted_ReturnsPOIs() {

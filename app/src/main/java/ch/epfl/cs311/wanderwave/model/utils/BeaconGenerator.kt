@@ -103,6 +103,7 @@ fun getNearbyPOIs(context: Context, location: Location, radius: Double): List<Lo
   val placesClient = Places.createClient(context)
 
   // Define the fields to request
+
   val placeFields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
 
   // Create a new FindCurrentPlaceRequest
@@ -127,13 +128,13 @@ fun getNearbyPOIs(context: Context, location: Location, radius: Double): List<Lo
                 } // Check if the place is of a certain type
             ) {
               nearbyPOIs.add(placeLoc)
-              Log.i("PlacesApi", "Place found: ${place.name} at ${place.latLng}")
             }
           }
         }
         .addOnFailureListener { exception ->
           if (exception is ApiException) {
             Log.e("PlacesApi", "Place not found: ${exception.statusCode}")
+            Log.e("PlacesApi", "Place not found: ${exception.message}")
           }
         }
   }
