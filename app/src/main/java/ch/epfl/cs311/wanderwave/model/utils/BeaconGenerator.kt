@@ -64,7 +64,7 @@ fun createNearbyBeacons(
   // Place new beacons at the nearby points of interest
   for (poi in nearbyPOIs) {
     // Check if POI is far enough from existing beacons
-    if (nearbyBeacons.any() { beacon ->
+    if (nearbyBeacons.any { beacon ->
       beacon.location.distanceBetween(poi) > MIN_BEACON_DISTANCE
     }) {
       newBeacons.add(Beacon("", poi))
