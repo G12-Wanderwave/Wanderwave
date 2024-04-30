@@ -105,21 +105,18 @@ fun getNearbyPOIs(context: Context, location: Location, radius: Double): List<Lo
     placesClient
         .findCurrentPlace(request)
         .addOnSuccessListener { response ->
-          Log.d("PlacesApi", "Place found: ${response.placeLikelihoods}")
           for (placeLikelihood in response.placeLikelihoods) {
             val place = placeLikelihood.place
             // Conversion to make computing distances easier
             val placeLoc = Location(place.latLng.latitude, place.latLng.longitude, place.name)
 
-            if (location.distanceBetween(placeLoc) <=
-                radius && // Check if the place is within the radius
+            if (location.distanceBetween(placeLoc) <= radius &&
                 place.reviews.size >= MIN_REVIEWS && // Check if the place has enough reviews
                 place.placeTypes.any() {
                   types.contains(it)
                 } // Check if the place is of a certain type
             ) {
               nearbyPOIs.add(placeLoc)
-              Log.i("PlacesApi", "Place found: ${place.name} at ${place.latLng}")
             }
           }
         }
