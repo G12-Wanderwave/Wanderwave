@@ -18,6 +18,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.Transaction
+import com.spotify.protocol.client.Debug.assertTrue
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -26,6 +27,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -328,5 +330,49 @@ public class BeaconConnectionTest {
     beaconConnection.deleteItem(beacon)
     // Verify that the delete function is called on the document with the correct id
     verify { documentReference.delete() }
+  }
+
+  @Test
+  fun testAddBeaconToFirebase() = runBlocking {
+    // Mock the Task for adding a document to Firestore
+    val mockAddTask = mockk<Task<DocumentReference>>()
+    val mockDocRef = mockk<DocumentReference>(relaxed = true)
+
+    // Prepare the data
+    val beaconToAdd =
+        Beacon(
+            id = "newBeacon",
+            location = Location(1.0, 1.0, "New Location"),
+            tracks = listOf(Track("track1", "Title1", "Artist1")))
+
+    // Mock Firestore responses to simulate a successful addition of the document
+    every { collectionReference.add(beaconToAdd.toMap()) } returns mockAddTask
+    every { mockAddTask.addOnSuccessListener(any<OnSuccessListener<DocumentReference>>()) } answers
+        {
+          val listener = arg<OnSuccessListener<DocumentReference>>(0)
+          listener.onSuccess(mockDocRef) // Simulate successful addition
+          mockAddTask
+        }
+    every { mockAddTask.addOnFailureListener(any<OnFailureListener>()) } answers
+        {
+          mockAddTask // Simulate that there is no failure in the task
+        }
+
+    // Set the mock document reference ID to simulate Firestore assigning an ID
+    every { mockDocRef.id } returns "newBeaconId"
+
+    // Create a completion flag to track if add was successful
+    var completionFlag = false
+
+    // Call the function under test
+    beaconConnection.addBeaconToFirebase(beaconToAdd) { success, _ -> completionFlag = success }
+
+    delay(1000) // Ensure all async operations have time to complete
+
+    // Verify that the Firestore add function is called with the correct map
+    verify { collectionReference.add(beaconToAdd.toMap()) }
+
+    // Assert that the callback returns true, indicating successful addition
+    assertTrue(completionFlag, "Beacon should be added successfully.")
   }
 }

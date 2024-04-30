@@ -144,4 +144,34 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
         .addOnSuccessListener { onComplete(true) }
         .addOnFailureListener { onComplete(false) }
   }
+
+  fun addBeaconToFirebase(beacon: Beacon, onComplete: (Boolean, String?) -> Unit) {
+    // Convert the Beacon to a Firestore-compatible map
+    val beaconMap = beacon.toMap()
+
+    // Add the beacon to the 'beacons' collection
+    db.collection(collectionName)
+        .add(beaconMap)
+        .addOnSuccessListener { documentReference ->
+          // Handle adding tracks to the beacon
+          trackConnection.addItemsIfNotExist(beacon.tracks)
+          // Update the beacon document with the correct track references
+          val trackRefs =
+              beacon.tracks.map { track ->
+                db.collection(trackConnection.collectionName).document(track.id)
+              }
+          db.collection(collectionName)
+              .document(documentReference.id)
+              .update("tracks", trackRefs)
+              .addOnSuccessListener {
+                onComplete(true, null) // Success callback
+              }
+              .addOnFailureListener { e ->
+                onComplete(false, e.message) // Failure callback, tracks update failed
+              }
+        }
+        .addOnFailureListener { e ->
+          onComplete(false, e.message) // Failure callback, beacon creation failed
+        }
+  }
 }
