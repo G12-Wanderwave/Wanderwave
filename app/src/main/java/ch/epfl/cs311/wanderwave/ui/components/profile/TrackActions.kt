@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.viewmodel.SongList
 
 /**
@@ -129,28 +130,19 @@ fun AddTrackDialog(
  *     * @last update 1.0
  */
 @Composable
-fun SongsListDisplay(songLists: List<SongList>, isTopSongsListVisible: Boolean) {
-  if (isTopSongsListVisible) {
-    songLists
-        .firstOrNull { it.name == "TOP SONGS" }
-        ?.let { songList ->
-          if (songList.tracks.isNotEmpty()) {
-            Text("TOP SONGS")
-            TracksList(songList.tracks)
-          } else {
-            Text("The TOP SONGS List is empty")
-          }
-        }
-  } else {
-    songLists
-        .firstOrNull { it.name == "CHOSEN SONGS" }
-        ?.let { songList ->
-          if (songList.tracks.isNotEmpty()) {
-            Text("CHOSEN SONGS")
-            TracksList(songList.tracks)
-          } else {
-            Text("The CHOSEN SONGS List is empty")
-          }
-        }
-  }
+fun SongsListDisplay(
+    songLists: List<SongList>,
+    isTopSongsListVisible: Boolean,
+    onAddTrack: (Track) -> Unit
+) {
+  val name = if (isTopSongsListVisible) "TOP SONGS" else "CHOSEN SONGS"
+  songLists
+      .firstOrNull { it.name == name }
+      ?.let { songList ->
+        TrackList(
+            tracks = songList.tracks,
+            title = name,
+            onSelectTrack = { /* TODO */},
+            onAddTrack = onAddTrack)
+      }
 }

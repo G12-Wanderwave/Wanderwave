@@ -34,7 +34,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
-import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
 import ch.epfl.cs311.wanderwave.ui.components.profile.ClickableIcon
 import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
 import ch.epfl.cs311.wanderwave.ui.components.profile.SongsListDisplay
@@ -90,38 +89,47 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
               Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
             }
 
-        // Call the SongsListDisplay function
-        // Buttons for adding tracks to top songs lists
-        Button(
-            onClick = { navActions.navigateTo(Route.SELECT_SONG) },
-            modifier = Modifier.testTag("addTopSongs")) {
-              Text("Add Track to TOP SONGS List")
-            }
-        SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible)
-        // Buttons for adding tracks to chosen songs list
-        Button(
-            onClick = {
-              showDialog = true
-              dialogListType = "CHOSEN SONGS"
-            },
-            modifier = Modifier.testTag("addChosenSongs")) {
-              Text("Add Track to CHOSEN SONGS List")
-            }
-
-        // Show dialog for adding a new track and add the track to the appropriate list
-        if (showDialog) {
-          AddTrackDialog(
-              onAddTrack = { track ->
-                viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
-                viewModel.addTrackToList(dialogListType, track)
-                showDialog = false
-              },
-              onDismiss = { showDialog = false },
-              initialTrackId = "",
-              initialTrackTitle = "",
-              initialTrackArtist = "",
-              dialogTestTag = "addTrackDialog")
-        }
+        SongsListDisplay(
+            songLists = songLists,
+            isTopSongsListVisible = isTopSongsListVisible,
+            onAddTrack = { track ->
+              viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
+              viewModel.addTrackToList(dialogListType, track)
+            })
+        //        // Call the SongsListDisplay function
+        //        // Buttons for adding tracks to top songs lists
+        //        Button(
+        //            onClick = { navActions.navigateTo(Route.SELECT_SONG) },
+        //            modifier = Modifier.testTag("addTopSongs")) {
+        //              Text("Add Track to TOP SONGS List")
+        //            }
+        //        SongsListDisplay(songLists = songLists, isTopSongsListVisible =
+        // isTopSongsListVisible)
+        //        // Buttons for adding tracks to chosen songs list
+        //        Button(
+        //            onClick = {
+        //              showDialog = true
+        //              dialogListType = "CHOSEN SONGS"
+        //            },
+        //            modifier = Modifier.testTag("addChosenSongs")) {
+        //              Text("Add Track to CHOSEN SONGS List")
+        //            }
+        //
+        //        // Show dialog for adding a new track and add the track to the appropriate list
+        //        if (showDialog) {
+        //          AddTrackDialog(
+        //              onAddTrack = { track ->
+        //                viewModel.createSpecificSongList(dialogListType) // Ensure the list is
+        // created
+        //                viewModel.addTrackToList(dialogListType, track)
+        //                showDialog = false
+        //              },
+        //              onDismiss = { showDialog = false },
+        //              initialTrackId = "",
+        //              initialTrackTitle = "",
+        //              initialTrackArtist = "",
+        //              dialogTestTag = "addTrackDialog")
+        //        }
       }
 
   SignOutButton(modifier = Modifier, navActions = navActions)
