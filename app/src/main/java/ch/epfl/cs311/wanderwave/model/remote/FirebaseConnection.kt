@@ -9,6 +9,7 @@ import com.google.firebase.firestore.persistentCacheSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.tasks.await
 
 abstract class FirebaseConnection<T, U> {
 
@@ -39,19 +40,29 @@ abstract class FirebaseConnection<T, U> {
 
   abstract fun itemToMap(item: T): Map<String, Any>
 
-  open fun addItem(item: T): String? {
+  open fun addItem(item: T) {
     val itemMap = itemToMap(item)
-    var id: String? = null
 
     db.collection(collectionName)
         .add(itemMap)
         .addOnFailureListener { e -> Log.e("Firestore", "Error adding document: ", e) }
-        .addOnSuccessListener {
-          Log.d("Firestore", "DocumentSnapshot successfully added!")
-          id = it.id
-        }
+        .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully added!") }
+  }
 
-    return id
+  suspend fun addItemAndGetId(item: T): String? {
+    val itemMap = itemToMap(item)
+    var documentId: String? = null
+
+    try {
+      val documentReference = db.collection(collectionName).add(itemMap).await()
+
+      Log.d("Firestore", "DocumentSnapshot successfully added!")
+      documentId = documentReference.id
+    } catch (e: Exception) {
+      Log.e("Firestore", "Error adding document: ", e)
+    }
+
+    return documentId
   }
 
   open fun addItemWithId(item: T) {
