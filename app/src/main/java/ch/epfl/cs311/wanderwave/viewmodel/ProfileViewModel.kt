@@ -1,11 +1,9 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
-import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +22,7 @@ data class SongList(val name: String, val tracks: List<Track> = mutableListOf())
 class ProfileViewModel
 @Inject
 constructor(
-    private val repository: ProfileRepositoryImpl,
+    private val profileRepository: ProfileRepository,
     private val spotifyController: SpotifyController
 ) : ViewModel() {
 
@@ -88,20 +86,13 @@ constructor(
     _songLists.value = updatedLists
   }
 
-  val profileConnection = ProfileConnection()
-
   fun updateProfile(updatedProfile: Profile) {
     _profile.value = updatedProfile
-    profileConnection.updateItem(updatedProfile)
-    viewModelScope.launch {
-      repository.delete()
-      repository.insert(_profile.value)
-    }
+    profileRepository.updateItem(updatedProfile)
   }
 
   fun deleteProfile() {
-    profileConnection.deleteItem(_profile.value)
-    viewModelScope.launch { repository.delete() }
+    profileRepository.deleteItem(_profile.value)
   }
 
   fun togglePublicMode() {

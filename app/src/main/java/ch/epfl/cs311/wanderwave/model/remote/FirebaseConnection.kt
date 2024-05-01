@@ -3,6 +3,9 @@ package ch.epfl.cs311.wanderwave.model.remote
 import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.memoryCacheSettings
+import com.google.firebase.firestore.persistentCacheSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.mapNotNull
@@ -13,7 +16,24 @@ abstract class FirebaseConnection<T, U> {
 
   abstract val getItemId: (T) -> String
 
-  open val db = FirebaseFirestore.getInstance()
+  open val db =
+      FirebaseFirestore.getInstance().apply {
+        firestoreSettings =
+            FirebaseFirestoreSettings.Builder()
+                .setLocalCacheSettings(memoryCacheSettings {}) // Memory cache settings
+                .setLocalCacheSettings(
+                    persistentCacheSettings {
+                      FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED
+                    } // Persistence cache settings (default)
+                    )
+                .build()
+      }
+
+  // If you want to use data exclusively from the local cache, you can use the following code:
+  // db.disableNetwork().addOnCompleteListener {
+  //   // Do offline things
+  //   // ...
+  // }
 
   abstract fun documentToItem(document: DocumentSnapshot): T?
 
@@ -50,12 +70,12 @@ abstract class FirebaseConnection<T, U> {
         .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully updated!") }
   }
 
-  open fun deleteItem(item: T) {
+  fun deleteItem(item: T) {
     val itemId = getItemId(item)
     deleteItem(itemId)
   }
 
-  open fun deleteItem(itemId: String) {
+  fun deleteItem(itemId: String) {
     db.collection(collectionName)
         .document(itemId)
         .delete()
@@ -63,7 +83,7 @@ abstract class FirebaseConnection<T, U> {
         .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully deleted!") }
   }
 
-  open fun getItem(item: T): Flow<T> = getItem(getItemId(item))
+  fun getItem(item: T): Flow<T> = getItem(getItemId(item))
 
   open fun getItem(itemId: String): Flow<T> {
     val dataFlow = MutableStateFlow<T?>(null)
