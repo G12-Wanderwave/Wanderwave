@@ -65,6 +65,9 @@ fun createNearbyBeacons(
     context: Context
 ): List<Beacon> {
   // Initialize the list of new Beacons
+  if (radius <= 0.0) {
+    throw IllegalArgumentException("Radius must be positive")
+  }
   val newBeacons = mutableListOf<Beacon>()
 
   // Get the nearby points of interest
@@ -137,9 +140,10 @@ fun getNearbyPOIs(context: Context, location: Location, radius: Double): List<Lo
           if (exception is ApiException) {
             Log.e("PlacesApi", "Place not found: ${exception.statusCode}")
             Log.e("PlacesApi", "Place not found: ${exception.message}")
+            Log.e("PlacesApi", "Place not found: ${exception.localizedMessage}")
+            Log.e("PlacesApi", "Place not found: ${exception.cause}")
           }
         }
   }
-
   return nearbyPOIs
 }

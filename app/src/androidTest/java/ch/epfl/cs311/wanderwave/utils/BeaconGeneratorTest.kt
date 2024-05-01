@@ -8,25 +8,30 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import ch.epfl.cs311.wanderwave.BuildConfig
+import ch.epfl.cs311.wanderwave.BuildConfig.MAPS_API_KEY
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.utils.createNearbyBeacons
 import ch.epfl.cs311.wanderwave.model.utils.getNearbyPOIs
 import ch.epfl.cs311.wanderwave.model.utils.types
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.PlaceLikelihood
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse
-import com.google.android.libraries.places.api.net.PlacesClient
+import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
+import org.junit.Assert.assertThrows
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,6 +56,17 @@ class BeaconGeneratorTest {
         time = System.currentTimeMillis()
         elapsedRealtimeNanos = System.nanoTime()
       }
+
+  @Before
+  fun setup() {
+    MockKAnnotations.init(this)
+    try {
+      locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true)
+      locationManager.setTestProviderLocation(LocationManager.GPS_PROVIDER, location)
+    } catch (e: SecurityException) {
+      e.printStackTrace()
+    }
+  }
 
   @Test
   fun createNearbyBeacons_addsNewBeaconsWhenNearbyPOIsAreFarFromExistingBeacons() {
@@ -121,6 +137,32 @@ class BeaconGeneratorTest {
   }
 
   @Test
+  fun createNearbyBeaconsWithNegativeRadius() {
+    val location = Location(46.519962, 6.633597)
+
+    val nearbyBeacons =
+        listOf(
+            Beacon(
+                id = "testBeacon",
+                location = Location(46.519962, 6.633597, "Test Location"),
+                tracks = listOf(Track("testTrack", "Test Title", "Test Artist"))))
+
+    val context = ApplicationProvider.getApplicationContext<Context>()
+
+    mockkStatic("ch.epfl.cs311.wanderwave.model.utils.BeaconGeneratorKt")
+    every { getNearbyPOIs(any(), any(), any()) } returns
+        listOf(Location(0.0000001, 6.2), Location(0.0, 6.2))
+
+    // Assert that IllegalArgumentException is thrown for negative radius
+    val exception =
+        assertThrows(IllegalArgumentException::class.java) {
+          createNearbyBeacons(location, nearbyBeacons, -1.0, context)
+        }
+
+    assertEquals("Radius must be positive", exception.message)
+  }
+
+  @Test
   fun testGetNearbyPOIs_PermissionGranted_ReturnsPOIs() {
     val context = ApplicationProvider.getApplicationContext<Context>()
     val location = Location(46.519962, 6.633597)
@@ -136,23 +178,22 @@ class BeaconGeneratorTest {
     every { mockPlace.latLng } returns com.google.android.gms.maps.model.LatLng(46.519962, 6.633597)
     every { mockPlaceLikelihood.place } returns mockPlace
     every { mockResponse.placeLikelihoods } returns listOf(mockPlaceLikelihood)
-
     // Mock the request and the task
     val request = FindCurrentPlaceRequest.newInstance(placeFields)
-    val task = mockk<Task<FindCurrentPlaceResponse>>()
-    every { task.addOnSuccessListener(any()) } answers
-        {
-          val listener = arg<(FindCurrentPlaceResponse) -> Unit>(0)
-          listener.invoke(mockResponse)
-          task
-        }
-    every { task.addOnFailureListener(any()) } returns task
-    every { task.isSuccessful } returns true
-    // Mock the PlacesClient
-    val placesClient = mockk<PlacesClient>()
-    every { placesClient.findCurrentPlace(request) } returns task
+    val mockTask = mockk<Task<FindCurrentPlaceResponse>>()
 
-    // Call the function to test
+    every { mockTask.isSuccessful } returns true
+    every { mockTask.result } returns mockResponse
+    every {
+      mockTask.addOnSuccessListener(any<OnSuccessListener<FindCurrentPlaceResponse>>())
+    } answers
+        {
+          val listener = arg<OnSuccessListener<FindCurrentPlaceResponse>>(0)
+          listener.onSuccess(mockResponse)
+          mockTask
+        }
+    every { mockTask.addOnFailureListener(any()) } answers { mockTask }
+
     val result = getNearbyPOIs(context, location, radius)
 
     // Assertions
