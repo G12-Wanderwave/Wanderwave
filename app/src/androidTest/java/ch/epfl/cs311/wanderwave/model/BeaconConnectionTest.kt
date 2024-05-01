@@ -25,6 +25,7 @@ import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.fail
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -75,6 +76,72 @@ public class BeaconConnectionTest {
 
     // Verify that either the set function is called
     verify { collectionReference.add(any()) }
+  }
+
+  @Test
+  fun testAddItemAndGetIdSuccess() = runBlocking {
+    // Mock the Task
+    val mockTask = mockk<Task<DocumentReference>>()
+    val mockDocumentReference = mockk<DocumentReference>()
+
+    every { mockTask.isComplete } returns true
+    every { mockTask.isSuccessful } returns true
+    every { mockTask.result } returns mockDocumentReference
+    every { mockTask.isCanceled } returns false
+    every { mockTask.exception } returns null
+
+    every { mockDocumentReference.id } returns "testDocumentId"
+
+    // Define behavior for the addOnSuccessListener method
+    every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentReference>>()) } answers
+        {
+          val listener = arg<OnSuccessListener<DocumentReference>>(0)
+          listener.onSuccess(mockDocumentReference)
+          mockTask
+        }
+    every { mockTask.addOnFailureListener(any()) } answers { mockTask }
+
+    // Define behavior for the add() method on the CollectionReference to return the mock task
+    every { collectionReference.add(any()) } returns mockTask
+
+    // Call the function under test
+    val documentId = beaconConnection.addItemAndGetId(beacon)
+
+    // Verify that the add function is called on the collection
+    coVerify { collectionReference.add(any()) }
+
+    // Assert that the returned document ID is not null
+    assertEquals("testDocumentId", documentId)
+  }
+
+  @Test
+  fun testAddItemAndGetIdFailure() = runBlocking {
+    // Mock the Task
+    val mockTask = mockk<Task<DocumentReference>>()
+
+    // Define behavior for the addOnFailureListener method
+    every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentReference>>()) } answers
+        {
+          mockTask
+        }
+    every { mockTask.addOnFailureListener(any()) } answers
+        {
+          val listener = arg<OnFailureListener>(0)
+          listener.onFailure(Exception("Test Exception"))
+          mockTask
+        }
+
+    // Define behavior for the add() method on the CollectionReference to return the mock task
+    every { collectionReference.add(any()) } returns mockTask
+
+    // Call the function under test
+    val documentId = beaconConnection.addItemAndGetId(beacon)
+
+    // Verify that the add function is called on the collection
+    coVerify { collectionReference.add(any()) }
+
+    // Assert that the returned document ID is null
+    assertNull(documentId)
   }
 
   @Test
