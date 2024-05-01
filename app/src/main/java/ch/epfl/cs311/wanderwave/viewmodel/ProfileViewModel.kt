@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
@@ -8,8 +9,6 @@ import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
@@ -107,7 +106,7 @@ constructor(
    * @last update 2.0
    */
   fun retrieveTracks() {
-    CoroutineScope(Dispatchers.IO).launch {
+    viewModelScope.launch {
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
       if (track != null) {
         for (i in track) {
@@ -132,7 +131,7 @@ constructor(
    * @last update 2.0
    */
   fun retrieveAndAddSubsection() {
-    CoroutineScope(Dispatchers.IO).launch {
+    viewModelScope.launch {
       _spotifySubsectionList.value = emptyList()
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
       if (track != null) {
@@ -151,7 +150,7 @@ constructor(
    * @last update 2.0
    */
   fun retrieveChild(item: ListItem) {
-    CoroutineScope(Dispatchers.IO).launch {
+    viewModelScope.launch {
       _childrenPlaylistTrackList.value = emptyList()
       val children = spotifyController.getAllChildren(item).firstOrNull()
       if (children != null) {

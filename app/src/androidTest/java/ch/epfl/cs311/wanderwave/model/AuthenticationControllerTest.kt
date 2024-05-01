@@ -8,6 +8,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import io.mockk.called
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -71,14 +72,14 @@ class AuthenticationControllerTest {
                         .trimIndent()
               }
         }
-    every { mockTokenRepository.setAuthToken(any(), any(), any()) } returns Unit
-    every {
+    coEvery { mockTokenRepository.setAuthToken(any(), any(), any()) } returns Unit
+    coEvery {
       mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.FIREBASE_TOKEN)
     } returns "testtoken-firebase"
-    every {
+    coEvery {
       mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
     } returns "testtoken-spotify-access"
-    every {
+    coEvery {
       mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_REFRESH_TOKEN)
     } returns "testtoken-spotify-refresh"
   }

@@ -47,7 +47,7 @@ constructor(
 
   suspend fun refreshTokenIfNecessary(): Boolean {
     if (auth.currentUser == null) {
-      return withContext(Dispatchers.IO) { refreshSpotifyToken() }
+      return refreshSpotifyToken()
     }
     return true
   }
@@ -66,7 +66,9 @@ constructor(
             .post("code=$authenticationCode".toRequestBody())
             .build()
 
-    val responseJson = httpClient.newCall(request).execute().body?.string() ?: return false
+    val responseJson =
+        withContext(Dispatchers.IO) { httpClient.newCall(request).execute().body?.string() }
+            ?: return false
     return storeAndUseNewTokens(responseJson)
   }
 
@@ -104,7 +106,9 @@ constructor(
             .post("refresh_token=$refreshToken".toRequestBody())
             .build()
 
-    val responseJson = httpClient.newCall(request).execute().body?.string() ?: return false
+    val responseJson =
+        withContext(Dispatchers.IO) { httpClient.newCall(request).execute().body?.string() }
+            ?: return false
     return storeAndUseNewTokens(responseJson)
   }
 
