@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.model.spotify
 
 import android.content.Context
+import android.util.Log
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.spotify.android.appremote.api.ConnectionParams
@@ -91,8 +92,10 @@ class SpotifyController(private val context: Context) {
     return callbackFlow {
       val callResult =
           appRemote?.let {
+            Log.d("Track Spotify ID", track.id)
             it.playerApi
-                .play(track.id)
+                // TODO: remove magic string
+                .play("spotify:track:${track.id}")
                 .setResultCallback { trySend(true) }
                 .setErrorCallback { trySend(false) }
           }
