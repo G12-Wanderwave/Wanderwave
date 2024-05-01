@@ -4,9 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,7 +21,7 @@ import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.navigation.TOP_LEVEL_DESTINATIONS
 
 val trackListIcon: ImageVector = Icons.Default.List
-val mainIcon: ImageVector = Icons.Default.Home
+val profileIcon: ImageVector = Icons.Default.Person
 val mapIcon: ImageVector = Icons.Default.LocationOn
 
 /**
@@ -60,17 +60,19 @@ fun AppBottomBar(navActions: NavigationActions) {
     Spacer(Modifier.weight(1f)) // Spacer for centering the middle icon
 
     IconButton(
-        onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[1].route) },
-        modifier = Modifier.weight(1f).testTag("bottomAppBarButton" + Route.MAIN.routeString)) {
-          Icon(mainIcon, contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[1].textId))
+        onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[2].route) },
+        modifier = Modifier.weight(1f).testTag("bottomAppBarButton" + Route.MAP.routeString)) {
+          Icon(mapIcon, contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[2].textId))
         }
 
     Spacer(Modifier.weight(1f)) // Spacer for centering the middle icon
 
     IconButton(
-        onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[2].route) },
-        modifier = Modifier.weight(1f).testTag("bottomAppBarButton" + Route.MAP.routeString)) {
-          Icon(mapIcon, contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[2].textId))
+        onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[1].route) },
+        modifier = Modifier.weight(1f).testTag("bottomAppBarButton" + Route.PROFILE.routeString)) {
+          Icon(
+              profileIcon,
+              contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[1].textId))
         }
   }
 }
