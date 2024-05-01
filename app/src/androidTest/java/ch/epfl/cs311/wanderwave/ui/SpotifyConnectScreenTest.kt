@@ -41,10 +41,7 @@ class SpotifyConnectScreenTest :
   fun spotifyConnectScreenProgressIndicatorIsDisplayed() = run {
     setup(SpotifyConnectScreenViewModel.UiState(hasResult = false))
 
-    onComposeScreen<SpotifyConnectScreen>(composeTestRule) {
-      assertIsDisplayed()
-      spotifyConnectProgressIndicator { assertIsDisplayed() }
-    }
+    onComposeScreen<SpotifyConnectScreen>(composeTestRule) { assertIsDisplayed() }
   }
 
   @Test

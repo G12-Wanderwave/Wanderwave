@@ -36,14 +36,14 @@ class SpotifyController(private val context: Context) {
 
   fun getAuthorizationRequest(): AuthorizationRequest {
     val builder =
-        AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
+        AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
             .setScopes(SCOPES.toTypedArray())
     return builder.build()
   }
 
   fun getLogoutRequest(): AuthorizationRequest {
     val builder =
-        AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
+        AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
             .setScopes(emptyArray())
             .setShowDialog(true)
     return builder.build()

@@ -26,6 +26,7 @@ import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
 import ch.epfl.cs311.wanderwave.ui.components.player.SurroundWithMiniPlayer
 import ch.epfl.cs311.wanderwave.ui.screens.AboutScreen
+import ch.epfl.cs311.wanderwave.ui.screens.BeaconScreen
 import ch.epfl.cs311.wanderwave.ui.screens.EditProfileScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
@@ -77,7 +78,7 @@ fun AppScaffold(navController: NavHostController) {
         SurroundWithMiniPlayer(displayPlayer = showBottomBar, viewModel = trackListViewModel) {
           NavHost(
               navController = navController,
-              startDestination = Route.SPOTIFY_CONNECT.routeString,
+              startDestination = Route.LOGIN.routeString,
               modifier =
                   Modifier.padding(innerPadding).background(MaterialTheme.colorScheme.background)) {
                 composable(Route.LOGIN.routeString) { LoginScreen(navActions, showSnackbar) }
@@ -94,6 +95,9 @@ fun AppScaffold(navController: NavHostController) {
                 }
                 composable(Route.SELECT_SONG.routeString) {
                   SelectSongScreen(navActions, viewModel)
+                }
+                composable("${Route.BEACON.routeString}/{beaconId}") {
+                  BeaconScreen(it.arguments?.getString("beaconId") ?: "", navActions)
                 }
               }
         }
