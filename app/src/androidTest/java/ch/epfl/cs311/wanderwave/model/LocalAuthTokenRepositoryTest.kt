@@ -58,7 +58,7 @@ class LocalAuthTokenRepositoryTest {
   }
 
   @Test
-  fun canSetTokens() = runBlocking{
+  fun canSetTokens() = runBlocking {
     localAuthTokenRepository.setAuthToken(
         AuthTokenRepository.AuthTokenType.FIREBASE_TOKEN, "firebaseToken", 123L)
 
@@ -92,7 +92,7 @@ class LocalAuthTokenRepositoryTest {
   }
 
   @Test
-  fun canGetTokens() = runBlocking{
+  fun canGetTokens() = runBlocking {
     val firebaseToken =
         localAuthTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.FIREBASE_TOKEN)
     assert(firebaseToken == "firebaseToken")
