@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class BeaconConnection
 @Inject
@@ -61,31 +62,32 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
           if (document != null && document.data != null) {
             documentToItem(document)?.let { beacon ->
               dataFlow.value = beacon
-              val trackRefs = document.get("tracks") as? List<DocumentReference>
-              val tracks = mutableListOf<Track>()
 
-              // Use a coroutine to perform asynchronous operations
-              coroutineScope.launch {
-                val tracksDeferred =
-                    trackRefs?.map { trackRef ->
-                      async(Dispatchers.IO) {
-                        try {
-                          val trackDocument = trackRef.get().await()
-                          trackDocument.toObject(Track::class.java)
-                        } catch (e: Exception) {
-                          // Handle exceptions
-                          Log.e("Firestore", "Error fetching track: ${e.message}")
-                          null
-                        }
+              val tracksObject = document["tracks"]
+
+              var trackRefs: List<Map<String, DocumentReference>>?
+
+              if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
+                trackRefs = tracksObject as List<Map<String, DocumentReference>>
+                // Continue with the code
+                // Use a coroutine to perform asynchronous operations
+                coroutineScope.launch {
+                  val tracksDeferred =
+                      trackRefs?.map { trackRef ->
+                        // track ref is a map with a single key "track" and a DocumentReference
+                        // value
+                        async { fetchTrack(trackRef["track"]) }
                       }
-                    }
 
-                // Wait for all tracks to be fetched
-                val tracks = tracksDeferred?.mapNotNull { it?.await() }
+                  // Wait for all tracks to be fetched
+                  val tracks = tracksDeferred?.mapNotNull { it?.await() }
 
-                // Update the beacon with the complete list of tracks
-                val updatedBeacon = beacon.copy(tracks = tracks ?: emptyList())
-                dataFlow.value = updatedBeacon
+                  // Update the beacon with the complete list of tracks
+                  val updatedBeacon = beacon.copy(tracks = tracks ?: emptyList())
+                  dataFlow.value = updatedBeacon
+                }
+              } else {
+                Log.e("Firestore", "tracks has Wrong Firebase Format")
               }
             }
           } else {
@@ -97,9 +99,25 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
           Log.e("Firestore", "Error getting document: ", e)
         }
 
-    Log.d("Firestore", "DocumentSnapshot data 4: ${dataFlow.value}")
-
     return dataFlow.filterNotNull()
+  }
+
+  // Fetch a track from a DocumentReference asynchronously
+  suspend fun fetchTrack(trackRef: DocumentReference?): Track? {
+    if (trackRef == null) return null
+    return withContext(Dispatchers.IO) {
+      try {
+        val trackDocument = trackRef?.get()?.await()
+        if (trackDocument != null) {
+          Track.from(trackDocument)
+        } else {
+          null
+        }
+      } catch (e: Exception) {
+        Log.e("Firestore", "Error fetching track: ${e.message}")
+        null
+      }
+    }
   }
 
   override fun getAll(): Flow<List<Beacon>> {
