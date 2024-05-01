@@ -47,6 +47,11 @@ class AppBottomBarTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
         performClick()
         verify { mockNavigationActions.navigateToTopLevel(Route.MAP) }
       }
+      bottomAppBarProfileButton {
+        assertIsDisplayed()
+        performClick()
+        verify { mockNavigationActions.navigateToTopLevel(Route.PROFILE) }
+      }
     }
   }
 

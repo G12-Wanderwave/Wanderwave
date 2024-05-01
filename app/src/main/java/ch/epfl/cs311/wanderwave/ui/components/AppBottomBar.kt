@@ -60,19 +60,19 @@ fun AppBottomBar(navActions: NavigationActions) {
     Spacer(Modifier.weight(1f)) // Spacer for centering the middle icon
 
     IconButton(
-        onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[2].route) },
+        onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[1].route) },
         modifier = Modifier.weight(1f).testTag("bottomAppBarButton" + Route.MAP.routeString)) {
-          Icon(mapIcon, contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[2].textId))
+          Icon(mapIcon, contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[1].textId))
         }
 
     Spacer(Modifier.weight(1f)) // Spacer for centering the middle icon
 
     IconButton(
-        onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[1].route) },
+        onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[2].route) },
         modifier = Modifier.weight(1f).testTag("bottomAppBarButton" + Route.PROFILE.routeString)) {
           Icon(
               profileIcon,
-              contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[1].textId))
+              contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[2].textId))
         }
   }
 }
