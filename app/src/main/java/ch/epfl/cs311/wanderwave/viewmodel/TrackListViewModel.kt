@@ -36,7 +36,11 @@ constructor(
   private fun observeTracks() {
     CoroutineScope(Dispatchers.IO).launch {
       repository.getAll().collect { tracks ->
-        _uiState.value = UiState(tracks = tracks.filter { matchesSearchQuery(it) }, queue = tracks.filter { matchesSearchQuery(it) }, loading = false)
+        _uiState.value =
+            UiState(
+                tracks = tracks.filter { matchesSearchQuery(it) },
+                queue = tracks.filter { matchesSearchQuery(it) },
+                loading = false)
       }
       // deal with the flow
     }
