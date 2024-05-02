@@ -164,34 +164,4 @@ class BeaconConnection(
     return beaconMap
   }
 
-  override fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
-    val beaconRef = db.collection("beacons").document(beaconId)
-
-    db.runTransaction { transaction ->
-          val snapshot = transaction.get(beaconRef)
-          val beacon = snapshot.toObject(Beacon::class.java)
-          beacon?.let {
-            val newTracks =
-                ArrayList(it.profileAndTrack).apply {
-                  add(
-                      ProfileTrackAssociation(
-                          Profile( // TODO : ayman : this is a dummy profile, replace with actual
-                              // profile, you should have the profile connection imported
-                              // profile
-                              "Sample First Name",
-                              "Sample last name",
-                              "Sample desc",
-                              0,
-                              false,
-                              null,
-                              "Sample Profile ID",
-                              track.id),
-                          track))
-                }
-            transaction.update(beaconRef, "tracks", newTracks.map { it.toMap() })
-          } ?: throw Exception("Beacon not found")
-        }
-        .addOnSuccessListener { onComplete(true) }
-        .addOnFailureListener { onComplete(false) }
-  }
 }
