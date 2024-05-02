@@ -50,15 +50,13 @@ class BeaconConnection(
   override fun addItemWithId(item: Beacon) {
     super.addItemWithId(item)
     trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
-    profileConnection.addProfilesIfNotExist(
-        item.profileAndTrack.map { it.profile })
+    profileConnection.addProfilesIfNotExist(item.profileAndTrack.map { it.profile })
   }
 
   override fun updateItem(item: Beacon) {
     super.updateItem(item)
     trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
-    profileConnection.addProfilesIfNotExist(
-        item.profileAndTrack.map { it.profile })
+    profileConnection.addProfilesIfNotExist(item.profileAndTrack.map { it.profile })
   }
 
   override fun getItem(itemId: String): Flow<Beacon> {
