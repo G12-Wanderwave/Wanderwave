@@ -104,7 +104,6 @@ class BeaconConnection(
         }
 
     return dataFlow.filterNotNull()
-    return flowOf()
   }
 
   // Fetch a track from a DocumentReference asynchronously
