@@ -169,7 +169,7 @@ constructor(
   fun getProfileByID(id: String) {
     viewModelScope.launch {
       repository.getItem(id).collect { fetchedProfile ->
-        _uiState.value = ProfileViewModel.UIState(profile = fetchedProfile, isLoading = false)
+        _uiState.value = UIState(profile = fetchedProfile, isLoading = false)
       }
     }
   }
