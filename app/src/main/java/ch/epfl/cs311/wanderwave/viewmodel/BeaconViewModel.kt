@@ -3,6 +3,9 @@ package ch.epfl.cs311.wanderwave.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Beacon
+import ch.epfl.cs311.wanderwave.model.data.Location
+import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +22,25 @@ class BeaconViewModel @Inject constructor(private val beaconRepository: BeaconRe
   val uiState: StateFlow<UIState> = _uiState
 
   init {
-    _uiState.value = UIState(beacon = null, isLoading = true)
+    val sampleBeacon =
+        Beacon(
+            id = "Sample ID",
+            location = Location(0.0, 0.0, "Sample Location"),
+            profileAndTrack =
+                listOf(
+                    ProfileTrackAssociation(
+                        Profile(
+                            "Sample First Name",
+                            "Sample last name",
+                            "Sample desc",
+                            0,
+                            false,
+                            null,
+                            "Sample Profile ID",
+                            "Sample Track ID"),
+                        Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
+
+    _uiState.value = UIState(beacon = sampleBeacon, isLoading = false)
   }
 
   fun getBeaconById(id: String) {
@@ -32,6 +53,7 @@ class BeaconViewModel @Inject constructor(private val beaconRepository: BeaconRe
 
   fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
     // Call the BeaconConnection's addTrackToBeacon with the provided beaconId and track
+
     beaconRepository.addTrackToBeacon(beaconId, track, onComplete)
   }
 
