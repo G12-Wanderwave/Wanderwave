@@ -22,7 +22,7 @@ fun SpotifyConnectScreen(
   LaunchedEffect(state) {
     if (state.hasResult) {
       if (state.success) {
-        navigationActions.navigateToTopLevel(Route.MAIN)
+        navigationActions.navigateToTopLevel(Route.MAP)
       } else {
         navigationActions.navigateToTopLevel(Route.LOGIN)
       }

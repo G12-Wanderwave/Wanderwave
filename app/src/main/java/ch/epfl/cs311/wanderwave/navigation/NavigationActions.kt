@@ -13,8 +13,8 @@ enum class Route(val routeString: String, val showBottomBar: Boolean) {
   MAIN("main", true),
   TRACK_LIST("trackList", true),
   MAP("map", true),
-  PROFILE("profile", false),
-  EDIT_PROFILE("editprofile", false),
+  PROFILE("profile", true),
+  EDIT_PROFILE("editprofile", true),
   BEACON("beacon", false),
   SELECT_SONG("selectsong", false);
 
@@ -26,7 +26,7 @@ enum class Route(val routeString: String, val showBottomBar: Boolean) {
 }
 
 // Top level destination
-data class TopLevelDestination(val route: Route, val iconId: Int, val textId: Int)
+data class TopLevelDestination(val route: Route, val textId: Int)
 
 class NavigationActions(navController: NavHostController) {
 
@@ -81,8 +81,7 @@ class NavigationActions(navController: NavHostController) {
 
 val TOP_LEVEL_DESTINATIONS =
     listOf(
-        TopLevelDestination(
-            route = Route.TRACK_LIST, iconId = R.drawable.tracklist, textId = R.string.trackList),
-        // 0 is temporary, main will be removed later
-        TopLevelDestination(route = Route.MAIN, iconId = 0, textId = R.string.main),
-        TopLevelDestination(route = Route.MAP, iconId = R.drawable.map, textId = R.string.map))
+        TopLevelDestination(route = Route.TRACK_LIST, textId = R.string.trackList),
+        TopLevelDestination(route = Route.MAP, textId = R.string.map),
+        TopLevelDestination(route = Route.PROFILE, textId = R.string.profile),
+    )
