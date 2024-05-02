@@ -40,14 +40,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.compose.rememberNavController
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
-import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -55,9 +52,7 @@ import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
 import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
-import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
-import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -90,14 +85,13 @@ fun BeaconScreen(
       modifier = Modifier.fillMaxSize().padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         if (!uiState.isLoading) {
-       //   BeaconScreen(beacon = uiState.beacon!!, navigationActions = navigationActions)
-          BeaconScreen(beacon = uiState.beacon!!, viewModel::addTrackToBeacon,navigationActions)
+          //   BeaconScreen(beacon = uiState.beacon!!, navigationActions = navigationActions)
+          BeaconScreen(beacon = uiState.beacon!!, viewModel::addTrackToBeacon, navigationActions)
         } else {
           LoadingScreen()
         }
       }
 }
-
 
 @Composable
 private fun BeaconScreen(
@@ -109,7 +103,7 @@ private fun BeaconScreen(
       modifier = Modifier.fillMaxSize().padding(8.dp).testTag("beaconScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
-        SongList(beacon, addTrackToBeacon,navigationActions)
+        SongList(beacon, addTrackToBeacon, navigationActions)
       }
 }
 
@@ -145,9 +139,9 @@ fun BeaconInformation(location: Location) {
   }
 }
 
-//TODO : @Jonas, pls look at it again
-//@Composable
-//fun SongList(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit) {
+// TODO : @Jonas, pls look at it again
+// @Composable
+// fun SongList(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit) {
 //    TrackList(
 //        beacon.profileAndTrack,
 //        title = stringResource(R.string.beaconTracksTitle),
@@ -160,16 +154,20 @@ fun BeaconInformation(location: Location) {
 //                }
 //            }
 //        })
-//}
+// }
 
 @Composable
-fun SongList(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit, navigationActions: NavigationActions) {
-    HorizontalDivider()
-    Text(
-        text = stringResource(R.string.beaconTracksTitle),
-        style = MaterialTheme.typography.displayMedium,
-        modifier = Modifier.testTag("beaconTracksTitle"))
-    LazyColumn { items(beacon.profileAndTrack) { TrackItem(it, navigationActions) } }
+fun SongList(
+    beacon: Beacon,
+    addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit,
+    navigationActions: NavigationActions
+) {
+  HorizontalDivider()
+  Text(
+      text = stringResource(R.string.beaconTracksTitle),
+      style = MaterialTheme.typography.displayMedium,
+      modifier = Modifier.testTag("beaconTracksTitle"))
+  LazyColumn { items(beacon.profileAndTrack) { TrackItem(it, navigationActions) } }
 }
 
 @Composable
@@ -177,77 +175,77 @@ internal fun TrackItem(
     profileAndTrack: ProfileTrackAssociation,
     navigationActions: NavigationActions
 ) {
-    val scrollState = rememberScrollState()
-    val scope = rememberCoroutineScope()
-    val slowScrollAnimation: AnimationSpec<Float> = TweenSpec(durationMillis = 5000, easing = { it })
-    val snackbarHostState = remember { SnackbarHostState() }
+  val scrollState = rememberScrollState()
+  val scope = rememberCoroutineScope()
+  val slowScrollAnimation: AnimationSpec<Float> = TweenSpec(durationMillis = 5000, easing = { it })
+  val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(key1 = true) {
-        while (true) {
-            scope.launch {
-                scrollState.animateScrollTo(
-                    value = scrollState.maxValue, animationSpec = slowScrollAnimation)
-            }
-            delay(6000)
-            scope.launch { scrollState.animateScrollTo(value = 0, animationSpec = slowScrollAnimation) }
-            delay(6000)
-        }
+  LaunchedEffect(key1 = true) {
+    while (true) {
+      scope.launch {
+        scrollState.animateScrollTo(
+            value = scrollState.maxValue, animationSpec = slowScrollAnimation)
+      }
+      delay(6000)
+      scope.launch { scrollState.animateScrollTo(value = 0, animationSpec = slowScrollAnimation) }
+      delay(6000)
     }
+  }
 
-    Card(
-        colors =
-        CardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            CardDefaults.cardColors().contentColor,
-            CardDefaults.cardColors().disabledContainerColor,
-            CardDefaults.cardColors().disabledContentColor),
-        modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem"),
+  Card(
+      colors =
+          CardColors(
+              containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+              CardDefaults.cardColors().contentColor,
+              CardDefaults.cardColors().disabledContainerColor,
+              CardDefaults.cardColors().disabledContentColor),
+      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem"),
+  ) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-                contentAlignment = Alignment.Center) {
-                Image(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Album Cover",
-                    modifier = Modifier.fillMaxSize(.8f),
-                )
-            }
-            Row(modifier = Modifier.padding(0.dp).weight(3f)) {
-                Column(modifier = Modifier.padding(8.dp).weight(1f).horizontalScroll(scrollState)) {
-                    Text(
-                        text = profileAndTrack.track.title,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.titleMedium)
-                    Text(
-                        text = profileAndTrack.track.artist,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodyMedium)
-                }
-                SelectImage(
-                    modifier =
-                    Modifier.size(width = 150.dp, height = 100.dp)
-                        .clickable(
-                            enabled = profileAndTrack.profile.isPublic,
-                            onClick = {
-                                if (profileAndTrack.profile.isPublic) {
-                                    // if the profile is public, navigate to the profile view screen
-                                    navigationActions.navigateToProfile(profileAndTrack.profile.firebaseUid)
-                                } else {
-                                    // if the profile is private , output a message that say the profile is
-                                    // private, you cannot access to profile informations
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            "This profile is private, you cannot access profile information.")
-                                    }
-                                }
-                            }),
-                    profile = profileAndTrack.profile,
-                )
-            }
+      Box(
+          modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+          contentAlignment = Alignment.Center) {
+            Image(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = "Album Cover",
+                modifier = Modifier.fillMaxSize(.8f),
+            )
+          }
+      Row(modifier = Modifier.padding(0.dp).weight(3f)) {
+        Column(modifier = Modifier.padding(8.dp).weight(1f).horizontalScroll(scrollState)) {
+          Text(
+              text = profileAndTrack.track.title,
+              color = MaterialTheme.colorScheme.onSurface,
+              style = MaterialTheme.typography.titleMedium)
+          Text(
+              text = profileAndTrack.track.artist,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              style = MaterialTheme.typography.bodyMedium)
         }
+        SelectImage(
+            modifier =
+                Modifier.size(width = 150.dp, height = 100.dp)
+                    .clickable(
+                        enabled = profileAndTrack.profile.isPublic,
+                        onClick = {
+                          if (profileAndTrack.profile.isPublic) {
+                            // if the profile is public, navigate to the profile view screen
+                            navigationActions.navigateToProfile(profileAndTrack.profile.firebaseUid)
+                          } else {
+                            // if the profile is private , output a message that say the profile is
+                            // private, you cannot access to profile informations
+                            scope.launch {
+                              snackbarHostState.showSnackbar(
+                                  "This profile is private, you cannot access profile information.")
+                            }
+                          }
+                        }),
+            profile = profileAndTrack.profile,
+        )
+      }
     }
-    SnackbarHost(hostState = snackbarHostState)
+  }
+  SnackbarHost(hostState = snackbarHostState)
 }

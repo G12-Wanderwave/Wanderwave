@@ -101,5 +101,6 @@ fun showListSong(songLists: List<SongList>) {
       modifier = Modifier.testTag("toggleSongList")) {
         Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
       }
-  SongsListDisplay(songLists = songLists, isTopSongsListVisible = isTopSongsListVisible, onAddTrack = {})
+  SongsListDisplay(
+      songLists = songLists, isTopSongsListVisible = isTopSongsListVisible, onAddTrack = {})
 }

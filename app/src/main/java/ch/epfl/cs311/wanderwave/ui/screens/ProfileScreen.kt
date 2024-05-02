@@ -13,9 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -63,57 +61,57 @@ val INPUT_BOX_NAM_SIZE = 150.dp
  */
 @Composable
 fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
-    val currentProfileState by viewModel.profile.collectAsState()
-    val songLists by viewModel.songLists.collectAsState()
-    val dialogListType by remember { mutableStateOf("TOP SONGS") }
-    var isTopSongsListVisible by remember { mutableStateOf(true) }
+  val currentProfileState by viewModel.profile.collectAsState()
+  val songLists by viewModel.songLists.collectAsState()
+  val dialogListType by remember { mutableStateOf("TOP SONGS") }
+  var isTopSongsListVisible by remember { mutableStateOf(true) }
 
-    val currentProfile: Profile = currentProfileState ?: return
-    LaunchedEffect(Unit) {
-        viewModel.createSpecificSongList("TOP_SONGS")
-        viewModel.createSpecificSongList("CHOSEN_SONGS")
-    }
+  val currentProfile: Profile = currentProfileState ?: return
+  LaunchedEffect(Unit) {
+    viewModel.createSpecificSongList("TOP_SONGS")
+    viewModel.createSpecificSongList("CHOSEN_SONGS")
+  }
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
-        horizontalAlignment = Alignment.CenterHorizontally) {
+  Column(
+      modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
+      horizontalAlignment = Alignment.CenterHorizontally) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            VisitCard(Modifier, currentProfile)
-            ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
-            ClickableIcon(
-                Modifier.align(Alignment.BottomEnd),
-                Icons.Filled.Create,
-                onClick = { navActions.navigateTo(Route.EDIT_PROFILE) })
+          VisitCard(Modifier, currentProfile)
+          ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
+          ClickableIcon(
+              Modifier.align(Alignment.BottomEnd),
+              Icons.Filled.Create,
+              onClick = { navActions.navigateTo(Route.EDIT_PROFILE) })
         }
         // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
         Button(
             onClick = { isTopSongsListVisible = !isTopSongsListVisible },
             modifier = Modifier.testTag("toggleSongList")) {
-            Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
-        }
+              Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
+            }
 
         // Call the SongsListDisplay function
         // Buttons for adding tracks to top songs lists
         Button(
             onClick = { navActions.navigateTo(Route.SELECT_SONG) },
             modifier = Modifier.testTag("addTopSongs")) {
-            Text("Add Track to TOP SONGS List")
-        }
+              Text("Add Track to TOP SONGS List")
+            }
 
         SongsListDisplay(
             songLists = songLists,
             isTopSongsListVisible = isTopSongsListVisible,
             onAddTrack = { track ->
-                viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
-                viewModel.addTrackToList(dialogListType, track)
+              viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
+              viewModel.addTrackToList(dialogListType, track)
             })
-    }
+      }
 
-    Row {
-        SignOutButton(modifier = Modifier, navActions = navActions)
-        Spacer(modifier = Modifier.width(5.dp))
-        AboutButton(modifier = Modifier, navActions = navActions)
-    }
+  Row {
+    SignOutButton(modifier = Modifier, navActions = navActions)
+    Spacer(modifier = Modifier.width(5.dp))
+    AboutButton(modifier = Modifier, navActions = navActions)
+  }
 }
 /**
  * This handle the logic behind the switch that can permit the user to switch to the anonymous mode
