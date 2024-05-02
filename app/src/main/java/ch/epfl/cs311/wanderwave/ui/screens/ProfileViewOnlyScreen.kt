@@ -8,27 +8,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.profile.ClickableIcon
 import ch.epfl.cs311.wanderwave.ui.components.profile.SongsListDisplay
 import ch.epfl.cs311.wanderwave.ui.components.profile.VisitCard
+import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.SongList
 import kotlinx.coroutines.Dispatchers
@@ -43,9 +39,6 @@ val mockSongLists =
             "CHOSEN SONGS",
             listOf(Track("3", "Track 3", "Artist 3"), Track("4", "Track 4", "Artist 4"))))
 // TODO: modify this, because the profile.songLists is not available yet
-
-val mockProfile =
-    Profile("Declan", "Rice", "COYG", 80, true, null, "My Spotify ID", "My Firebase ID")
 /**
  * This is the screen composable which can only show the profile of the user. It includes a visit
  * card and a list of songs. This screen is not modifiable.
@@ -85,52 +78,18 @@ fun ProfileViewOnlyScreen(
   val uiState = viewModel.uiState.collectAsState().value
 
   ClickableIcon(icon = Icons.Default.ArrowBack, onClick = { navigationActions?.goBack() })
-  Column(
-      modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
-      horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-          if (uiState.profile != null) {
+  if (uiState.isLoading) {
+    LoadingScreen()
+  } else {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
+        horizontalAlignment = Alignment.CenterHorizontally) {
+          Box(modifier = Modifier.fillMaxWidth()) {
             VisitCard(Modifier, uiState.profile!!)
-          } else {
-            VisitCard(Modifier, mockProfile)
+            // to #127
           }
-          // to #127
+
+          SongsListDisplay(mockSongLists, isTopSongsListVisible = true, {}, canAddSong = false)
         }
-
-        SongsListDisplay(
-            mockSongLists,
-            isTopSongsListVisible = true,
-            {},
-            canAddSong =
-                false) // TODO: change to actually recover the profile.songLists, but related
   }
-}
-
-/**
- * Composable that displays a list of tracks. Each track is represented by the TrackItem composable.
- *
- * @param songLists List of song lists to display.
- * @author Menzo Bouaissi
- * @since 2.0
- * @last update 2.0
- */
-
-/**
- * Composable that displays a list of tracks. Each track is represented by the TrackItem composable.
- *
- * @param songLists List of song lists to display.
- * @author Menzo Bouaissi
- * @since 2.0
- * @last update 2.0
- */
-@Composable
-fun showListSong(songLists: List<SongList>) {
-  var isTopSongsListVisible by remember { mutableStateOf(true) }
-  Button(
-      onClick = { isTopSongsListVisible = !isTopSongsListVisible },
-      modifier = Modifier.testTag("toggleSongList")) {
-        Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
-      }
-  SongsListDisplay(
-      songLists = songLists, isTopSongsListVisible = isTopSongsListVisible, onAddTrack = {})
 }

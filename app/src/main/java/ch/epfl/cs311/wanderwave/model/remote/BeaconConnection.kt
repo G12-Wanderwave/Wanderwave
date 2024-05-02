@@ -15,7 +15,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -104,7 +103,6 @@ class BeaconConnection(
         }
 
     return dataFlow.filterNotNull()
-    return flowOf()
   }
 
   // Fetch a track from a DocumentReference asynchronously

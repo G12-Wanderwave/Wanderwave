@@ -22,12 +22,10 @@ class ProfileConnection(private val database: FirebaseFirestore? = null) :
   private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
   override fun isUidExisting(spotifyUid: String, callback: (Boolean, Profile?) -> Unit) {
-    Log.d("ProfileConnection", "Checking if Spotify UID exists in Firestore...")
     db.collection("users")
         .whereEqualTo("spotifyUid", spotifyUid)
         .get()
         .addOnSuccessListener { documents ->
-          Log.d("Firestore", "DocumentSnapshot data: ${documents.documents}")
           val isExisting = documents.size() > 0
           callback(isExisting, if (isExisting) documentToItem(documents.documents[0]) else null)
         }

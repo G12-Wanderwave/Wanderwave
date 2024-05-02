@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.navigation
 
-import android.util.Log
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import ch.epfl.cs311.wanderwave.R
@@ -77,7 +76,6 @@ class NavigationActions(navController: NavHostController) {
   }
 
   fun navigateToProfile(profileId: String) {
-    Log.d("NavigationActions", "Navigating to profile with id: $profileId")
     navigationController.navigate("${Route.VIEW_PROFILE.routeString}/$profileId")
     _currentRouteFlow.value = Route.PROFILE
   }
