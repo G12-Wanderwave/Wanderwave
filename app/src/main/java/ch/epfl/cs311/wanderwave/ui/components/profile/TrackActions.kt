@@ -133,7 +133,8 @@ fun AddTrackDialog(
 fun SongsListDisplay(
     songLists: List<SongList>,
     isTopSongsListVisible: Boolean,
-    onAddTrack: (Track) -> Unit
+    onAddTrack: (Track) -> Unit,
+    onSelectTrack: (Track) -> Unit
 ) {
   val name = if (isTopSongsListVisible) "TOP SONGS" else "CHOSEN SONGS"
   songLists
@@ -142,7 +143,8 @@ fun SongsListDisplay(
         TrackList(
             tracks = songList.tracks,
             title = name,
-            onSelectTrack = { /* TODO */},
-            onAddTrack = onAddTrack)
+            onSelectTrack = onSelectTrack,
+            onAddTrack = onAddTrack
+        )
       }
 }

@@ -52,7 +52,7 @@ fun BeaconScreen(
       modifier = Modifier.fillMaxSize().padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         if (!uiState.isLoading) {
-          BeaconScreen(beacon = uiState.beacon!!, viewModel::addTrackToBeacon)
+          BeaconScreen(beacon = uiState.beacon!!, viewModel::addTrackToBeacon, viewModel::selectTrack)
         } else {
           LoadingScreen()
         }
@@ -79,13 +79,14 @@ private fun BeaconScreenPreview() {
 @Composable
 private fun BeaconScreen(
     beacon: Beacon,
-    addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit = { _, _, _ -> }
+    addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit = { _, _, _ -> },
+    onSelectTrack: (Track) -> Unit = {}
 ) {
   Column(
       modifier = Modifier.fillMaxSize().padding(8.dp).testTag("beaconScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
-        SongList(beacon, addTrackToBeacon)
+        SongList(beacon, addTrackToBeacon, onSelectTrack)
       }
 }
 
@@ -122,7 +123,7 @@ fun BeaconInformation(location: Location) {
 }
 
 @Composable
-fun SongList(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit) {
+fun SongList(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit, onSelectTrack: (Track) -> Unit) {
   TrackList(
       beacon.tracks,
       title = stringResource(R.string.beaconTracksTitle),
@@ -134,5 +135,7 @@ fun SongList(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit
             Log.e("SongList", "Failed to add track.")
           }
         }
-      })
+      },
+      onSelectTrack = onSelectTrack,
+  )
 }

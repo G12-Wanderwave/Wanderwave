@@ -101,7 +101,9 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
             onAddTrack = { track ->
               viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
               viewModel.addTrackToList(dialogListType, track)
-            })
+            },
+            onSelectTrack = { track -> viewModel.selectTrack(track, dialogListType) }
+        )
       }
 
   SignOutButton(modifier = Modifier, navActions = navActions)

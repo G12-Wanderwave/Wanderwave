@@ -161,4 +161,13 @@ constructor(
       }
     }
   }
+
+  fun selectTrack(track: Track, listName: String) {
+    val trackList = _songLists.value.firstOrNull { it.name == listName }
+    if (trackList != null) {
+      spotifyController.playTrackList(trackList = trackList.tracks)
+    } else {
+      spotifyController.playTrack(track)
+    }
+  }
 }
