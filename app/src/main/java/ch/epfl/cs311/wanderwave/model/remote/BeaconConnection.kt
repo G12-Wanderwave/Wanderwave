@@ -18,12 +18,11 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class BeaconConnection(
     private val database: FirebaseFirestore? = null,
     val trackConnection: TrackConnection,
-    // TODO : ayman : add profile connection, watch out for the tests, you will need to add profile
-    // connection as an argument to those as well
     val profileConnection: ProfileConnection
 ) : FirebaseConnection<Beacon, Beacon>(), BeaconRepository {
 
@@ -68,46 +67,34 @@ class BeaconConnection(
         .addOnSuccessListener { document ->
           if (document != null && document.data != null) {
             documentToItem(document)?.let { beacon ->
-              val profileAndTrackRefs =
-                  document.get("tracks") as? List<Map<String, DocumentReference>>
+              dataFlow.value = beacon
 
-              // Use a coroutine to perform asynchronous operations
-              coroutineScope.launch {
-                val profileAndTracksDeferred =
+              val tracksObject = document["tracks"]
+
+              var profileAndTrackRefs: List<Map<String, DocumentReference>>?
+
+              if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
+                profileAndTrackRefs =
+                  tracksObject as? List<Map<String, DocumentReference>>
+
+                // Use a coroutine to perform asynchronous operations
+                coroutineScope.launch {
+                  val profileAndTracksDeferred =
                     profileAndTrackRefs?.map { profileAndTrackRef ->
-                      async(Dispatchers.IO) {
-                        try {
-
-                          var profile: Profile? = null
-                          var track: Track? = null
-                          val trackDocument = profileAndTrackRef["track"]?.get()?.await()
-                          trackDocument?.let { track = Track.from(it) }
-                          val profileDocument = profileAndTrackRef["creator"]?.get()?.await()
-                          profileDocument?.let { profile = Profile.from(it) }
-                          Log.d(
-                              "Firestore",
-                              "Fetched track:${track?.title}, profile:${profile?.firstName}")
-                          if (profile == null || track == null) {
-                            return@async null
-                          }
-
-                          ProfileTrackAssociation(
-                              profile = profileDocument?.let { Profile.from(it) }!!,
-                              track = trackDocument?.let { Track.from(it) }!!)
-                        } catch (e: Exception) {
-                          // Handle exceptions
-                          Log.e("Firestore", "Error fetching track:${e.message}")
-                          null
-                        }
+                      async {
+                        fetchTrack(profileAndTrackRef)
                       }
                     }
 
-                // Wait for all tracks to be fetched
-                val profileAndTracks = profileAndTracksDeferred?.mapNotNull { it?.await() }
+                  // Wait for all tracks to be fetched
+                  val profileAndTracks = profileAndTracksDeferred?.mapNotNull { it?.await() }
 
-                // Update the beacon with the complete list of tracks
-                val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks ?: emptyList())
-                dataFlow.value = updatedBeacon
+                  // Update the beacon with the complete list of tracks
+                  val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks ?: emptyList())
+                  dataFlow.value = updatedBeacon
+                }
+              } else {
+                Log.e("Firestore", "tracks has Wrong Firebase Format")
               }
             }
           } else {
@@ -121,6 +108,36 @@ class BeaconConnection(
 
     return dataFlow.filterNotNull()
     return flowOf()
+  }
+
+  // Fetch a track from a DocumentReference asynchronously
+  suspend fun fetchTrack(profileAndTrackRef: Map<String,DocumentReference>?): ProfileTrackAssociation? {
+    if (profileAndTrackRef == null) return null
+    return withContext(Dispatchers.IO) {
+      try {
+
+        var profile: Profile? = null
+        var track: Track? = null
+        val trackDocument = profileAndTrackRef["track"]?.get()?.await()
+        trackDocument?.let { track = Track.from(it) }
+        val profileDocument = profileAndTrackRef["creator"]?.get()?.await()
+        profileDocument?.let { profile = Profile.from(it) }
+        Log.d(
+          "Firestore",
+          "Fetched track:${track?.title}, profile:${profile?.firstName}")
+        if (profile == null || track == null) {
+          return@withContext null
+        }
+
+        ProfileTrackAssociation(
+          profile = profileDocument?.let { Profile.from(it) }!!,
+          track = trackDocument?.let { Track.from(it) }!!)
+      } catch (e: Exception) {
+        // Handle exceptions
+        Log.e("Firestore", "Error fetching track:${e.message}")
+        null
+      }
+    }
   }
 
   override fun getAll(): Flow<List<Beacon>> {
@@ -157,25 +174,22 @@ class BeaconConnection(
 
   override fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
     val beaconRef = db.collection("beacons").document(beaconId)
-
     db.runTransaction { transaction ->
           val snapshot = transaction.get(beaconRef)
-          val beacon = snapshot.toObject(Beacon::class.java)
+          val beacon = Beacon.from(snapshot)
           beacon?.let {
             val newTracks =
                 ArrayList(it.profileAndTrack).apply {
                   add(
                       ProfileTrackAssociation(
-                          Profile( // TODO : ayman : this is a dummy profile, replace with actual
-                              // profile, you should have the profile connection imported
-                              // profile
+                          Profile(
                               "Sample First Name",
                               "Sample last name",
                               "Sample desc",
                               0,
                               false,
                               null,
-                              "Sample Profile ID",
+                              "My Firebase UID",
                               track.id),
                           track))
                 }
