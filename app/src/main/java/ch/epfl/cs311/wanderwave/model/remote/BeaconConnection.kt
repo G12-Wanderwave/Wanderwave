@@ -168,7 +168,7 @@ class BeaconConnection(
                   add(
                       ProfileTrackAssociation(
                           Profile( // TODO : ayman : this is a dummy profile, replace with actual
-                                   // profile, you should have the profile connection imported
+                              // profile, you should have the profile connection imported
                               // profile
                               "Sample First Name",
                               "Sample last name",
