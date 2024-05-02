@@ -197,14 +197,6 @@ public class BeaconConnectionTest {
     }
   }
 
-  // TODO : To be deleted after a real entry is added to the database
-  private lateinit var db: AppDatabase
-
-  @Test
-  fun createDb() {
-    val context = ApplicationProvider.getApplicationContext<Context>()
-    db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
-  }
 
   @After
   fun cleanupTestData() = runBlocking {
