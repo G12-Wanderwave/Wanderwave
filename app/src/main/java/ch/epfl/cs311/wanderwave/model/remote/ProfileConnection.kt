@@ -36,17 +36,9 @@ class ProfileConnection(private val database: FirebaseFirestore? = null) :
     return Profile.from(document)
   }
 
-  override fun itemToMap(profile: Profile): Map<String, Any> {
-    val profileMap: HashMap<String, Any> =
-        hashMapOf(
-            "firstName" to profile.firstName,
-            "lastName" to profile.lastName,
-            "description" to profile.description,
-            "numberOfLikes" to profile.numberOfLikes,
-            "spotifyUid" to profile.spotifyUid,
-            "firebaseUid" to profile.firebaseUid,
-            "isPublic" to profile.isPublic,
-            "profilePictureUri" to (profile.profilePictureUri?.toString() ?: ""))
+  override fun itemToMap(profile: Profile): HashMap<String, Any> {
+    val profileMap: HashMap<String, Any> = profile.toMap()
+
     return profileMap
   }
 }

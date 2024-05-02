@@ -16,6 +16,7 @@ data class ProfileTrackAssociation(val profile: Profile, val track: Track) {
   // different data from the latter
   // and associate it
 
-
-
+  fun toMap(): Map<String, Any> {
+    return hashMapOf("profile" to profile.toMap(), "track" to track.toMap())
+  }
 }
