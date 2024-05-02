@@ -362,3 +362,5 @@ class TrackListViewModelTest {
     assertEquals(LoopMode.NONE, viewModel.uiState.value.loopMode)
   }
 }
+
+// for the CI rerun to be removed
