@@ -1,37 +1,17 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
 import android.util.Log
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,7 +27,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
-import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
+import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
@@ -143,83 +123,16 @@ fun BeaconInformation(location: Location) {
 
 @Composable
 fun SongList(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit) {
-  // State to control the visibility of the add track dialog
-  var showDialog by remember { mutableStateOf(false) }
-
-  Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween) {
-          Text(
-              text = stringResource(R.string.beaconTracksTitle),
-              style = MaterialTheme.typography.headlineMedium,
-              modifier = Modifier.testTag("beaconTracksTitle"))
-          IconButton(onClick = { showDialog = true }) { // Toggle dialog visibility
-            Icon(
-                imageVector = Icons.Filled.Add,
-                contentDescription = stringResource(R.string.beaconTitle))
+  TrackList(
+      beacon.tracks,
+      title = stringResource(R.string.beaconTracksTitle),
+      onAddTrack = {
+        addTrackToBeacon(beacon.id, it) { success ->
+          if (success) {
+            Log.d("SongList", "Track added successfully.")
+          } else {
+            Log.e("SongList", "Failed to add track.")
           }
         }
-    LazyColumn { items(beacon.tracks) { TrackItem(it) } }
-
-    if (showDialog) {
-      AddTrackDialog(
-          onAddTrack = { id, title, artist ->
-            addTrackToBeacon(beacon.id, Track(id, title, artist)) { success ->
-              if (success) {
-                Log.d("SongList", "Track added successfully.")
-              } else {
-                Log.e("SongList", "Failed to add track.")
-              }
-            }
-            showDialog = false // Close dialog after adding track
-          },
-          onDismiss = {
-            showDialog = false // Close dialog on dismiss
-          },
-          initialTrackId = "",
-          initialTrackTitle = "",
-          initialTrackArtist = "",
-          dialogTestTag = "addTrackDialog" // For testing purposes
-          )
-    }
-  }
-}
-
-@Composable
-internal fun TrackItem(track: Track) {
-  Card(
-      colors =
-          CardColors(
-              containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-              CardDefaults.cardColors().contentColor,
-              CardDefaults.cardColors().disabledContainerColor,
-              CardDefaults.cardColors().disabledContentColor),
-      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem")) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Box(
-              modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-              contentAlignment = Alignment.Center) {
-                Image(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Album Cover",
-                    modifier = Modifier.fillMaxSize(.8f),
-                )
-              }
-          Column(modifier = Modifier.padding(8.dp)) {
-            Text(
-                text = track.title,
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.titleMedium)
-            Text(
-                text = track.artist,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-          }
-        }
-      }
+      })
 }
