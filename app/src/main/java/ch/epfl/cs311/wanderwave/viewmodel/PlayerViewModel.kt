@@ -24,19 +24,13 @@ class PlayerViewModel @Inject constructor(val spotifyController: SpotifyControll
   private val _expandedState = MutableStateFlow(false)
 
   private var _uiState = combine(_playerState, _expandedState) { playerState, expandedState ->
-    Log.d("PlayerViewModel", "Flow updated")
     if (playerState == null) {
       UiState(expanded = expandedState)
     }
-    else
-    UiState(
-      track = Track(
-        /* TODO: I _think_ that the track uri includes "spotify:track:" at the beginning, so
-        *   need to remove that. */
-        playerState.track.uri,
-        title = playerState.track.name,
-        artist = playerState.track.artist.name,
-      ),
+    else UiState(
+      /* TODO: I _think_ that the track uri includes "spotify:track:" at the beginning, so
+      *   need to remove that. */
+      track = playerState.track?.let { Track(it.uri, it.name, it.artist.name) },
       isPlaying = !playerState.isPaused,
       repeatMode = playerState.playbackOptions.repeatMode != RepeatMode.NONE.ordinal,
       isShuffling = playerState.playbackOptions.isShuffling,
