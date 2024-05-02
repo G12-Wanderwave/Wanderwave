@@ -105,8 +105,7 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
               viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
               viewModel.addTrackToList(dialogListType, track)
             },
-            onSelectTrack = { track -> viewModel.selectTrack(track, dialogListType) }
-        )
+            onSelectTrack = { track -> viewModel.selectTrack(track, dialogListType) })
       }
 
   Row {

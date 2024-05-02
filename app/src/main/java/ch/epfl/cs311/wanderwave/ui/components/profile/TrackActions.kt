@@ -144,7 +144,6 @@ fun SongsListDisplay(
             tracks = songList.tracks,
             title = name,
             onSelectTrack = onSelectTrack,
-            onAddTrack = onAddTrack
-        )
+            onAddTrack = onAddTrack)
       }
 }

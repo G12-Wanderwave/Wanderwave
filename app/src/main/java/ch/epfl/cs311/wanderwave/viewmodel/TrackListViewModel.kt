@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
@@ -13,7 +12,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -72,30 +70,31 @@ constructor(
     spotifyController.playTrackList(uiState.value.tracks, track)
   }
 
-//  /**
-//   * Plays the selected track if it's not already playing or resumes the paused track if it's the
-//   * same as the selected track. If no track is selected, it updates the UI state with an
-//   * appropriate message.
-//   */
-//  fun play() {
-//    if (_uiState.value.selectedTrack != null && !_uiState.value.isPlaying) {
-//
-//      if (_uiState.value.pausedTrack == _uiState.value.selectedTrack) {
-//        resumeTrack()
-//      } else {
-//        playTrack(_uiState.value.selectedTrack!!)
-//      }
-//
-//      _uiState.value = _uiState.value.copy(isPlaying = true)
-//    } else {
-//      if (!_uiState.value.isPlaying) {
-//        _uiState.value = _uiState.value.copy(message = "No track selected")
-//      } else {
-//        _uiState.value = _uiState.value.copy(message = "Track already playing")
-//      }
-//    }
-//  }
-//
+  //  /**
+  //   * Plays the selected track if it's not already playing or resumes the paused track if it's
+  // the
+  //   * same as the selected track. If no track is selected, it updates the UI state with an
+  //   * appropriate message.
+  //   */
+  //  fun play() {
+  //    if (_uiState.value.selectedTrack != null && !_uiState.value.isPlaying) {
+  //
+  //      if (_uiState.value.pausedTrack == _uiState.value.selectedTrack) {
+  //        resumeTrack()
+  //      } else {
+  //        playTrack(_uiState.value.selectedTrack!!)
+  //      }
+  //
+  //      _uiState.value = _uiState.value.copy(isPlaying = true)
+  //    } else {
+  //      if (!_uiState.value.isPlaying) {
+  //        _uiState.value = _uiState.value.copy(message = "No track selected")
+  //      } else {
+  //        _uiState.value = _uiState.value.copy(message = "Track already playing")
+  //      }
+  //    }
+  //  }
+  //
 
   fun collapse() {
     _uiState.value = _uiState.value.copy(expanded = false)

@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.ui.components.player
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -29,7 +28,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 import ch.epfl.cs311.wanderwave.viewmodel.PlayerViewModel
-import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import javax.inject.Singleton
 import kotlinx.coroutines.delay
 

@@ -13,9 +13,9 @@ import com.spotify.protocol.types.ListItem
 import com.spotify.protocol.types.PlayerState
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
@@ -105,63 +105,81 @@ class SpotifyController(private val context: Context) {
 
   fun playTrack(track: Track, onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
     appRemote.value?.let {
-      it.playerApi.play("spotify:track:${track.id}")
-        .setResultCallback { onSuccess() }
-        .setErrorCallback { error -> onFailure(error) }
+      it.playerApi
+          .play("spotify:track:${track.id}")
+          .setResultCallback { onSuccess() }
+          .setErrorCallback { error -> onFailure(error) }
     }
   }
 
-  fun playTrackList(trackList: List<Track>, track: Track? = null, onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
+  fun playTrackList(
+      trackList: List<Track>,
+      track: Track? = null,
+      onSuccess: () -> Unit = {},
+      onFailure: (Throwable) -> Unit = {}
+  ) {
     if (trackList.isEmpty()) {
       onFailure(Throwable("Empty track list"))
       return
     }
     val trackToPlay = track ?: trackList[0]
     appRemote.value?.let {
-      it.playerApi.play("spotify:track:${trackToPlay.id}")
-        .setResultCallback {
-          this.trackList = trackList
-          onSuccess()
-        }
-        .setErrorCallback { error -> onFailure(error) }
+      it.playerApi
+          .play("spotify:track:${trackToPlay.id}")
+          .setResultCallback {
+            this.trackList = trackList
+            onSuccess()
+          }
+          .setErrorCallback { error -> onFailure(error) }
     }
   }
 
   fun pauseTrack(onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
     appRemote.value?.let {
-      it.playerApi.pause()
-        .setResultCallback { onSuccess() }
-        .setErrorCallback { error -> onFailure(error) }
+      it.playerApi
+          .pause()
+          .setResultCallback { onSuccess() }
+          .setErrorCallback { error -> onFailure(error) }
     }
   }
 
   fun resumeTrack(onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
     appRemote.value?.let {
-      it.playerApi.resume()
-        .setResultCallback { onSuccess() }
-        .setErrorCallback { error -> onFailure(error) }
+      it.playerApi
+          .resume()
+          .setResultCallback { onSuccess() }
+          .setErrorCallback { error -> onFailure(error) }
     }
   }
 
-  suspend fun skip(direction: Int, onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
+  suspend fun skip(
+      direction: Int,
+      onSuccess: () -> Unit = {},
+      onFailure: (Throwable) -> Unit = {}
+  ) {
     val currentTrack = playerState().firstOrNull()?.track
-    val currentIndex = trackList?.indexOfFirst { track -> "spotify:track:${track.id}" == currentTrack?.uri } ?: -1
+    val currentIndex =
+        trackList?.indexOfFirst { track -> "spotify:track:${track.id}" == currentTrack?.uri } ?: -1
     if (currentIndex != -1) {
       val nextIndex = (currentIndex + direction) % trackList!!.size
       val nextTrack = trackList!![nextIndex]
       playTrack(nextTrack, onSuccess, onFailure)
     }
   }
+
   @OptIn(ExperimentalCoroutinesApi::class)
-  fun playerState() : Flow<PlayerState?> {
+  fun playerState(): Flow<PlayerState?> {
     return appRemote.flatMapLatest { appRemote ->
       callbackFlow {
-        val callbackResult = appRemote?.playerApi?.subscribeToPlayerState()
-          ?.setEventCallback {
-            trySend(it)
-            startPlaybackTimer(it.track.duration)
-          }
-          ?.setErrorCallback { Log.d("SpotifyController", "Error in player state flow") }
+        val callbackResult =
+            appRemote
+                ?.playerApi
+                ?.subscribeToPlayerState()
+                ?.setEventCallback {
+                  trySend(it)
+                  startPlaybackTimer(it.track.duration)
+                }
+                ?.setErrorCallback { Log.d("SpotifyController", "Error in player state flow") }
         awaitClose {
           callbackResult?.cancel()
           stopPlaybackTimer()

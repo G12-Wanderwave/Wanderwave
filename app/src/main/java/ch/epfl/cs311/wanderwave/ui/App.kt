@@ -15,14 +15,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
@@ -38,7 +36,6 @@ import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
-import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -84,9 +81,7 @@ fun AppScaffold(navController: NavHostController) {
                 composable(Route.LOGIN.routeString) { LoginScreen(navActions, showSnackbar) }
                 composable(Route.SPOTIFY_CONNECT.routeString) { SpotifyConnectScreen(navActions) }
                 composable(Route.ABOUT.routeString) { AboutScreen(navActions) }
-                composable(Route.TRACK_LIST.routeString) {
-                  TrackListScreen(showSnackbar)
-                }
+                composable(Route.TRACK_LIST.routeString) { TrackListScreen(showSnackbar) }
                 composable(Route.MAP.routeString) { MapScreen(navActions) }
                 composable(Route.PROFILE.routeString) { ProfileScreen(navActions, viewModel) }
                 composable(Route.EDIT_PROFILE.routeString) {

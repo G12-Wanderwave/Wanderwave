@@ -30,8 +30,6 @@ import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.ui.theme.orange
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 import ch.epfl.cs311.wanderwave.viewmodel.PlayerViewModel
-import ch.epfl.cs311.wanderwave.viewmodel.LoopMode
-import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
 @Composable
 fun ExclusivePlayer(
@@ -132,10 +130,8 @@ fun TrackInfoComponent(uiState: PlayerViewModel.UiState) {
       modifier = Modifier.fillMaxWidth(),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center) {
-        Text(
-            text = uiState.track?.artist ?: "", style = MaterialTheme.typography.titleSmall)
-        Text(
-            text = uiState.track?.title ?: "", style = MaterialTheme.typography.titleMedium)
+        Text(text = uiState.track?.artist ?: "", style = MaterialTheme.typography.titleSmall)
+        Text(text = uiState.track?.title ?: "", style = MaterialTheme.typography.titleMedium)
       }
 }
 

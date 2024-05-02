@@ -52,7 +52,8 @@ fun BeaconScreen(
       modifier = Modifier.fillMaxSize().padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         if (!uiState.isLoading) {
-          BeaconScreen(beacon = uiState.beacon!!, viewModel::addTrackToBeacon, viewModel::selectTrack)
+          BeaconScreen(
+              beacon = uiState.beacon!!, viewModel::addTrackToBeacon, viewModel::selectTrack)
         } else {
           LoadingScreen()
         }
@@ -123,7 +124,11 @@ fun BeaconInformation(location: Location) {
 }
 
 @Composable
-fun SongList(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit, onSelectTrack: (Track) -> Unit) {
+fun SongList(
+    beacon: Beacon,
+    addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit,
+    onSelectTrack: (Track) -> Unit
+) {
   TrackList(
       beacon.tracks,
       title = stringResource(R.string.beaconTracksTitle),

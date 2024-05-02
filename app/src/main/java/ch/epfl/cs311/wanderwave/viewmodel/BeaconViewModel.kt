@@ -13,8 +13,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class BeaconViewModel @Inject constructor(private val beaconRepository: BeaconRepository, private val spotifyController: SpotifyController) :
-    ViewModel() {
+class BeaconViewModel
+@Inject
+constructor(
+    private val beaconRepository: BeaconRepository,
+    private val spotifyController: SpotifyController
+) : ViewModel() {
 
   private var _uiState = MutableStateFlow(UIState())
   val uiState: StateFlow<UIState> = _uiState
@@ -37,9 +41,7 @@ class BeaconViewModel @Inject constructor(private val beaconRepository: BeaconRe
   }
 
   fun selectTrack(track: Track) {
-    uiState.value.beacon?.tracks?.let {
-      spotifyController.playTrackList(it, track)
-    }
+    uiState.value.beacon?.tracks?.let { spotifyController.playTrackList(it, track) }
   }
 
   data class UIState(
