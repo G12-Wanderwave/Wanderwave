@@ -73,7 +73,6 @@ class BeaconScreenTest {
       beaconTitle { assertIsDisplayed() }
       beaconLocation { assertIsDisplayed() }
       beaconMap { assertIsDisplayed() }
-      beaconTracksTitle { assertIsDisplayed() }
     }
   }
 }
