@@ -2,7 +2,6 @@ package ch.epfl.cs311.wanderwave.model
 
 import android.content.Context
 import android.net.Uri
-import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import ch.epfl.cs311.wanderwave.di.ConnectionModule
 import ch.epfl.cs311.wanderwave.model.data.Beacon
@@ -10,7 +9,6 @@ import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
@@ -31,16 +29,12 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
-import junit.framework.TestCase
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
-import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
-import kotlinx.coroutines.withTimeoutOrNull
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -161,21 +155,23 @@ public class BeaconConnectionTest {
       val mockDocumentSnapshot = mockk<DocumentSnapshot>()
 
       val getTestBeacon =
-        Beacon(
-          id = "testBeacon", location = Location(1.0, 1.0, "Test Location"), profileAndTrack = listOf())
+          Beacon(
+              id = "testBeacon",
+              location = Location(1.0, 1.0, "Test Location"),
+              profileAndTrack = listOf())
 
-      val mapOfTestBeacon = hashMapOf(
-          "id" to getTestBeacon.id,
-          "location" to getTestBeacon.location.toMap(),
-          "tracks" to getTestBeacon.profileAndTrack.map { it.toMap() }
-      )
-
+      val mapOfTestBeacon =
+          hashMapOf(
+              "id" to getTestBeacon.id,
+              "location" to getTestBeacon.location.toMap(),
+              "tracks" to getTestBeacon.profileAndTrack.map { it.toMap() })
 
       every { mockDocumentSnapshot.getData() } returns mapOfTestBeacon
       every { mockDocumentSnapshot.exists() } returns true
       every { mockDocumentSnapshot.id } returns getTestBeacon.id
       every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
-      every { mockDocumentSnapshot.get("tracks") } returns getTestBeacon.profileAndTrack.map { it.toMap() }
+      every { mockDocumentSnapshot.get("tracks") } returns
+          getTestBeacon.profileAndTrack.map { it.toMap() }
 
       // Define behavior for the addOnSuccessListener method
       every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentSnapshot>>()) } answers
@@ -208,14 +204,16 @@ public class BeaconConnectionTest {
       val mockDocumentSnapshot = mockk<DocumentSnapshot>()
 
       val getTestBeacon =
-        Beacon(
-          id = "testBeacon", location = Location(1.0, 1.0, "Test Location"), profileAndTrack = listOf())
+          Beacon(
+              id = "testBeacon",
+              location = Location(1.0, 1.0, "Test Location"),
+              profileAndTrack = listOf())
 
-      val mapOfTestBeacon = hashMapOf(
-        "id" to getTestBeacon.id,
-        "location" to getTestBeacon.location.toMap(),
-        "tracks" to getTestBeacon.profileAndTrack.map { it.toMap() }
-      )
+      val mapOfTestBeacon =
+          hashMapOf(
+              "id" to getTestBeacon.id,
+              "location" to getTestBeacon.location.toMap(),
+              "tracks" to getTestBeacon.profileAndTrack.map { it.toMap() })
       every { mockDocumentSnapshot.getData() } returns mapOfTestBeacon
       every { mockDocumentSnapshot.exists() } returns true
       every { mockDocumentSnapshot.id } returns getTestBeacon.id
@@ -292,16 +290,16 @@ public class BeaconConnectionTest {
 
     // Mock the Track
     val mockTrack = Track("testTrackId", "Test Title", "Test Artist")
-    val mockProfile = Profile(
-      "Test First Name",
-      "Test Last Name",
-      "Test Description",
-      10,
-      true,
-      Uri.parse("https://example.com/profile.jpg"),
-      "Test Spotify Uid",
-      "Test Firebase Uid"
-    )
+    val mockProfile =
+        Profile(
+            "Test First Name",
+            "Test Last Name",
+            "Test Description",
+            10,
+            true,
+            Uri.parse("https://example.com/profile.jpg"),
+            "Test Spotify Uid",
+            "Test Firebase Uid")
 
     val mockProfileTrackAssociation = ProfileTrackAssociation(mockProfile, mockTrack)
 
@@ -315,15 +313,14 @@ public class BeaconConnectionTest {
           every { isCanceled } returns false
         }
 
-    coEvery {
-      mockProfileDocumentReference.get()
-    } returns mockk {
-      every { isComplete } returns true
-      every { isSuccessful } returns true
-      every { result } returns mockDocumentSnapshot
-      every { getException() } returns null
-      every { isCanceled } returns false
-    }
+    coEvery { mockProfileDocumentReference.get() } returns
+        mockk {
+          every { isComplete } returns true
+          every { isSuccessful } returns true
+          every { result } returns mockDocumentSnapshot
+          every { getException() } returns null
+          every { isCanceled } returns false
+        }
 
     // Define behavior for the DocumentSnapshot
     every { mockDocumentSnapshot.exists() } returns true
@@ -333,22 +330,22 @@ public class BeaconConnectionTest {
     every { mockDocumentSnapshot.getString("firstName") } returns mockProfile.firstName
     every { mockDocumentSnapshot.getString("lastName") } returns mockProfile.lastName
     every { mockDocumentSnapshot.getString("description") } returns mockProfile.description
-    every { mockDocumentSnapshot.getLong("numberOfLikes") } returns mockProfile.numberOfLikes.toLong()
+    every { mockDocumentSnapshot.getLong("numberOfLikes") } returns
+        mockProfile.numberOfLikes.toLong()
     every { mockDocumentSnapshot.getBoolean("isPublic") } returns mockProfile.isPublic
     every { mockDocumentSnapshot.getString("spotifyUid") } returns mockProfile.spotifyUid
     every { mockDocumentSnapshot.getString("firebaseUid") } returns mockProfile.firebaseUid
-    every { mockDocumentSnapshot.getString("profilePictureUri") } returns mockProfile.profilePictureUri.toString()
-
+    every { mockDocumentSnapshot.getString("profilePictureUri") } returns
+        mockProfile.profilePictureUri.toString()
 
     var retrievedTrackAndProfile: ProfileTrackAssociation? = null
 
-    val mapOfDocumentReferences = mapOf(
-      "creator" to mockProfileDocumentReference,
-      "track" to mockTrackDocumentReference
-    )
+    val mapOfDocumentReferences =
+        mapOf("creator" to mockProfileDocumentReference, "track" to mockTrackDocumentReference)
 
     // Call the function under test
-    async { retrievedTrackAndProfile = beaconConnection.fetchTrack(mapOfDocumentReferences) }.await()
+    async { retrievedTrackAndProfile = beaconConnection.fetchTrack(mapOfDocumentReferences) }
+        .await()
 
     // Verify that the get function is called on the document with the correct id
     coVerify { mockTrackDocumentReference.get() }
@@ -371,7 +368,6 @@ public class BeaconConnectionTest {
     // Mock the DocumentReference
     val mockDocumentReference = mockk<DocumentReference>()
 
-
     // Define behavior for the get() method on the DocumentReference to return the mock task
     coEvery { mockDocumentReference.get() } returns
         mockk {
@@ -382,7 +378,8 @@ public class BeaconConnectionTest {
           every { isCanceled } returns false
         }
 
-    val documentReferenceMap = mapOf("track" to mockDocumentReference, "creator" to mockDocumentReference)
+    val documentReferenceMap =
+        mapOf("track" to mockDocumentReference, "creator" to mockDocumentReference)
 
     // Call the function under test
     val retrievedTrack = beaconConnection.fetchTrack(documentReferenceMap)
@@ -409,7 +406,8 @@ public class BeaconConnectionTest {
           every { isCanceled } returns false
         }
 
-    val documentReferenceMap = mapOf("track" to mockDocumentReference, "creator" to mockDocumentReference)
+    val documentReferenceMap =
+        mapOf("track" to mockDocumentReference, "creator" to mockDocumentReference)
 
     // Call the function under test
     val retrievedTrack = beaconConnection.fetchTrack(documentReferenceMap)
@@ -430,14 +428,16 @@ public class BeaconConnectionTest {
       val mockDocumentSnapshot = mockk<QueryDocumentSnapshot>()
 
       val getTestBeacon =
-        Beacon(
-          id = "testBeacon", location = Location(1.0, 1.0, "Test Location"), profileAndTrack = listOf())
+          Beacon(
+              id = "testBeacon",
+              location = Location(1.0, 1.0, "Test Location"),
+              profileAndTrack = listOf())
 
-      val mapOfTestBeacon = hashMapOf(
-        "id" to getTestBeacon.id,
-        "location" to getTestBeacon.location.toMap(),
-        "tracks" to getTestBeacon.profileAndTrack.map { it.toMap() }
-      )
+      val mapOfTestBeacon =
+          hashMapOf(
+              "id" to getTestBeacon.id,
+              "location" to getTestBeacon.location.toMap(),
+              "tracks" to getTestBeacon.profileAndTrack.map { it.toMap() })
 
       val getTestBeaconList = listOf(getTestBeacon, getTestBeacon)
 
@@ -445,7 +445,8 @@ public class BeaconConnectionTest {
       every { mockDocumentSnapshot.exists() } returns true
       every { mockDocumentSnapshot.id } returns getTestBeacon.id
       every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
-      every { mockDocumentSnapshot.get("tracks") } returns getTestBeacon.profileAndTrack.map { it.toMap() }
+      every { mockDocumentSnapshot.get("tracks") } returns
+          getTestBeacon.profileAndTrack.map { it.toMap() }
 
       every { mockQuerySnapshot.documents } returns
           listOf(mockDocumentSnapshot, mockDocumentSnapshot)
@@ -488,17 +489,21 @@ public class BeaconConnectionTest {
   fun testAddTrackToBeacon() {
     // Mock data
     val track = Track("testTrackId", "Test Title", "Test Artist")
-    val profile = Profile(
-      "Sample First Name",
-      "Sample last name",
-      "Sample desc",
-      0,
-      false,
-      null,
-      "My Firebase UID",
-      track.id
-    )
-    val beacon = Beacon("testBeaconId", Location(1.0, 1.0, "Test Location"), listOf(ProfileTrackAssociation(profile, track)))
+    val profile =
+        Profile(
+            "Sample First Name",
+            "Sample last name",
+            "Sample desc",
+            0,
+            false,
+            null,
+            "My Firebase UID",
+            track.id)
+    val beacon =
+        Beacon(
+            "testBeaconId",
+            Location(1.0, 1.0, "Test Location"),
+            listOf(ProfileTrackAssociation(profile, track)))
 
     // Mock the Task
     val mockTask = mockk<Task<Transaction>>()
@@ -506,14 +511,16 @@ public class BeaconConnectionTest {
     val mockDocumentSnapshot = mockk<DocumentSnapshot>()
 
     val getTestBeacon =
-      Beacon(
-        id = "testBeacon", location = Location(1.0, 1.0, "Test Location"), profileAndTrack = listOf( ProfileTrackAssociation(profile, track)))
+        Beacon(
+            id = "testBeacon",
+            location = Location(1.0, 1.0, "Test Location"),
+            profileAndTrack = listOf(ProfileTrackAssociation(profile, track)))
 
-    val mapOfTestBeacon = hashMapOf(
-      "id" to getTestBeacon.id,
-      "location" to getTestBeacon.location.toMap(),
-      "tracks" to getTestBeacon.profileAndTrack.map { it.toMap() }
-    )
+    val mapOfTestBeacon =
+        hashMapOf(
+            "id" to getTestBeacon.id,
+            "location" to getTestBeacon.location.toMap(),
+            "tracks" to getTestBeacon.profileAndTrack.map { it.toMap() })
 
     every { mockTransaction.get(any<DocumentReference>()) } returns mockDocumentSnapshot
     every { mockTransaction.update(any<DocumentReference>(), any<String>(), any()) } answers
@@ -524,7 +531,8 @@ public class BeaconConnectionTest {
     every { mockDocumentSnapshot.exists() } returns true
     every { mockDocumentSnapshot.id } returns getTestBeacon.id
     every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
-    every { mockDocumentSnapshot.get("tracks") } returns getTestBeacon.profileAndTrack.map { it.toMap() }
+    every { mockDocumentSnapshot.get("tracks") } returns
+        getTestBeacon.profileAndTrack.map { it.toMap() }
 
     // Define behavior for the addOnSuccessListener method
     every { mockTask.addOnSuccessListener(any<OnSuccessListener<Transaction>>()) } answers
@@ -557,23 +565,27 @@ public class BeaconConnectionTest {
   fun testAddNullTrackToBeacon() {
     // Mock data
     val track = Track("testTrackId", "Test Title", "Test Artist")
-    val profile = Profile(
-      "Sample First Name",
-      "Sample last name",
-      "Sample desc",
-      0,
-      false,
-      null,
-      "My Firebase UID",
-      track.id
-    )
-    val beacon = Beacon("testBeaconId", Location(1.0, 1.0, "Test Location"), listOf(ProfileTrackAssociation(profile, track)))
+    val profile =
+        Profile(
+            "Sample First Name",
+            "Sample last name",
+            "Sample desc",
+            0,
+            false,
+            null,
+            "My Firebase UID",
+            track.id)
+    val beacon =
+        Beacon(
+            "testBeaconId",
+            Location(1.0, 1.0, "Test Location"),
+            listOf(ProfileTrackAssociation(profile, track)))
 
-    val mapOfTestBeacon = hashMapOf(
-      "id" to beacon.id,
-      "location" to beacon.location.toMap(),
-      "tracks" to beacon.profileAndTrack.map { it.toMap() }
-    )
+    val mapOfTestBeacon =
+        hashMapOf(
+            "id" to beacon.id,
+            "location" to beacon.location.toMap(),
+            "tracks" to beacon.profileAndTrack.map { it.toMap() })
 
     // Mock the Task
     val mockTask = mockk<Task<Transaction>>()
@@ -581,7 +593,10 @@ public class BeaconConnectionTest {
     val mockDocumentSnapshot = mockk<DocumentSnapshot>()
 
     val getTestBeacon =
-      Beacon(id = "testBeacon", location = Location(1.0, 1.0, "Test Location"), profileAndTrack = listOf(ProfileTrackAssociation(profile, track)))
+        Beacon(
+            id = "testBeacon",
+            location = Location(1.0, 1.0, "Test Location"),
+            profileAndTrack = listOf(ProfileTrackAssociation(profile, track)))
 
     every { mockDocumentSnapshot.getData() } returns mapOfTestBeacon
     every { mockDocumentSnapshot.exists() } returns false
@@ -632,7 +647,4 @@ public class BeaconConnectionTest {
     // Verify that the delete function is called on the document with the correct id
     verify { documentReference.delete() }
   }
-
-
-
 }

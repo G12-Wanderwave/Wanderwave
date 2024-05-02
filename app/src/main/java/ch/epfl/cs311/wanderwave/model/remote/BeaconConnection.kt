@@ -74,17 +74,14 @@ class BeaconConnection(
               var profileAndTrackRefs: List<Map<String, DocumentReference>>?
 
               if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
-                profileAndTrackRefs =
-                  tracksObject as? List<Map<String, DocumentReference>>
+                profileAndTrackRefs = tracksObject as? List<Map<String, DocumentReference>>
 
                 // Use a coroutine to perform asynchronous operations
                 coroutineScope.launch {
                   val profileAndTracksDeferred =
-                    profileAndTrackRefs?.map { profileAndTrackRef ->
-                      async {
-                        fetchTrack(profileAndTrackRef)
+                      profileAndTrackRefs?.map { profileAndTrackRef ->
+                        async { fetchTrack(profileAndTrackRef) }
                       }
-                    }
 
                   // Wait for all tracks to be fetched
                   val profileAndTracks = profileAndTracksDeferred?.mapNotNull { it?.await() }
@@ -111,7 +108,9 @@ class BeaconConnection(
   }
 
   // Fetch a track from a DocumentReference asynchronously
-  suspend fun fetchTrack(profileAndTrackRef: Map<String,DocumentReference>?): ProfileTrackAssociation? {
+  suspend fun fetchTrack(
+      profileAndTrackRef: Map<String, DocumentReference>?
+  ): ProfileTrackAssociation? {
     if (profileAndTrackRef == null) return null
     return withContext(Dispatchers.IO) {
       try {
@@ -122,16 +121,14 @@ class BeaconConnection(
         trackDocument?.let { track = Track.from(it) }
         val profileDocument = profileAndTrackRef["creator"]?.get()?.await()
         profileDocument?.let { profile = Profile.from(it) }
-        Log.d(
-          "Firestore",
-          "Fetched track:${track?.title}, profile:${profile?.firstName}")
+        Log.d("Firestore", "Fetched track:${track?.title}, profile:${profile?.firstName}")
         if (profile == null || track == null) {
           return@withContext null
         }
 
         ProfileTrackAssociation(
-          profile = profileDocument?.let { Profile.from(it) }!!,
-          track = trackDocument?.let { Track.from(it) }!!)
+            profile = profileDocument?.let { Profile.from(it) }!!,
+            track = trackDocument?.let { Track.from(it) }!!)
       } catch (e: Exception) {
         // Handle exceptions
         Log.e("Firestore", "Error fetching track:${e.message}")
