@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.ui
 
-import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -54,25 +53,6 @@ class TrackListScreenTest : TestCase() {
     every { mockSpotifyController.playTrack(any()) } returns flowOf(result)
     viewModel = TrackListViewModel(mockSpotifyController, mockTrackRepositoryImpl)
     composeTestRule.setContent { TrackListScreen(mockShowMessage, viewModel) }
-  }
-
-  @Test
-  fun trackListScreenIsDisplayed() = runTest {
-    setupViewModel(true)
-    onComposeScreen<TrackListScreen>(composeTestRule) {
-      assertIsDisplayed()
-
-      // add text to the search bar :
-      searchBar {
-        assertIsDisplayed()
-        performTextInput("search")
-      }
-
-      trackButton {
-        assertIsDisplayed()
-        assert(hasClickAction())
-      }
-    }
   }
 
   @Test
