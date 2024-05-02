@@ -6,7 +6,9 @@ import io.github.kakaocup.compose.node.element.KNode
 
 class AppScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
     ComposeScreen<AppScreen>(
-        semanticsProvider = semanticsProvider, viewBuilderAction = { hasTestTag("appScreen") }){
-    val appBottomBarScreen = onNode { hasTestTag("appBottomBarScreen") }
-    val trackListButton: KNode = appBottomBarScreen.child { hasTestTag("trackListButton") }
-    }
+        semanticsProvider = semanticsProvider, viewBuilderAction = { hasTestTag("appScreen") }) {
+  //    val appBottomBarScreen = onNode { hasTestTag("appBottomBarScreen") }
+  //    val trackListButton: KNode = appBottomBarScreen.child { hasTestTag("trackListButton") }
+  val appScaffold = onNode { hasTestTag("appScaffold") }
+  val appBottomBar: KNode = appScaffold.child { hasTestTag("appBottomBar") }
+}

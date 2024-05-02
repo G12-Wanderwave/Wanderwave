@@ -92,7 +92,7 @@ class SpotifyController(private val context: Context) {
       val callResult =
           appRemote?.let {
             it.playerApi
-                .play(track.id)
+                .play("spotify:track:" + track.id)
                 .setResultCallback { trySend(true) }
                 .setErrorCallback { trySend(false) }
           }

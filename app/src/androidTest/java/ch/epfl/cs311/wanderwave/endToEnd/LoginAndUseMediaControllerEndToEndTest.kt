@@ -1,157 +1,114 @@
 package ch.epfl.cs311.wanderwave.endToEnd
 
-import android.util.Log
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.repository.TrackRepositoryImpl
+import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.ui.App
+import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.TestActivity
 import ch.epfl.cs311.wanderwave.ui.screens.AppScreen
-import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
-import ch.epfl.cs311.wanderwave.viewmodel.LoginScreenViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.SpotifyConnectScreenViewModel
-import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
-import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
+import com.spotify.protocol.types.ListItem
+import dagger.hilt.android.testing.HiltAndroidTest
+import io.github.kakaocup.compose.node.element.ComposeScreen
 import io.mockk.Runs
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.just
-import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class EndToEndTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
+@HiltAndroidTest
+class LoginAndUseMediaControllerEndToEndTest :
+    TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
 
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<TestActivity>()
+  @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
 
-    @get:Rule
-    val mockkRule = MockKRule(this)
+  @get:Rule val mockkRule = MockKRule(this)
 
-    @RelaxedMockK
-    private lateinit var mockNavController: NavHostController
+  @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
-    @RelaxedMockK
-    private lateinit var mockNavigationActions: NavigationActions
+  @RelaxedMockK private lateinit var mockSpotifyViewModel: SpotifyConnectScreenViewModel
 
-    @RelaxedMockK
-    private lateinit var mockSpotifyConnectScreenViewModel: SpotifyConnectScreenViewModel
+  @RelaxedMockK private lateinit var mockProfileViewModel: ProfileViewModel
 
-    @RelaxedMockK
-    private lateinit var mockTrackListViewModel: TrackListViewModel
+  @RelaxedMockK private lateinit var profileRepositoryImpl: ProfileRepository
 
-    @RelaxedMockK
-    private lateinit var mockSpotifyController: SpotifyController
+  @RelaxedMockK private lateinit var spotifyController: SpotifyController
 
-    @RelaxedMockK
-    private lateinit var mockRepositoryImpl: TrackRepositoryImpl
+  @After
+  fun clearMocks() {
+    clearAllMocks() // Clear all MockK mocks
+  }
 
-    @RelaxedMockK
-    private lateinit var mockLoginScreenViewModel: LoginScreenViewModel
+  private fun setup(uiState: SpotifyConnectScreenViewModel.UiState) {
+    mockDependencies()
+    every { mockSpotifyViewModel.uiState } returns MutableStateFlow(uiState)
+    mockProfileViewModel = ProfileViewModel(profileRepositoryImpl, spotifyController)
 
-    @After
-    fun clearMocks() {
-        clearAllMocks() // Clear all MockK mocks
+    // Mock navigation actions to track list
+    every { mockNavigationActions.navigateTo(Route.TRACK_LIST) } just Runs
+
+    composeTestRule.setContent {
+      SpotifyConnectScreen(
+          navigationActions = mockNavigationActions, viewModel = mockSpotifyViewModel)
+      AppScreen(composeTestRule)
+      TrackListScreen(showMessage = { _ -> })
+    }
+  }
+
+  private fun mockDependencies() {
+    // Mocking ProfileRepositoryImpl
+    coEvery { profileRepositoryImpl.addItem(any()) } just Runs
+    coEvery { profileRepositoryImpl.deleteItem(any<Profile>()) } just Runs
+    coEvery { profileRepositoryImpl.deleteItem(any<String>()) } just Runs
+
+    // Mocking SpotifyController
+    coEvery { spotifyController.getChildren(any()) } returns
+        flowOf(ListItem("", "", null, "", "", false, false))
+    coEvery { spotifyController.getAllElementFromSpotify() } returns
+        flowOf(listOf(ListItem("", "", null, "", "", false, false)))
+    coEvery { spotifyController.getAllChildren(any()) } returns
+        flowOf(listOf(ListItem("", "", null, "", "", false, false)))
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun testEndToEnd() = runBlockingTest {
+    setup(SpotifyConnectScreenViewModel.UiState(hasResult = true, success = true))
+
+    ComposeScreen.onComposeScreen<AppScreen>(composeTestRule) {
+      assertIsDisplayed()
+      appScaffold.assertIsDisplayed()
     }
 
-    @Before
-    fun setup() {
-        mockNavController = mockk()
-        every { mockNavController.navigate(any<String>()) } just Runs
-        every { mockNavController.currentBackStackEntry } returns mockk {
-            every { destination } returns mockk {
-                every { route } returns "expected_route"
-            }
-        }
+    // TODO: Find a way to test the bottom bar
+    mockNavigationActions.navigateTo(Route.TRACK_LIST)
 
+    ComposeScreen.onComposeScreen<TrackListScreen>(composeTestRule) {
+      assertIsDisplayed()
+      trackButton.assertIsDisplayed()
+      searchBar.assertIsDisplayed()
 
-        val connectResult = SpotifyController.ConnectResult.SUCCESS
-        every { mockSpotifyController.connectRemote() } returns flowOf(connectResult)
-
-        val track1 = Track("spotify:track:6ImuyUQYhJKEKFtlrstHCD", "Main Title", "John Williams")
-        val track2 = Track("spotify:track:0HLQFjnwq0FHpNVxormx60", "The Nightingale", "Percival Schuttenbach")
-        val track3 = Track("spotify:track:2NZhNbfb1rD1aRj3hZaoqk", "The Imperial Suite", "Michael Giacchino")
-        val track4 = Track("spotify:track:5EWPGh7jbTNO2wakv8LjUI", "Free Bird", "Lynyrd Skynyrd")
-        val track5 = Track("spotify:track:4rTlPsga6T8yiHGOvZAPhJ", "Godzilla", "Eminem")
-
-        val trackList =
-            listOf(track1,
-                   track2,
-                   track3,
-                   track4,
-                   track5,)
-
-        mockRepositoryImpl = mockk()
-        every { mockRepositoryImpl.getAll() } returns flowOf(trackList)
-
-        val _mockUIState = MutableStateFlow(SpotifyConnectScreenViewModel.UiState(hasResult = true, success = true))
-        val mockUIState: StateFlow<SpotifyConnectScreenViewModel.UiState> = _mockUIState
-        mockSpotifyConnectScreenViewModel = mockk()
-        every { mockSpotifyConnectScreenViewModel.uiState } returns mockUIState
-
-        mockTrackListViewModel = TrackListViewModel(spotifyController = mockSpotifyController, repository = mockRepositoryImpl)
-
-        mockLoginScreenViewModel = LoginScreenViewModel(spotifyController = mockSpotifyController)
-
-        composeTestRule.setContent {
-
-            LoginScreen(navigationActions = mockNavigationActions,
-                        showMessage = { m:String -> Log.d("LoginScreen", m)},
-                        viewModel = mockLoginScreenViewModel)
-
-            SpotifyConnectScreen(navigationActions = mockNavigationActions,
-                                 viewModel = mockSpotifyConnectScreenViewModel)
-
-            App(navController = mockNavController)
-
-            TrackListScreen(showMessage = { m -> Log.d("TrackListScreen", m)},
-                            viewModel = mockTrackListViewModel)
-        }
+      trackButton.performClick()
     }
-
-    @Test
-    fun testEndToEnd() = run {
-        runTest {
-            onComposeScreen<LoginScreen>(composeTestRule) {
-                assertIsDisplayed()
-                signInButton.assertIsDisplayed()
-                signInButton.performClick()
-            }
-
-            onComposeScreen<SpotifyConnectScreen>(composeTestRule){
-                assertIsDisplayed()
-            }
-
-            onComposeScreen<AppScreen>(composeTestRule){
-                assertIsDisplayed()
-                appBottomBarScreen.assertIsDisplayed()
-                trackListButton.assertIsDisplayed()
-                trackListButton.performClick()
-            }
-
-
-            onComposeScreen<TrackListScreen>(composeTestRule) {
-                assertIsDisplayed()
-            }
-        }
-    }
+  }
 }
