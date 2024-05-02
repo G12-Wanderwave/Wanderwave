@@ -55,8 +55,8 @@ class BeaconViewModel @Inject constructor(private val beaconRepository: BeaconRe
     // Call the BeaconConnection's addTrackToBeacon with the provided beaconId and track
 
 
-      //TODO : Revoir MERGE
-     // beaconRepository.addTrackToBeacon(beaconId, track, onComplete)
+
+     beaconRepository.addTrackToBeacon(beaconId, track, onComplete)
   }
 
   data class UIState(

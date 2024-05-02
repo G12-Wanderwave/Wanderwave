@@ -45,27 +45,20 @@ class BeaconConnection(
         super.addItem(item)
         trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
         profileConnection.addProfilesIfNotExist(item.profileAndTrack.map { it.profile })
-        // Added this line
-
-        // TODO : ayman, after you added the profile connection, add the profiles to the database if
-        // they don't exist
-        // TODO : ayman, do it for the two next functions as well (same line of code)
-        // TODO : ayman, add the function addProfileIfNotExist to the profile connection, there is a
-        // very similar version in the track connection, just copy it, you may have to test it
     }
 
     override fun addItemWithId(item: Beacon) {
         super.addItemWithId(item)
         trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
         profileConnection.addProfilesIfNotExist(
-            item.profileAndTrack.map { it.profile }) // Added line to add profiles
+            item.profileAndTrack.map { it.profile })
     }
 
     override fun updateItem(item: Beacon) {
         super.updateItem(item)
         trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
         profileConnection.addProfilesIfNotExist(
-            item.profileAndTrack.map { it.profile }) // Added line to add profiles
+            item.profileAndTrack.map { it.profile })
     }
 
     override fun getItem(itemId: String): Flow<Beacon> {
@@ -148,6 +141,8 @@ class BeaconConnection(
 
         return dataFlow.filterNotNull()
     }
+
+
 
     override fun itemToMap(beacon: Beacon): Map<String, Any> {
         val beaconMap: HashMap<String, Any> =

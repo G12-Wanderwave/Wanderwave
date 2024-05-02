@@ -26,7 +26,7 @@ class BeaconScreenViewModelTest {
     val viewModel = BeaconViewModel(beaconConnection)
     val track = Track("trackId", "trackName", "trackArtist")
     viewModel.addTrackToBeacon("beaconId", track, {})
-    //TODO: @Klaklama add track doesn't exist
-    //verify { beaconConnection.addTrackToBeacon("beaconId", track, any()) }
+
+    verify { beaconConnection.addTrackToBeacon("beaconId", track, any()) }
   }
 }

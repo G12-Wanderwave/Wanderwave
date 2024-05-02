@@ -8,4 +8,6 @@ import kotlinx.coroutines.flow.Flow
 interface BeaconRepository : FirebaseRepository<Beacon> {
 
   fun getAll(): Flow<List<Beacon>>
+
+  fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit)
 }
