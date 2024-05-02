@@ -4,16 +4,19 @@ import android.content.Context
 import android.util.Log
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.viewmodel.RepeatMode
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.ContentApi
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.android.appremote.api.error.NotLoggedInException
 import com.spotify.protocol.types.ListItem
+import com.spotify.protocol.types.PlayerState
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
@@ -128,6 +131,25 @@ class SpotifyController(private val context: Context) {
       awaitClose { callResult?.cancel() }
     }
   }
+
+  fun playerState() : Flow<PlayerState?> {
+    Log.d("SpotifyController", appRemote.toString())
+    val playerStateFlow = callbackFlow<PlayerState?> {
+      trySend(null)
+      while (appRemote == null) {
+        delay(1000) // TODO: this is a very bad way to do it... suggestions?
+      }
+      val callResult =
+        appRemote?.playerApi?.subscribeToPlayerState()
+          ?.setEventCallback {
+            trySend(it)
+          }
+          ?.setErrorCallback { Log.d("SpotifyController", "Error in player state flow") }
+      awaitClose { callResult?.cancel() }
+    }
+    return playerStateFlow
+  }
+
   /**
    * Get all the playlist, title, ... from spotify from the home page of the user.
    *

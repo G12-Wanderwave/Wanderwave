@@ -15,12 +15,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
@@ -63,7 +65,6 @@ fun AppScaffold(navController: NavHostController) {
     scope.launch { snackbarHostState.showSnackbar(message) }
     Unit
   }
-  val trackListViewModel = hiltViewModel<TrackListViewModel>()
 
   LaunchedEffect(currentRouteState) { showBottomBar = currentRouteState?.showBottomBar ?: false }
 
@@ -75,7 +76,7 @@ fun AppScaffold(navController: NavHostController) {
           )
         }
       }) { innerPadding ->
-        SurroundWithMiniPlayer(displayPlayer = showBottomBar, viewModel = trackListViewModel) {
+        SurroundWithMiniPlayer(displayPlayer = showBottomBar) {
           NavHost(
               navController = navController,
               startDestination = Route.LOGIN.routeString,
@@ -86,7 +87,7 @@ fun AppScaffold(navController: NavHostController) {
                 composable(Route.ABOUT.routeString) { AboutScreen(navActions) }
                 composable(Route.MAIN.routeString) { MainPlaceHolder(navActions) }
                 composable(Route.TRACK_LIST.routeString) {
-                  TrackListScreen(showSnackbar, trackListViewModel)
+                  TrackListScreen(showSnackbar)
                 }
                 composable(Route.MAP.routeString) { MapScreen(navActions) }
                 composable(Route.PROFILE.routeString) { ProfileScreen(navActions, viewModel) }
