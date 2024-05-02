@@ -25,14 +25,18 @@ val types: List<String> =
         "amusement_park",
         "aquarium",
         "art_gallery",
+        "spa",
         "bowling_alley",
+        "cafe",
         "campground",
         "casino",
         "church",
         "city_hall",
         "courthouse",
+        "drugstore",
         "embassy",
         "fire_station",
+        "hindu_temple",
         "hospital",
         "library",
         "light_rail_station",
@@ -40,6 +44,8 @@ val types: List<String> =
         "movie_theater",
         "museum",
         "park",
+        "primary_school",
+        "spa",
         "stadium",
         "subway_station",
         "synagogue",
@@ -48,6 +54,7 @@ val types: List<String> =
         "transit_station",
         "university",
         "zoo")
+
 
 /**
  * Create new beacons at nearby points of interest.

@@ -23,8 +23,10 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.PlaceLikelihood
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse
+import com.google.android.libraries.places.api.net.PlacesClient
 import io.mockk.MockKAnnotations
 import io.mockk.every
+import io.mockk.invoke
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -201,6 +203,50 @@ class BeaconGeneratorTest {
   }
 
   @Test
+  fun testGetNearbyPOIs_ThrowsRuntimeException() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    val location = Location(46.519962, 6.633597)
+    val radius = 1000.0
+    val placeFields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
+    Places.initialize(context, BuildConfig.MAPS_API_KEY)
+
+    // Mock the response
+    val mockResponse = mockk<FindCurrentPlaceResponse>()
+    val mockPlaceLikelihood = mockk<PlaceLikelihood>()
+    val mockPlace = mockk<Place>()
+    every { mockPlace.name } returns "Test Place"
+    every { mockPlace.latLng } returns com.google.android.gms.maps.model.LatLng(46.519962, 6.633597)
+    every { mockPlaceLikelihood.place } returns mockPlace
+    every { mockResponse.placeLikelihoods } returns listOf(mockPlaceLikelihood)
+
+    // Mock the PlacesClient and its findCurrentPlace method
+    val placesClient = mockk<PlacesClient>()
+    val task = mockk<Task<FindCurrentPlaceResponse>>()
+    every { task.isSuccessful } returns false
+    every { task.exception } returns NoSuchFieldException()
+    every { placesClient.findCurrentPlace(any()) } returns task
+
+    // Mock the request and the task
+    val request = FindCurrentPlaceRequest.newInstance(placeFields)
+    val mockTask = mockk<Task<FindCurrentPlaceResponse>>()
+
+    every {
+      mockTask.addOnSuccessListener(any<OnSuccessListener<FindCurrentPlaceResponse>>())
+    } answers
+        {
+          val listener = arg<OnSuccessListener<FindCurrentPlaceResponse>>(0)
+          listener.onSuccess(mockResponse)
+          mockTask
+        }
+    every { mockTask.addOnFailureListener(any()) } answers { mockTask }
+
+    val result = getNearbyPOIs(context, location, radius)
+
+    // Assertions
+    assertTrue(result.isEmpty())
+  }
+
+  @Test
   fun typesList_containsExpectedElements() {
     val expectedTypes =
         listOf(
@@ -208,14 +254,18 @@ class BeaconGeneratorTest {
             "amusement_park",
             "aquarium",
             "art_gallery",
+            "spa",
             "bowling_alley",
+            "cafe",
             "campground",
             "casino",
             "church",
             "city_hall",
             "courthouse",
+            "drugstore",
             "embassy",
             "fire_station",
+            "hindu_temple",
             "hospital",
             "library",
             "light_rail_station",
@@ -223,6 +273,8 @@ class BeaconGeneratorTest {
             "movie_theater",
             "museum",
             "park",
+            "primary_school",
+            "spa",
             "stadium",
             "subway_station",
             "synagogue",
