@@ -1,11 +1,13 @@
 package ch.epfl.cs311.wanderwave.model
 
+import android.net.Uri
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.DocumentSnapshot
@@ -25,6 +27,7 @@ class DataClassesTest {
   @get:Rule val mockkRule = MockKRule(this)
   private lateinit var beaconConnection: BeaconConnection
   private lateinit var trackConnection: TrackConnection
+  private lateinit var profileConnection: ProfileConnection
 
   @RelaxedMockK private lateinit var document: DocumentSnapshot
 
@@ -33,8 +36,10 @@ class DataClassesTest {
     MockKAnnotations.init(this)
 
     trackConnection = mockk<TrackConnection>(relaxed = true)
+    profileConnection = mockk<ProfileConnection>(relaxed = true)
 
-    beaconConnection = BeaconConnection(trackConnection = trackConnection)
+    beaconConnection =
+        BeaconConnection(trackConnection = trackConnection, profileConnection = profileConnection)
 
     // Set up the document mock to return some tracks
     every { document.id } returns "someId"
@@ -129,17 +134,30 @@ class DataClassesTest {
   }
 
   @Test
-  fun beaconToMap() {
-    val location = Location(1.0, 1.0, "Test Location")
-    val beacon = Beacon("Test Id", location, listOf())
-    val beaconMap: Map<String, Any> = beacon.toMap()
-    // test beacon behaviour
-    assertEquals("Test Id", beacon.id)
-    assertEquals(location, beacon.location)
-    assertEquals(listOf<ProfileTrackAssociation>(), beacon.profileAndTrack)
-    assertEquals("Test Id", beaconMap["id"])
-    assertEquals(location.toMap(), beaconMap["location"])
-    assertEquals(listOf<ProfileTrackAssociation>(), beaconMap["tracks"])
+  fun toMapTest() {
+    val profile =
+        Profile(
+            firstName = "John",
+            lastName = "Doe",
+            description = "Test description",
+            numberOfLikes = 10,
+            isPublic = true,
+            profilePictureUri = Uri.parse("https://example.com/image.jpg"),
+            spotifyUid = "spotify123",
+            firebaseUid = "firebase123")
+
+    val expectedMap =
+        hashMapOf(
+            "firstName" to "John",
+            "lastName" to "Doe",
+            "description" to "Test description",
+            "numberOfLikes" to 10,
+            "spotifyUid" to "spotify123",
+            "firebaseUid" to "firebase123",
+            "isPublic" to true,
+            "profilePictureUri" to "https://example.com/image.jpg")
+
+    assertEquals(expectedMap, profile.toMap())
   }
 
   @Test
@@ -174,7 +192,7 @@ class DataClassesTest {
   }
 
   @Test
-  fun profileTrackAssociation_initializesCorrectly() {
+  fun profileTrackAssociationInitializesCorrectly() {
     val mockProfile = mockk<Profile>()
     val mockTrack = mockk<Track>()
     val association = ProfileTrackAssociation(mockProfile, mockTrack)
@@ -183,6 +201,33 @@ class DataClassesTest {
     assertEquals(mockTrack, association.track)
   }
 
+  @Test
+  fun profileTrackToMapTest() {
+    val profile =
+        Profile(
+            firstName = "John",
+            lastName = "Doe",
+            description = "Test description",
+            numberOfLikes = 10,
+            isPublic = true,
+            profilePictureUri = Uri.parse("https://example.com/image.jpg"),
+            spotifyUid = "spotify123",
+            firebaseUid = "firebase123")
+
+    val track = Track() // Assuming Track has a no-argument constructor
+
+    val profileTrackAssociation = ProfileTrackAssociation(profile, track)
+
+    val expectedMap =
+        hashMapOf(
+            "profile" to profile.toMap(),
+            "track" to track.toMap() // Assuming Track has a toMap function
+            )
+
+    assertEquals(expectedMap, profileTrackAssociation.toMap())
+  }
+
+  @Test
   fun noArgumentConstructorCreatesEmptyTrack() {
     val track = Track()
     assertEquals("", track.id)

@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.model
 
+import android.net.Uri
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import com.google.firebase.firestore.DocumentSnapshot
@@ -78,5 +79,32 @@ public class ProfileConnectionTest {
             spotifyUid = spotifyUid,
             firebaseUid = firebaseUid)
     assertEquals(expectedProfile, result)
+  }
+
+  @Test
+  fun itemToMapTest() {
+    val profile =
+        Profile(
+            firstName = "John",
+            lastName = "Doe",
+            description = "Test description",
+            numberOfLikes = 10,
+            isPublic = true,
+            profilePictureUri = Uri.parse("https://example.com/image.jpg"),
+            spotifyUid = "spotify123",
+            firebaseUid = "firebase123")
+
+    val expectedMap: HashMap<String, Any> =
+        hashMapOf(
+            "firstName" to "John",
+            "lastName" to "Doe",
+            "description" to "Test description",
+            "numberOfLikes" to 10,
+            "spotifyUid" to "spotify123",
+            "firebaseUid" to "firebase123",
+            "isPublic" to true,
+            "profilePictureUri" to "https://example.com/image.jpg")
+
+    assertEquals(expectedMap, profileConnection.itemToMap(profile))
   }
 }

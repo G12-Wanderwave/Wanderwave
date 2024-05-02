@@ -2,20 +2,29 @@ package ch.epfl.cs311.wanderwave.model.remote
 
 import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Beacon
+import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class BeaconConnection(
     private val database: FirebaseFirestore? = null,
-    val trackConnection: TrackConnection
+    val trackConnection: TrackConnection,
+    // TODO : ayman : add profile connection, watch out for the tests, you will need to add profile
+    // connection as an argument to those as well
+    val profileConnection: ProfileConnection
 ) : FirebaseConnection<Beacon, Beacon>(), BeaconRepository {
 
   override val collectionName: String = "beacons"
@@ -31,69 +40,95 @@ class BeaconConnection(
   override fun documentToItem(document: DocumentSnapshot): Beacon? {
     return Beacon.from(document)
   }
-  //
-  //    override fun addItem(item: Beacon) {
-  //        super.addItem(item)
-  //        trackConnection.addItemsIfNotExist(item.tracks)
-  //    }
-  //
-  //    override fun addItemWithId(item: Beacon) {
-  //        super.addItemWithId(item)
-  //        trackConnection.addItemsIfNotExist(item.tracks)
-  //    }
-  //
-  //    override fun updateItem(item: Beacon) {
-  //        super.updateItem(item)
-  //        trackConnection.addItemsIfNotExist(item.tracks)
-  //    }
+
+  override fun addItem(item: Beacon) {
+    super.addItem(item)
+    trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
+    profileConnection.addProfilesIfNotExist(item.profileAndTrack.map { it.profile })
+    // Added this line
+
+    // TODO : ayman, after you added the profile connection, add the profiles to the database if
+    // they don't exist
+    // TODO : ayman, do it for the two next functions as well (same line of code)
+    // TODO : ayman, add the function addProfileIfNotExist to the profile connection, there is a
+    // very similar version in the track connection, just copy it, you may have to test it
+  }
+
+  override fun addItemWithId(item: Beacon) {
+    super.addItemWithId(item)
+    trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
+    profileConnection.addProfilesIfNotExist(
+        item.profileAndTrack.map { it.profile }) // Added line to add profiles
+  }
+
+  override fun updateItem(item: Beacon) {
+    super.updateItem(item)
+    trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
+    profileConnection.addProfilesIfNotExist(
+        item.profileAndTrack.map { it.profile }) // Added line to add profiles
+  }
 
   override fun getItem(itemId: String): Flow<Beacon> {
-    //        val dataFlow = MutableStateFlow<Beacon?>(null)
-    //
-    //        db.collection(collectionName)
-    //            .document(itemId)
-    //            .get()
-    //            .addOnSuccessListener { document ->
-    //                if (document != null && document.data != null) {
-    //                    documentToItem(document)?.let { beacon ->
-    //                        val trackRefs = document.get("tracks") as? List<DocumentReference>
-    //                        val tracks = mutableListOf<Track>()
-    //
-    //                        // Use a coroutine to perform asynchronous operations
-    //                        coroutineScope.launch {
-    //                            val tracksDeferred =
-    //                                trackRefs?.map { trackRef ->
-    //                                    async(Dispatchers.IO) {
-    //                                        try {
-    //                                            val trackDocument = trackRef.get().await()
-    //                                            trackDocument.toObject(Track::class.java)
-    //                                        } catch (e: Exception) {
-    //                                            // Handle exceptions
-    //                                            Log.e("Firestore", "Error fetching track:
-    // ${e.message}")
-    //                                            null
-    //                                        }
-    //                                    }
-    //                                }
-    //
-    //                            // Wait for all tracks to be fetched
-    //                            val tracks = tracksDeferred?.mapNotNull { it?.await() }
-    //
-    //                            // Update the beacon with the complete list of tracks
-    //                            val updatedBeacon = beacon.copy(tracks = tracks ?: emptyList())
-    //                            dataFlow.value = updatedBeacon
-    //                        }
-    //                    }
-    //                } else {
-    //                    dataFlow.value = null
-    //                }
-    //            }
-    //            .addOnFailureListener { e ->
-    //                dataFlow.value = null
-    //                Log.e("Firestore", "Error getting document: ", e)
-    //            }
-    //
-    //        return dataFlow.filterNotNull()
+    val dataFlow = MutableStateFlow<Beacon?>(null)
+
+    db.collection(collectionName)
+        .document(itemId)
+        .get()
+        .addOnSuccessListener { document ->
+          if (document != null && document.data != null) {
+            documentToItem(document)?.let { beacon ->
+              val profileAndTrackRefs =
+                  document.get("tracks") as? List<Map<String, DocumentReference>>
+
+              // Use a coroutine to perform asynchronous operations
+              coroutineScope.launch {
+                val profileAndTracksDeferred =
+                    profileAndTrackRefs?.map { profileAndTrackRef ->
+                      async(Dispatchers.IO) {
+                        try {
+
+                          var profile: Profile? = null
+                          var track: Track? = null
+                          val trackDocument = profileAndTrackRef["track"]?.get()?.await()
+                          trackDocument?.let { track = Track.from(it) }
+                          val profileDocument = profileAndTrackRef["creator"]?.get()?.await()
+                          profileDocument?.let { profile = Profile.from(it) }
+                          Log.d(
+                              "Firestore",
+                              "Fetched track:${track?.title}, profile:${profile?.firstName}")
+                          if (profile == null || track == null) {
+                            return@async null
+                          }
+
+                          ProfileTrackAssociation(
+                              profile = profileDocument?.let { Profile.from(it) }!!,
+                              track = trackDocument?.let { Track.from(it) }!!)
+                        } catch (e: Exception) {
+                          // Handle exceptions
+                          Log.e("Firestore", "Error fetching track:${e.message}")
+                          null
+                        }
+                      }
+                    }
+
+                // Wait for all tracks to be fetched
+                val profileAndTracks = profileAndTracksDeferred?.mapNotNull { it?.await() }
+
+                // Update the beacon with the complete list of tracks
+                val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks ?: emptyList())
+                dataFlow.value = updatedBeacon
+              }
+            }
+          } else {
+            dataFlow.value = null
+          }
+        }
+        .addOnFailureListener { e ->
+          dataFlow.value = null
+          Log.e("Firestore", "Error getting document: ", e)
+        }
+
+    return dataFlow.filterNotNull()
     return flowOf()
   }
 
@@ -115,30 +150,48 @@ class BeaconConnection(
   }
 
   override fun itemToMap(beacon: Beacon): Map<String, Any> {
-    val beaconMap: HashMap<String, Any> = beacon.toMap() as HashMap<String, Any>
-    //            hashMapOf(
-    //                "id" to beacon.id,
-    //                "location" to beacon.location.toMap(),
-    //                "tracks" to
-    //                        beacon.tracks.map { track ->
-    //                            db.collection(trackConnection.collectionName).document(track.id)
-    //                        })
+    val beaconMap: HashMap<String, Any> =
+        hashMapOf(
+            "id" to beacon.id,
+            "location" to beacon.location.toMap(),
+            "tracks" to
+                beacon.profileAndTrack.map { profileAndTrack ->
+                  hashMapOf(
+                      "creator" to
+                          db.collection("users").document(profileAndTrack.profile.firebaseUid),
+                      "track" to db.collection("tracks").document(profileAndTrack.track.id))
+                })
     return beaconMap
   }
 
   override fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
-    //        val beaconRef = db.collection("beacons").document(beaconId)
-    //
-    //        db.runTransaction { transaction ->
-    //            val snapshot = transaction.get(beaconRef)
-    //            val beacon = snapshot.toObject(Beacon::class.java)
-    //            beacon?.let {
-    //                val newTracks = ArrayList(it.tracks).apply { add(track) }
-    //                transaction.update(beaconRef, "tracks", newTracks.map { it.toMap() })
-    //            } ?: throw Exception("Beacon not found")
-    //        }
-    //            .addOnSuccessListener { onComplete(true) }
-    //            .addOnFailureListener { onComplete(false) }
-    //    }
+    val beaconRef = db.collection("beacons").document(beaconId)
+
+    db.runTransaction { transaction ->
+          val snapshot = transaction.get(beaconRef)
+          val beacon = snapshot.toObject(Beacon::class.java)
+          beacon?.let {
+            val newTracks =
+                ArrayList(it.profileAndTrack).apply {
+                  add(
+                      ProfileTrackAssociation(
+                          Profile( // TODO : ayman : this is a dummy profile, replace with actual
+                              // profile, you should have the profile connection imported
+                              // profile
+                              "Sample First Name",
+                              "Sample last name",
+                              "Sample desc",
+                              0,
+                              false,
+                              null,
+                              "Sample Profile ID",
+                              track.id),
+                          track))
+                }
+            transaction.update(beaconRef, "tracks", newTracks.map { it.toMap() })
+          } ?: throw Exception("Beacon not found")
+        }
+        .addOnSuccessListener { onComplete(true) }
+        .addOnFailureListener { onComplete(false) }
   }
 }

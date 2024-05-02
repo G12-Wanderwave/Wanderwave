@@ -13,9 +13,6 @@ data class Beacon(
     /** List of tracks that are broadcast from the beacon */
     val profileAndTrack: List<ProfileTrackAssociation> = listOf<ProfileTrackAssociation>(),
 ) {
-  fun toMap(): Map<String, Any> {
-    return hashMapOf("id" to id, "location" to location.toMap(), "tracks" to listOf<Track>())
-  }
 
   companion object {
     fun from(document: DocumentSnapshot): Beacon? {
