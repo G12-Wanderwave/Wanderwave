@@ -36,7 +36,11 @@ constructor(
   private fun observeTracks() {
     CoroutineScope(Dispatchers.IO).launch {
       repository.getAll().collect { tracks ->
-        _uiState.value = UiState(tracks = tracks.filter { matchesSearchQuery(it) }, loading = false)
+        _uiState.value =
+            UiState(
+                tracks = tracks.filter { matchesSearchQuery(it) },
+                queue = tracks.filter { matchesSearchQuery(it) },
+                loading = false)
       }
       // deal with the flow
     }
@@ -92,8 +96,18 @@ constructor(
 //    }
 //  }
 //
+
+  fun collapse() {
+    _uiState.value = _uiState.value.copy(expanded = false)
+  }
+
+  fun expand() {
+    _uiState.value = _uiState.value.copy(expanded = true)
+  }
+
   data class UiState(
       val tracks: List<Track> = listOf(),
+      val queue: List<Track> = listOf(),
       val loading: Boolean = false,
       val message: String? = null,
       val selectedTrack: Track? = null,
@@ -102,12 +116,12 @@ constructor(
       val currentMillis: Int = 0,
       val expanded: Boolean = false,
       val progress: Float = 0f,
-      val shuffleOn: Boolean = false,
-      val repeatMode: RepeatMode = RepeatMode.NONE
+      val isShuffled: Boolean = false,
+      val loopMode: LoopMode = LoopMode.NONE
   )
 }
 
-enum class RepeatMode {
+enum class LoopMode {
   NONE,
   ONE,
   ALL

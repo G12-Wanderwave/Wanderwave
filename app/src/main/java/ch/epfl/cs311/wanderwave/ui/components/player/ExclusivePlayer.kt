@@ -30,7 +30,7 @@ import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.ui.theme.orange
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 import ch.epfl.cs311.wanderwave.viewmodel.PlayerViewModel
-import ch.epfl.cs311.wanderwave.viewmodel.RepeatMode
+import ch.epfl.cs311.wanderwave.viewmodel.LoopMode
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
 @Composable

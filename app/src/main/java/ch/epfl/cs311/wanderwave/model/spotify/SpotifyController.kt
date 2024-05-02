@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.viewmodel.RepeatMode
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.ContentApi
@@ -15,18 +14,16 @@ import com.spotify.protocol.types.PlayerState
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class SpotifyController(private val context: Context) {
@@ -42,11 +39,14 @@ class SpotifyController(private val context: Context) {
           "user-read-email",
           "user-read-private")
 
+  var playbackTimer: Job? = null
+
   private val connectionParams =
       ConnectionParams.Builder(CLIENT_ID).setRedirectUri(REDIRECT_URI).showAuthView(true).build()
 
   val appRemote: MutableStateFlow<SpotifyAppRemote?> = MutableStateFlow(null)
   private var trackList: List<Track>? = null
+  private var onTrackEndCallback: (() -> Unit)? = null
 
   fun getAuthorizationRequest(): AuthorizationRequest {
     val builder =
@@ -80,6 +80,7 @@ class SpotifyController(private val context: Context) {
               override fun onConnected(spotifyAppRemote: SpotifyAppRemote) {
                 appRemote.value = spotifyAppRemote
                 println("Connected to Spotify App Remote")
+                onPlayerStateUpdate()
                 trySend(ConnectResult.SUCCESS)
                 channel.close()
               }
@@ -156,13 +157,61 @@ class SpotifyController(private val context: Context) {
     return appRemote.flatMapLatest { appRemote ->
       callbackFlow {
         val callbackResult = appRemote?.playerApi?.subscribeToPlayerState()
-          ?.setEventCallback { trySend(it) }
+          ?.setEventCallback {
+            trySend(it)
+            startPlaybackTimer(it.track.duration)
+          }
           ?.setErrorCallback { Log.d("SpotifyController", "Error in player state flow") }
-        awaitClose { callbackResult?.cancel() }
+        awaitClose {
+          callbackResult?.cancel()
+          stopPlaybackTimer()
+        }
       }
     }
   }
 
+  fun startPlaybackTimer(
+      trackDuration: Long,
+      scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+  ) {
+    stopPlaybackTimer() // Ensure no previous timers are running
+    playbackTimer =
+        scope.launch {
+          val checkInterval = 1000L // Check every second
+          var elapsedTime = 0L
+          while (elapsedTime < trackDuration) {
+            delay(checkInterval)
+            appRemote.value?.playerApi?.playerState?.setResultCallback { playerState ->
+              if ((trackDuration - playerState.playbackPosition) <= 1000) {
+                onTrackEndCallback?.invoke()
+              }
+            }
+          }
+        }
+  }
+
+  fun stopPlaybackTimer() {
+    playbackTimer?.cancel()
+    playbackTimer = null
+  }
+
+  fun onPlayerStateUpdate() { // TODO: Coverage
+    appRemote.value?.let {
+      it.playerApi.subscribeToPlayerState().setEventCallback { playerState: PlayerState ->
+        if (playerState.track != null) {
+          startPlaybackTimer(playerState.track.duration - playerState.playbackPosition)
+        }
+      }
+    }
+  }
+
+  fun setOnTrackEndCallback(callback: () -> Unit) {
+    onTrackEndCallback = callback
+  }
+
+  fun getOnTrackEndCallback(): (() -> Unit)? {
+    return onTrackEndCallback
+  }
   /**
    * Get all the playlist, title, ... from spotify from the home page of the user.
    *
@@ -197,7 +246,6 @@ class SpotifyController(private val context: Context) {
    * @since 2.0
    * @last update 2.0
    */
-  @OptIn(FlowPreview::class)
   fun getChildren(listItem: ListItem): Flow<ListItem> {
     return callbackFlow {
       val callResult =
@@ -224,7 +272,6 @@ class SpotifyController(private val context: Context) {
    * @since 2.0
    * @last update 2.0
    */
-  @OptIn(FlowPreview::class)
   fun getAllChildren(listItem: ListItem): Flow<List<ListItem>> {
     val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
 

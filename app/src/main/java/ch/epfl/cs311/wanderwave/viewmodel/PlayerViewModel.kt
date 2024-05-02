@@ -32,7 +32,7 @@ class PlayerViewModel @Inject constructor(val spotifyController: SpotifyControll
       *   need to remove that. */
       track = playerState.track?.let { Track(it.uri, it.name, it.artist.name) },
       isPlaying = !playerState.isPaused,
-      repeatMode = playerState.playbackOptions.repeatMode != RepeatMode.NONE.ordinal,
+      repeatMode = playerState.playbackOptions.repeatMode != LoopMode.NONE.ordinal,
       isShuffling = playerState.playbackOptions.isShuffling,
       expanded = expandedState
     )
@@ -43,6 +43,10 @@ class PlayerViewModel @Inject constructor(val spotifyController: SpotifyControll
       SharingStarted.WhileSubscribed(5000),
       UiState()
     )
+
+  init {
+    spotifyController.setOnTrackEndCallback { skipForward() }
+  }
 
   fun collapse() {
     _expandedState.value = false

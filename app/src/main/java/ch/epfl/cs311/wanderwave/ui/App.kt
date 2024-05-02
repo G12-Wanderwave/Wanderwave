@@ -31,7 +31,6 @@ import ch.epfl.cs311.wanderwave.ui.screens.AboutScreen
 import ch.epfl.cs311.wanderwave.ui.screens.BeaconScreen
 import ch.epfl.cs311.wanderwave.ui.screens.EditProfileScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
-import ch.epfl.cs311.wanderwave.ui.screens.MainPlaceHolder
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
 import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
 import ch.epfl.cs311.wanderwave.ui.screens.SelectSongScreen
@@ -85,7 +84,6 @@ fun AppScaffold(navController: NavHostController) {
                 composable(Route.LOGIN.routeString) { LoginScreen(navActions, showSnackbar) }
                 composable(Route.SPOTIFY_CONNECT.routeString) { SpotifyConnectScreen(navActions) }
                 composable(Route.ABOUT.routeString) { AboutScreen(navActions) }
-                composable(Route.MAIN.routeString) { MainPlaceHolder(navActions) }
                 composable(Route.TRACK_LIST.routeString) {
                   TrackListScreen(showSnackbar)
                 }
