@@ -14,11 +14,15 @@ import com.spotify.protocol.types.ListItem
 import com.spotify.protocol.types.PlayerState
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 
 class SpotifyController(private val context: Context) {
 
@@ -36,7 +40,7 @@ class SpotifyController(private val context: Context) {
   private val connectionParams =
       ConnectionParams.Builder(CLIENT_ID).setRedirectUri(REDIRECT_URI).showAuthView(true).build()
 
-  var appRemote: SpotifyAppRemote? = null
+  var appRemote: MutableStateFlow<SpotifyAppRemote?> = MutableStateFlow(null)
 
   fun getAuthorizationRequest(): AuthorizationRequest {
     val builder =
@@ -54,7 +58,7 @@ class SpotifyController(private val context: Context) {
   }
 
   fun isConnected(): Boolean {
-    return appRemote?.isConnected ?: false
+    return appRemote.value?.isConnected ?: false
   }
 
   fun connectRemote(): Flow<ConnectResult> {
@@ -68,7 +72,7 @@ class SpotifyController(private val context: Context) {
             connectionParams,
             object : Connector.ConnectionListener {
               override fun onConnected(spotifyAppRemote: SpotifyAppRemote) {
-                appRemote = spotifyAppRemote
+                appRemote.value = spotifyAppRemote
                 println("Connected to Spotify App Remote")
                 trySend(ConnectResult.SUCCESS)
                 channel.close()
@@ -88,11 +92,12 @@ class SpotifyController(private val context: Context) {
   }
 
   fun disconnectRemote() {
-    appRemote?.let { SpotifyAppRemote.disconnect(it) }
+    appRemote.value.let { SpotifyAppRemote.disconnect(it) }
+    appRemote.value = null
   }
 
   fun playTrack(track: Track, onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
-    appRemote?.let {
+    appRemote.value?.let {
       it.playerApi.play("spotify:track:${track.id}")
         .setResultCallback { onSuccess() }
         .setErrorCallback { error -> onFailure(error) }
@@ -100,7 +105,7 @@ class SpotifyController(private val context: Context) {
   }
 
   fun pauseTrack(onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
-    appRemote?.let {
+    appRemote.value?.let {
       it.playerApi.pause()
         .setResultCallback { onSuccess() }
         .setErrorCallback { error -> onFailure(error) }
@@ -108,28 +113,23 @@ class SpotifyController(private val context: Context) {
   }
 
   fun resumeTrack(onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
-    appRemote?.let {
+    appRemote.value?.let {
       it.playerApi.resume()
         .setResultCallback { onSuccess() }
         .setErrorCallback { error -> onFailure(error) }
     }
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   fun playerState() : Flow<PlayerState?> {
-    val playerStateFlow = callbackFlow<PlayerState?> {
-      trySend(null)
-      while (appRemote == null) {
-        delay(1000) // TODO: this is a very bad way to do it... suggestions?
-      }
-      val callResult =
-        appRemote?.playerApi?.subscribeToPlayerState()
-          ?.setEventCallback {
-            trySend(it)
-          }
+    return appRemote.flatMapLatest { appRemote ->
+      callbackFlow {
+        val callbackResult = appRemote?.playerApi?.subscribeToPlayerState()
+          ?.setEventCallback { trySend(it) }
           ?.setErrorCallback { Log.d("SpotifyController", "Error in player state flow") }
-      awaitClose { callResult?.cancel() }
+        awaitClose { callbackResult?.cancel() }
+      }
     }
-    return playerStateFlow
   }
 
   /**
@@ -145,7 +145,7 @@ class SpotifyController(private val context: Context) {
     val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
     return callbackFlow {
       val callResult =
-          appRemote?.let { it ->
+          appRemote.value?.let { it ->
             it.contentApi
                 .getRecommendedContentItems(ContentApi.ContentType.DEFAULT)
                 .setResultCallback {
@@ -170,7 +170,7 @@ class SpotifyController(private val context: Context) {
   fun getChildren(listItem: ListItem): Flow<ListItem> {
     return callbackFlow {
       val callResult =
-          appRemote?.let { it ->
+          appRemote.value?.let { it ->
             it.contentApi
                 .getChildrenOfItem(listItem, 50, 0)
                 .setResultCallback {
@@ -199,7 +199,7 @@ class SpotifyController(private val context: Context) {
 
     return callbackFlow {
       val callResult =
-          appRemote?.let { it ->
+          appRemote.value?.let { it ->
             it.contentApi
                 .getChildrenOfItem(listItem, 50, 0)
                 .setResultCallback {
