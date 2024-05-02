@@ -55,7 +55,6 @@ val types: List<String> =
         "university",
         "zoo")
 
-
 /**
  * Create new beacons at nearby points of interest.
  *
