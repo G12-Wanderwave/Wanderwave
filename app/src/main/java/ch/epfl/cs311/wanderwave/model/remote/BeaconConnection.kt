@@ -127,18 +127,18 @@ class BeaconConnection(
   }
 
   override fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
-    //        val beaconRef = db.collection("beacons").document(beaconId)
-    //
-    //        db.runTransaction { transaction ->
-    //            val snapshot = transaction.get(beaconRef)
-    //            val beacon = snapshot.toObject(Beacon::class.java)
-    //            beacon?.let {
-    //                val newTracks = ArrayList(it.tracks).apply { add(track) }
-    //                transaction.update(beaconRef, "tracks", newTracks.map { it.toMap() })
-    //            } ?: throw Exception("Beacon not found")
-    //        }
-    //            .addOnSuccessListener { onComplete(true) }
-    //            .addOnFailureListener { onComplete(false) }
-    //    }
+           val beaconRef = db.collection("beacons").document(beaconId)
+
+           db.runTransaction { transaction ->
+               val snapshot = transaction.get(beaconRef)
+               val beacon = snapshot.toObject(Beacon::class.java)
+               beacon?.let {
+                   val newTracks = ArrayList(it.profileAndTrack).apply { add(track) }
+                   transaction.update(beaconRef, "tracks", newTracks.map { it.toMap() })
+               } ?: throw Exception("Beacon not found")
+           }
+               .addOnSuccessListener { onComplete(true) }
+               .addOnFailureListener { onComplete(false) }
+       }
   }
 }
