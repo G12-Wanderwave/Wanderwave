@@ -142,6 +142,8 @@ fun getNearbyPOIs(context: Context, location: Location, radius: Double): List<Lo
             Log.e("PlacesApi", "Place not found: ${exception.message}")
             Log.e("PlacesApi", "Place not found: ${exception.localizedMessage}")
             Log.e("PlacesApi", "Place not found: ${exception.cause}")
+          } else {
+            Log.e("Error", "An error occurred: " + exception.message)
           }
         }
   }
