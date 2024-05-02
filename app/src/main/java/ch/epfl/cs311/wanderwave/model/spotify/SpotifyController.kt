@@ -91,49 +91,31 @@ class SpotifyController(private val context: Context) {
     appRemote?.let { SpotifyAppRemote.disconnect(it) }
   }
 
-  fun playTrack(track: Track): Flow<Boolean> {
-    return callbackFlow {
-      val callResult =
-          appRemote?.let {
-            Log.d("Track Spotify ID", track.id)
-            it.playerApi
-                // TODO: remove magic string
-                .play("spotify:track:${track.id}")
-                .setResultCallback { trySend(true) }
-                .setErrorCallback { trySend(false) }
-          }
-      awaitClose { callResult?.cancel() }
+  fun playTrack(track: Track, onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
+    appRemote?.let {
+      it.playerApi.play("spotify:track:${track.id}")
+        .setResultCallback { onSuccess() }
+        .setErrorCallback { error -> onFailure(error) }
     }
   }
 
-  fun pauseTrack(): Flow<Boolean> {
-    return callbackFlow {
-      val callResult =
-          appRemote?.let {
-            it.playerApi
-                .pause()
-                .setResultCallback { trySend(true) }
-                .setErrorCallback { trySend(false) }
-          }
-      awaitClose { callResult?.cancel() }
+  fun pauseTrack(onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
+    appRemote?.let {
+      it.playerApi.pause()
+        .setResultCallback { onSuccess() }
+        .setErrorCallback { error -> onFailure(error) }
     }
   }
 
-  fun resumeTrack(): Flow<Boolean> {
-    return callbackFlow {
-      val callResult =
-          appRemote?.let {
-            it.playerApi
-                .resume()
-                .setResultCallback { trySend(true) }
-                .setErrorCallback { trySend(false) }
-          }
-      awaitClose { callResult?.cancel() }
+  fun resumeTrack(onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
+    appRemote?.let {
+      it.playerApi.resume()
+        .setResultCallback { onSuccess() }
+        .setErrorCallback { error -> onFailure(error) }
     }
   }
 
   fun playerState() : Flow<PlayerState?> {
-    Log.d("SpotifyController", appRemote.toString())
     val playerStateFlow = callbackFlow<PlayerState?> {
       trySend(null)
       while (appRemote == null) {
@@ -186,7 +168,6 @@ class SpotifyController(private val context: Context) {
    */
   @OptIn(FlowPreview::class)
   fun getChildren(listItem: ListItem): Flow<ListItem> {
-
     return callbackFlow {
       val callResult =
           appRemote?.let { it ->

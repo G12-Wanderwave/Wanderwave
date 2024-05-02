@@ -55,8 +55,7 @@ class PlayerViewModel @Inject constructor(val spotifyController: SpotifyControll
   }
 
   fun expand() {
-    Log.d("PlayerViewModel", "Emitting true works: ${_expandedState.tryEmit(true)}")
-    Log.d("PlayerViewModel", "Expanded state: ${_expandedState.value}")
+    _expandedState.value = true
   }
 
   fun resume() {
