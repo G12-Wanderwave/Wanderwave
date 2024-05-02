@@ -26,6 +26,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -127,6 +128,51 @@ public class BeaconConnectionTest {
   }
 
   @Test
+  fun testGetItemTrackObjectIsNotList() = runBlocking {
+    withTimeout(3000) {
+      // Mock the Task
+      val mockTask = mockk<Task<DocumentSnapshot>>()
+      val mockDocumentSnapshot = mockk<DocumentSnapshot>()
+
+      val getTestBeacon =
+          Beacon(
+              id = "testBeacon", location = Location(1.0, 1.0, "Test Location"), tracks = listOf())
+
+      every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap()
+      every { mockDocumentSnapshot.exists() } returns true
+      every { mockDocumentSnapshot.id } returns getTestBeacon.id
+      every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
+
+      // not a list of maps, doesn't pass the if
+      every { mockDocumentSnapshot.get("tracks") } returns listOf("String1", "String2")
+
+      // Define behavior for the addOnSuccessListener method
+      every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentSnapshot>>()) } answers
+          {
+            val listener = arg<OnSuccessListener<DocumentSnapshot>>(0)
+
+            // Define the behavior of the mock DocumentSnapshot here
+            listener.onSuccess(mockDocumentSnapshot)
+            mockTask
+          }
+      every { mockTask.addOnFailureListener(any()) } answers { mockTask }
+
+      // Define behavior for the get() method on the DocumentReference to return the mock task
+      every { documentReference.get() } returns mockTask
+
+      // Call the function under test
+      beaconConnection.getItem("testBeacon").first()
+
+      // Verify that the get function is called on the document with the correct id
+      coVerify { documentReference.get() }
+
+      // verify that fetchTrack is not called
+      // I don't know how to do this didn't work : coVerify(exactly = 0) {
+      // beaconConnection.fetchTrack(any<DocumentReference>()) }
+    }
+  }
+
+  @Test
   fun testGetItemFailure() {
     runBlocking {
       withTimeout(3000) {
@@ -155,6 +201,104 @@ public class BeaconConnectionTest {
         coVerify { documentReference.get() }
       }
     }
+  }
+
+  @Test
+  fun testFetchTrack() = runBlocking {
+    // Mock the DocumentReference
+    val mockDocumentReference = mockk<DocumentReference>()
+
+    // Mock the DocumentSnapshot
+    val mockDocumentSnapshot = mockk<DocumentSnapshot>()
+
+    // Mock the Track
+    val mockTrack = Track("testTrackId", "Test Title", "Test Artist")
+
+    // Define behavior for the get() method on the DocumentReference to return the mock task
+    coEvery { mockDocumentReference.get() } returns
+        mockk {
+          every { isComplete } returns true
+          every { isSuccessful } returns true
+          every { result } returns mockDocumentSnapshot
+          every { getException() } returns null
+          every { isCanceled } returns false
+        }
+
+    // Define behavior for the DocumentSnapshot
+    every { mockDocumentSnapshot.exists() } returns true
+    every { mockDocumentSnapshot.id } returns mockTrack.id
+    every { mockDocumentSnapshot.getString("title") } returns mockTrack.title
+    every { mockDocumentSnapshot.getString("artist") } returns mockTrack.artist
+
+    var retrievedTrack: Track? = null
+
+    // Call the function under test
+    async { retrievedTrack = beaconConnection.fetchTrack(mockDocumentReference) }.await()
+
+    // Verify that the get function is called on the document with the correct id
+    coVerify { mockDocumentReference.get() }
+
+    // Assert that the retrieved track is the same as the mock track
+    assertEquals(mockTrack, retrievedTrack)
+  }
+
+  @Test
+  fun testFetchTrackNullDocumentReference() = runBlocking {
+    // Call the function under test
+    val retrievedTrack = beaconConnection.fetchTrack(null)
+
+    // Assert that the retrieved track is null
+    assertEquals(null, retrievedTrack)
+  }
+
+  @Test
+  fun testFetchTrackNullTrackDocument() = runBlocking {
+    // Mock the DocumentReference
+    val mockDocumentReference = mockk<DocumentReference>()
+
+    // Define behavior for the get() method on the DocumentReference to return the mock task
+    coEvery { mockDocumentReference.get() } returns
+        mockk {
+          every { isComplete } returns true
+          every { isSuccessful } returns true
+          every { result } returns null
+          every { getException() } returns null
+          every { isCanceled } returns false
+        }
+
+    // Call the function under test
+    val retrievedTrack = beaconConnection.fetchTrack(mockDocumentReference)
+
+    // Verify that the get function is called on the document with the correct id
+    coVerify { mockDocumentReference.get() }
+
+    // Assert that the retrieved track is null
+    assertEquals(null, retrievedTrack)
+  }
+
+  @Test
+  fun testFetchTrackException() = runBlocking {
+    // Mock the DocumentReference
+    val mockDocumentReference = mockk<DocumentReference>()
+
+    // Define behavior for the get() method on the DocumentReference to return the mock task
+    coEvery { mockDocumentReference.get() } returns
+        mockk {
+          every { isComplete } returns true
+          every { isSuccessful } returns false
+          every { result } returns null
+          every { getException() } returns Exception("Test Exception")
+          every { isCanceled } returns false
+        }
+
+    // Call the function under test
+    val retrievedTrack = beaconConnection.fetchTrack(mockDocumentReference)
+
+    // Verify that the get function is called on the document with the correct id
+    coVerify { mockDocumentReference.get() }
+
+    // Assert that the retrieved track is null
+    assertEquals(null, retrievedTrack)
   }
 
   @Test
