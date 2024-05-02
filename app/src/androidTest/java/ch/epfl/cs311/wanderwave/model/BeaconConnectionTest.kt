@@ -10,6 +10,7 @@ import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
@@ -34,6 +35,7 @@ public class BeaconConnectionTest {
 
   @RelaxedMockK private lateinit var beaconConnectionMock: BeaconConnection
   private lateinit var trackConnection: TrackConnection
+  private lateinit var profileConnection: ProfileConnection // Add a mock for ProfileConnection
 
   private lateinit var firestore: FirebaseFirestore
   private lateinit var documentReference: DocumentReference
@@ -48,6 +50,7 @@ public class BeaconConnectionTest {
     documentReference = mockk<DocumentReference>(relaxed = true)
     collectionReference = mockk<CollectionReference>(relaxed = true)
     trackConnection = mockk<TrackConnection>(relaxed = true)
+    profileConnection = mockk<ProfileConnection>(relaxed = true)
 
     // Mock data
     beacon =
@@ -73,7 +76,7 @@ public class BeaconConnectionTest {
     every { firestore.collection(any()) } returns collectionReference
 
     // Pass the mock Firestore instance to your BeaconConnection
-    beaconConnection = BeaconConnection(firestore, trackConnection)
+    beaconConnection = BeaconConnection(firestore, trackConnection, profileConnection)
   }
 
   //  @Test
