@@ -1,7 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
@@ -21,7 +20,7 @@ class TrackListViewModel
 @Inject
 constructor(
     private val spotifyController: SpotifyController,
-    private val trackRepository: TrackRepository
+    private val repository: TrackRepository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(UiState(loading = true))
@@ -31,12 +30,17 @@ constructor(
 
   init {
     observeTracks()
+    spotifyController.setOnTrackEndCallback { skipForward() }
   }
 
   private fun observeTracks() {
-    viewModelScope.launch {
-      trackRepository.getAll().collect {
-        _uiState.value = _uiState.value.copy(tracks = it, loading = false)
+    CoroutineScope(Dispatchers.IO).launch {
+      repository.getAll().collect { tracks ->
+        _uiState.value =
+            UiState(
+                tracks = tracks.filter { matchesSearchQuery(it) },
+                queue = tracks.filter { matchesSearchQuery(it) },
+                loading = false)
       }
       // deal with the flow
     }
@@ -158,9 +162,21 @@ constructor(
    */
   private fun skip(dir: Int) {
     if (_uiState.value.selectedTrack != null && (dir == 1 || dir == -1)) {
-      _uiState.value.tracks.indexOf(_uiState.value.selectedTrack).let { it: Int ->
-        val next = Math.floorMod((it + dir), _uiState.value.tracks.size)
-        selectTrack(_uiState.value.tracks[next])
+      _uiState.value.queue.indexOf(_uiState.value.selectedTrack).let { it: Int ->
+        var next = it + dir
+        when (_uiState.value.loopMode) {
+          LoopMode.ONE -> next = it
+          LoopMode.ALL -> next = Math.floorMod((it + dir), _uiState.value.queue.size)
+          else -> {
+            /** Do nothing */
+          }
+        }
+        if (next >= 0 && next < _uiState.value.queue.size) {
+          selectTrack(_uiState.value.queue[next])
+        } else {
+          pause()
+          _uiState.value = _uiState.value.copy(selectedTrack = null)
+        }
       }
     }
   }
@@ -175,21 +191,34 @@ constructor(
     skip(-1)
   }
 
+  /** Toggles the shuffle state of the queue. */
   fun toggleShuffle() {
-    _uiState.value = _uiState.value.copy(shuffleOn = !_uiState.value.shuffleOn)
+    if (_uiState.value.isShuffled) {
+      _uiState.value = _uiState.value.copy(queue = _uiState.value.tracks, isShuffled = false)
+    } else {
+      _uiState.value =
+          _uiState.value.copy(queue = _uiState.value.tracks.shuffled(), isShuffled = true)
+    }
   }
 
-  fun toggleRepeat() {
+  /** Toggles the looping state of the player. */
+  fun toggleLoop() {
     _uiState.value =
-        when (_uiState.value.repeatMode) {
-          RepeatMode.NONE -> _uiState.value.copy(repeatMode = RepeatMode.ALL)
-          RepeatMode.ALL -> _uiState.value.copy(repeatMode = RepeatMode.ONE)
-          else -> _uiState.value.copy(repeatMode = RepeatMode.NONE)
+        when (_uiState.value.loopMode) {
+          LoopMode.NONE -> _uiState.value.copy(loopMode = LoopMode.ALL)
+          LoopMode.ALL -> _uiState.value.copy(loopMode = LoopMode.ONE)
+          else -> _uiState.value.copy(loopMode = LoopMode.NONE)
         }
+  }
+
+  /** Sets the looping state of the player. */
+  fun setLoop(loopMode: LoopMode) {
+    _uiState.value = _uiState.value.copy(loopMode = loopMode)
   }
 
   data class UiState(
       val tracks: List<Track> = listOf(),
+      val queue: List<Track> = listOf(),
       val loading: Boolean = false,
       val message: String? = null,
       val selectedTrack: Track? = null,
@@ -198,12 +227,12 @@ constructor(
       val currentMillis: Int = 0,
       val expanded: Boolean = false,
       val progress: Float = 0f,
-      val shuffleOn: Boolean = false,
-      val repeatMode: RepeatMode = RepeatMode.NONE
+      val isShuffled: Boolean = false,
+      val loopMode: LoopMode = LoopMode.NONE
   )
 }
 
-enum class RepeatMode {
+enum class LoopMode {
   NONE,
   ONE,
   ALL

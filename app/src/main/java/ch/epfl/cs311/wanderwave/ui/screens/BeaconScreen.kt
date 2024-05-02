@@ -55,6 +55,7 @@ import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
 import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
+import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
@@ -89,41 +90,26 @@ fun BeaconScreen(
       modifier = Modifier.fillMaxSize().padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         if (!uiState.isLoading) {
-          BeaconScreen(beacon = uiState.beacon!!, navigationActions = navigationActions)
+       //   BeaconScreen(beacon = uiState.beacon!!, navigationActions = navigationActions)
+          BeaconScreen(beacon = uiState.beacon!!, viewModel::addTrackToBeacon,navigationActions)
         } else {
           LoadingScreen()
         }
       }
 }
 
-@Composable
-@Preview(showBackground = true)
-private fun BeaconScreenPreview() {
-  val previewBeacon =
-      Beacon(
-          id = "a",
-          location = Location(latitude = 46.519962, longitude = 6.633597, name = "EPFL"),
-          profileAndTrack =
-              listOf(
-                  ProfileTrackAssociation(
-                      Profile("e", "a", "a", 0, false, null, "1", "2"),
-                      Track("a", "Never gonna let you mn,mn,mn,mn,mn,mn,nmn,m", "Rick Astley")),
-                  //                  Track("b", "Take on me", "A-ha"),
-                  //                  Track("c", "Africa", "Toto"),
-              ),
-      )
-  val navController = rememberNavController()
-  val actions = remember(navController) { NavigationActions(navController) }
-  WanderwaveTheme { BeaconScreen(previewBeacon, actions) }
-}
 
 @Composable
-private fun BeaconScreen(beacon: Beacon, navigationActions: NavigationActions) {
+private fun BeaconScreen(
+    beacon: Beacon,
+    addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit = { _, _, _ -> },
+    navigationActions: NavigationActions
+) {
   Column(
       modifier = Modifier.fillMaxSize().padding(8.dp).testTag("beaconScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
-        SongList(beacon, navigationActions)
+        SongList(beacon, addTrackToBeacon,navigationActions)
       }
 }
 
@@ -159,14 +145,31 @@ fun BeaconInformation(location: Location) {
   }
 }
 
+//TODO : @Jonas, pls look at it again
+//@Composable
+//fun SongList(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit) {
+//    TrackList(
+//        beacon.profileAndTrack,
+//        title = stringResource(R.string.beaconTracksTitle),
+//        onAddTrack = {
+//            addTrackToBeacon(beacon.id, it) { success ->
+//                if (success) {
+//                    Log.d("SongList", "Track added successfully.")
+//                } else {
+//                    Log.e("SongList", "Failed to add track.")
+//                }
+//            }
+//        })
+//}
+
 @Composable
-fun SongList(beacon: Beacon, navigationActions: NavigationActions) {
-  HorizontalDivider()
-  Text(
-      text = stringResource(R.string.beaconTracksTitle),
-      style = MaterialTheme.typography.displayMedium,
-      modifier = Modifier.testTag("beaconTracksTitle"))
-  LazyColumn { items(beacon.profileAndTrack) { TrackItem(it, navigationActions) } }
+fun SongList(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit, navigationActions: NavigationActions) {
+    HorizontalDivider()
+    Text(
+        text = stringResource(R.string.beaconTracksTitle),
+        style = MaterialTheme.typography.displayMedium,
+        modifier = Modifier.testTag("beaconTracksTitle"))
+    LazyColumn { items(beacon.profileAndTrack) { TrackItem(it, navigationActions) } }
 }
 
 @Composable
@@ -174,77 +177,77 @@ internal fun TrackItem(
     profileAndTrack: ProfileTrackAssociation,
     navigationActions: NavigationActions
 ) {
-  val scrollState = rememberScrollState()
-  val scope = rememberCoroutineScope()
-  val slowScrollAnimation: AnimationSpec<Float> = TweenSpec(durationMillis = 5000, easing = { it })
-  val snackbarHostState = remember { SnackbarHostState() }
+    val scrollState = rememberScrollState()
+    val scope = rememberCoroutineScope()
+    val slowScrollAnimation: AnimationSpec<Float> = TweenSpec(durationMillis = 5000, easing = { it })
+    val snackbarHostState = remember { SnackbarHostState() }
 
-  LaunchedEffect(key1 = true) {
-    while (true) {
-      scope.launch {
-        scrollState.animateScrollTo(
-            value = scrollState.maxValue, animationSpec = slowScrollAnimation)
-      }
-      delay(6000)
-      scope.launch { scrollState.animateScrollTo(value = 0, animationSpec = slowScrollAnimation) }
-      delay(6000)
-    }
-  }
-
-  Card(
-      colors =
-          CardColors(
-              containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-              CardDefaults.cardColors().contentColor,
-              CardDefaults.cardColors().disabledContainerColor,
-              CardDefaults.cardColors().disabledContentColor),
-      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem"),
-  ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Box(
-          modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-          contentAlignment = Alignment.Center) {
-            Image(
-                imageVector = Icons.Default.PlayArrow,
-                contentDescription = "Album Cover",
-                modifier = Modifier.fillMaxSize(.8f),
-            )
-          }
-      Row(modifier = Modifier.padding(0.dp).weight(3f)) {
-        Column(modifier = Modifier.padding(8.dp).weight(1f).horizontalScroll(scrollState)) {
-          Text(
-              text = profileAndTrack.track.title,
-              color = MaterialTheme.colorScheme.onSurface,
-              style = MaterialTheme.typography.titleMedium)
-          Text(
-              text = profileAndTrack.track.artist,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-              style = MaterialTheme.typography.bodyMedium)
+    LaunchedEffect(key1 = true) {
+        while (true) {
+            scope.launch {
+                scrollState.animateScrollTo(
+                    value = scrollState.maxValue, animationSpec = slowScrollAnimation)
+            }
+            delay(6000)
+            scope.launch { scrollState.animateScrollTo(value = 0, animationSpec = slowScrollAnimation) }
+            delay(6000)
         }
-        SelectImage(
-            modifier =
-                Modifier.size(width = 150.dp, height = 100.dp)
-                    .clickable(
-                        enabled = profileAndTrack.profile.isPublic,
-                        onClick = {
-                          if (profileAndTrack.profile.isPublic) {
-                            // if the profile is public, navigate to the profile view screen
-                            navigationActions.navigateToProfile(profileAndTrack.profile.firebaseUid)
-                          } else {
-                            // if the profile is private , output a message that say the profile is
-                            // private, you cannot access to profile informations
-                            scope.launch {
-                              snackbarHostState.showSnackbar(
-                                  "This profile is private, you cannot access profile information.")
-                            }
-                          }
-                        }),
-            profile = profileAndTrack.profile,
-        )
-      }
     }
-  }
-  SnackbarHost(hostState = snackbarHostState)
+
+    Card(
+        colors =
+        CardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            CardDefaults.cardColors().contentColor,
+            CardDefaults.cardColors().disabledContainerColor,
+            CardDefaults.cardColors().disabledContentColor),
+        modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem"),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+                contentAlignment = Alignment.Center) {
+                Image(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "Album Cover",
+                    modifier = Modifier.fillMaxSize(.8f),
+                )
+            }
+            Row(modifier = Modifier.padding(0.dp).weight(3f)) {
+                Column(modifier = Modifier.padding(8.dp).weight(1f).horizontalScroll(scrollState)) {
+                    Text(
+                        text = profileAndTrack.track.title,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = profileAndTrack.track.artist,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium)
+                }
+                SelectImage(
+                    modifier =
+                    Modifier.size(width = 150.dp, height = 100.dp)
+                        .clickable(
+                            enabled = profileAndTrack.profile.isPublic,
+                            onClick = {
+                                if (profileAndTrack.profile.isPublic) {
+                                    // if the profile is public, navigate to the profile view screen
+                                    navigationActions.navigateToProfile(profileAndTrack.profile.firebaseUid)
+                                } else {
+                                    // if the profile is private , output a message that say the profile is
+                                    // private, you cannot access to profile informations
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            "This profile is private, you cannot access profile information.")
+                                    }
+                                }
+                            }),
+                    profile = profileAndTrack.profile,
+                )
+            }
+        }
+    }
+    SnackbarHost(hostState = snackbarHostState)
 }
