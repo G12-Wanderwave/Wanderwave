@@ -22,7 +22,8 @@ import kotlinx.coroutines.tasks.await
 class BeaconConnection(
     private val database: FirebaseFirestore? = null,
     val trackConnection: TrackConnection
-    // TODO : ayman : add profile connection
+    // TODO : ayman : add profile connection, watch out for the tests, you will need to add profile
+    // connection as an argument to those as well
 ) : FirebaseConnection<Beacon, Beacon>(), BeaconRepository {
 
   override val collectionName: String = "beacons"
@@ -42,6 +43,11 @@ class BeaconConnection(
   override fun addItem(item: Beacon) {
     super.addItem(item)
     trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
+    // TODO : ayman, after you added the profile connection, add the profiles to the database if
+    // they don't exist
+    // TODO : ayman, do it for the two next functions as well (same line of code)
+    // TODO : ayman, add the function addProfileIfNotExist to the profile connection, there is a
+    // very similar version in the track conneciton, just copy it, you may have to test it
   }
 
   override fun addItemWithId(item: Beacon) {
@@ -161,7 +167,8 @@ class BeaconConnection(
                 ArrayList(it.profileAndTrack).apply {
                   add(
                       ProfileTrackAssociation(
-                          Profile( // TODO : aymain : this is a dummy profile, replace with actual
+                          Profile( // TODO : ayman : this is a dummy profile, replace with actual
+                                   // profile, you should have the profile connection imported
                               // profile
                               "Sample First Name",
                               "Sample last name",
