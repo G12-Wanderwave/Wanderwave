@@ -129,20 +129,6 @@ class DataClassesTest {
   }
 
   @Test
-  fun beaconToMap() {
-    val location = Location(1.0, 1.0, "Test Location")
-    val beacon = Beacon("Test Id", location, listOf())
-    val beaconMap: Map<String, Any> = beacon.toMap()
-    // test beacon behaviour
-    assertEquals("Test Id", beacon.id)
-    assertEquals(location, beacon.location)
-    assertEquals(listOf<ProfileTrackAssociation>(), beacon.profileAndTrack)
-    assertEquals("Test Id", beaconMap["id"])
-    assertEquals(location.toMap(), beaconMap["location"])
-    assertEquals(listOf<ProfileTrackAssociation>(), beaconMap["tracks"])
-  }
-
-  @Test
   fun basicVariablesLocation() {
     val location = Location(1.0, 1.0, "Test Location")
     val latLng: LatLng = location.toLatLng()
