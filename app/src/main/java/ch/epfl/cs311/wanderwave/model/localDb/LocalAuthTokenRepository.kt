@@ -1,15 +1,18 @@
 package ch.epfl.cs311.wanderwave.model.localDb
 
 import ch.epfl.cs311.wanderwave.model.repository.AuthTokenRepository
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
-class LocalAuthTokenRepository(database: AppDatabase) : AuthTokenRepository {
+class LocalAuthTokenRepository(
+    private val database: AppDatabase,
+    private val ioDispatcher: CoroutineDispatcher
+) : AuthTokenRepository {
 
   private val authTokenDao = database.authTokenDao()
 
   override suspend fun getAuthToken(tokenType: AuthTokenRepository.AuthTokenType): String? {
-    return withContext(Dispatchers.IO) {
+    return withContext(ioDispatcher) {
       authTokenDao.getAuthToken(tokenType.id)?.let { authTokenEntity ->
         if (authTokenEntity.expirationDate > System.currentTimeMillis() / 1000) {
           authTokenEntity.token
@@ -26,12 +29,12 @@ class LocalAuthTokenRepository(database: AppDatabase) : AuthTokenRepository {
       token: String,
       expirationTime: Long
   ) {
-    withContext(Dispatchers.IO) {
+    withContext(ioDispatcher) {
       authTokenDao.setAuthToken(AuthTokenEntity(token, expirationTime, tokenType.id))
     }
   }
 
   override suspend fun deleteAuthToken(tokenType: AuthTokenRepository.AuthTokenType) {
-    withContext(Dispatchers.IO) { authTokenDao.deleteAuthToken(tokenType.id) }
+    withContext(ioDispatcher) { authTokenDao.deleteAuthToken(tokenType.id) }
   }
 }

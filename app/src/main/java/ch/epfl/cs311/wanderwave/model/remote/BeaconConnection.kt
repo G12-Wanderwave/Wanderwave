@@ -8,6 +8,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -20,8 +21,11 @@ import kotlinx.coroutines.withContext
 
 class BeaconConnection
 @Inject
-constructor(private val database: FirebaseFirestore? = null, val trackConnection: TrackConnection) :
-    FirebaseConnection<Beacon, Beacon>(), BeaconRepository {
+constructor(
+    private val database: FirebaseFirestore? = null,
+    val trackConnection: TrackConnection,
+    private val ioDispatcher: CoroutineDispatcher
+) : FirebaseConnection<Beacon, Beacon>(), BeaconRepository {
 
   override val collectionName: String = "beacons"
 
@@ -105,7 +109,7 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
   // Fetch a track from a DocumentReference asynchronously
   suspend fun fetchTrack(trackRef: DocumentReference?): Track? {
     if (trackRef == null) return null
-    return withContext(Dispatchers.IO) {
+    return withContext(ioDispatcher) {
       try {
         val trackDocument = trackRef?.get()?.await()
         if (trackDocument != null) {

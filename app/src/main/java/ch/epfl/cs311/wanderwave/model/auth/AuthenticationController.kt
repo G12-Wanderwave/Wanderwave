@@ -3,7 +3,7 @@ package ch.epfl.cs311.wanderwave.model.auth
 import ch.epfl.cs311.wanderwave.model.repository.AuthTokenRepository
 import com.google.firebase.auth.FirebaseAuth
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
@@ -18,7 +18,8 @@ class AuthenticationController
 constructor(
     private val auth: FirebaseAuth,
     private val httpClient: OkHttpClient,
-    private val tokenRepository: AuthTokenRepository
+    private val tokenRepository: AuthTokenRepository,
+    private val ioDispatcher: CoroutineDispatcher
 ) {
 
   private val AUTH_SERVICE_URL = "https://us-central1-wanderwave-95743.cloudfunctions.net"
@@ -67,7 +68,7 @@ constructor(
             .build()
 
     val responseJson =
-        withContext(Dispatchers.IO) { httpClient.newCall(request).execute().body?.string() }
+        withContext(ioDispatcher) { httpClient.newCall(request).execute().body?.string() }
             ?: return false
     return storeAndUseNewTokens(responseJson)
   }
@@ -107,7 +108,7 @@ constructor(
             .build()
 
     val responseJson =
-        withContext(Dispatchers.IO) { httpClient.newCall(request).execute().body?.string() }
+        withContext(ioDispatcher) { httpClient.newCall(request).execute().body?.string() }
             ?: return false
     return storeAndUseNewTokens(responseJson)
   }

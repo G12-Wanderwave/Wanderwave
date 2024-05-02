@@ -14,8 +14,11 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import org.junit.Before
@@ -41,10 +44,13 @@ class AuthenticationControllerTest {
       AuthenticationUserData(
           "testid", "testemail", "testDisplayName", "https://example.com/testphoto.jpg")
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Before
   fun setup() {
+    val testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
     authenticationController =
-        AuthenticationController(mockFirebaseAuth, mockHttpClient, mockTokenRepository)
+        AuthenticationController(
+            mockFirebaseAuth, mockHttpClient, mockTokenRepository, testDispatcher)
   }
 
   fun setupDummyUserSignedIn() {

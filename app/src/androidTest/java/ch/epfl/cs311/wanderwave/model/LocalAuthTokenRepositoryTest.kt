@@ -10,6 +10,8 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -32,7 +34,9 @@ class LocalAuthTokenRepositoryTest {
     every { mockDatabase.authTokenDao() } returns mockAuthTokenDao
     every { mockAuthTokenDao.setAuthToken(any()) } returns Unit
     every { mockAuthTokenDao.deleteAuthToken(any()) } returns Unit
-    localAuthTokenRepository = LocalAuthTokenRepository(mockDatabase)
+
+    val testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
+    localAuthTokenRepository = LocalAuthTokenRepository(mockDatabase, testDispatcher)
 
     val now = System.currentTimeMillis() / 1000 + 3600
 

@@ -13,6 +13,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -21,7 +22,7 @@ object ConnectionModule {
   @Provides
   @Singleton
   fun provideBeaconRepository(@ApplicationContext context: Context): BeaconRepository {
-    return BeaconConnection(trackConnection = TrackConnection())
+    return BeaconConnection(trackConnection = TrackConnection(), ioDispatcher = Dispatchers.IO)
   }
 
   @Provides
