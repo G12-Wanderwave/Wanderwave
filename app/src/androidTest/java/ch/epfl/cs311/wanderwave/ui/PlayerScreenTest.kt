@@ -34,27 +34,6 @@ class PlayerScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
     every { viewModel.uiState } returns MutableStateFlow(TrackListViewModel.UiState())
   }
 
-  /*
-    @Test
-    fun miniPlayerScreenInteractions() = run {
-      composeTestRule.setContent {
-        MiniPlayer(
-            uiStateFlow = viewModel.uiState,
-            onTitleClick = { viewModel.expand() },
-            onPlayClick = { viewModel.play() },
-            onPauseClick = { viewModel.pause() },
-            progress = 0f)
-      }
-
-      onComposeScreen<MiniPlayerScreen>(composeTestRule) {
-        assertIsDisplayed()
-        playPauseButton.performClick()
-        playPauseButton.performClick()
-        miniPlayerTitleButton.performClick()
-      }
-    }
-  */
-
   @Test
   fun exclusivePlayerScreenInteractions() = run {
     composeTestRule.setContent {
