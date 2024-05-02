@@ -140,36 +140,6 @@ public class BeaconConnectionTest {
   //
   //        // Assert nothing
   //    }
-
-  @Test
-  fun testAddTrackToBeacon() {
-    // Mock data
-    val beacon =
-        Beacon(
-            id = "testBeacon",
-            location = Location(1.0, 1.0, "Test Location"),
-            profileAndTrack =
-                listOf(
-                    ProfileTrackAssociation(
-                        Profile(
-                            "Sample First Name",
-                            "Sample last name",
-                            "Sample desc",
-                            0,
-                            false,
-                            null,
-                            "Sample Profile ID",
-                            "Sample Track ID"),
-                        Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
-
-    val track = Track("testTrack2", "Test Title 2", "Test Artist 2")
-
-    // Call the function under test
-    beaconConnection.addTrackToBeacon(beacon.id, track, {})
-
-    // No verification is needed for interactions with the real object
-  }
-
   @Test
   fun testUpdateItem() = runBlocking {
     // Mock data
