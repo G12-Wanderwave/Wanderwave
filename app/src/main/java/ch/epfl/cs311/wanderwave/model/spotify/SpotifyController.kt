@@ -117,7 +117,10 @@ class SpotifyController(private val context: Context) {
               }
               trySend(true)
             }
-            .setErrorCallback { trySend(false) }
+            .setErrorCallback {
+              Log.e("SpotifyController", "Failed to play track: ${track.title}")
+              trySend(false)
+            }
       }
       awaitClose { stopPlaybackTimer() }
     }
@@ -159,8 +162,14 @@ class SpotifyController(private val context: Context) {
           appRemote?.let {
             it.playerApi
                 .pause()
-                .setResultCallback { trySend(true) }
-                .setErrorCallback { trySend(false) }
+                .setResultCallback {
+                  Log.i("SpotifyController", "Paused track")
+                  trySend(true)
+                }
+                .setErrorCallback {
+                  Log.e("SpotifyController", "Failed to pause track")
+                  trySend(false)
+                }
           }
       awaitClose { callResult?.cancel() }
     }
@@ -172,8 +181,14 @@ class SpotifyController(private val context: Context) {
           appRemote?.let {
             it.playerApi
                 .resume()
-                .setResultCallback { trySend(true) }
-                .setErrorCallback { trySend(false) }
+                .setResultCallback {
+                  Log.i("SpotifyController", "Resumed track")
+                  trySend(true)
+                }
+                .setErrorCallback {
+                  Log.e("SpotifyController", "Failed to resume track")
+                  trySend(false)
+                }
           }
       awaitClose { callResult?.cancel() }
     }
