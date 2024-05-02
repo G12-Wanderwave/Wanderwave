@@ -53,11 +53,11 @@ class SpotifyConnectScreenTest :
   }
 
   @Test
-  fun spotifyConnectScreenNavigatesToMainOnSuccess() = run {
+  fun spotifyConnectScreenNavigatesToMapOnSuccess() = run {
     setup(SpotifyConnectScreenViewModel.UiState(hasResult = true, success = true))
 
     onComposeScreen<SpotifyConnectScreen>(composeTestRule) {}
-    coVerify { mockNavigationActions.navigateToTopLevel(Route.MAIN) }
+    coVerify { mockNavigationActions.navigateToTopLevel(Route.MAP) }
   }
 
   @Test

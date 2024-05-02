@@ -29,7 +29,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.ui.theme.orange
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
-import ch.epfl.cs311.wanderwave.viewmodel.RepeatMode
+import ch.epfl.cs311.wanderwave.viewmodel.LoopMode
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
 @Composable
@@ -166,13 +166,13 @@ fun PlayerControlRowComponent(viewModel: TrackListViewModel, uiState: TrackListV
       modifier = Modifier.fillMaxWidth()) {
         ShuffleButton(viewModel, uiState)
         PlayerIconButton(
-            onClick = {},
+            onClick = { viewModel.skipBackward() },
             testTag = "previousButton",
             painterId = R.drawable.previous_track_icon,
             tint = MaterialTheme.colorScheme.onSurface)
         PlayPauseButton(viewModel, uiState)
         PlayerIconButton(
-            onClick = {},
+            onClick = { viewModel.skipForward() },
             testTag = "nextButton",
             painterId = R.drawable.next_track_icon,
             tint = MaterialTheme.colorScheme.onSurface)
@@ -184,7 +184,7 @@ fun PlayerControlRowComponent(viewModel: TrackListViewModel, uiState: TrackListV
 fun ShuffleButton(viewModel: TrackListViewModel, uiState: TrackListViewModel.UiState) {
   IconButton(
       onClick = { viewModel.toggleShuffle() }, modifier = Modifier.testTag("toggleShuffle")) {
-        if (!uiState.shuffleOn) {
+        if (!uiState.isShuffled) {
           Icon(
               painter = painterResource(id = R.drawable.shuffle_off_icon),
               contentDescription = "",
@@ -223,15 +223,15 @@ fun PlayPauseButton(viewModel: TrackListViewModel, uiState: TrackListViewModel.U
 
 @Composable
 fun RepeatButton(viewModel: TrackListViewModel, uiState: TrackListViewModel.UiState) {
-  IconButton(onClick = { viewModel.toggleRepeat() }, modifier = Modifier.testTag("toggleRepeat")) {
-    when (uiState.repeatMode) {
-      RepeatMode.NONE ->
+  IconButton(onClick = { viewModel.toggleLoop() }, modifier = Modifier.testTag("toggleRepeat")) {
+    when (uiState.loopMode) {
+      LoopMode.NONE ->
           Icon(
               painter = painterResource(id = R.drawable.repeat_icon),
               contentDescription = "",
               tint = MaterialTheme.colorScheme.onSurface,
               modifier = Modifier.size(30.dp))
-      RepeatMode.ALL ->
+      LoopMode.ALL ->
           Icon(
               painter = painterResource(id = R.drawable.repeat_icon),
               contentDescription = "",
