@@ -16,13 +16,18 @@ import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class SpotifyController(private val context: Context) {
 
@@ -40,7 +45,8 @@ class SpotifyController(private val context: Context) {
   private val connectionParams =
       ConnectionParams.Builder(CLIENT_ID).setRedirectUri(REDIRECT_URI).showAuthView(true).build()
 
-  var appRemote: MutableStateFlow<SpotifyAppRemote?> = MutableStateFlow(null)
+  val appRemote: MutableStateFlow<SpotifyAppRemote?> = MutableStateFlow(null)
+  private var trackList: List<Track>? = null
 
   fun getAuthorizationRequest(): AuthorizationRequest {
     val builder =
@@ -104,6 +110,22 @@ class SpotifyController(private val context: Context) {
     }
   }
 
+  fun playTrackList(trackList: List<Track>, track: Track? = null, onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
+    if (trackList.isEmpty()) {
+      onFailure(Throwable("Empty track list"))
+      return
+    }
+    val trackToPlay = track ?: trackList[0]
+    appRemote.value?.let {
+      it.playerApi.play("spotify:track:${trackToPlay.id}")
+        .setResultCallback {
+          this.trackList = trackList
+          onSuccess()
+        }
+        .setErrorCallback { error -> onFailure(error) }
+    }
+  }
+
   fun pauseTrack(onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
     appRemote.value?.let {
       it.playerApi.pause()
@@ -120,6 +142,15 @@ class SpotifyController(private val context: Context) {
     }
   }
 
+  suspend fun skip(direction: Int, onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
+    val currentTrack = playerState().firstOrNull()?.track
+    val currentIndex = trackList?.indexOfFirst { track -> "spotify:track:${track.id}" == currentTrack?.uri } ?: -1
+    if (currentIndex != -1) {
+      val nextIndex = (currentIndex + direction) % trackList!!.size
+      val nextTrack = trackList!![nextIndex]
+      playTrack(nextTrack, onSuccess, onFailure)
+    }
+  }
   @OptIn(ExperimentalCoroutinesApi::class)
   fun playerState() : Flow<PlayerState?> {
     return appRemote.flatMapLatest { appRemote ->

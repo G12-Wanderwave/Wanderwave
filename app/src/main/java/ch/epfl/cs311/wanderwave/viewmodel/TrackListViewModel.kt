@@ -65,7 +65,7 @@ constructor(
    * @param track The track to select.
    */
   fun selectTrack(track: Track) {
-    spotifyController.playTrack(track)
+    spotifyController.playTrackList(uiState.value.tracks, track)
   }
 
 //  /**

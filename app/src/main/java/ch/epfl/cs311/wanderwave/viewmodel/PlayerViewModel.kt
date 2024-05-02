@@ -60,6 +60,14 @@ class PlayerViewModel @Inject constructor(val spotifyController: SpotifyControll
     spotifyController.pauseTrack()
   }
 
+  fun skipForward() {
+    viewModelScope.launch { spotifyController.skip(1) }
+  }
+
+  fun skipBackward() {
+    viewModelScope.launch { spotifyController.skip(-1) }
+  }
+
   fun toggleShuffle() {
 //    _uiState.value = _uiState.value.copy(shuffleOn = !_uiState.value.shuffleOn)
   }
