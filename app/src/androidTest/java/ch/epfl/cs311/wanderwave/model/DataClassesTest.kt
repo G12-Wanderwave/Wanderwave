@@ -251,6 +251,19 @@ class DataClassesTest {
   }
 
   @Test
+  fun distanceBetween_returnsZeroForSameLocation() {
+    val location = Location(46.519962, 6.633597)
+    assertEquals(0.0, location.distanceBetween(location), 0.001)
+  }
+
+  @Test
+  fun distanceBetween_returnsCorrectDistanceForDifferentLocations() {
+    val location1 = Location(46.803246, 7.139212)
+    val location2 = Location(46.029423, 8.835748)
+    val expectedDistance = 156.0
+    assertEquals(expectedDistance, location1.distanceBetween(location2), 1.0)
+  }
+
   fun profileTrackAssociation_equalsReturnsTrueForSameData() {
     val mockProfile = mockk<Profile>()
     val mockTrack = mockk<Track>()
