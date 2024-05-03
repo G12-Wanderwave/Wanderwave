@@ -33,6 +33,7 @@ fun TrackList(
     title: String? = null,
     onAddTrack: (Track) -> Unit,
     onSelectTrack: (Track) -> Unit = {},
+    canAddSong: Boolean = true
 ) {
 
   Column {
@@ -49,10 +50,12 @@ fun TrackList(
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.testTag("trackListTitle"))
           }
-          IconButton(onClick = { showDialog = true }) { // Toggle dialog visibility
-            Icon(
-                imageVector = Icons.Filled.Add,
-                contentDescription = stringResource(R.string.beaconTitle))
+          if (canAddSong) {
+            IconButton(onClick = { showDialog = true }) { // Toggle dialog visibility
+              Icon(
+                  imageVector = Icons.Filled.Add,
+                  contentDescription = stringResource(R.string.beaconTitle))
+            }
           }
         }
     LazyColumn {

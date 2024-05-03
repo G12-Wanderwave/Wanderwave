@@ -21,7 +21,7 @@ data class SongList(val name: String, val tracks: List<Track> = mutableListOf())
 class ProfileViewModel
 @Inject
 constructor(
-    private val profileRepository: ProfileRepository,
+    private val repository: ProfileRepository, // TODO revoir
     private val spotifyController: SpotifyController
 ) : ViewModel() {
 
@@ -53,6 +53,9 @@ constructor(
 
   private val _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
+
+  private var _uiState = MutableStateFlow(ProfileViewModel.UIState())
+  val uiState: StateFlow<ProfileViewModel.UIState> = _uiState
 
   fun createSpecificSongList(listType: String) {
     val listName =
@@ -87,11 +90,11 @@ constructor(
 
   fun updateProfile(updatedProfile: Profile) {
     _profile.value = updatedProfile
-    profileRepository.updateItem(updatedProfile)
+    repository.updateItem(updatedProfile)
   }
 
   fun deleteProfile() {
-    profileRepository.deleteItem(_profile.value)
+    repository.deleteItem(_profile.value)
   }
 
   fun togglePublicMode() {
@@ -160,4 +163,18 @@ constructor(
       }
     }
   }
+
+  fun getProfileByID(id: String) {
+    viewModelScope.launch {
+      repository.getItem(id).collect { fetchedProfile ->
+        _uiState.value = UIState(profile = fetchedProfile, isLoading = false)
+      }
+    }
+  }
+
+  data class UIState(
+      val profile: Profile? = null,
+      val isLoading: Boolean = true,
+      val error: String? = null
+  )
 }
