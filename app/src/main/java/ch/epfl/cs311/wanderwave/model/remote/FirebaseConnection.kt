@@ -101,9 +101,7 @@ abstract class FirebaseConnection<T, U> {
   }
 
 
-    open fun getItem(itemId: String): Flow<T> = getItem(itemId) { _: DocumentSnapshot, _: MutableStateFlow<T?> -> }
-
-
+  open fun getItem(itemId: String): Flow<T> = getItem(itemId) { _: DocumentSnapshot, _: MutableStateFlow<T?> -> }
 
   open fun getItem(
       itemId: String,
