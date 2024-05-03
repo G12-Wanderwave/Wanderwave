@@ -12,6 +12,8 @@ data class Profile(
     var profilePictureUri: Uri? = null,
     var spotifyUid: String,
     var firebaseUid: String,
+    var topSongs: List<Track> = emptyList(),
+    var chosenSongs: List<Track> = emptyList(),
 ) {
 
   fun toMap(): HashMap<String, Any> {
