@@ -1,11 +1,9 @@
 Title	URL	Assignees	Status	Sprint	Task Type	Nature	Epic	Time estimate	Actual time
 As a Wanderwave user, I want to have a screen where I can see what songs I sent and received recently, so I can like and save them for later.	https://github.com/G12-Wanderwave/Wanderwave/issues/244	aymanbakiri, joriba	Sprint Backlog						
 As a curious user, I want the ability to see who has shared a particular song with me, enhancing my understanding of local listeners' tastes.	https://github.com/G12-Wanderwave/Wanderwave/issues/241		Sprint Backlog						
-As a user, I want to be able to see other user's profiles (if they allow it) to see what music they like.	https://github.com/G12-Wanderwave/Wanderwave/issues/159		Sprint Backlog						
 End-to-end tests	https://github.com/G12-Wanderwave/Wanderwave/issues/155	aymanbakiri, IB-12, joriba, KlaKalma, mbouaissi, tsogtb, yzueger	Sprint Backlog						
 As a privacy conscious person, I want to be able to know that my data is private and that other people can't access it	https://github.com/G12-Wanderwave/Wanderwave/issues/66	yzueger	Sprint Backlog		Backend			25h	
 As a user, I want to be able to share my music taste with others by adding a song to a beacon, so that others can see it.	https://github.com/G12-Wanderwave/Wanderwave/issues/68	aymanbakiri, KlaKalma, mbouaissi	Sprint Backlog	Sprint 3	Backend			25h	
-As a user, I want to be presented with a high quality, aesthetically pleasing UI/UX and a Responsive Design so that I can use the app on multiple devices and enjoy the experience.	https://github.com/G12-Wanderwave/Wanderwave/issues/198	joriba, KlaKalma, tsogtb	Sprint Backlog						
 As a WanderWave user, I want the beacons to be well distributed so that I can always find a beacon nearby	https://github.com/G12-Wanderwave/Wanderwave/issues/200	KlaKalma	Sprint Backlog						
 As a user, I want to customize beacons that I created with custom names and colors	https://github.com/G12-Wanderwave/Wanderwave/issues/101		Product Backlog		Frontend	User Story			
 As a tourist utilizing WanderWave, I aim for an enriched and immersive exploration experience, so that upon my arrival in a new country, I can simultaneously discover its landmarks and immerse myself in its culture by accessing playlists featuring the country's best songs.			Product Backlog						
@@ -30,9 +28,11 @@ Display the user that added a track on the beacon screen	https://github.com/G12-
 add the search bar functionality to the trackListScreen	https://github.com/G12-Wanderwave/Wanderwave/issues/136	aymanbakiri	Done in Sprint #5	Sprint 5				6h	Actual :8h
 Have a UI for the media player	https://github.com/G12-Wanderwave/Wanderwave/issues/117	tsogtb	Done in Sprint #5						
 Have an exclusive player UI	https://github.com/G12-Wanderwave/Wanderwave/issues/119	tsogtb	Done in Sprint #5						
+As a user, I want to be presented with a high quality, aesthetically pleasing UI/UX and a Responsive Design so that I can use the app on multiple devices and enjoy the experience.	https://github.com/G12-Wanderwave/Wanderwave/issues/198	joriba, KlaKalma, tsogtb	Done in Sprint #6						
 Clean up figma	https://github.com/G12-Wanderwave/Wanderwave/issues/206	tsogtb	Done in Sprint #6					5h	
 Clean up firebase's test beacons and tracks	https://github.com/G12-Wanderwave/Wanderwave/issues/202	KlaKalma	Done in Sprint #6					4h	3h
 Store the user who added a track to a beacon	https://github.com/G12-Wanderwave/Wanderwave/issues/160	joriba, KlaKalma	Done in Sprint #6					8h	
+As a user, I want to be able to see other user's profiles (if they allow it) to see what music they like.	https://github.com/G12-Wanderwave/Wanderwave/issues/159		Done in Sprint #6						
 Add option to see uploader user profile for tracks in beacon	https://github.com/G12-Wanderwave/Wanderwave/issues/222	mbouaissi	Done in Sprint #6	Sprint 6				6	
 Beacon Icon should fit the UI	https://github.com/G12-Wanderwave/Wanderwave/issues/207	KlaKalma	Done in Sprint #6					4h	
 Let users select if their profile is public	https://github.com/G12-Wanderwave/Wanderwave/issues/161	aymanbakiri	Done in Sprint #6	Sprint 6				4h	actual :3h
