@@ -87,4 +87,23 @@ class TrackConnection(private val database: FirebaseFirestore? = null) :
       }
     }
   }
+
+  // Fetch a track from a DocumentReference asynchronously
+  suspend fun fetchTrack(
+    TrackRef: DocumentReference?
+  ): Track? {
+    if (TrackRef == null) return null
+    return withContext(Dispatchers.IO) {
+      try {
+
+        val trackDocument = TrackRef.get()?.await()
+        trackDocument?.let { Track.from(it) }
+
+      } catch (e: Exception) {
+        // Handle exceptions
+        Log.e("Firestore", "Error fetching track:${e.message}")
+        null
+      }
+    }
+  }
 }

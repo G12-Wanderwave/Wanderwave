@@ -90,7 +90,7 @@ fun LoginScreen(
       )))
 
       val trackConnection = TrackConnection()
-      val profileConnection = ProfileConnection()
+      val profileConnection = ProfileConnection(trackConnection = trackConnection)
 
       val beaconConnection = BeaconConnection(trackConnection = trackConnection, profileConnection = profileConnection)
 
@@ -102,6 +102,7 @@ fun LoginScreen(
           Log.d("testing", "${it}")
         }
       }
+
 
 
     }

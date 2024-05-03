@@ -3,15 +3,20 @@ package ch.epfl.cs311.wanderwave.model.remote
 import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class ProfileConnection(private val database: FirebaseFirestore? = null) :
+class ProfileConnection(private val database: FirebaseFirestore? = null,
+                        val trackConnection: TrackConnection) :
     FirebaseConnection<Profile, Profile>(), ProfileRepository {
 
   override val collectionName: String = "users"
@@ -59,5 +64,65 @@ class ProfileConnection(private val database: FirebaseFirestore? = null) :
         }
       }
     }
+  }
+
+  override fun getItem(itemId: String): Flow<Profile> {
+    return getItem(itemId) { _, _ -> }
+  }
+
+  override fun getItem(
+    itemId: String,
+    onSuccess: (DocumentSnapshot, MutableStateFlow<Profile?>) -> Unit
+  ): Flow<Profile> {
+    val onSuccessWrapper: (DocumentSnapshot, MutableStateFlow<Profile?>) -> Unit =
+      { document, dataFlow ->
+        val profile =
+          dataFlow.value
+            ?: Profile.from(document)
+            ?: Profile(
+              firstName = "New",
+              lastName = "User",
+              description = "No description",
+              numberOfLikes = 0,
+              isPublic = false,
+              spotifyUid = "newspotifyUid",
+              firebaseUid = "newfirebaseUid")
+
+        val topSongsObject = document["topSongs"]
+        val chosenSongsObject = document["chosenSongs"]
+
+        var topSongRefs: List< DocumentReference>?
+        var chosenSongRefs: List< DocumentReference>?
+
+
+        if (topSongsObject is List<*> && topSongsObject.all { it is DocumentReference } && chosenSongsObject is List<*> && chosenSongsObject.all { it is DocumentReference }) {
+          topSongRefs = topSongsObject as? List<DocumentReference>
+          chosenSongRefs = chosenSongsObject as? List<DocumentReference>
+
+          // Use a coroutine to perform asynchronous operations
+          coroutineScope.launch {
+            val TopSongsDeferred =
+              topSongRefs?.map { trackRef ->
+                async { trackConnection.fetchTrack(trackRef) }
+              }
+            val chosenSongsDeffered =  chosenSongRefs?.map { trackRef ->
+                async { trackConnection.fetchTrack(trackRef) }
+              }
+
+            // Wait for all tracks to be fetched
+            val TopSongs = TopSongsDeferred?.mapNotNull { it?.await() }
+            val ChosenSongs = chosenSongsDeffered?.mapNotNull { it?.await() }
+
+            // Update the beacon with the complete list of tracks
+            val updatedBeacon = profile.copy(topSongs = TopSongs ?: emptyList(), chosenSongs = ChosenSongs ?: emptyList())
+            dataFlow.value = updatedBeacon
+          }
+          onSuccess(document, dataFlow)
+        } else {
+          Log.e("Firestore", "songs lists have a Wrong Firebase Format")
+        }
+      }
+
+    return super.getItem(itemId, onSuccessWrapper)
   }
 }

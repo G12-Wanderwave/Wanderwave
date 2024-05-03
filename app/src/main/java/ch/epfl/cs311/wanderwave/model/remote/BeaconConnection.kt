@@ -61,13 +61,10 @@ class BeaconConnection(
     return getItem(itemId) { _, _ -> }
   }
 
-
-
   override fun getItem(
       itemId: String,
       onSuccess: (DocumentSnapshot, MutableStateFlow<Beacon?>) -> Unit
   ): Flow<Beacon> {
-
     val onSuccessWrapper: (DocumentSnapshot, MutableStateFlow<Beacon?>) -> Unit =
         { document, dataFlow ->
           val beacon =
@@ -107,8 +104,6 @@ class BeaconConnection(
 
     return super.getItem(itemId, onSuccessWrapper)
   }
-
-
 
   override fun getAll(): Flow<List<Beacon>> {
     val dataFlow = MutableStateFlow<List<Beacon>?>(null)
