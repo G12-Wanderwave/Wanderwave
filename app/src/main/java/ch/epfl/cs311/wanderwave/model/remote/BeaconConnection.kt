@@ -42,6 +42,7 @@ class BeaconConnection(
     super.addItem(item)
     trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
     profileConnection.addProfilesIfNotExist(item.profileAndTrack.map { it.profile })
+    Log.d("BeaconConnection","Beacon added successfully")
   }
 
   override fun addItemWithId(item: Beacon) {
