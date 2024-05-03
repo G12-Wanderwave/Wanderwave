@@ -107,7 +107,7 @@ class ProfileViewModelTest {
     }
 
     // Trigger the operations that will cause the song lists to be populated
-    viewModel.retrieveTracks(this)
+    viewModel.retrieveTracksFromSpotify(this)
     // Wait for the job to complete which includes Flow collection
     job.join()
 

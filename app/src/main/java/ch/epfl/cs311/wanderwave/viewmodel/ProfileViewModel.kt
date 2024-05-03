@@ -110,7 +110,7 @@ constructor(
    * @since 2.0
    * @last update 2.0
    */
-  fun retrieveTracks(scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) {
+  fun retrieveTracksFromSpotify(scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) {
     scope.launch {
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
       if (track != null) {
