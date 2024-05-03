@@ -124,12 +124,4 @@ constructor(
   fun deauthenticate() {
     auth.signOut()
   }
-
-  private data class TokenResponse(
-      val accessToken: String,
-      val refreshToken: String?,
-      val firebaseToken: String
-  )
-
-  private data class State(val isSignedIn: Boolean = false)
 }

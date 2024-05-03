@@ -102,9 +102,12 @@ class AuthenticationControllerTest {
 
   @Test
   fun canSignOut() = runBlocking {
+    assert(authenticationController.isSignedIn())
     every { mockFirebaseAuth.signOut() } returns Unit
     authenticationController.deauthenticate()
     verify { mockFirebaseAuth.signOut() }
+    every { mockFirebaseAuth.currentUser } returns null
+    assert(!authenticationController.isSignedIn())
   }
 
   @Test
@@ -170,5 +173,28 @@ class AuthenticationControllerTest {
     val result = authenticationController.refreshTokenIfNecessary()
     verify { mockFirebaseAuth.signInWithCustomToken("testtoken-firebase") }
     assert(result)
+
+    every { mockFirebaseAuth.currentUser } returns mockFirebaseUser
+    val result2 = authenticationController.refreshTokenIfNecessary()
+    assert(result2)
+    verify { mockFirebaseAuth.signInWithCustomToken(any()) wasNot called }
+  }
+
+  @Test
+  fun failureCases() = runBlocking {
+    setupDummyUserSignedIn()
+    val call = mockk<Call>()
+    every { mockHttpClient.newCall(any()) } returns call
+    every { call.execute() } returns mockk { every { body } returns null }
+    every { mockFirebaseAuth.currentUser } returns null
+
+    assert(!authenticationController.refreshTokenIfNecessary())
+    verify { call.execute() }
+
+    coEvery { mockTokenRepository.getAuthToken(any()) } returns null
+
+    assert(!authenticationController.refreshTokenIfNecessary())
+
+    assert(!authenticationController.authenticate("%invalidcode%").first())
   }
 }
