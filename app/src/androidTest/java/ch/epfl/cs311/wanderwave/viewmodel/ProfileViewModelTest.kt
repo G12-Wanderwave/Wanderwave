@@ -107,7 +107,7 @@ class ProfileViewModelTest {
     }
 
     // Trigger the operations that will cause the song lists to be populated
-    viewModel.retrieveTracks(this)
+    viewModel.retrieveTracks()
     // Wait for the job to complete which includes Flow collection
     job.join()
 
@@ -140,8 +140,8 @@ class ProfileViewModelTest {
     every {
       spotifyController.getAllChildren(ListItem("id", "title", null, "subtitle", "", false, true))
     } returns flowOf(listOf(expectedListItem))
-    viewModel.retrieveAndAddSubsection(this)
-    viewModel.retrieveChild(expectedListItem, this)
+    viewModel.retrieveAndAddSubsection()
+    viewModel.retrieveChild(expectedListItem)
     advanceUntilIdle() // Ensure all coroutines are completed
 
     // val result = viewModel.spotifySubsectionList.first()  // Safely access the first item

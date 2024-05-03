@@ -34,6 +34,8 @@ import junit.framework.TestCase.fail
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
@@ -87,7 +89,9 @@ public class BeaconConnectionTest {
     every { firestore.collection(any()) } returns collectionReference
 
     // Pass the mock Firestore instance to your BeaconConnection
-    beaconConnection = BeaconConnection(firestore, trackConnection, profileConnection)
+    val testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
+    beaconConnection =
+        BeaconConnection(firestore, trackConnection, profileConnection, testDispatcher)
   }
 
   @Test

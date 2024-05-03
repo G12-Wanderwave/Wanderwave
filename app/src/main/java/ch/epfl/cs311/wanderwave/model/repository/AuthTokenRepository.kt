@@ -2,11 +2,11 @@ package ch.epfl.cs311.wanderwave.model.repository
 
 interface AuthTokenRepository {
 
-  fun getAuthToken(tokenType: AuthTokenType): String?
+  suspend fun getAuthToken(tokenType: AuthTokenType): String?
 
-  fun setAuthToken(tokenType: AuthTokenType, token: String, expirationTime: Long)
+  suspend fun setAuthToken(tokenType: AuthTokenType, token: String, expirationTime: Long)
 
-  fun deleteAuthToken(tokenType: AuthTokenType)
+  suspend fun deleteAuthToken(tokenType: AuthTokenType)
 
   enum class AuthTokenType(val id: Int) {
     SPOTIFY_ACCESS_TOKEN(0),

@@ -6,7 +6,6 @@ import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import com.google.android.gms.maps.model.LatLng
@@ -25,7 +24,6 @@ import org.junit.Test
 class DataClassesTest {
   // Testing of all the data classes, I think it's better to test them all together
   @get:Rule val mockkRule = MockKRule(this)
-  private lateinit var beaconConnection: BeaconConnection
   private lateinit var trackConnection: TrackConnection
   private lateinit var profileConnection: ProfileConnection
 
@@ -38,8 +36,6 @@ class DataClassesTest {
     trackConnection = mockk<TrackConnection>(relaxed = true)
     profileConnection = mockk<ProfileConnection>(relaxed = true)
 
-    beaconConnection =
-        BeaconConnection(trackConnection = trackConnection, profileConnection = profileConnection)
     // Set up the document mock to return some tracks
     every { document.id } returns "someId"
     every { document["title"] } returns "someTitle"
