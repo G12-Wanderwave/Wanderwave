@@ -263,6 +263,7 @@ class DataClassesTest {
     val expectedDistance = 156.0
     assertEquals(expectedDistance, location1.distanceBetween(location2), 1.0)
   }
+
   fun profileTrackAssociation_equalsReturnsTrueForSameData() {
     val mockProfile = mockk<Profile>()
     val mockTrack = mockk<Track>()
