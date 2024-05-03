@@ -100,9 +100,19 @@ abstract class FirebaseConnection<T, U> {
         .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully deleted!") }
   }
 
-  fun getItem(item: T, onSuccess: (DocumentSnapshot) -> Unit = {}): Flow<T> = getItem(getItemId(item),onSuccess)
+  fun getItem(
+      item: T,
+      onSuccess: (DocumentSnapshot, MutableStateFlow<T?>) -> Unit =
+          { _: DocumentSnapshot, _: MutableStateFlow<T?> ->
+          }
+  ): Flow<T> = getItem(getItemId(item), onSuccess)
 
-  open fun getItem(itemId: String, onSuccess: (DocumentSnapshot) -> Unit = {}): Flow<T> {
+  open fun getItem(
+      itemId: String,
+      onSuccess: (DocumentSnapshot, MutableStateFlow<T?>) -> Unit =
+          { _: DocumentSnapshot, _: MutableStateFlow<T?> ->
+          }
+  ): Flow<T> {
     val dataFlow = MutableStateFlow<T?>(null)
     db.collection(collectionName)
         .document(itemId)
@@ -111,7 +121,7 @@ abstract class FirebaseConnection<T, U> {
           if (document != null && document.data != null) {
             documentToItem(document)?.let {
               dataFlow.value = it
-              onSuccess(document)
+              onSuccess(document, dataFlow)
             }
           }
         }

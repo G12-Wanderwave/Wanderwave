@@ -2,6 +2,7 @@ package ch.epfl.cs311.wanderwave.model.repository
 
 import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 
 interface FirebaseRepository<T> {
   val collectionName: String
@@ -21,7 +22,7 @@ interface FirebaseRepository<T> {
 
   fun deleteItem(itemId: String)
 
-  fun getItem(item: T): Flow<T>
+  fun getItem(item: T, onSuccess: (DocumentSnapshot, MutableStateFlow<T?>) -> Unit): Flow<T>
 
-  fun getItem(itemId: String): Flow<T>
+  fun getItem(itemId: String, onSuccess: (DocumentSnapshot, MutableStateFlow<T?>) -> Unit): Flow<T>
 }

@@ -2,6 +2,7 @@ package ch.epfl.cs311.wanderwave.model.remote
 
 import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Beacon
+import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -57,52 +58,49 @@ class BeaconConnection(
     profileConnection.addProfilesIfNotExist(item.profileAndTrack.map { it.profile })
   }
 
-  override fun getItem(itemId: String): Flow<Beacon> {
-    val dataFlow = MutableStateFlow<Beacon?>(null)
+  override fun getItem(
+      itemId: String,
+      onSuccess: (DocumentSnapshot, MutableStateFlow<Beacon?>) -> Unit
+  ): Flow<Beacon> {
 
-    db.collection(collectionName)
-        .document(itemId)
-        .get()
-        .addOnSuccessListener { document ->
-          if (document != null && document.data != null) {
-            documentToItem(document)?.let { beacon ->
-              dataFlow.value = beacon
+    val onSuccessWrapper: (DocumentSnapshot, MutableStateFlow<Beacon?>) -> Unit =
+        { document, dataFlow ->
+          val beacon =
+              dataFlow.value
+                  ?: Beacon.from(document)
+                  ?: Beacon(
+                      id = document.id,
+                      location = Location(0.0, 0.0),
+                      profileAndTrack = emptyList())
 
-              val tracksObject = document["tracks"]
+          val tracksObject = document["tracks"]
 
-              var profileAndTrackRefs: List<Map<String, DocumentReference>>?
+          var profileAndTrackRefs: List<Map<String, DocumentReference>>?
 
-              if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
-                profileAndTrackRefs = tracksObject as? List<Map<String, DocumentReference>>
+          if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
+            profileAndTrackRefs = tracksObject as? List<Map<String, DocumentReference>>
 
-                // Use a coroutine to perform asynchronous operations
-                coroutineScope.launch {
-                  val profileAndTracksDeferred =
-                      profileAndTrackRefs?.map { profileAndTrackRef ->
-                        async { fetchTrack(profileAndTrackRef) }
-                      }
+            // Use a coroutine to perform asynchronous operations
+            coroutineScope.launch {
+              val profileAndTracksDeferred =
+                  profileAndTrackRefs?.map { profileAndTrackRef ->
+                    async { fetchTrack(profileAndTrackRef) }
+                  }
 
-                  // Wait for all tracks to be fetched
-                  val profileAndTracks = profileAndTracksDeferred?.mapNotNull { it?.await() }
+              // Wait for all tracks to be fetched
+              val profileAndTracks = profileAndTracksDeferred?.mapNotNull { it?.await() }
 
-                  // Update the beacon with the complete list of tracks
-                  val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks ?: emptyList())
-                  dataFlow.value = updatedBeacon
-                }
-              } else {
-                Log.e("Firestore", "tracks has Wrong Firebase Format")
-              }
+              // Update the beacon with the complete list of tracks
+              val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks ?: emptyList())
+              dataFlow.value = updatedBeacon
             }
+            onSuccess(document, dataFlow)
           } else {
-            dataFlow.value = null
+            Log.e("Firestore", "tracks has Wrong Firebase Format")
           }
         }
-        .addOnFailureListener { e ->
-          dataFlow.value = null
-          Log.e("Firestore", "Error getting document: ", e)
-        }
 
-    return dataFlow.filterNotNull()
+    return super.getItem(itemId, onSuccessWrapper)
   }
 
   // Fetch a track from a DocumentReference asynchronously
