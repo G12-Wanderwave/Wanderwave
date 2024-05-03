@@ -9,7 +9,6 @@ import ch.epfl.cs311.wanderwave.model.utils.findNearbyBeacons
 import ch.epfl.cs311.wanderwave.model.utils.findRandomBeacon
 import ch.epfl.cs311.wanderwave.model.utils.placeBeaconsRandomly
 import ch.epfl.cs311.wanderwave.model.utils.randomLatLongFromPosition
-import com.google.android.gms.maps.model.LatLng
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
@@ -147,7 +146,7 @@ class BeaconPlacerTest : TestCase() {
     val result = randomLatLongFromPosition(userPosition, distance)
 
     val actualDistance = location.distanceBetween(result)
-      Log.d("distance", "$actualDistance")
+    Log.d("distance", "$actualDistance")
     assertTrue(actualDistance <= distance)
   }
 }

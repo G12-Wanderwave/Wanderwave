@@ -2,7 +2,6 @@ package ch.epfl.cs311.wanderwave.model.utils
 
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
-import com.google.android.gms.maps.model.LatLng
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -80,7 +79,6 @@ fun findRandomBeacon(location: Location, newBeacons: MutableList<Beacon>, it: In
           location = Location(randomLocation.latitude, randomLocation.longitude))
   newBeacons.add(newBeacon)
 }
-
 
 /**
  * This function finds the beacons that are in the vicinity of the user's location. It computes the
