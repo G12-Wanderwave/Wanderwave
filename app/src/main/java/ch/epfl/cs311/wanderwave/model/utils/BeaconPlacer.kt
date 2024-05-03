@@ -6,8 +6,8 @@ import com.google.android.gms.maps.model.LatLng
 import kotlin.math.*
 import kotlin.random.Random
 
-private const val EARTH_RADIUS_M = 6371000.0
-private const val BEACON_RADIUS = 1000.0
+private const val EARTH_RADIUS = 6371.0
+private const val BEACON_RADIUS = 1.0
 private const val BEACON_COUNT = 20
 private const val NUMBER_ITERATION = 5
 
@@ -24,7 +24,7 @@ private const val NUMBER_ITERATION = 5
  * @since 2.0
  * @last update 2.0
  */
-fun placeBeaconsRandomly(beacons: List<Beacon>, location: LatLng): List<Beacon> {
+fun placeBeaconsRandomly(beacons: List<Beacon>, location: Location): List<Beacon> {
   var finalBeacons = mutableListOf<Beacon>()
   var nearbyBeacons = findNearbyBeacons(location, beacons, BEACON_RADIUS)
   if (nearbyBeacons.size < BEACON_COUNT) {
@@ -56,7 +56,7 @@ fun computeDistanceBetweenBeacons(newBeacons: MutableList<Beacon>, beacons: List
   var distance = 0.0
   newBeacons.forEach { beacon ->
     beacons.forEach { existingBeacon ->
-      distance += haversine(beacon.location.toLatLng(), existingBeacon.location.toLatLng())
+      distance += beacon.location.distanceBetween(existingBeacon.location)
     }
   }
   return distance
@@ -72,7 +72,7 @@ fun computeDistanceBetweenBeacons(newBeacons: MutableList<Beacon>, beacons: List
  * @since 2.0
  * @last update 2.0
  */
-fun findRandomBeacon(location: LatLng, newBeacons: MutableList<Beacon>, it: Int) {
+fun findRandomBeacon(location: Location, newBeacons: MutableList<Beacon>, it: Int) {
   val randomLocation = randomLatLongFromPosition(location, BEACON_RADIUS)
   val newBeacon =
       Beacon(
@@ -81,28 +81,6 @@ fun findRandomBeacon(location: LatLng, newBeacons: MutableList<Beacon>, it: Int)
   newBeacons.add(newBeacon)
 }
 
-/**
- * This function computes the haversine distance between two locations.
- *
- * @param position1 the first location
- * @param position2 the second location
- * @return the haversine distance between the two locations in meters
- * @see <a href="https://en.wikipedia.org/wiki/Haversine_formula">Haversine formula</a>
- * @author Menzo Bouaissi
- * @since 2.0
- * @last update 2.0
- */
-fun haversine(position1: LatLng, position2: LatLng): Double {
-  val latDistance = Math.toRadians(position2.latitude - position1.latitude)
-  val lonDistance = Math.toRadians(position2.longitude - position1.longitude)
-  val a =
-      sin(latDistance / 2).pow(2) +
-          (cos(Math.toRadians(position1.latitude)) *
-              cos(Math.toRadians(position2.latitude)) *
-              sin(lonDistance / 2).pow(2))
-  val c = 2 * atan2(sqrt(a), sqrt(1 - a))
-  return EARTH_RADIUS_M * c
-}
 
 /**
  * This function finds the beacons that are in the vicinity of the user's location. It computes the
@@ -118,10 +96,10 @@ fun haversine(position1: LatLng, position2: LatLng): Double {
  * @since 2.0
  * @last update 2.0
  */
-fun findNearbyBeacons(userPosition: LatLng, beacons: List<Beacon>, radius: Double): List<Beacon> {
+fun findNearbyBeacons(userPosition: Location, beacons: List<Beacon>, radius: Double): List<Beacon> {
   var nearbyBeacons = mutableListOf<Beacon>()
   beacons.forEach { beacon ->
-    if ((haversine(userPosition, beacon.location.toLatLng())) < radius) {
+    if ((userPosition.distanceBetween(beacon.location)) < radius) {
       nearbyBeacons += beacon
     }
   }
@@ -139,12 +117,12 @@ fun findNearbyBeacons(userPosition: LatLng, beacons: List<Beacon>, radius: Doubl
  * @since 2.0
  * @last update 2.0
  */
-fun randomLatLongFromPosition(userPosition: LatLng, distance: Double): LatLng {
+fun randomLatLongFromPosition(userPosition: Location, distance: Double): Location {
   val latRad = Math.toRadians(userPosition.latitude)
   val lonRad = Math.toRadians(userPosition.longitude)
 
   val bearing = Random.nextDouble(0.0, 2 * Math.PI)
-  val angularDistance = Random.nextDouble(distance) / EARTH_RADIUS_M
+  val angularDistance = Random.nextDouble(distance) / EARTH_RADIUS
 
   // New latitude in radians
   val newLat =
@@ -160,5 +138,5 @@ fun randomLatLongFromPosition(userPosition: LatLng, distance: Double): LatLng {
   val newLatDeg = Math.toDegrees(newLat)
   val newLonDeg = Math.toDegrees(newLon)
 
-  return LatLng(newLatDeg, newLonDeg)
+  return Location(newLatDeg, newLonDeg)
 }
