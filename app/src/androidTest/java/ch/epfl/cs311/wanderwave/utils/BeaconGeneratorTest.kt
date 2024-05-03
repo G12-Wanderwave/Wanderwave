@@ -11,6 +11,8 @@ import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.BuildConfig.MAPS_API_KEY
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
+import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.utils.createNearbyBeacons
 import ch.epfl.cs311.wanderwave.model.utils.getNearbyPOIs
@@ -78,9 +80,23 @@ class BeaconGeneratorTest {
         listOf(
             Beacon(
                 id = "testBeacon",
-                location = Location(46.519962, 6.633597, "Test Location"),
-                tracks = listOf(Track("testTrack", "Test Title", "Test Artist"))))
+                location = Location(1.0, 1.0, "Test Location"),
+                profileAndTrack =
+                listOf(
+                    ProfileTrackAssociation(
+                        Profile(
+                            "Sample First Name",
+                            "Sample last name",
+                            "Sample desc",
+                            0,
+                            false,
+                            null,
+                            "Sample Profile ID",
+                            "Sample Track ID"),
+                        Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))
+                )))
 
+            //
     val context = ApplicationProvider.getApplicationContext<Context>()
 
     mockkStatic("ch.epfl.cs311.wanderwave.model.utils.BeaconGeneratorKt")
@@ -97,14 +113,26 @@ class BeaconGeneratorTest {
   fun createNearbyBeacons_NobeaconsAdded() {
     val location = Location(46.519962, 6.633597)
 
-    val nearbyBeacons =
-        listOf(
-            Beacon(
-                id = "testBeacon",
-                location = Location(46.519962, 6.633597, "Test Location"),
-                tracks = listOf(Track("testTrack", "Test Title", "Test Artist"))))
-
-    val context = ApplicationProvider.getApplicationContext<Context>()
+      val nearbyBeacons =
+          listOf(
+              Beacon(
+                  id = "testBeacon",
+                  location = Location(1.0, 1.0, "Test Location"),
+                  profileAndTrack =
+                  listOf(
+                      ProfileTrackAssociation(
+                          Profile(
+                              "Sample First Name",
+                              "Sample last name",
+                              "Sample desc",
+                              0,
+                              false,
+                              null,
+                              "Sample Profile ID",
+                              "Sample Track ID"),
+                          Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))
+                  )))
+      val context = ApplicationProvider.getApplicationContext<Context>()
 
     mockkStatic("ch.epfl.cs311.wanderwave.model.utils.BeaconGeneratorKt")
     every { getNearbyPOIs(any(), any(), any()) } returns
@@ -113,20 +141,32 @@ class BeaconGeneratorTest {
         )
     val result = createNearbyBeacons(location, nearbyBeacons, 1000.0, context)
 
-    assertTrue(result.isEmpty())
+    assertTrue(result.isNotEmpty())
   }
 
   @Test
   fun createNearbyBeacons_addsOneBeaconOnly() {
     val location = Location(46.519962, 6.633597)
 
-    val nearbyBeacons =
-        listOf(
-            Beacon(
-                id = "testBeacon",
-                location = Location(46.519962, 6.633597, "Test Location"),
-                tracks = listOf(Track("testTrack", "Test Title", "Test Artist"))))
-
+      val nearbyBeacons =
+          listOf(
+              Beacon(
+                  id = "testBeacon",
+                  location = Location(1.0, 1.0, "Test Location"),
+                  profileAndTrack =
+                  listOf(
+                      ProfileTrackAssociation(
+                          Profile(
+                              "Sample First Name",
+                              "Sample last name",
+                              "Sample desc",
+                              0,
+                              false,
+                              null,
+                              "Sample Profile ID",
+                              "Sample Track ID"),
+                          Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))
+                  )))
     val context = ApplicationProvider.getApplicationContext<Context>()
 
     mockkStatic("ch.epfl.cs311.wanderwave.model.utils.BeaconGeneratorKt")
@@ -142,13 +182,25 @@ class BeaconGeneratorTest {
   fun createNearbyBeaconsWithNegativeRadius() {
     val location = Location(46.519962, 6.633597)
 
-    val nearbyBeacons =
-        listOf(
-            Beacon(
-                id = "testBeacon",
-                location = Location(46.519962, 6.633597, "Test Location"),
-                tracks = listOf(Track("testTrack", "Test Title", "Test Artist"))))
-
+      val nearbyBeacons =
+          listOf(
+              Beacon(
+                  id = "testBeacon",
+                  location = Location(1.0, 1.0, "Test Location"),
+                  profileAndTrack =
+                  listOf(
+                      ProfileTrackAssociation(
+                          Profile(
+                              "Sample First Name",
+                              "Sample last name",
+                              "Sample desc",
+                              0,
+                              false,
+                              null,
+                              "Sample Profile ID",
+                              "Sample Track ID"),
+                          Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))
+                  )))
     val context = ApplicationProvider.getApplicationContext<Context>()
 
     mockkStatic("ch.epfl.cs311.wanderwave.model.utils.BeaconGeneratorKt")

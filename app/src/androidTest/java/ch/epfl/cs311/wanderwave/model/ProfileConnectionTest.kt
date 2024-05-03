@@ -1,9 +1,12 @@
 package ch.epfl.cs311.wanderwave.model
 
+import android.net.Uri
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QuerySnapshot
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -34,6 +37,8 @@ public class ProfileConnectionTest {
   private lateinit var profileConnection: ProfileConnection
 
   @RelaxedMockK private lateinit var firebaseFirestore: FirebaseFirestore
+  @RelaxedMockK private lateinit var querySnapshot: QuerySnapshot
+  @RelaxedMockK private lateinit var query: Query
 
   @Before
   fun setup() {
@@ -78,5 +83,49 @@ public class ProfileConnectionTest {
             spotifyUid = spotifyUid,
             firebaseUid = firebaseUid)
     assertEquals(expectedProfile, result)
+  }
+
+  @Test
+  fun itemToMapTest() {
+    val profile =
+        Profile(
+            firstName = "John",
+            lastName = "Doe",
+            description = "Test description",
+            numberOfLikes = 10,
+            isPublic = true,
+            profilePictureUri = Uri.parse("https://example.com/image.jpg"),
+            spotifyUid = "spotify123",
+            firebaseUid = "firebase123")
+
+    val expectedMap: HashMap<String, Any> =
+        hashMapOf(
+            "firstName" to "John",
+            "lastName" to "Doe",
+            "description" to "Test description",
+            "numberOfLikes" to 10,
+            "spotifyUid" to "spotify123",
+            "firebaseUid" to "firebase123",
+            "isPublic" to true,
+            "profilePictureUri" to "https://example.com/image.jpg")
+
+    assertEquals(expectedMap, profileConnection.itemToMap(profile))
+  }
+
+  @Test
+  fun testAddProfilesIfNotExist() {
+    val profiles =
+        listOf(
+            Profile(
+                firstName = "New",
+                lastName = "User",
+                description = "No description",
+                numberOfLikes = 0,
+                isPublic = false,
+                spotifyUid = "newspotifyUid",
+                firebaseUid = "newfirebaseUid"))
+
+    every { querySnapshot.isEmpty } returns true
+    profileConnection.addProfilesIfNotExist(profiles)
   }
 }

@@ -32,7 +32,7 @@ class TrackListScreenTest : TestCase() {
   @get:Rule val mockkRule = MockKRule(this)
 
   @RelaxedMockK lateinit var mockSpotifyController: SpotifyController
-  @RelaxedMockK lateinit var mockTrackRepositoryImpl: TrackRepository
+  @RelaxedMockK lateinit var trackRepository: TrackRepository
 
   @RelaxedMockK lateinit var viewModel: TrackListViewModel
 
@@ -48,10 +48,17 @@ class TrackListScreenTest : TestCase() {
 
   private fun setupViewModel(result: Boolean) {
 
-    every { mockTrackRepositoryImpl.getAll() } returns
-        flowOf(listOf(Track("id1", "title1", "artist1")))
+    flowOf(listOf(Track("id1", "title1", "artist1")))
     every { mockSpotifyController.playTrack(any()) } returns flowOf(result)
-    viewModel = TrackListViewModel(mockSpotifyController, mockTrackRepositoryImpl)
+    every { trackRepository.getAll() } returns
+        flowOf(
+            listOf(
+                Track("is 1", "Track 1", "Artist 1"),
+                Track("is 2", "Track 2", "Artist 2"),
+            ))
+
+    viewModel = TrackListViewModel(mockSpotifyController, trackRepository)
+
     composeTestRule.setContent { TrackListScreen(mockShowMessage, viewModel) }
   }
 

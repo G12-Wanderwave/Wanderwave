@@ -7,6 +7,7 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.screens.ProfileScreen
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import com.kaspersky.components.composesupport.config.withComposeSupport
@@ -19,6 +20,7 @@ import io.mockk.coEvery
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.just
+import io.mockk.verify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -115,6 +117,15 @@ class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSup
         assertIsDisplayed()
         assertTextContains("My LastName")
       }
+    }
+  }
+
+  @Test
+  fun canNavigateToAbout() = run {
+    onComposeScreen<ProfileScreen>(composeTestRule) {
+      aboutButton.assertIsDisplayed()
+      aboutButton.performClick()
+      verify { mockNavigationActions.navigateTo(Route.ABOUT) }
     }
   }
 }
