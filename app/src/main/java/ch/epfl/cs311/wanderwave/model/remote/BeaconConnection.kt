@@ -58,6 +58,12 @@ class BeaconConnection(
     profileConnection.addProfilesIfNotExist(item.profileAndTrack.map { it.profile })
   }
 
+  override fun getItem(itemId: String): Flow<Beacon> {
+    return getItem(itemId) { _, _ -> }
+  }
+
+
+
   override fun getItem(
       itemId: String,
       onSuccess: (DocumentSnapshot, MutableStateFlow<Beacon?>) -> Unit

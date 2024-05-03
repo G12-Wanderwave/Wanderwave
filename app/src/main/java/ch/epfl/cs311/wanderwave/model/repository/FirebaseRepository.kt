@@ -22,7 +22,7 @@ interface FirebaseRepository<T> {
 
   fun deleteItem(itemId: String)
 
-  fun getItem(item: T, onSuccess: (DocumentSnapshot, MutableStateFlow<T?>) -> Unit): Flow<T>
+  fun getItem(itemId: String): Flow<T>
 
   fun getItem(itemId: String, onSuccess: (DocumentSnapshot, MutableStateFlow<T?>) -> Unit): Flow<T>
 }
