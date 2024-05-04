@@ -6,7 +6,6 @@ import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import com.google.android.gms.maps.model.LatLng
@@ -25,7 +24,6 @@ import org.junit.Test
 class DataClassesTest {
   // Testing of all the data classes, I think it's better to test them all together
   @get:Rule val mockkRule = MockKRule(this)
-  private lateinit var beaconConnection: BeaconConnection
   private lateinit var trackConnection: TrackConnection
   private lateinit var profileConnection: ProfileConnection
 
@@ -38,8 +36,6 @@ class DataClassesTest {
     trackConnection = mockk<TrackConnection>(relaxed = true)
     profileConnection = mockk<ProfileConnection>(relaxed = true)
 
-    beaconConnection =
-        BeaconConnection(trackConnection = trackConnection, profileConnection = profileConnection)
     // Set up the document mock to return some tracks
     every { document.id } returns "someId"
     every { document["title"] } returns "someTitle"
@@ -251,6 +247,19 @@ class DataClassesTest {
   }
 
   @Test
+  fun distanceBetween_returnsZeroForSameLocation() {
+    val location = Location(46.519962, 6.633597)
+    assertEquals(0.0, location.distanceBetween(location), 0.001)
+  }
+
+  @Test
+  fun distanceBetween_returnsCorrectDistanceForDifferentLocations() {
+    val location1 = Location(46.803246, 7.139212)
+    val location2 = Location(46.029423, 8.835748)
+    val expectedDistance = 156.0
+    assertEquals(expectedDistance, location1.distanceBetween(location2), 1.0)
+  }
+
   fun profileTrackAssociation_equalsReturnsTrueForSameData() {
     val mockProfile = mockk<Profile>()
     val mockTrack = mockk<Track>()

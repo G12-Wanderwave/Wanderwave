@@ -62,25 +62,6 @@ class TrackListScreenTest : TestCase() {
     composeTestRule.setContent { TrackListScreen(mockShowMessage, viewModel) }
   }
 
-  //  @Test
-  //  fun trackListScreenIsDisplayed() = runTest {
-  //    setupViewModel(true)
-  //    onComposeScreen<TrackListScreen>(composeTestRule) {
-  //      assertIsDisplayed()
-  //
-  //      // add text to the search bar :
-  //      searchBar {
-  //        assertIsDisplayed()
-  //        performTextInput("search")
-  //      }
-  //
-  //      trackButton {
-  //        assertIsDisplayed()
-  //        assert(hasClickAction())
-  //      }
-  //    }
-  //  }
-
   @Test
   fun tappingTrackSelectssIt() = runTest {
     setupViewModel(true)

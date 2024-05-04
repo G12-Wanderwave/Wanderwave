@@ -10,6 +10,7 @@ import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -21,7 +22,8 @@ import kotlinx.coroutines.launch
 class BeaconConnection(
     private val database: FirebaseFirestore? = null,
     val trackConnection: TrackConnection,
-    val profileConnection: ProfileConnection
+    val profileConnection: ProfileConnection,
+    private val ioDispatcher: CoroutineDispatcher
 ) : FirebaseConnection<Beacon, Beacon>(), BeaconRepository {
 
   override val collectionName: String = "beacons"

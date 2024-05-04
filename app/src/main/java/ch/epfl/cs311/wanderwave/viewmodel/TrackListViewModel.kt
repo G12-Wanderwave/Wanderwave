@@ -1,13 +1,12 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,7 +33,7 @@ constructor(
   }
 
   private fun observeTracks() {
-    CoroutineScope(Dispatchers.IO).launch {
+    viewModelScope.launch {
       repository.getAll().collect { tracks ->
         _uiState.value =
             UiState(
@@ -56,7 +55,7 @@ constructor(
   fun setSearchQuery(query: String) {
     searchJob?.cancel()
     searchJob =
-        CoroutineScope(Dispatchers.IO).launch {
+        viewModelScope.launch {
           delay(300) // Debounce time in milliseconds
           _searchQuery.value = query
           observeTracks() // Re-filter tracks when search query changes
@@ -69,7 +68,7 @@ constructor(
    * @param track The track to play.
    */
   private fun playTrack(track: Track) {
-    CoroutineScope(Dispatchers.IO).launch {
+    viewModelScope.launch {
       val success = spotifyController.playTrack(track).firstOrNull()
       if (success == null || !success) {
         _uiState.value = _uiState.value.copy(message = "Failed to play track")
@@ -79,7 +78,7 @@ constructor(
 
   /** Resumes the currently paused track using the SpotifyController. */
   private fun resumeTrack() {
-    CoroutineScope(Dispatchers.IO).launch {
+    viewModelScope.launch {
       val success = spotifyController.resumeTrack().firstOrNull()
       if (success == null || !success) {
         _uiState.value = _uiState.value.copy(message = "Failed to resume track")
@@ -89,7 +88,7 @@ constructor(
 
   /** Pauses the currently playing track using the SpotifyController. */
   private fun pauseTrack() {
-    CoroutineScope(Dispatchers.IO).launch {
+    viewModelScope.launch {
       val success = spotifyController.pauseTrack().firstOrNull()
       if (success == null || !success) {
         _uiState.value = _uiState.value.copy(message = "Failed to pause track")
