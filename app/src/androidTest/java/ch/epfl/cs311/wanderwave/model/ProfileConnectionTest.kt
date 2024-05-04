@@ -13,8 +13,10 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Before
 import org.junit.Rule
@@ -186,12 +188,23 @@ public class ProfileConnectionTest {
   fun testGetItemCallsOtherGetItem() {
     val itemId = "testItemId"
 
-    val profileConnection = mockk<ProfileConnection>(relaxed = true)
+    // Mock the ProfileConnection
+    val profileConnection =
+        spyk(ProfileConnection(trackConnection = TrackConnection()), recordPrivateCalls = true)
 
-    every { profileConnection.getItem(itemId, any()) } returns flowOf()
+    // Define the behavior for the second getItem method
+    every {
+      profileConnection.getItem(
+          itemId, any<(DocumentSnapshot, MutableStateFlow<Profile?>) -> Unit>())
+    } returns flowOf<Profile>()
 
+    // Call the method under test
     profileConnection.getItem(itemId)
 
-    verify { profileConnection.getItem(itemId, any()) }
+    // Verify that the second getItem method was called
+    verify {
+      profileConnection.getItem(
+          itemId, any<(DocumentSnapshot, MutableStateFlow<Profile?>) -> Unit>())
+    }
   }
 }
