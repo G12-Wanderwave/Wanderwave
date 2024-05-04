@@ -2,7 +2,6 @@ package ch.epfl.cs311.wanderwave.ui.screens
 
 import android.content.Context
 import android.content.ContextWrapper
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,10 +14,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import ch.epfl.cs311.wanderwave.model.data.Profile
-import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
-import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.login.LoginAppLogo
@@ -26,7 +21,6 @@ import ch.epfl.cs311.wanderwave.ui.components.login.SignInButton
 import ch.epfl.cs311.wanderwave.ui.components.login.WelcomeTitle
 import ch.epfl.cs311.wanderwave.viewmodel.LoginScreenViewModel
 import com.spotify.sdk.android.auth.AuthorizationClient
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 @Composable

@@ -95,9 +95,7 @@ class BeaconConnection(
             } else {
               Log.e("Firestore", "tracks has Wrong Firebase Format")
             }
-          } ?: {
-            Log.e("Firestore", "Error fetching beacon")
-          }
+          } ?: { Log.e("Firestore", "Error fetching beacon") }
         }
 
     return super.getItem(itemId, onSuccessWrapper)

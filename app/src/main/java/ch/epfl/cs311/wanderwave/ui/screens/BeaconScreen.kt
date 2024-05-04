@@ -167,11 +167,7 @@ fun SongList(
       text = stringResource(R.string.beaconTracksTitle),
       style = MaterialTheme.typography.displayMedium,
       modifier = Modifier.testTag("beaconTracksTitle"))
-  LazyColumn {
-    items(beacon.profileAndTrack) {
-      TrackItem(it, navigationActions)
-    }
-  }
+  LazyColumn { items(beacon.profileAndTrack) { TrackItem(it, navigationActions) } }
 }
 
 @Composable
