@@ -45,10 +45,24 @@ class ProfileConnection(private val database: FirebaseFirestore? = null,
     return Profile.from(document)
   }
 
-  override fun itemToMap(profile: Profile): HashMap<String, Any> {
-    val profileMap: HashMap<String, Any> = profile.toMap()
 
+
+  override fun itemToMap(profile: Profile): HashMap<String, Any> {
+    val profileMap: HashMap<String, Any> = profile.toMap(db)
+    Log.d("ProfileConnection", "profileMap: $profileMap")
     return profileMap
+  }
+
+  override fun addItem(item: Profile) {
+    super.addItem(item)
+    trackConnection.addItemsIfNotExist(item.topSongs)
+    trackConnection.addItemsIfNotExist(item.chosenSongs)
+  }
+
+  override fun addItemWithId(item: Profile) {
+    super.addItemWithId(item)
+    trackConnection.addItemsIfNotExist(item.topSongs)
+    trackConnection.addItemsIfNotExist(item.chosenSongs)
   }
 
   fun addProfilesIfNotExist(profiles: List<Profile>) {
@@ -99,6 +113,9 @@ class ProfileConnection(private val database: FirebaseFirestore? = null,
           topSongRefs = topSongsObject as? List<DocumentReference>
           chosenSongRefs = chosenSongsObject as? List<DocumentReference>
 
+          Log.d("ProfileConnection", "topSongRefs: $topSongRefs")
+          Log.d("ProfileConnection", "chosenSongRefs: $chosenSongRefs")
+
           // Use a coroutine to perform asynchronous operations
           coroutineScope.launch {
             val TopSongsDeferred =
@@ -112,6 +129,9 @@ class ProfileConnection(private val database: FirebaseFirestore? = null,
             // Wait for all tracks to be fetched
             val TopSongs = TopSongsDeferred?.mapNotNull { it?.await() }
             val ChosenSongs = chosenSongsDeffered?.mapNotNull { it?.await() }
+
+            Log.d("ProfileConnection", "TopSongs: $TopSongs")
+            Log.d("ProfileConnection", "ChosenSongs: $ChosenSongs")
 
             // Update the beacon with the complete list of tracks
             val updatedBeacon = profile.copy(topSongs = TopSongs ?: emptyList(), chosenSongs = ChosenSongs ?: emptyList())
