@@ -4,6 +4,7 @@ import android.net.Uri
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -109,7 +110,10 @@ public class ProfileConnectionTest {
             "spotifyUid" to "spotify123",
             "firebaseUid" to "firebase123",
             "isPublic" to true,
-            "profilePictureUri" to "https://example.com/image.jpg")
+            "profilePictureUri" to "https://example.com/image.jpg",
+            "topSongs" to listOf<DocumentReference>(),
+            "chosenSongs" to listOf<DocumentReference>(),
+          )
 
     assertEquals(expectedMap, profileConnection.itemToMap(profile))
   }
