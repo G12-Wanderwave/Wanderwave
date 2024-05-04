@@ -7,27 +7,31 @@ import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.mockk
+import io.mockk.verify
 import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
 /*
-public constructor Profile(
-    val firstName: String,
-    val lastName: String,
-    val description: String,
-    val numberOfLikes: Int,
-    val isPublic: Boolean,
-    val profilePictureUri: Uri? = null,
-    val spotifyUid: String,
-    val firebaseUid: String
+data class Profile(
+    var firstName: String,
+    var lastName: String,
+    var description: String,
+    var numberOfLikes: Int,
+    var isPublic: Boolean,
+    var profilePictureUri: Uri? = null,
+    var spotifyUid: String,
+    var firebaseUid: String,
+    var topSongs: List<Track> = emptyList(),
+    var chosenSongs: List<Track> = emptyList(),
 )
  */
 
@@ -40,7 +44,6 @@ public class ProfileConnectionTest {
 
   @RelaxedMockK private lateinit var firebaseFirestore: FirebaseFirestore
   @RelaxedMockK private lateinit var querySnapshot: QuerySnapshot
-  @RelaxedMockK private lateinit var query: Query
 
   @Before
   fun setup() {
@@ -133,5 +136,62 @@ public class ProfileConnectionTest {
 
     every { querySnapshot.isEmpty } returns true
     profileConnection.addProfilesIfNotExist(profiles)
+  }
+
+  @Test
+  fun testAddItem() {
+    val profile =
+        Profile(
+            firstName = "John",
+            lastName = "Doe",
+            description = "Test description",
+            numberOfLikes = 10,
+            isPublic = true,
+            profilePictureUri = Uri.parse("https://example.com/image.jpg"),
+            spotifyUid = "spotify123",
+            firebaseUid = "firebase123")
+
+    val trackConnection = mockk<TrackConnection>(relaxed = true)
+    val profileConnection = ProfileConnection(firebaseFirestore, trackConnection = trackConnection)
+
+    profileConnection.addItem(profile)
+
+    verify { trackConnection.addItemsIfNotExist(profile.topSongs) }
+    verify { trackConnection.addItemsIfNotExist(profile.chosenSongs) }
+  }
+
+  @Test
+  fun testAddItemWithId() {
+    val profile =
+        Profile(
+            firstName = "John",
+            lastName = "Doe",
+            description = "Test description",
+            numberOfLikes = 10,
+            isPublic = true,
+            profilePictureUri = Uri.parse("https://example.com/image.jpg"),
+            spotifyUid = "spotify123",
+            firebaseUid = "firebase123")
+
+    val trackConnection = mockk<TrackConnection>(relaxed = true)
+    val profileConnection = ProfileConnection(firebaseFirestore, trackConnection = trackConnection)
+
+    profileConnection.addItemWithId(profile)
+
+    verify { trackConnection.addItemsIfNotExist(profile.topSongs) }
+    verify { trackConnection.addItemsIfNotExist(profile.chosenSongs) }
+  }
+
+  @Test
+  fun testGetItemCallsOtherGetItem() {
+    val itemId = "testItemId"
+
+    val profileConnection = mockk<ProfileConnection>(relaxed = true)
+
+    every { profileConnection.getItem(itemId, any()) } returns flowOf()
+
+    profileConnection.getItem(itemId)
+
+    verify { profileConnection.getItem(itemId, any()) }
   }
 }
