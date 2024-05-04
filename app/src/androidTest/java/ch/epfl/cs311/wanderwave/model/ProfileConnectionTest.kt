@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.model
 import android.net.Uri
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
+import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -43,7 +44,8 @@ public class ProfileConnectionTest {
   @Before
   fun setup() {
     MockKAnnotations.init(this)
-    profileConnection = ProfileConnection(firebaseFirestore)
+    val trackConnection = TrackConnection()
+    profileConnection = ProfileConnection(firebaseFirestore, trackConnection = trackConnection)
   }
 
   @Test
