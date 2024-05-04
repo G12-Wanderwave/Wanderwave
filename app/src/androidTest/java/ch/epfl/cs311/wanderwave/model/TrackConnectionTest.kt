@@ -121,7 +121,7 @@ class TrackConnectionTest {
   }
 
   @Test
-  fun testFetchTrack() = runBlocking {
+  fun testFetchProfileAndTrack() = runBlocking {
     // Mock the DocumentReference
     val mockTrackDocumentReference = mockk<DocumentReference>()
     val mockProfileDocumentReference = mockk<DocumentReference>()
@@ -198,7 +198,7 @@ class TrackConnectionTest {
   }
 
   @Test
-  fun testFetchTrackNullDocumentReference() = runBlocking {
+  fun testFetchProfileAndTrackNullDocumentReference() = runBlocking {
     // Call the function under test
     val retrievedTrack = trackConnection.fetchProfileAndTrack(null)
 
@@ -235,7 +235,7 @@ class TrackConnectionTest {
   }
 
   @Test
-  fun testFetchTrackException() = runBlocking {
+  fun testFetchProfileAndTrackException() = runBlocking {
     // Mock the DocumentReference
     val mockDocumentReference = mockk<DocumentReference>()
 
@@ -261,4 +261,76 @@ class TrackConnectionTest {
     // Assert that the retrieved track is null
     assertEquals(null, retrievedTrack)
   }
+
+  @Test
+fun testFetchTrack() = runBlocking {
+    // Mock the DocumentReference
+    val mockTrackDocumentReference = mockk<DocumentReference>()
+
+    // Mock the DocumentSnapshot
+    val mockDocumentSnapshot = mockk<DocumentSnapshot>()
+
+    // Mock the Track
+    val mockTrack = Track("testTrackId", "Test Title", "Test Artist")
+
+    // Define behavior for the get() method on the DocumentReference to return the mock task
+    coEvery { mockTrackDocumentReference.get() } returns
+        mockk {
+            every { isComplete } returns true
+            every { isSuccessful } returns true
+            every { result } returns mockDocumentSnapshot
+            every { getException() } returns null
+            every { isCanceled } returns false
+        }
+
+    // Define behavior for the DocumentSnapshot
+    every { mockDocumentSnapshot.exists() } returns true
+    every { mockDocumentSnapshot.id } returns mockTrack.id
+    every { mockDocumentSnapshot.getString("title") } returns mockTrack.title
+    every { mockDocumentSnapshot.getString("artist") } returns mockTrack.artist
+
+    // Call the function under test
+    val retrievedTrack = trackConnection.fetchTrack(mockTrackDocumentReference)
+
+    // Verify that the get function is called on the document with the correct id
+    coVerify { mockTrackDocumentReference.get() }
+
+    // Assert that the retrieved track is the same as the mock track
+    assertEquals(mockTrack, retrievedTrack)
+}
+
+@Test
+fun testFetchTrackNullDocumentReference() = runBlocking {
+    // Call the function under test
+    val retrievedTrack = trackConnection.fetchTrack(null)
+
+    // Assert that the retrieved track is null
+    assertEquals(null, retrievedTrack)
+}
+
+@Test
+fun testFetchTrackException() = runBlocking {
+    // Mock the DocumentReference
+    val mockDocumentReference = mockk<DocumentReference>()
+
+    // Define behavior for the get() method on the DocumentReference to return the mock task
+    coEvery { mockDocumentReference.get() } returns
+        mockk {
+            every { isComplete } returns true
+            every { isSuccessful } returns false
+            every { result } returns null
+            every { getException() } returns Exception("Test Exception")
+            every { isCanceled } returns false
+        }
+
+    // Call the function under test
+    val retrievedTrack = trackConnection.fetchTrack(mockDocumentReference)
+
+    // Verify that the get function is called on the document with the correct id
+    coVerify { mockDocumentReference.get() }
+
+    // Assert that the retrieved track is null
+    assertEquals(null, retrievedTrack)
+}
+
 }
