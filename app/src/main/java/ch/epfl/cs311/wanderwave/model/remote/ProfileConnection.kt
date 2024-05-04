@@ -15,9 +15,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class ProfileConnection(private val database: FirebaseFirestore? = null,
-                        val trackConnection: TrackConnection) :
-    FirebaseConnection<Profile, Profile>(), ProfileRepository {
+class ProfileConnection(
+    private val database: FirebaseFirestore? = null,
+    val trackConnection: TrackConnection
+) : FirebaseConnection<Profile, Profile>(), ProfileRepository {
 
   override val collectionName: String = "users"
 
@@ -44,8 +45,6 @@ class ProfileConnection(private val database: FirebaseFirestore? = null,
   override fun documentToItem(document: DocumentSnapshot): Profile? {
     return Profile.from(document)
   }
-
-
 
   override fun itemToMap(profile: Profile): HashMap<String, Any> {
     val profileMap: HashMap<String, Any> = profile.toMap(db)
@@ -85,63 +84,64 @@ class ProfileConnection(private val database: FirebaseFirestore? = null,
   }
 
   override fun getItem(
-    itemId: String,
-    onSuccess: (DocumentSnapshot, MutableStateFlow<Profile?>) -> Unit
+      itemId: String,
+      onSuccess: (DocumentSnapshot, MutableStateFlow<Profile?>) -> Unit
   ): Flow<Profile> {
     val onSuccessWrapper: (DocumentSnapshot, MutableStateFlow<Profile?>) -> Unit =
-      { document, dataFlow ->
-        val profile =
-          dataFlow.value
-            ?: Profile.from(document)
-            ?: Profile(
-              firstName = "New",
-              lastName = "User",
-              description = "No description",
-              numberOfLikes = 0,
-              isPublic = false,
-              spotifyUid = "newspotifyUid",
-              firebaseUid = "newfirebaseUid")
+        { document, dataFlow ->
+          val profile =
+              dataFlow.value
+                  ?: Profile.from(document)
+                  ?: Profile(
+                      firstName = "New",
+                      lastName = "User",
+                      description = "No description",
+                      numberOfLikes = 0,
+                      isPublic = false,
+                      spotifyUid = "newspotifyUid",
+                      firebaseUid = "newfirebaseUid")
 
-        val topSongsObject = document["topSongs"]
-        val chosenSongsObject = document["chosenSongs"]
+          val topSongsObject = document["topSongs"]
+          val chosenSongsObject = document["chosenSongs"]
 
-        var topSongRefs: List< DocumentReference>?
-        var chosenSongRefs: List< DocumentReference>?
+          var topSongRefs: List<DocumentReference>?
+          var chosenSongRefs: List<DocumentReference>?
 
+          if (topSongsObject is List<*> &&
+              topSongsObject.all { it is DocumentReference } &&
+              chosenSongsObject is List<*> &&
+              chosenSongsObject.all { it is DocumentReference }) {
+            topSongRefs = topSongsObject as? List<DocumentReference>
+            chosenSongRefs = chosenSongsObject as? List<DocumentReference>
 
-        if (topSongsObject is List<*> && topSongsObject.all { it is DocumentReference } && chosenSongsObject is List<*> && chosenSongsObject.all { it is DocumentReference }) {
-          topSongRefs = topSongsObject as? List<DocumentReference>
-          chosenSongRefs = chosenSongsObject as? List<DocumentReference>
+            Log.d("ProfileConnection", "topSongRefs: $topSongRefs")
+            Log.d("ProfileConnection", "chosenSongRefs: $chosenSongRefs")
 
-          Log.d("ProfileConnection", "topSongRefs: $topSongRefs")
-          Log.d("ProfileConnection", "chosenSongRefs: $chosenSongRefs")
+            // Use a coroutine to perform asynchronous operations
+            coroutineScope.launch {
+              val TopSongsDeferred =
+                  topSongRefs?.map { trackRef -> async { trackConnection.fetchTrack(trackRef) } }
+              val chosenSongsDeffered =
+                  chosenSongRefs?.map { trackRef -> async { trackConnection.fetchTrack(trackRef) } }
 
-          // Use a coroutine to perform asynchronous operations
-          coroutineScope.launch {
-            val TopSongsDeferred =
-              topSongRefs?.map { trackRef ->
-                async { trackConnection.fetchTrack(trackRef) }
-              }
-            val chosenSongsDeffered =  chosenSongRefs?.map { trackRef ->
-                async { trackConnection.fetchTrack(trackRef) }
-              }
+              // Wait for all tracks to be fetched
+              val TopSongs = TopSongsDeferred?.mapNotNull { it?.await() }
+              val ChosenSongs = chosenSongsDeffered?.mapNotNull { it?.await() }
 
-            // Wait for all tracks to be fetched
-            val TopSongs = TopSongsDeferred?.mapNotNull { it?.await() }
-            val ChosenSongs = chosenSongsDeffered?.mapNotNull { it?.await() }
+              Log.d("ProfileConnection", "TopSongs: $TopSongs")
+              Log.d("ProfileConnection", "ChosenSongs: $ChosenSongs")
 
-            Log.d("ProfileConnection", "TopSongs: $TopSongs")
-            Log.d("ProfileConnection", "ChosenSongs: $ChosenSongs")
-
-            // Update the beacon with the complete list of tracks
-            val updatedBeacon = profile.copy(topSongs = TopSongs ?: emptyList(), chosenSongs = ChosenSongs ?: emptyList())
-            dataFlow.value = updatedBeacon
+              // Update the beacon with the complete list of tracks
+              val updatedBeacon =
+                  profile.copy(
+                      topSongs = TopSongs ?: emptyList(), chosenSongs = ChosenSongs ?: emptyList())
+              dataFlow.value = updatedBeacon
+            }
+            onSuccess(document, dataFlow)
+          } else {
+            Log.e("Firestore", "songs lists have a Wrong Firebase Format")
           }
-          onSuccess(document, dataFlow)
-        } else {
-          Log.e("Firestore", "songs lists have a Wrong Firebase Format")
         }
-      }
 
     return super.getItem(itemId, onSuccessWrapper)
   }

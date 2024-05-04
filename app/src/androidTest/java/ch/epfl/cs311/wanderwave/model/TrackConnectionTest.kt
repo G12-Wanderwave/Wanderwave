@@ -132,15 +132,15 @@ class TrackConnectionTest {
     // Mock the Track
     val mockTrack = Track("testTrackId", "Test Title", "Test Artist")
     val mockProfile =
-      Profile(
-        "Test First Name",
-        "Test Last Name",
-        "Test Description",
-        10,
-        true,
-        Uri.parse("https://example.com/profile.jpg"),
-        "Test Spotify Uid",
-        "Test Firebase Uid")
+        Profile(
+            "Test First Name",
+            "Test Last Name",
+            "Test Description",
+            10,
+            true,
+            Uri.parse("https://example.com/profile.jpg"),
+            "Test Spotify Uid",
+            "Test Firebase Uid")
 
     val mockProfileTrackAssociation = ProfileTrackAssociation(mockProfile, mockTrack)
 
@@ -182,11 +182,13 @@ class TrackConnectionTest {
     var retrievedTrackAndProfile: ProfileTrackAssociation? = null
 
     val mapOfDocumentReferences =
-      mapOf("creator" to mockProfileDocumentReference, "track" to mockTrackDocumentReference)
+        mapOf("creator" to mockProfileDocumentReference, "track" to mockTrackDocumentReference)
 
     // Call the function under test
-    async { retrievedTrackAndProfile = trackConnection.fetchProfileAndTrack(mapOfDocumentReferences) }
-      .await()
+    async {
+          retrievedTrackAndProfile = trackConnection.fetchProfileAndTrack(mapOfDocumentReferences)
+        }
+        .await()
 
     // Verify that the get function is called on the document with the correct id
     coVerify { mockTrackDocumentReference.get() }
@@ -220,7 +222,7 @@ class TrackConnectionTest {
         }
 
     val documentReferenceMap =
-      mapOf("track" to mockDocumentReference, "creator" to mockDocumentReference)
+        mapOf("track" to mockDocumentReference, "creator" to mockDocumentReference)
 
     // Call the function under test
     val retrievedTrack = trackConnection.fetchProfileAndTrack(documentReferenceMap)
@@ -248,7 +250,7 @@ class TrackConnectionTest {
         }
 
     val documentReferenceMap =
-      mapOf("track" to mockDocumentReference, "creator" to mockDocumentReference)
+        mapOf("track" to mockDocumentReference, "creator" to mockDocumentReference)
 
     // Call the function under test
     val retrievedTrack = trackConnection.fetchProfileAndTrack(documentReferenceMap)

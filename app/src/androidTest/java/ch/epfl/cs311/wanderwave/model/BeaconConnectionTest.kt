@@ -1,7 +1,6 @@
 package ch.epfl.cs311.wanderwave.model
 
 import android.content.Context
-import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
 import ch.epfl.cs311.wanderwave.di.ConnectionModule
 import ch.epfl.cs311.wanderwave.model.data.Beacon
@@ -31,7 +30,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -278,8 +276,6 @@ public class BeaconConnectionTest {
       }
     }
   }
-
-
 
   @Test
   fun testGetAllItems() = runBlocking {

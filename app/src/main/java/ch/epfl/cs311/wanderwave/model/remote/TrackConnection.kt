@@ -61,7 +61,7 @@ class TrackConnection(private val database: FirebaseFirestore? = null) :
 
   // Fetch a track from a DocumentReference asynchronously
   suspend fun fetchProfileAndTrack(
-    profileAndTrackRef: Map<String, DocumentReference>?
+      profileAndTrackRef: Map<String, DocumentReference>?
   ): ProfileTrackAssociation? {
     if (profileAndTrackRef == null) return null
     return withContext(Dispatchers.IO) {
@@ -78,8 +78,8 @@ class TrackConnection(private val database: FirebaseFirestore? = null) :
         }
 
         ProfileTrackAssociation(
-          profile = profileDocument?.let { Profile.from(it) }!!,
-          track = trackDocument?.let { Track.from(it) }!!)
+            profile = profileDocument?.let { Profile.from(it) }!!,
+            track = trackDocument?.let { Track.from(it) }!!)
       } catch (e: Exception) {
         // Handle exceptions
         Log.e("Firestore", "Error fetching track:${e.message}")
@@ -89,9 +89,7 @@ class TrackConnection(private val database: FirebaseFirestore? = null) :
   }
 
   // Fetch a track from a DocumentReference asynchronously
-  suspend fun fetchTrack(
-    TrackRef: DocumentReference?
-  ): Track? {
+  suspend fun fetchTrack(TrackRef: DocumentReference?): Track? {
     if (TrackRef == null) return null
     return withContext(Dispatchers.IO) {
       try {
@@ -99,7 +97,6 @@ class TrackConnection(private val database: FirebaseFirestore? = null) :
         val trackDocument = TrackRef.get()?.await()
         Log.d("Firestore", "Fetched track ${trackDocument}")
         trackDocument?.let { Track.from(it) }
-
       } catch (e: Exception) {
         // Handle exceptions
         Log.e("Firestore", "Error fetching track:${e.message}")

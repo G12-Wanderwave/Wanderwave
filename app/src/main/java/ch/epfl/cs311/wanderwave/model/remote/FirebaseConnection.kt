@@ -42,7 +42,7 @@ abstract class FirebaseConnection<T, U> {
 
   open fun addItem(item: T) {
     val itemMap = itemToMap(item)
-    Log.d("Conneciton","beacon map : ${itemMap}")
+    Log.d("Conneciton", "beacon map : ${itemMap}")
     db.collection(collectionName)
         .add(itemMap)
         .addOnFailureListener { e -> Log.e("Firestore", "Error adding document: ", e) }
@@ -100,8 +100,8 @@ abstract class FirebaseConnection<T, U> {
         .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully deleted!") }
   }
 
-
-  open fun getItem(itemId: String): Flow<T> = getItem(itemId) { _: DocumentSnapshot, _: MutableStateFlow<T?> -> }
+  open fun getItem(itemId: String): Flow<T> =
+      getItem(itemId) { _: DocumentSnapshot, _: MutableStateFlow<T?> -> }
 
   open fun getItem(
       itemId: String,
