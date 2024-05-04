@@ -24,7 +24,7 @@ object ConnectionModule {
   fun provideBeaconRepository(@ApplicationContext context: Context): BeaconRepository {
     return BeaconConnection(
         trackConnection = TrackConnection(),
-        profileConnection = ProfileConnection(),
+        profileConnection = ProfileConnection(trackConnection = TrackConnection()),
         ioDispatcher = Dispatchers.IO)
   }
 

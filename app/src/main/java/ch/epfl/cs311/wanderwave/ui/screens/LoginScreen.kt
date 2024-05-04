@@ -17,7 +17,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -85,8 +84,9 @@ fun LoginScreen(
       val trackConnection = TrackConnection()
       val profileConnection = ProfileConnection(trackConnection = trackConnection)
 
-      val beaconConnection =
-          BeaconConnection(trackConnection = trackConnection, profileConnection = profileConnection)
+      // val beaconConnection =
+      //     BeaconConnection(trackConnection = trackConnection, profileConnection =
+      // profileConnection)
 
       profileConnection.addItemWithId(profile)
 
