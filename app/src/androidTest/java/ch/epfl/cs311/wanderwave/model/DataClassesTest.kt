@@ -153,8 +153,7 @@ class DataClassesTest {
             "isPublic" to true,
             "profilePictureUri" to "https://example.com/image.jpg",
             "chosenSongs" to listOf<DocumentReference>(),
-            "topSongs" to listOf<DocumentReference>()
-        )
+            "topSongs" to listOf<DocumentReference>())
 
     assertEquals(expectedMap, profile.toMap())
   }

@@ -113,7 +113,7 @@ public class ProfileConnectionTest {
             "profilePictureUri" to "https://example.com/image.jpg",
             "topSongs" to listOf<DocumentReference>(),
             "chosenSongs" to listOf<DocumentReference>(),
-          )
+        )
 
     assertEquals(expectedMap, profileConnection.itemToMap(profile))
   }
