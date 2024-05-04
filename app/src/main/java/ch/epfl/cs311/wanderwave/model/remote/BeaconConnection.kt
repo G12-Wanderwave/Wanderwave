@@ -69,15 +69,14 @@ class BeaconConnection(
     val onSuccessWrapper: (DocumentSnapshot, MutableStateFlow<Beacon?>) -> Unit =
         { document, dataFlow ->
           val beacon = dataFlow.value ?: Beacon.from(document) ?: null
-
+          Log.d("BeaconConnection", "Beacon fetched successfully ${document["tracks"]}")
           beacon?.let { beacon ->
             val tracksObject = document["tracks"]
-
+            Log.d("BeaconConnection", "tracks object: $tracksObject")
             var profileAndTrackRefs: List<Map<String, DocumentReference>>?
 
             if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
               profileAndTrackRefs = tracksObject as? List<Map<String, DocumentReference>>
-
               // Use a coroutine to perform asynchronous operations
               coroutineScope.launch {
                 val profileAndTracksDeferred =
@@ -87,7 +86,6 @@ class BeaconConnection(
 
                 // Wait for all tracks to be fetched
                 val profileAndTracks = profileAndTracksDeferred?.mapNotNull { it?.await() }
-
                 // Update the beacon with the complete list of tracks
                 val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks ?: emptyList())
                 dataFlow.value = updatedBeacon
@@ -97,6 +95,8 @@ class BeaconConnection(
             } else {
               Log.e("Firestore", "tracks has Wrong Firebase Format")
             }
+          } ?: {
+            Log.e("Firestore", "Error fetching beacon")
           }
         }
 
@@ -156,7 +156,15 @@ class BeaconConnection(
                               track.id),
                           track))
                 }
-            transaction.update(beaconRef, "tracks", newTracks.map { it.toMap() })
+            transaction.update(
+                beaconRef,
+                "tracks",
+                newTracks.map { profileAndTrack ->
+                  hashMapOf(
+                      "creator" to
+                          db.collection("users").document(profileAndTrack.profile.firebaseUid),
+                      "track" to db.collection("tracks").document(profileAndTrack.track.id))
+                })
           } ?: throw Exception("Beacon not found")
         }
         .addOnSuccessListener { onComplete(true) }

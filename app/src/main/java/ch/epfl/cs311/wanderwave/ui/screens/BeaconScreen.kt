@@ -169,9 +169,6 @@ fun SongList(
       modifier = Modifier.testTag("beaconTracksTitle"))
   LazyColumn {
     items(beacon.profileAndTrack) {
-      Log.d("SongList", "Track added successfully.")
-      Log.d("SongList", it.profile.toString())
-      Log.d("SongList", it.track.toString())
       TrackItem(it, navigationActions)
     }
   }

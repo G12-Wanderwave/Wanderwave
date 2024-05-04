@@ -66,7 +66,6 @@ class TrackConnection(private val database: FirebaseFirestore? = null) :
     if (profileAndTrackRef == null) return null
     return withContext(Dispatchers.IO) {
       try {
-
         var profile: Profile? = null
         var track: Track? = null
         val trackDocument = profileAndTrackRef["track"]?.get()?.await()
@@ -74,6 +73,7 @@ class TrackConnection(private val database: FirebaseFirestore? = null) :
         val profileDocument = profileAndTrackRef["creator"]?.get()?.await()
         profileDocument?.let { profile = Profile.from(it) }
         if (profile == null || track == null) {
+          Log.e("Firestore", "Error fetching profile or track, firebase format is wrong")
           return@withContext null
         }
 
