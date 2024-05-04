@@ -263,7 +263,7 @@ class TrackConnectionTest {
   }
 
   @Test
-fun testFetchTrack() = runBlocking {
+  fun testFetchTrack() = runBlocking {
     // Mock the DocumentReference
     val mockTrackDocumentReference = mockk<DocumentReference>()
 
@@ -276,11 +276,11 @@ fun testFetchTrack() = runBlocking {
     // Define behavior for the get() method on the DocumentReference to return the mock task
     coEvery { mockTrackDocumentReference.get() } returns
         mockk {
-            every { isComplete } returns true
-            every { isSuccessful } returns true
-            every { result } returns mockDocumentSnapshot
-            every { getException() } returns null
-            every { isCanceled } returns false
+          every { isComplete } returns true
+          every { isSuccessful } returns true
+          every { result } returns mockDocumentSnapshot
+          every { getException() } returns null
+          every { isCanceled } returns false
         }
 
     // Define behavior for the DocumentSnapshot
@@ -297,30 +297,30 @@ fun testFetchTrack() = runBlocking {
 
     // Assert that the retrieved track is the same as the mock track
     assertEquals(mockTrack, retrievedTrack)
-}
+  }
 
-@Test
-fun testFetchTrackNullDocumentReference() = runBlocking {
+  @Test
+  fun testFetchTrackNullDocumentReference() = runBlocking {
     // Call the function under test
     val retrievedTrack = trackConnection.fetchTrack(null)
 
     // Assert that the retrieved track is null
     assertEquals(null, retrievedTrack)
-}
+  }
 
-@Test
-fun testFetchTrackException() = runBlocking {
+  @Test
+  fun testFetchTrackException() = runBlocking {
     // Mock the DocumentReference
     val mockDocumentReference = mockk<DocumentReference>()
 
     // Define behavior for the get() method on the DocumentReference to return the mock task
     coEvery { mockDocumentReference.get() } returns
         mockk {
-            every { isComplete } returns true
-            every { isSuccessful } returns false
-            every { result } returns null
-            every { getException() } returns Exception("Test Exception")
-            every { isCanceled } returns false
+          every { isComplete } returns true
+          every { isSuccessful } returns false
+          every { result } returns null
+          every { getException() } returns Exception("Test Exception")
+          every { isCanceled } returns false
         }
 
     // Call the function under test
@@ -331,6 +331,5 @@ fun testFetchTrackException() = runBlocking {
 
     // Assert that the retrieved track is null
     assertEquals(null, retrievedTrack)
-}
-
+  }
 }
