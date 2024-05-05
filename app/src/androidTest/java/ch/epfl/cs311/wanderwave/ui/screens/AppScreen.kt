@@ -11,4 +11,5 @@ class AppScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
   //    val trackListButton: KNode = appBottomBarScreen.child { hasTestTag("trackListButton") }
   val appScaffold = onNode { hasTestTag("appScaffold") }
   val appBottomBar: KNode = appScaffold.child { hasTestTag("appBottomBar") }
+  val trackListButton: KNode = appBottomBar.child { hasTestTag("bottomAppBarButtontrackList") }
 }

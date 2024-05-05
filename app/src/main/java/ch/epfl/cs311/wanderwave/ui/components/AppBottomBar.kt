@@ -51,7 +51,7 @@ fun AppBottomBar(navActions: NavigationActions) {
         onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[0].route) },
         modifier =
             Modifier.weight(1f) // Spread the icons evenly across the BottomAppBar
-                .testTag("trackListButton" + Route.TRACK_LIST.routeString)) {
+                .testTag("bottomAppBarButton" + Route.TRACK_LIST.routeString)) {
           Icon(
               trackListIcon,
               contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[0].textId))
