@@ -42,6 +42,7 @@ import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
 import ch.epfl.cs311.wanderwave.ui.components.profile.SongsListDisplay
 import ch.epfl.cs311.wanderwave.ui.components.profile.VisitCard
 import ch.epfl.cs311.wanderwave.model.data.ListType
+import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
 const val SCALE_X = 0.5f
@@ -93,11 +94,11 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
 
         // Call the SongsListDisplay function
         // Buttons for adding tracks to top songs lists
-        Button(
-            onClick = { navActions.navigateToSelectSongScreen("profile") },
-            modifier = Modifier.testTag("addTopSongs")) {
-              Text("Add Track to TOP SONGS List")
-            }
+//        Button(
+//            onClick = { navActions.navigateToSelectSongScreen(viewModelType.PROFILE) },
+//            modifier = Modifier.testTag("addTopSongs")) {
+//              Text("Add Track to TOP SONGS List")
+//            }
 
         SongsListDisplay(
             navigationActions = navActions,
@@ -107,7 +108,7 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
               viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
               viewModel.addTrackToList(dialogListType, track)
             },
-            viewModelName = "profile",)
+            viewModelName = viewModelType.PROFILE,)
       }
 
   Row {

@@ -6,6 +6,7 @@ import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.util.Locale
 
 enum class Route(val routeString: String, val showBottomBar: Boolean) {
   LOGIN("login", false),
@@ -80,8 +81,9 @@ class NavigationActions(navController: NavHostController) {
     navigationController.navigate("${Route.VIEW_PROFILE.routeString}/$profileId")
     _currentRouteFlow.value = Route.PROFILE
   }
-  fun navigateToSelectSongScreen(viewModelType: String) {
-    navigationController.navigate("${Route.SELECT_SONG.routeString}/$viewModelType")
+  fun navigateToSelectSongScreen(viewModelType: viewModelType) {
+    val type = viewModelType.name.lowercase(Locale.getDefault()) // Converts enum to a lowercase string
+    navigationController.navigate("${Route.SELECT_SONG.routeString}/$type")
   }
   fun goBack() {
     navigationController.popBackStack()

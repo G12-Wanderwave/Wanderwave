@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.model.data.ListType
+import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.viewmodel.SongList
 import com.spotify.protocol.types.ListItem
@@ -114,7 +115,7 @@ fun SongsListDisplay(
     isTopSongsListVisible: Boolean,
     onAddTrack: (Track) -> Unit,
     canAddSong: Boolean = true,
-    viewModelName: String = ""
+    viewModelName: viewModelType = viewModelType.NULL
 ) {
   val name = if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.CHOSEN_SONGS
   songLists

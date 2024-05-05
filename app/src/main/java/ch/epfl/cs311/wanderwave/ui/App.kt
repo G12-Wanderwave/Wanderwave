@@ -102,7 +102,7 @@ fun AppScaffold(navController: NavHostController) {
                   val viewModelType = backStackEntry.arguments?.getString("viewModelType")
                   val viewModel = when (viewModelType) {
                       "profile" -> profileViewModel
-                      "trackList" -> trackListViewModel
+                      "tracklist" -> trackListViewModel
                       else -> throw IllegalStateException("Invalid ViewModel type for SelectSongScreen")
                   }
 

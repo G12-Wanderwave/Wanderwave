@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
@@ -49,7 +50,7 @@ fun TrackListScreen(navActions: NavigationActions,
         onAddTrack = {},
         onSelectTrack = viewModel::selectTrack,
         navActions = navActions,
-        viewModelName = "trackList"
+        viewModelName = viewModelType.TRACKLIST
         )
   }
 }
