@@ -22,6 +22,7 @@ import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
@@ -38,9 +39,10 @@ fun needToRequestPermissions(permissionState: MultiplePermissionsState): Boolean
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
-@SuppressLint("MissingPermission")
+@SuppressLint("MissingPermission", "StateFlowValueCalledInComposition")
 @Composable
-fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hiltViewModel()) {
+fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hiltViewModel(),
+              profileViewModel: ProfileViewModel = hiltViewModel()) {
   val context = LocalContext.current
   val cameraPositionState: CameraPositionState = rememberCameraPositionState {}
   val mapIsLoaded = remember { mutableStateOf(false) }
@@ -56,6 +58,9 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
   DisposableEffect(Unit) {
     onDispose { viewModel.cameraPosition.value = cameraPositionState.position }
   }
+
+  // Add listener to check if user is in beacon range and drop song if applicable
+  viewModel.isInBeaconRange(profileViewModel.songLists.value.first().tracks.first(), profileViewModel.profile.value)
 
   WanderwaveGoogleMap(
       cameraPositionState = cameraPositionState,

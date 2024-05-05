@@ -11,7 +11,7 @@ data class Beacon(
     val location: Location,
 
     /** List of tracks that are broadcast from the beacon */
-    val profileAndTrack: List<ProfileTrackAssociation> = listOf<ProfileTrackAssociation>(),
+    var profileAndTrack: List<ProfileTrackAssociation> = listOf<ProfileTrackAssociation>(),
 ) {
 
   /**
@@ -19,8 +19,12 @@ data class Beacon(
    *
    * @param track the track to add
    */
-  fun addTrack(track: Track) {
-    tracks = tracks + track
+  fun addTrack(track: Track, profile: Profile) {
+    // Check if the track is already in the beacon
+    //TODO: In the future, add a popularity metric if song is added multiple time?
+    if(!profileAndTrack.any { it.track == track }) {
+        profileAndTrack = profileAndTrack + ProfileTrackAssociation(profile, track)
+    }
   }
 
   companion object {
