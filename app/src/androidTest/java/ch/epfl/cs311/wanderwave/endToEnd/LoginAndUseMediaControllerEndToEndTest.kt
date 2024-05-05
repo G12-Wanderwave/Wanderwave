@@ -9,6 +9,7 @@ import ch.epfl.cs311.wanderwave.ui.screens.AppScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
+import ch.epfl.cs311.wanderwave.ui.screens.components.ExclusivePlayerScreen
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -63,6 +64,38 @@ class LoginAndUseMediaControllerEndToEndTest :
       searchBar.assertIsDisplayed()
 
       trackButton.performClick()
+    }
+
+    ComposeScreen.onComposeScreen<AppScreen>(composeTestRule) {
+      miniPlayer.assertIsDisplayed()
+
+      miniPlayerPlayButton.assertIsDisplayed()
+      miniPlayerPlayButton.performClick()
+
+      miniPlayerTitle.assertIsDisplayed()
+      miniPlayerTitle.performClick()
+    }
+
+    ComposeScreen.onComposeScreen<ExclusivePlayerScreen>(composeTestRule) {
+      assertIsDisplayed()
+
+      playerControl.assertIsDisplayed()
+
+      playPauseButton.assertIsDisplayed()
+      playPauseButton.performClick()
+
+      previousButton.assertIsDisplayed()
+      previousButton.performClick()
+
+      nextButton.assertIsDisplayed()
+      nextButton.performClick()
+
+      shuffleButton.assertIsDisplayed()
+      shuffleButton.performClick()
+
+      loopButton.assertIsDisplayed()
+      loopButton.performClick()
+      loopButton.performClick()
     }
   }
 }

@@ -23,13 +23,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
-import javax.inject.Singleton
 import kotlinx.coroutines.delay
+import javax.inject.Singleton
 
 @Singleton
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,6 +50,7 @@ fun SurroundWithMiniPlayer(
   HandleProgressChanges(uiState = uiState, progress = progress)
 
   BottomSheetScaffold(
+      modifier = Modifier.testTag("miniPlayer"),
       sheetContent = {
         if (!uiState.expanded && sheetState.hasPartiallyExpandedState && displayPlayer) {
           MiniPlayer(
