@@ -22,4 +22,8 @@ class ExclusivePlayerScreen(semanticsProvider: SemanticsNodeInteractionsProvider
   val nextButton: KNode = playerControl.child { hasTestTag("nextButton") }
   val shuffleButton: KNode = playerControl.child { hasTestTag("shuffleButton") }
   val loopButton: KNode = playerControl.child { hasTestTag("loopButton") }
+
+  val trackInfo = onNode { hasTestTag("trackInfo") }
+  val artist: KNode = trackInfo.child { hasTestTag("artist") }
+  val title: KNode = trackInfo.child { hasTestTag("title") }
 }

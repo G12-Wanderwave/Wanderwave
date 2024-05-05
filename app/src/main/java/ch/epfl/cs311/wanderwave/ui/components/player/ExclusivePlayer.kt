@@ -128,13 +128,13 @@ fun VotingButtonsComponent(selectedVote: MutableIntState) {
 @Composable
 fun TrackInfoComponent(uiState: TrackListViewModel.UiState) {
   Column(
-      modifier = Modifier.fillMaxWidth(),
+      modifier = Modifier.fillMaxWidth().testTag("trackInfo"),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center) {
         Text(
-            text = uiState.selectedTrack?.artist ?: "", style = MaterialTheme.typography.titleSmall)
+            text = uiState.selectedTrack?.artist ?: "", style = MaterialTheme.typography.titleSmall, modifier = Modifier.testTag("artist"))
         Text(
-            text = uiState.selectedTrack?.title ?: "", style = MaterialTheme.typography.titleMedium)
+            text = uiState.selectedTrack?.title ?: "", style = MaterialTheme.typography.titleMedium, modifier = Modifier.testTag("title"))
       }
 }
 
