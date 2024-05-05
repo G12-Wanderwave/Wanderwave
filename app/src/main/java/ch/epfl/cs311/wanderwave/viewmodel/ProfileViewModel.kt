@@ -23,7 +23,7 @@ class ProfileViewModel
 constructor(
     private val repository: ProfileRepository, // TODO revoir
     private val spotifyController: SpotifyController
-) : ViewModel() {
+) : ViewModel(),SpotifySongsActions {
 
   private val _profile =
       MutableStateFlow(
@@ -49,10 +49,10 @@ constructor(
   val songLists: StateFlow<List<SongList>> = _songLists
 
   private val _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
-  val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
+  override val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
 
   private val _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
-  val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
+  override val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
 
   private var _uiState = MutableStateFlow(ProfileViewModel.UIState())
   val uiState: StateFlow<ProfileViewModel.UIState> = _uiState
@@ -74,7 +74,7 @@ constructor(
   }
 
   // Function to add a track to a song list
-  fun addTrackToList(listName: String, track: Track) {
+  override fun addTrackToList(listName: String, track: Track) {
     val updatedLists =
         _songLists.value.map { list ->
           if (list.name == listName) {
@@ -108,7 +108,7 @@ constructor(
    * @since 2.0
    * @last update 2.0
    */
-  fun retrieveTracks() {
+  override fun retrieveTracks() {
     viewModelScope.launch {
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
       if (track != null) {
@@ -133,7 +133,7 @@ constructor(
    * @since 2.0
    * @last update 2.0
    */
-  fun retrieveAndAddSubsection() {
+  override fun retrieveAndAddSubsection() {
     viewModelScope.launch {
       _spotifySubsectionList.value = emptyList()
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
@@ -152,7 +152,7 @@ constructor(
    * @since 2.0
    * @last update 2.0
    */
-  fun retrieveChild(item: ListItem) {
+  override fun retrieveChild(item: ListItem) {
     viewModelScope.launch {
       _childrenPlaylistTrackList.value = emptyList()
       val children = spotifyController.getAllChildren(item).firstOrNull()
