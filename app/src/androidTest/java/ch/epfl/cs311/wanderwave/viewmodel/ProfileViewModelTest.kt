@@ -4,6 +4,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.model.data.ListType
 import com.spotify.protocol.types.ListItem
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -73,17 +74,17 @@ class ProfileViewModelTest {
     assertTrue(viewModel.songLists.value.isEmpty())
 
     // Call createSpecificSongList to initialize a list
-    viewModel.createSpecificSongList("TOP_SONGS")
+    viewModel.createSpecificSongList(ListType.TOP_SONGS)
 
     // Add track to "TOP SONGS"
-    viewModel.addTrackToList("TOP SONGS", newTrack)
+    viewModel.addTrackToList(ListType.TOP_SONGS, newTrack)
 
     // Get the updated song list
     val songLists = viewModel.songLists.value
     assertFalse("Song list should not be empty after adding a track", songLists.isEmpty())
 
     // Check if the track was added correctly
-    val songsInList = songLists.find { it.name == "TOP SONGS" }?.tracks ?: emptyList()
+    val songsInList = songLists.find { it.name == ListType.TOP_SONGS}?.tracks ?: emptyList()
     assertTrue("Song list should contain the newly added track", songsInList.contains(newTrack))
   }
 
@@ -96,7 +97,7 @@ class ProfileViewModelTest {
     every { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(track))
     every { spotifyController.getAllChildren(track) } returns flowOf(listOf(track2))
 
-    viewModel.createSpecificSongList("TOP_SONGS")
+    viewModel.createSpecificSongList(ListType.TOP_SONGS)
     // Start observing the Flow before triggering actions that modify it
     val job = launch {
       viewModel.songLists.collect { songLists ->

@@ -16,11 +16,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
 @Composable
-fun TrackListScreen(
+fun TrackListScreen(navActions: NavigationActions,
     showMessage: (String) -> Unit,
     viewModel: TrackListViewModel = hiltViewModel()
 ) {
@@ -46,6 +47,9 @@ fun TrackListScreen(
         uiState.tracks,
         title = "All Tracks",
         onAddTrack = {},
-        onSelectTrack = viewModel::selectTrack)
+        onSelectTrack = viewModel::selectTrack,
+        navActions = navActions,
+        viewModelName = "trackList"
+        )
   }
 }

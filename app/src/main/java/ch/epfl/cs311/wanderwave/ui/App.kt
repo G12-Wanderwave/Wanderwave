@@ -19,8 +19,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
@@ -57,13 +59,14 @@ fun AppScaffold(navController: NavHostController) {
   var showBottomBar by remember { mutableStateOf(false) }
   val currentRouteState by navActions.currentRouteFlow.collectAsStateWithLifecycle()
   val snackbarHostState = remember { SnackbarHostState() }
-  val viewModel: ProfileViewModel = hiltViewModel()
-  val scope = rememberCoroutineScope()
+    val profileViewModel: ProfileViewModel = hiltViewModel()
+    val trackListViewModel = hiltViewModel<TrackListViewModel>()
+
+    val scope = rememberCoroutineScope()
   val showSnackbar = { message: String ->
     scope.launch { snackbarHostState.showSnackbar(message) }
     Unit
   }
-  val trackListViewModel = hiltViewModel<TrackListViewModel>()
 
   LaunchedEffect(currentRouteState) { showBottomBar = currentRouteState?.showBottomBar ?: false }
 
@@ -85,16 +88,26 @@ fun AppScaffold(navController: NavHostController) {
                 composable(Route.SPOTIFY_CONNECT.routeString) { SpotifyConnectScreen(navActions) }
                 composable(Route.ABOUT.routeString) { AboutScreen(navActions) }
                 composable(Route.TRACK_LIST.routeString) {
-                  TrackListScreen(showSnackbar, trackListViewModel)
+                  TrackListScreen(navActions,showSnackbar, trackListViewModel)
                 }
                 composable(Route.MAP.routeString) { MapScreen(navActions) }
-                composable(Route.PROFILE.routeString) { ProfileScreen(navActions, viewModel) }
+                composable(Route.PROFILE.routeString) { ProfileScreen(navActions, profileViewModel) }
                 composable(Route.EDIT_PROFILE.routeString) {
-                  EditProfileScreen(navActions, viewModel)
+                  EditProfileScreen(navActions, profileViewModel)
                 }
-                composable(Route.SELECT_SONG.routeString) {
+              composable(
+                  route = "${Route.SELECT_SONG.routeString}/{viewModelType}",
+                  arguments = listOf(navArgument("viewModelType") { type = NavType.StringType })
+              ) { backStackEntry ->
+                  val viewModelType = backStackEntry.arguments?.getString("viewModelType")
+                  val viewModel = when (viewModelType) {
+                      "profile" -> profileViewModel
+                      "trackList" -> trackListViewModel
+                      else -> throw IllegalStateException("Invalid ViewModel type for SelectSongScreen")
+                  }
+
                   SelectSongScreen(navActions, viewModel)
-                }
+              }
                 composable("${Route.VIEW_PROFILE.routeString}/{profileId}") {
                   ProfileViewOnlyScreen(it.arguments?.getString("profileId") ?: "", navActions)
                 }

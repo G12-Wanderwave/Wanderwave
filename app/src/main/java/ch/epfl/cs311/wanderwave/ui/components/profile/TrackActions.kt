@@ -24,51 +24,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
+import ch.epfl.cs311.wanderwave.model.data.ListType
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.viewmodel.SongList
 import com.spotify.protocol.types.ListItem
-
-/**
- * Composable that displays a list of tracks. Each track is represented by the TrackItem composable.
- *
- * @param tracks List of tracks to display.
- * @author Ayman Bakiri
- * @author Menzo Bouaissi (add the scrollable list)
- * @since 1.0
- * @last update 2.0
- */
-@Composable
-fun TracksList(tracks: List<Track>) {
-  tracks.forEach { track -> key(track.id) { TrackItem(track = track) } }
-}
-
-/**
- * Composable that displays information for a single track, including its ID, title, and artist.
- *
- * @param track The track data to display.
- * @author Ayman Bakiri
- * @author Menzo Bouaissi
- * @since 1.0
- * @last update 2.0
- */
-@Composable
-fun TrackItem(track: Track, onClick: () -> Unit = {}) {
-  Card(
-      colors =
-          CardDefaults.cardColors(
-              containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-              contentColor = MaterialTheme.colorScheme.onSurface,
-              disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariant,
-              disabledContentColor = MaterialTheme.colorScheme.error // Example color
-              ),
-      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).clickable(onClick = onClick)) {
-        Row {
-          Column(modifier = Modifier.padding(8.dp)) {
-            Text(text = track.title, style = MaterialTheme.typography.titleMedium)
-            Text(text = track.artist, style = MaterialTheme.typography.bodyMedium)
-          }
-        }
-      }
-}
 
 /**
  * Dialog composable that allows the user to add a new track by entering the track ID, title, and
@@ -150,23 +109,30 @@ fun AddTrackDialog(
  */
 @Composable
 fun SongsListDisplay(
+    navigationActions: NavigationActions,
     songLists: List<SongList>,
     isTopSongsListVisible: Boolean,
     onAddTrack: (Track) -> Unit,
-    canAddSong: Boolean = true
+    canAddSong: Boolean = true,
+    viewModelName: String = ""
 ) {
-  val name = if (isTopSongsListVisible) "TOP SONGS" else "CHOSEN SONGS"
+  val name = if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.CHOSEN_SONGS
   songLists
       .firstOrNull { it.name == name }
       ?.let { songList ->
         TrackList(
             tracks = songList.tracks,
-            title = name,
+            title = name.name,
             onSelectTrack = { /* TODO */},
             onAddTrack = onAddTrack,
-            canAddSong = canAddSong)
+            canAddSong = canAddSong,
+            navActions = navigationActions,// TODO: Pass the correct navActions),
+            viewModelName = viewModelName
+        )
       }
 }
+
+
 
 /**
  * Composable that displays a Track. Each track is represented by the TrackItem composable, which is

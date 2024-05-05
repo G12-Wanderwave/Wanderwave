@@ -5,6 +5,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -33,6 +34,7 @@ class TrackListScreenTest : TestCase() {
 
   @RelaxedMockK lateinit var mockSpotifyController: SpotifyController
   @RelaxedMockK lateinit var trackRepository: TrackRepository
+  @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
   @RelaxedMockK lateinit var viewModel: TrackListViewModel
 
@@ -59,7 +61,7 @@ class TrackListScreenTest : TestCase() {
 
     viewModel = TrackListViewModel(mockSpotifyController, trackRepository)
 
-    composeTestRule.setContent { TrackListScreen(mockShowMessage, viewModel) }
+    composeTestRule.setContent { TrackListScreen(mockNavigationActions,mockShowMessage, viewModel) }
   }
 
   @Test

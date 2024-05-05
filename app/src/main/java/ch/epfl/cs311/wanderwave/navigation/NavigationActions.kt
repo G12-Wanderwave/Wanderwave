@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.navigation
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import ch.epfl.cs311.wanderwave.R
+import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -79,7 +80,9 @@ class NavigationActions(navController: NavHostController) {
     navigationController.navigate("${Route.VIEW_PROFILE.routeString}/$profileId")
     _currentRouteFlow.value = Route.PROFILE
   }
-
+  fun navigateToSelectSongScreen(viewModelType: String) {
+    navigationController.navigate("${Route.SELECT_SONG.routeString}/$viewModelType")
+  }
   fun goBack() {
     navigationController.popBackStack()
   }

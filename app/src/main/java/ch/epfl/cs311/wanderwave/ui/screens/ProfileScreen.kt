@@ -41,6 +41,7 @@ import ch.epfl.cs311.wanderwave.ui.components.profile.ClickableIcon
 import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
 import ch.epfl.cs311.wanderwave.ui.components.profile.SongsListDisplay
 import ch.epfl.cs311.wanderwave.ui.components.profile.VisitCard
+import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
 const val SCALE_X = 0.5f
@@ -63,13 +64,13 @@ val INPUT_BOX_NAM_SIZE = 150.dp
 fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
   val currentProfileState by viewModel.profile.collectAsState()
   val songLists by viewModel.songLists.collectAsState()
-  val dialogListType by remember { mutableStateOf("TOP SONGS") }
+  val dialogListType by remember { mutableStateOf(ListType.TOP_SONGS) }
   var isTopSongsListVisible by remember { mutableStateOf(true) }
 
   val currentProfile: Profile = currentProfileState ?: return
   LaunchedEffect(Unit) {
-    viewModel.createSpecificSongList("TOP_SONGS")
-    viewModel.createSpecificSongList("CHOSEN_SONGS")
+    viewModel.createSpecificSongList(ListType.TOP_SONGS)
+    viewModel.createSpecificSongList(ListType.CHOSEN_SONGS)
   }
 
   Column(
@@ -93,18 +94,20 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
         // Call the SongsListDisplay function
         // Buttons for adding tracks to top songs lists
         Button(
-            onClick = { navActions.navigateTo(Route.SELECT_SONG) },
+            onClick = { navActions.navigateToSelectSongScreen("profile") },
             modifier = Modifier.testTag("addTopSongs")) {
               Text("Add Track to TOP SONGS List")
             }
 
         SongsListDisplay(
+            navigationActions = navActions,
             songLists = songLists,
             isTopSongsListVisible = isTopSongsListVisible,
             onAddTrack = { track ->
               viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
               viewModel.addTrackToList(dialogListType, track)
-            })
+            },
+            viewModelName = "profile",)
       }
 
   Row {

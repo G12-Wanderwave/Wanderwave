@@ -6,6 +6,8 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.model.data.ListType
+import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -15,7 +17,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 // Define a simple class for a song list
-data class SongList(val name: String, val tracks: List<Track> = mutableListOf())
+data class SongList(val name: ListType, val tracks: List<Track> = mutableListOf())
 
 @HiltViewModel
 class ProfileViewModel
@@ -23,7 +25,7 @@ class ProfileViewModel
 constructor(
     private val repository: ProfileRepository, // TODO revoir
     private val spotifyController: SpotifyController
-) : ViewModel(),SpotifySongsActions {
+) : ViewModel(), SpotifySongsActions {
 
   private val _profile =
       MutableStateFlow(
@@ -57,14 +59,9 @@ constructor(
   private var _uiState = MutableStateFlow(ProfileViewModel.UIState())
   val uiState: StateFlow<ProfileViewModel.UIState> = _uiState
 
-  fun createSpecificSongList(listType: String) {
-    val listName =
-        when (listType) {
-          "TOP_SONGS" -> "TOP SONGS"
-          "CHOSEN_SONGS" -> "CHOSEN SONGS"
-          else -> return // Or handle error/invalid type
-        }
-    // Check if the list already exists
+
+  fun createSpecificSongList(listType: ListType) {
+    val listName =listType    // Check if the list already exists
     val existingList = _songLists.value.firstOrNull { it.name == listName }
     if (existingList == null) {
       // Add new list if it doesn't exist
@@ -74,7 +71,7 @@ constructor(
   }
 
   // Function to add a track to a song list
-  override fun addTrackToList(listName: String, track: Track) {
+  override fun addTrackToList(listName: ListType, track: Track) {
     val updatedLists =
         _songLists.value.map { list ->
           if (list.name == listName) {
@@ -117,7 +114,7 @@ constructor(
             val children = spotifyController.getAllChildren(i).firstOrNull()
             if (children != null) {
               for (child in children) {
-                addTrackToList("TOP SONGS", Track(child.id, child.title, child.subtitle))
+                addTrackToList(ListType.TOP_SONGS, Track(child.id, child.title, child.subtitle))
               }
             }
           }
