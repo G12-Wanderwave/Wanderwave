@@ -21,9 +21,9 @@ data class Beacon(
    */
   fun addTrack(track: Track, profile: Profile) {
     // Check if the track is already in the beacon
-    //TODO: In the future, add a popularity metric if song is added multiple time?
-    if(!profileAndTrack.any { it.track == track }) {
-        profileAndTrack = profileAndTrack + ProfileTrackAssociation(profile, track)
+    // TODO: In the future, add a popularity metric if song is added multiple time?
+    if (!profileAndTrack.any { it.track == track }) {
+      profileAndTrack = profileAndTrack + ProfileTrackAssociation(profile, track)
     }
   }
 

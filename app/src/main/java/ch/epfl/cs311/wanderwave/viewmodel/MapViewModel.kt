@@ -16,8 +16,8 @@ import com.google.android.gms.maps.LocationSource
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import javax.inject.Inject
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -25,9 +25,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class MapViewModel
 @Inject
-constructor(
-    val locationSource: LocationSource,
-    private val beaconRepository: BeaconRepository) : ViewModel() {
+constructor(val locationSource: LocationSource, private val beaconRepository: BeaconRepository) :
+    ViewModel() {
   val cameraPosition = MutableLiveData<CameraPosition?>()
 
   private val _uiState = MutableStateFlow(BeaconListUiState(loading = true))
@@ -65,11 +64,11 @@ constructor(
           _uiState.value.beacons.withIndex().minBy { (_, b) -> b.location.distanceBetween(loc) }
 
       // Check if the closest beacon is within range and if cooldown is not active
-      if (closestBeacon.value.location.distanceBetween(loc) < BEACON_RANGE && !isCooldownActive.value) {
-        viewModelScope.launch {
-          dropTrack(closestBeacon.value, track, profile)
-        }
-      }    }
+      if (closestBeacon.value.location.distanceBetween(loc) < BEACON_RANGE &&
+          !isCooldownActive.value) {
+        viewModelScope.launch { dropTrack(closestBeacon.value, track, profile) }
+      }
+    }
   }
 
   /**
@@ -88,6 +87,7 @@ constructor(
     delay(60000) // delay for 60 seconds
     isCooldownActive.value = false
   }
+
   @RequiresPermission(
       allOf =
           [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION])

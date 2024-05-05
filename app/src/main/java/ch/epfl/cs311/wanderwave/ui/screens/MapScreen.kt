@@ -41,8 +41,11 @@ fun needToRequestPermissions(permissionState: MultiplePermissionsState): Boolean
 @OptIn(ExperimentalPermissionsApi::class)
 @SuppressLint("MissingPermission", "StateFlowValueCalledInComposition")
 @Composable
-fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hiltViewModel(),
-              profileViewModel: ProfileViewModel = hiltViewModel()) {
+fun MapScreen(
+    navigationActions: NavigationActions,
+    viewModel: MapViewModel = hiltViewModel(),
+    profileViewModel: ProfileViewModel = hiltViewModel()
+) {
   val context = LocalContext.current
   val cameraPositionState: CameraPositionState = rememberCameraPositionState {}
   val mapIsLoaded = remember { mutableStateOf(false) }
@@ -60,7 +63,8 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
   }
 
   // Add listener to check if user is in beacon range and drop song if applicable
-  viewModel.isInBeaconRange(profileViewModel.songLists.value.first().tracks.first(), profileViewModel.profile.value)
+  viewModel.isInBeaconRange(
+      profileViewModel.songLists.value.first().tracks.first(), profileViewModel.profile.value)
 
   WanderwaveGoogleMap(
       cameraPositionState = cameraPositionState,
