@@ -11,7 +11,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -215,46 +214,45 @@ public class ProfileConnectionTest {
 
   @Test
   fun testGetItem() = runBlocking {
-      // Mock the FirebaseFirestore
-      val mockDb = mockk<FirebaseFirestore>()
+    // Mock the FirebaseFirestore
+    val mockDb = mockk<FirebaseFirestore>()
 
-      // Mock the DocumentSnapshot
-      val mockDocument = mockk<DocumentSnapshot>()
+    // Mock the DocumentSnapshot
+    val mockDocument = mockk<DocumentSnapshot>()
 
-      // Mock the Profile
-      val mockProfile = mockk<Profile>()
+    // Mock the Profile
+    val mockProfile = mockk<Profile>()
 
-      // Mock the TrackConnection
-      val mockTrackConnection = mockk<TrackConnection>()
+    // Mock the TrackConnection
+    val mockTrackConnection = mockk<TrackConnection>()
 
-      // Mock the ProfileConnection
-      val profileConnection = spyk(ProfileConnection(mockDb, mockTrackConnection), recordPrivateCalls = true)
+    // Mock the ProfileConnection
+    val profileConnection =
+        spyk(ProfileConnection(mockDb, mockTrackConnection), recordPrivateCalls = true)
 
-      // Mock the document reference
-      val mockDocumentReference = mockk<DocumentReference>()
+    // Mock the document reference
+    val mockDocumentReference = mockk<DocumentReference>()
 
-      // Define behavior for the DocumentSnapshot
-      every { mockDocument.exists() } returns true
-      every { mockDocument["topSongs"] } returns listOf<DocumentReference>(mockDocumentReference)
-      every { mockDocument["chosenSongs"] } returns listOf<DocumentReference>(mockDocumentReference)
-      every { Profile.from(mockDocument) } returns mockProfile
+    // Define behavior for the DocumentSnapshot
+    every { mockDocument.exists() } returns true
+    every { mockDocument["topSongs"] } returns listOf<DocumentReference>(mockDocumentReference)
+    every { mockDocument["chosenSongs"] } returns listOf<DocumentReference>(mockDocumentReference)
+    every { Profile.from(mockDocument) } returns mockProfile
 
-      // Define behavior for the TrackConnection
-      coEvery { mockTrackConnection.fetchTrack(any()) } returns mockk()
+    // Define behavior for the TrackConnection
+    coEvery { mockTrackConnection.fetchTrack(any()) } returns mockk()
 
-      // Define behavior for the getItem method
-      coEvery { profileConnection.getItem(any(), any()) } returns flowOf()
+    // Define behavior for the getItem method
+    coEvery { profileConnection.getItem(any(), any()) } returns flowOf()
 
-      // Call the method under test
-      val profile = profileConnection.getItem(itemId = "testItemId", onSuccess =  { _, _ -> }).firstOrNull()
+    // Call the method under test
+    val profile =
+        profileConnection.getItem(itemId = "testItemId", onSuccess = { _, _ -> }).firstOrNull()
 
-      Log.d("Firestore", "getItem: testItemId")
+    Log.d("Firestore", "getItem: testItemId")
 
-      // Verify that the fetchTrack function is called on the trackConnection with the correct id
-      // coVerify { mockTrackConnection.fetchTrack(any()) }
-      assertEquals(1, 1)
-
+    // Verify that the fetchTrack function is called on the trackConnection with the correct id
+    // coVerify { mockTrackConnection.fetchTrack(any()) }
+    assertEquals(1, 1)
   }
-
-
 }

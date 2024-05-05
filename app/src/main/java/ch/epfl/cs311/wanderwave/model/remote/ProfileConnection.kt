@@ -142,17 +142,15 @@ class ProfileConnection(
         }
 
     return flowOf<Profile>(
-      Profile(
-          firstName = "test",
-          lastName = "test",
-          description = "test",
-          numberOfLikes = 0,
-          isPublic = false,
-          spotifyUid = "test",
-          firebaseUid = "test",
-          topSongs = emptyList(),
-          chosenSongs = emptyList()
-      )
-    )//super.getItem(itemId, onSuccessWrapper)
+        Profile(
+            firstName = "test",
+            lastName = "test",
+            description = "test",
+            numberOfLikes = 0,
+            isPublic = false,
+            spotifyUid = "test",
+            firebaseUid = "test",
+            topSongs = emptyList(),
+            chosenSongs = emptyList())) // super.getItem(itemId, onSuccessWrapper)
   }
 }
