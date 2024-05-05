@@ -38,15 +38,7 @@ val mockSongLists =
             ListType.CHOSEN_SONGS,
             listOf(Track("3", "Track 3", "Artist 3"), Track("4", "Track 4", "Artist 4"))))
 // TODO: modify this, because the profile.songLists is not available yet
-/**
- * This is the screen composable which can only show the profile of the user. It includes a visit
- * card and a list of songs. This screen is not modifiable.
- *
- * @param profile The profile to display.
- * @author Menzo Bouaissi
- * @since 2.0
- * @last update 2.0
- */
+
 /**
  * This is the screen composable which can only show the profile of the user. It includes a visit
  * card and a list of songs. This screen is not modifiable.

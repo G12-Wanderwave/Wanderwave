@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -75,42 +76,6 @@ constructor(
   override fun addTrackToList(listName: ListType, track: Track) {
     _uiState.value.tracks += track
 
-
-//    val updatedLists =
-//      _songLists.value.map { list ->
-//        if (list.name == listName) {
-//          if (list.tracks.contains(track)) return@map list
-//
-//          list.copy(tracks = ArrayList(list.tracks).apply { add(track) })
-//        } else {
-//          list
-//        }
-//      }
-//    _songLists.value = updatedLists
-  }
-  /**
-   * Get all the element of the main screen and add them to the top list
-   *
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 2.0
-   */
-  override fun retrieveTracks() {
-    viewModelScope.launch {
-      val track = spotifyController.getAllElementFromSpotify().firstOrNull()
-      if (track != null) {
-        for (i in track) {
-          if (i.hasChildren) {
-            val children = spotifyController.getAllChildren(i).firstOrNull()
-            if (children != null) {
-              for (child in children) {
-                addTrackToList(ListType.TOP_SONGS, Track(child.id, child.title, child.subtitle))
-              }
-            }
-          }
-        }
-      }
-    }
   }
 
   /**

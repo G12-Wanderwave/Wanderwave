@@ -88,41 +88,6 @@ class ProfileViewModelTest {
     assertTrue("Song list should contain the newly added track", songsInList.contains(newTrack))
   }
 
-  @Test
-  fun retrieveTrackTest() = runBlockingTest {
-    val track = ListItem("bbbb", "bbbb", null, "bbbb", "bbbb", false, true)
-    val track2 = ListItem("aaaa", "aaaaa", null, "aaaaa", "aaaaa", false, true)
-
-    // Mocking responses for your spotifyController
-    every { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(track))
-    every { spotifyController.getAllChildren(track) } returns flowOf(listOf(track2))
-
-    viewModel.createSpecificSongList(ListType.TOP_SONGS)
-    // Start observing the Flow before triggering actions that modify it
-    val job = launch {
-      viewModel.songLists.collect { songLists ->
-        if (songLists.isNotEmpty()) {
-          cancel() // Stop collecting once we have our expected result
-        }
-      }
-    }
-
-    // Trigger the operations that will cause the song lists to be populated
-    viewModel.retrieveTracks()
-    // Wait for the job to complete which includes Flow collection
-    job.join()
-
-    // Since Flow collection is asynchronous, ensure the Flow has time to collect
-    advanceUntilIdle()
-
-    // Optionally check additional conditions after ensuring Flow had time to collect
-
-    assertFalse(
-        "Song list should not be empty after adding a track", viewModel.songLists.value.isEmpty())
-    assertEquals(
-        Track(track2.id, track2.title, track2.subtitle),
-        viewModel.songLists.value.first().tracks.get(0))
-  }
 
   @Test
   fun testGetAllChildrenFlow() = runBlockingTest {
