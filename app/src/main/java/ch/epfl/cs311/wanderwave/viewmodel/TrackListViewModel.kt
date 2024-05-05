@@ -1,13 +1,12 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,12 +29,17 @@ constructor(
 
   init {
     observeTracks()
+    spotifyController.setOnTrackEndCallback { skipForward() }
   }
 
   private fun observeTracks() {
-    CoroutineScope(Dispatchers.IO).launch {
+    viewModelScope.launch {
       repository.getAll().collect { tracks ->
-        _uiState.value = UiState(tracks = tracks.filter { matchesSearchQuery(it) }, loading = false)
+        _uiState.value =
+            UiState(
+                tracks = tracks.filter { matchesSearchQuery(it) },
+                queue = tracks.filter { matchesSearchQuery(it) },
+                loading = false)
       }
       // deal with the flow
     }
@@ -51,7 +55,7 @@ constructor(
   fun setSearchQuery(query: String) {
     searchJob?.cancel()
     searchJob =
-        CoroutineScope(Dispatchers.IO).launch {
+        viewModelScope.launch {
           delay(300) // Debounce time in milliseconds
           _searchQuery.value = query
           observeTracks() // Re-filter tracks when search query changes
@@ -64,7 +68,7 @@ constructor(
    * @param track The track to play.
    */
   private fun playTrack(track: Track) {
-    CoroutineScope(Dispatchers.IO).launch {
+    viewModelScope.launch {
       val success = spotifyController.playTrack(track).firstOrNull()
       if (success == null || !success) {
         _uiState.value = _uiState.value.copy(message = "Failed to play track")
@@ -74,7 +78,7 @@ constructor(
 
   /** Resumes the currently paused track using the SpotifyController. */
   private fun resumeTrack() {
-    CoroutineScope(Dispatchers.IO).launch {
+    viewModelScope.launch {
       val success = spotifyController.resumeTrack().firstOrNull()
       if (success == null || !success) {
         _uiState.value = _uiState.value.copy(message = "Failed to resume track")
@@ -84,7 +88,7 @@ constructor(
 
   /** Pauses the currently playing track using the SpotifyController. */
   private fun pauseTrack() {
-    CoroutineScope(Dispatchers.IO).launch {
+    viewModelScope.launch {
       val success = spotifyController.pauseTrack().firstOrNull()
       if (success == null || !success) {
         _uiState.value = _uiState.value.copy(message = "Failed to pause track")
@@ -157,9 +161,21 @@ constructor(
    */
   private fun skip(dir: Int) {
     if (_uiState.value.selectedTrack != null && (dir == 1 || dir == -1)) {
-      _uiState.value.tracks.indexOf(_uiState.value.selectedTrack).let { it: Int ->
-        val next = Math.floorMod((it + dir), _uiState.value.tracks.size)
-        selectTrack(_uiState.value.tracks[next])
+      _uiState.value.queue.indexOf(_uiState.value.selectedTrack).let { it: Int ->
+        var next = it + dir
+        when (_uiState.value.loopMode) {
+          LoopMode.ONE -> next = it
+          LoopMode.ALL -> next = Math.floorMod((it + dir), _uiState.value.queue.size)
+          else -> {
+            /** Do nothing */
+          }
+        }
+        if (next >= 0 && next < _uiState.value.queue.size) {
+          selectTrack(_uiState.value.queue[next])
+        } else {
+          pause()
+          _uiState.value = _uiState.value.copy(selectedTrack = null)
+        }
       }
     }
   }
@@ -174,21 +190,34 @@ constructor(
     skip(-1)
   }
 
+  /** Toggles the shuffle state of the queue. */
   fun toggleShuffle() {
-    _uiState.value = _uiState.value.copy(shuffleOn = !_uiState.value.shuffleOn)
+    if (_uiState.value.isShuffled) {
+      _uiState.value = _uiState.value.copy(queue = _uiState.value.tracks, isShuffled = false)
+    } else {
+      _uiState.value =
+          _uiState.value.copy(queue = _uiState.value.tracks.shuffled(), isShuffled = true)
+    }
   }
 
-  fun toggleRepeat() {
+  /** Toggles the looping state of the player. */
+  fun toggleLoop() {
     _uiState.value =
-        when (_uiState.value.repeatMode) {
-          RepeatMode.NONE -> _uiState.value.copy(repeatMode = RepeatMode.ALL)
-          RepeatMode.ALL -> _uiState.value.copy(repeatMode = RepeatMode.ONE)
-          else -> _uiState.value.copy(repeatMode = RepeatMode.NONE)
+        when (_uiState.value.loopMode) {
+          LoopMode.NONE -> _uiState.value.copy(loopMode = LoopMode.ALL)
+          LoopMode.ALL -> _uiState.value.copy(loopMode = LoopMode.ONE)
+          else -> _uiState.value.copy(loopMode = LoopMode.NONE)
         }
+  }
+
+  /** Sets the looping state of the player. */
+  fun setLoop(loopMode: LoopMode) {
+    _uiState.value = _uiState.value.copy(loopMode = loopMode)
   }
 
   data class UiState(
       val tracks: List<Track> = listOf(),
+      val queue: List<Track> = listOf(),
       val loading: Boolean = false,
       val message: String? = null,
       val selectedTrack: Track? = null,
@@ -197,12 +226,12 @@ constructor(
       val currentMillis: Int = 0,
       val expanded: Boolean = false,
       val progress: Float = 0f,
-      val shuffleOn: Boolean = false,
-      val repeatMode: RepeatMode = RepeatMode.NONE
+      val isShuffled: Boolean = false,
+      val loopMode: LoopMode = LoopMode.NONE
   )
 }
 
-enum class RepeatMode {
+enum class LoopMode {
   NONE,
   ONE,
   ALL

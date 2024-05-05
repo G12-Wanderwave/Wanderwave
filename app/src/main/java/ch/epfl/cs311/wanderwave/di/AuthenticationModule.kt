@@ -9,6 +9,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
 import okhttp3.OkHttpClient
 
 @Module
@@ -21,6 +22,7 @@ object AuthenticationModule {
       httpClient: OkHttpClient,
       authenticationRepository: AuthTokenRepository
   ): AuthenticationController {
-    return AuthenticationController(Firebase.auth, httpClient, authenticationRepository)
+    return AuthenticationController(
+        Firebase.auth, httpClient, authenticationRepository, Dispatchers.IO)
   }
 }
