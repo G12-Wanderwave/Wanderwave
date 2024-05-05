@@ -109,6 +109,7 @@ abstract class FirebaseConnection<T, U> {
           { _: DocumentSnapshot, _: MutableStateFlow<T?> ->
           }
   ): Flow<T> {
+    Log.d("Firestore", "getItem 5: $itemId")
     val dataFlow = MutableStateFlow<T?>(null)
     db.collection(collectionName)
         .document(itemId)

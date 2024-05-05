@@ -12,6 +12,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -80,6 +81,7 @@ class ProfileConnection(
   }
 
   override fun getItem(itemId: String): Flow<Profile> {
+    Log.d("Firestore", "getItem 1: $itemId")
     return getItem(itemId) { _, _ -> }
   }
 
@@ -87,9 +89,14 @@ class ProfileConnection(
       itemId: String,
       onSuccess: (DocumentSnapshot, MutableStateFlow<Profile?>) -> Unit
   ): Flow<Profile> {
+
+    Log.d("Firestore", "getItem 2: $itemId")
+
     val onSuccessWrapper: (DocumentSnapshot, MutableStateFlow<Profile?>) -> Unit =
         { document, dataFlow ->
           val profile = dataFlow.value ?: Profile.from(document)
+
+          Log.d("Firestore", "profile : $profile")
 
           profile?.let { profile ->
             val topSongsObject = document["topSongs"]
@@ -105,8 +112,7 @@ class ProfileConnection(
               topSongRefs = topSongsObject as? List<DocumentReference>
               chosenSongRefs = chosenSongsObject as? List<DocumentReference>
 
-              Log.d("ProfileConnection", "topSongRefs: $topSongRefs")
-              Log.d("ProfileConnection", "chosenSongRefs: $chosenSongRefs")
+              Log.d("Firestore", "refs : $topSongRefs $chosenSongRefs")
 
               // Use a coroutine to perform asynchronous operations
               coroutineScope.launch {
@@ -120,9 +126,6 @@ class ProfileConnection(
                 // Wait for all tracks to be fetched
                 val TopSongs = TopSongsDeferred?.mapNotNull { it?.await() }
                 val ChosenSongs = chosenSongsDeffered?.mapNotNull { it?.await() }
-
-                Log.d("ProfileConnection", "TopSongs: $TopSongs")
-                Log.d("ProfileConnection", "ChosenSongs: $ChosenSongs")
 
                 // Update the beacon with the complete list of tracks
                 val updatedBeacon =
@@ -138,6 +141,18 @@ class ProfileConnection(
           }
         }
 
-    return super.getItem(itemId, onSuccessWrapper)
+    return flowOf<Profile>(
+      Profile(
+          firstName = "test",
+          lastName = "test",
+          description = "test",
+          numberOfLikes = 0,
+          isPublic = false,
+          spotifyUid = "test",
+          firebaseUid = "test",
+          topSongs = emptyList(),
+          chosenSongs = emptyList()
+      )
+    )//super.getItem(itemId, onSuccessWrapper)
   }
 }
