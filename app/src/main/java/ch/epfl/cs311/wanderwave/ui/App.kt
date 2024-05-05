@@ -59,10 +59,10 @@ fun AppScaffold(navController: NavHostController) {
   var showBottomBar by remember { mutableStateOf(false) }
   val currentRouteState by navActions.currentRouteFlow.collectAsStateWithLifecycle()
   val snackbarHostState = remember { SnackbarHostState() }
-    val profileViewModel: ProfileViewModel = hiltViewModel()
-    val trackListViewModel = hiltViewModel<TrackListViewModel>()
+  val profileViewModel: ProfileViewModel = hiltViewModel()
+  val trackListViewModel = hiltViewModel<TrackListViewModel>()
 
-    val scope = rememberCoroutineScope()
+  val scope = rememberCoroutineScope()
   val showSnackbar = { message: String ->
     scope.launch { snackbarHostState.showSnackbar(message) }
     Unit
@@ -88,26 +88,32 @@ fun AppScaffold(navController: NavHostController) {
                 composable(Route.SPOTIFY_CONNECT.routeString) { SpotifyConnectScreen(navActions) }
                 composable(Route.ABOUT.routeString) { AboutScreen(navActions) }
                 composable(Route.TRACK_LIST.routeString) {
-                  TrackListScreen(navActions,showSnackbar, trackListViewModel)
+                  TrackListScreen(navActions, showSnackbar, trackListViewModel)
                 }
                 composable(Route.MAP.routeString) { MapScreen(navActions) }
-                composable(Route.PROFILE.routeString) { ProfileScreen(navActions, profileViewModel) }
+                composable(Route.PROFILE.routeString) {
+                  ProfileScreen(navActions, profileViewModel)
+                }
                 composable(Route.EDIT_PROFILE.routeString) {
                   EditProfileScreen(navActions, profileViewModel)
                 }
-              composable(
-                  route = "${Route.SELECT_SONG.routeString}/{viewModelType}",
-                  arguments = listOf(navArgument("viewModelType") { type = NavType.StringType })
-              ) { backStackEntry ->
-                  val viewModelType = backStackEntry.arguments?.getString("viewModelType")
-                  val viewModel = when (viewModelType) {
-                      "profile" -> profileViewModel
-                      "tracklist" -> trackListViewModel
-                      else -> throw IllegalStateException("Invalid ViewModel type for SelectSongScreen")
-                  }
+                composable(
+                    route = "${Route.SELECT_SONG.routeString}/{viewModelType}",
+                    arguments =
+                        listOf(navArgument("viewModelType") { type = NavType.StringType })) {
+                        backStackEntry ->
+                      val viewModelType = backStackEntry.arguments?.getString("viewModelType")
+                      val viewModel =
+                          when (viewModelType) {
+                            "profile" -> profileViewModel
+                            "tracklist" -> trackListViewModel
+                            else ->
+                                throw IllegalStateException(
+                                    "Invalid ViewModel type for SelectSongScreen")
+                          }
 
-                  SelectSongScreen(navActions, viewModel)
-              }
+                      SelectSongScreen(navActions, viewModel)
+                    }
                 composable("${Route.VIEW_PROFILE.routeString}/{profileId}") {
                   ProfileViewOnlyScreen(it.arguments?.getString("profileId") ?: "", navActions)
                 }
