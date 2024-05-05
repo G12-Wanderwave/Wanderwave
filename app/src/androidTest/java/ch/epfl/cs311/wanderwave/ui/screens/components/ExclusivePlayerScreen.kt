@@ -13,8 +13,8 @@ class ExclusivePlayerScreen(semanticsProvider: SemanticsNodeInteractionsProvider
   val beaconButton = onNode { hasTestTag("beaconButton") }
   val playlistButton = onNode { hasTestTag("playlistButton") }
   val ignoreButton = onNode { hasTestTag("ignoreButton") }
-  val toggleShuffle = onNode { hasTestTag("toggleShuffle") }
-  val toggleRepeat = onNode { hasTestTag("toggleRepeat") }
+  val toggleShuffle = onNode { hasTestTag("shuffleButton") }
+  val toggleRepeat = onNode { hasTestTag("loopButton") }
 
   val playerControl = onNode { hasTestTag("playerControl") }
   val playPauseButton: KNode = playerControl.child { hasTestTag("playPauseButton") }
