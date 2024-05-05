@@ -87,7 +87,6 @@ class LoginAndUseMediaControllerEndToEndTest :
       title.assertIsDisplayed()
       title.assertTextContains("1")
 
-
       playPauseButton.assertIsDisplayed()
       playPauseButton.performClick()
 
@@ -97,13 +96,11 @@ class LoginAndUseMediaControllerEndToEndTest :
       title.assertIsDisplayed()
       title.assertTextContains("The Nightingale")
 
-
       previousButton.assertIsDisplayed()
       previousButton.performClick()
       artist.assertTextContains("1")
       title.assertIsDisplayed()
       title.assertTextContains("1")
-
 
       shuffleButton.assertIsDisplayed()
       shuffleButton.performClick()

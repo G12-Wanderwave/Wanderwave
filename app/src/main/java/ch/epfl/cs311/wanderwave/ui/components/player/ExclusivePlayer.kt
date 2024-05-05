@@ -132,9 +132,13 @@ fun TrackInfoComponent(uiState: TrackListViewModel.UiState) {
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center) {
         Text(
-            text = uiState.selectedTrack?.artist ?: "", style = MaterialTheme.typography.titleSmall, modifier = Modifier.testTag("artist"))
+            text = uiState.selectedTrack?.artist ?: "",
+            style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.testTag("artist"))
         Text(
-            text = uiState.selectedTrack?.title ?: "", style = MaterialTheme.typography.titleMedium, modifier = Modifier.testTag("title"))
+            text = uiState.selectedTrack?.title ?: "",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.testTag("title"))
       }
 }
 
