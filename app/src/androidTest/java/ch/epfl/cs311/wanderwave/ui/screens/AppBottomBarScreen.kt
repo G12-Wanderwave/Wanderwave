@@ -9,7 +9,7 @@ class AppBottomBarScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
         semanticsProvider = semanticsProvider, viewBuilderAction = { hasTestTag("appBottomBar") }) {
 
   val bottomAppBarTrackListButton = onNode {
-    hasTestTag("trackListButton" + Route.TRACK_LIST.routeString)
+    hasTestTag("bottomAppBarButton" + Route.TRACK_LIST.routeString)
   }
   val mapScreenButton = onNode { hasTestTag("bottomAppBarButton" + Route.MAP.routeString) }
   val bottomAppBarProfileButton = onNode {
