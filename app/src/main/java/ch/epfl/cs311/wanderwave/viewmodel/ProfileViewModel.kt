@@ -2,11 +2,11 @@ package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -59,9 +59,8 @@ constructor(
   private var _uiState = MutableStateFlow(ProfileViewModel.UIState())
   val uiState: StateFlow<ProfileViewModel.UIState> = _uiState
 
-
   fun createSpecificSongList(listType: ListType) {
-    val listName =listType    // Check if the list already exists
+    val listName = listType // Check if the list already exists
     val existingList = _songLists.value.firstOrNull { it.name == listName }
     if (existingList == null) {
       // Add new list if it doesn't exist

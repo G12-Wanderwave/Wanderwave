@@ -61,7 +61,9 @@ class TrackListScreenTest : TestCase() {
 
     viewModel = TrackListViewModel(mockSpotifyController, trackRepository)
 
-    composeTestRule.setContent { TrackListScreen(mockNavigationActions,mockShowMessage, viewModel) }
+    composeTestRule.setContent {
+      TrackListScreen(mockNavigationActions, mockShowMessage, viewModel)
+    }
   }
 
   @Test

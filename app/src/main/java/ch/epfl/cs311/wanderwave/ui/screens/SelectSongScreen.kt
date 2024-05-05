@@ -20,10 +20,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.profile.TrackItem
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 
 /**
@@ -72,7 +72,8 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: SpotifySongsActio
                         viewModel.retrieveChild(listItem)
                       } else {
                         viewModel.addTrackToList(
-                            ListType.TOP_SONGS, Track(listItem.id, listItem.title, listItem.subtitle))
+                            ListType.TOP_SONGS,
+                            Track(listItem.id, listItem.title, listItem.subtitle))
                         navActions.goBack()
                       }
                     })

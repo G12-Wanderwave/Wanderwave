@@ -16,13 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.profile.ClickableIcon
 import ch.epfl.cs311.wanderwave.ui.components.profile.SongsListDisplay
 import ch.epfl.cs311.wanderwave.ui.components.profile.VisitCard
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.SongList
@@ -80,7 +80,13 @@ fun ProfileViewOnlyScreen(
             // to #127
           }
 
-          SongsListDisplay(navigationActions = navigationActions,mockSongLists, isTopSongsListVisible = true, {}, canAddSong = false,)
+          SongsListDisplay(
+              navigationActions = navigationActions,
+              mockSongLists,
+              isTopSongsListVisible = true,
+              {},
+              canAddSong = false,
+          )
         }
   }
 }

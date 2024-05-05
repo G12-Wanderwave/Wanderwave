@@ -27,9 +27,7 @@ import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
-import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
 @Composable
 fun TrackList(
@@ -39,7 +37,7 @@ fun TrackList(
     onSelectTrack: (Track) -> Unit = {},
     canAddSong: Boolean = true,
     navActions: NavigationActions,
-    viewModelName : viewModelType
+    viewModelName: viewModelType
 ) {
 
   Column {
@@ -57,11 +55,14 @@ fun TrackList(
                 modifier = Modifier.testTag("trackListTitle"))
           }
           if (canAddSong) {
-            IconButton(onClick = { navActions.navigateToSelectSongScreen(viewModelName) }) { // Toggle dialog visibility
-              Icon(
-                  imageVector = Icons.Filled.Add,
-                  contentDescription = stringResource(R.string.beaconTitle))
-            }
+            IconButton(
+                onClick = {
+                  navActions.navigateToSelectSongScreen(viewModelName)
+                }) { // Toggle dialog visibility
+                  Icon(
+                      imageVector = Icons.Filled.Add,
+                      contentDescription = stringResource(R.string.beaconTitle))
+                }
           }
         }
     LazyColumn {

@@ -15,18 +15,17 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.model.data.ListType
+import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.viewmodel.SongList
 import com.spotify.protocol.types.ListItem
 
@@ -103,16 +102,16 @@ fun AddTrackDialog(
  *
  * @param songLists List of song lists including "TOP SONGS" and "CHOSEN SONGS".
  * @param isTopSongsListVisible Boolean state to toggle between showing "TOP SONGS" or "CHOSEN
- *  SONGS".
- *  @param onAddTrack Callback function to be invoked when a track is added.
- *  @param canAddSong Boolean state to enable or disable adding a song.
- *  @param viewModelName The name of the view model.
- *  @param navigationActions The navigation actions.
+ *   SONGS".
+ *     @param onAddTrack Callback function to be invoked when a track is added.
+ *     @param canAddSong Boolean state to enable or disable adding a song.
+ *     @param viewModelName The name of the view model.
+ *     @param navigationActions The navigation actions.
  *
- *  @author Menzo Bouaissi
- *  @author Ayman Bakiri
- *  @since 1.0
- *  @last update 2.0
+ *     @author Menzo Bouaissi
+ *     @author Ayman Bakiri
+ *     @since 1.0
+ *     @last update 2.0
  */
 @Composable
 fun SongsListDisplay(
@@ -133,13 +132,10 @@ fun SongsListDisplay(
             onSelectTrack = { /* TODO */},
             onAddTrack = onAddTrack,
             canAddSong = canAddSong,
-            navActions = navigationActions,// TODO: Pass the correct navActions),
-            viewModelName = viewModelName
-        )
+            navActions = navigationActions, // TODO: Pass the correct navActions),
+            viewModelName = viewModelName)
       }
 }
-
-
 
 /**
  * Composable that displays a Track. Each track is represented by the TrackItem composable, which is

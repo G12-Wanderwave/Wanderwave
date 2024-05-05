@@ -1,10 +1,10 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import com.spotify.protocol.types.ListItem
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -13,13 +13,11 @@ import io.mockk.junit4.MockKRule
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.timeout
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -84,10 +82,9 @@ class ProfileViewModelTest {
     assertFalse("Song list should not be empty after adding a track", songLists.isEmpty())
 
     // Check if the track was added correctly
-    val songsInList = songLists.find { it.name == ListType.TOP_SONGS}?.tracks ?: emptyList()
+    val songsInList = songLists.find { it.name == ListType.TOP_SONGS }?.tracks ?: emptyList()
     assertTrue("Song list should contain the newly added track", songsInList.contains(newTrack))
   }
-
 
   @Test
   fun testGetAllChildrenFlow() = runBlockingTest {

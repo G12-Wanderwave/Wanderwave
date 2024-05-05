@@ -22,7 +22,8 @@ import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
 @Composable
-fun TrackListScreen(navActions: NavigationActions,
+fun TrackListScreen(
+    navActions: NavigationActions,
     showMessage: (String) -> Unit,
     viewModel: TrackListViewModel = hiltViewModel()
 ) {
@@ -50,7 +51,6 @@ fun TrackListScreen(navActions: NavigationActions,
         onAddTrack = {},
         onSelectTrack = viewModel::selectTrack,
         navActions = navActions,
-        viewModelName = viewModelType.TRACKLIST
-        )
+        viewModelName = viewModelType.TRACKLIST)
   }
 }
