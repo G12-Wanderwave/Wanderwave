@@ -75,15 +75,14 @@ constructor(
 
   override fun addTrackToList(listName: ListType, track: Track) {
     _uiState.value.tracks += track
-
   }
 
   /**
    * Get all the element of the main screen and add them to the top list
    *
    * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 2.0
+   * @since 3.0
+   * @last update 3.0
    */
   override fun retrieveAndAddSubsection() {
     viewModelScope.launch {
@@ -101,8 +100,8 @@ constructor(
    * Get all the element of the main screen and add them to the top list
    *
    * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 2.0
+   * @since 3.0
+   * @last update 3.0
    */
   override fun retrieveChild(item: ListItem) {
     viewModelScope.launch {
