@@ -8,6 +8,7 @@ class TrackListScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
         semanticsProvider = semanticsProvider,
         viewBuilderAction = { hasTestTag("trackListScreen") }) {
 
-  val trackButton = onNode { hasTestTag("trackButton") }
+  // val trackButton = onNode { hasTestTag("trackButton") }
+  val trackButton = onNode { hasTestTag("trackItem") }
   val searchBar = onNode { hasTestTag("searchBar") }
 }

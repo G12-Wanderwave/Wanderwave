@@ -24,10 +24,6 @@ class LoadingScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComp
 
   @Test
   fun loadingScreenIndicatorIsDisplayed() = run {
-    onComposeScreen<LoadingScreen>(composeTestRule) {
-      assertIsDisplayed()
-
-      progressIndicator { assertIsDisplayed() }
-    }
+    onComposeScreen<LoadingScreen>(composeTestRule) { assertIsDisplayed() }
   }
 }

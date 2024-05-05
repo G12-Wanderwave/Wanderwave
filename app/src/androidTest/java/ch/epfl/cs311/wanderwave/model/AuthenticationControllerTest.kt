@@ -8,13 +8,17 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import io.mockk.called
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import org.junit.Before
@@ -40,10 +44,13 @@ class AuthenticationControllerTest {
       AuthenticationUserData(
           "testid", "testemail", "testDisplayName", "https://example.com/testphoto.jpg")
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Before
   fun setup() {
+    val testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
     authenticationController =
-        AuthenticationController(mockFirebaseAuth, mockHttpClient, mockTokenRepository)
+        AuthenticationController(
+            mockFirebaseAuth, mockHttpClient, mockTokenRepository, testDispatcher)
   }
 
   fun setupDummyUserSignedIn() {
@@ -71,14 +78,14 @@ class AuthenticationControllerTest {
                         .trimIndent()
               }
         }
-    every { mockTokenRepository.setAuthToken(any(), any(), any()) } returns Unit
-    every {
+    coEvery { mockTokenRepository.setAuthToken(any(), any(), any()) } returns Unit
+    coEvery {
       mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.FIREBASE_TOKEN)
     } returns "testtoken-firebase"
-    every {
+    coEvery {
       mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
     } returns "testtoken-spotify-access"
-    every {
+    coEvery {
       mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_REFRESH_TOKEN)
     } returns "testtoken-spotify-refresh"
   }
@@ -95,9 +102,12 @@ class AuthenticationControllerTest {
 
   @Test
   fun canSignOut() = runBlocking {
+    assert(authenticationController.isSignedIn())
     every { mockFirebaseAuth.signOut() } returns Unit
     authenticationController.deauthenticate()
     verify { mockFirebaseAuth.signOut() }
+    every { mockFirebaseAuth.currentUser } returns null
+    assert(!authenticationController.isSignedIn())
   }
 
   @Test
@@ -163,5 +173,28 @@ class AuthenticationControllerTest {
     val result = authenticationController.refreshTokenIfNecessary()
     verify { mockFirebaseAuth.signInWithCustomToken("testtoken-firebase") }
     assert(result)
+
+    every { mockFirebaseAuth.currentUser } returns mockFirebaseUser
+    val result2 = authenticationController.refreshTokenIfNecessary()
+    assert(result2)
+    verify { mockFirebaseAuth.signInWithCustomToken(any()) wasNot called }
+  }
+
+  @Test
+  fun failureCases() = runBlocking {
+    setupDummyUserSignedIn()
+    val call = mockk<Call>()
+    every { mockHttpClient.newCall(any()) } returns call
+    every { call.execute() } returns mockk { every { body } returns null }
+    every { mockFirebaseAuth.currentUser } returns null
+
+    assert(!authenticationController.refreshTokenIfNecessary())
+    verify { call.execute() }
+
+    coEvery { mockTokenRepository.getAuthToken(any()) } returns null
+
+    assert(!authenticationController.refreshTokenIfNecessary())
+
+    assert(!authenticationController.authenticate("%invalidcode%").first())
   }
 }

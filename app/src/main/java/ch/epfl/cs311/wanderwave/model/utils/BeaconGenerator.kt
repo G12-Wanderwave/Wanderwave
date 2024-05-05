@@ -25,14 +25,18 @@ val types: List<String> =
         "amusement_park",
         "aquarium",
         "art_gallery",
+        "spa",
         "bowling_alley",
+        "cafe",
         "campground",
         "casino",
         "church",
         "city_hall",
         "courthouse",
+        "drugstore",
         "embassy",
         "fire_station",
+        "hindu_temple",
         "hospital",
         "library",
         "light_rail_station",
@@ -40,6 +44,8 @@ val types: List<String> =
         "movie_theater",
         "museum",
         "park",
+        "primary_school",
+        "spa",
         "stadium",
         "subway_station",
         "synagogue",
@@ -49,6 +55,15 @@ val types: List<String> =
         "university",
         "zoo")
 
+/**
+ * Create new beacons at nearby points of interest.
+ *
+ * @param location The current location of the user.
+ * @param nearbyBeacons The list of existing beacons.
+ * @param radius The radius in which to search for points of interest.
+ * @param context The context of the application.
+ * @return A list of new beacons.
+ */
 fun createNearbyBeacons(
     location: Location,
     nearbyBeacons: List<Beacon>,
@@ -56,6 +71,9 @@ fun createNearbyBeacons(
     context: Context
 ): List<Beacon> {
   // Initialize the list of new Beacons
+  if (radius <= 0.0) {
+    throw IllegalArgumentException("Radius must be positive")
+  }
   val newBeacons = mutableListOf<Beacon>()
 
   // Get the nearby points of interest
@@ -64,9 +82,10 @@ fun createNearbyBeacons(
   // Place new beacons at the nearby points of interest
   for (poi in nearbyPOIs) {
     // Check if POI is far enough from existing beacons
-    if (nearbyBeacons.any() { beacon ->
+    if (nearbyBeacons.all() { beacon ->
       beacon.location.distanceBetween(poi) > MIN_BEACON_DISTANCE
-    }) {
+    } &&
+        newBeacons.all() { beacon -> beacon.location.distanceBetween(poi) > MIN_BEACON_DISTANCE }) {
       newBeacons.add(Beacon("", poi))
     }
   }
@@ -93,7 +112,10 @@ fun getNearbyPOIs(context: Context, location: Location, radius: Double): List<Lo
   val placesClient = Places.createClient(context)
 
   // Define the fields to request
-  val placeFields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
+  val placeFieldID = Place.Field.ID
+  val placeFieldName = Place.Field.NAME
+  val placeFieldLatLng = Place.Field.LAT_LNG
+  val placeFields = listOf(placeFieldID, placeFieldName, placeFieldLatLng)
 
   // Create a new FindCurrentPlaceRequest
   val request = FindCurrentPlaceRequest.newInstance(placeFields)
@@ -110,24 +132,26 @@ fun getNearbyPOIs(context: Context, location: Location, radius: Double): List<Lo
             // Conversion to make computing distances easier
             val placeLoc = Location(place.latLng.latitude, place.latLng.longitude, place.name)
 
-            if (location.distanceBetween(placeLoc) <=
-                radius && // Check if the place is within the radius
+            if (location.distanceBetween(placeLoc) <= radius &&
                 place.reviews.size >= MIN_REVIEWS && // Check if the place has enough reviews
                 place.placeTypes.any() {
                   types.contains(it)
                 } // Check if the place is of a certain type
             ) {
               nearbyPOIs.add(placeLoc)
-              Log.i("PlacesApi", "Place found: ${place.name} at ${place.latLng}")
             }
           }
         }
         .addOnFailureListener { exception ->
           if (exception is ApiException) {
             Log.e("PlacesApi", "Place not found: ${exception.statusCode}")
+            Log.e("PlacesApi", "Place not found: ${exception.message}")
+            Log.e("PlacesApi", "Place not found: ${exception.localizedMessage}")
+            Log.e("PlacesApi", "Place not found: ${exception.cause}")
+          } else {
+            Log.e("Error", "An error occurred: " + exception.message)
           }
         }
   }
-
   return nearbyPOIs
 }

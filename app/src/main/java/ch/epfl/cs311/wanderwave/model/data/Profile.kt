@@ -13,6 +13,19 @@ data class Profile(
     var spotifyUid: String,
     var firebaseUid: String,
 ) {
+
+  fun toMap(): HashMap<String, Any> {
+    return hashMapOf(
+        "firstName" to firstName,
+        "lastName" to lastName,
+        "description" to description,
+        "numberOfLikes" to numberOfLikes,
+        "spotifyUid" to spotifyUid,
+        "firebaseUid" to firebaseUid,
+        "isPublic" to isPublic,
+        "profilePictureUri" to (profilePictureUri?.toString() ?: ""))
+  }
+
   companion object {
     fun from(documentSnapshot: DocumentSnapshot): Profile? {
       if (documentSnapshot.exists()) {

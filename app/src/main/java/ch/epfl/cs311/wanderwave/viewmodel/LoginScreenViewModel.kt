@@ -1,14 +1,13 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -46,7 +45,7 @@ constructor(
   }
 
   private fun authenticate(authenticationCode: String) {
-    CoroutineScope(Dispatchers.IO).launch {
+    viewModelScope.launch {
       authenticationController.authenticate(authenticationCode).collect { success ->
         if (success) {
           _uiState.value = uiState.value.copy(hasResult = true, success = true, message = null)
