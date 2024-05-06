@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface SpotifySongsActions {
 
+  val spotifySubsectionList: StateFlow<List<ListItem>>
+  val childrenPlaylistTrackList: StateFlow<List<ListItem>>
   /**
    * Add a track to the list of the user's list. The list is specified by the listName parameter.
    *

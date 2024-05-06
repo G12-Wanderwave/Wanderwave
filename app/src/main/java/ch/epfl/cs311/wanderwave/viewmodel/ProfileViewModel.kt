@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.ListType
@@ -7,6 +8,8 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.model.spotify.retrieveAndAddSubsectionFromSpotify
+import ch.epfl.cs311.wanderwave.model.spotify.retrieveChildFromSpotify
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -50,11 +53,11 @@ constructor(
   private val _songLists = MutableStateFlow<List<SongList>>(emptyList())
   val songLists: StateFlow<List<SongList>> = _songLists
 
-  private val _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
-  val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
+  private var _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
+  override val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
 
-  private val _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
-  val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
+  private var _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
+  override val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
 
   private var _uiState = MutableStateFlow(ProfileViewModel.UIState())
   val uiState: StateFlow<ProfileViewModel.UIState> = _uiState
@@ -97,6 +100,13 @@ constructor(
     _isInPublicMode.value = !_isInPublicMode.value
   }
 
+  fun getProfileByID(id: String) {
+    viewModelScope.launch {
+      repository.getItem(id).collect { fetchedProfile ->
+        _uiState.value = UIState(profile = fetchedProfile, isLoading = false)
+      }
+    }
+  }
   /**
    * Get all the element of the main screen and add them to the top list
    *
@@ -105,17 +115,8 @@ constructor(
    * @last update 3.0
    */
   override fun retrieveAndAddSubsection() {
-    viewModelScope.launch {
-      _spotifySubsectionList.value = emptyList()
-      val track = spotifyController.getAllElementFromSpotify().firstOrNull()
-      if (track != null) {
-        for (i in track) {
-          _spotifySubsectionList.value += i
-        }
-      }
-    }
+    retrieveAndAddSubsectionFromSpotify(_spotifySubsectionList, spotifyController)
   }
-
   /**
    * Get all the element of the main screen and add them to the top list
    *
@@ -124,23 +125,8 @@ constructor(
    * @last update 3.0
    */
   override fun retrieveChild(item: ListItem) {
-    viewModelScope.launch {
-      _childrenPlaylistTrackList.value = emptyList()
-      val children = spotifyController.getAllChildren(item).firstOrNull()
-      if (children != null) {
-        for (child in children) {
-          _childrenPlaylistTrackList.value += child
-        }
-      }
-    }
-  }
-
-  fun getProfileByID(id: String) {
-    viewModelScope.launch {
-      repository.getItem(id).collect { fetchedProfile ->
-        _uiState.value = UIState(profile = fetchedProfile, isLoading = false)
-      }
-    }
+    Log.d("Test32", "retrieveChild")
+    retrieveChildFromSpotify(item, this._childrenPlaylistTrackList, spotifyController)
   }
 
   data class UIState(

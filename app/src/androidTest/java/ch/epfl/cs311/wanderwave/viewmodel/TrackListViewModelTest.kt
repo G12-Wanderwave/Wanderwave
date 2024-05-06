@@ -8,6 +8,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.catch
@@ -27,7 +28,6 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import kotlin.time.Duration.Companion.seconds
 
 class TrackListViewModelTest {
 
@@ -367,11 +367,12 @@ class TrackListViewModelTest {
     viewModel.toggleLoop()
     assertEquals(LoopMode.NONE, viewModel.uiState.value.loopMode)
   }
+
   @Test
   fun testGetAllChildrenFlow() = runBlockingTest {
     val expectedListItem = ListItem("id", "title", null, "subtitle", "", false, true)
     every { mockSpotifyController.getAllChildren(expectedListItem) } returns
-            flowOf(listOf(expectedListItem))
+        flowOf(listOf(expectedListItem))
 
     val result = mockSpotifyController.getAllChildren(expectedListItem)
     assertEquals(expectedListItem, result.first().get(0)) // Check if the first item is as expected
@@ -380,9 +381,11 @@ class TrackListViewModelTest {
   @Test
   fun testRetrieveSubsectionAndChildrenFlow() = runBlockingTest {
     val expectedListItem = ListItem("id", "title", null, "subtitle", "", false, true)
-    every { mockSpotifyController.getAllElementFromSpotify() } returns flowOf(listOf(expectedListItem))
+    every { mockSpotifyController.getAllElementFromSpotify() } returns
+        flowOf(listOf(expectedListItem))
     every {
-      mockSpotifyController.getAllChildren(ListItem("id", "title", null, "subtitle", "", false, true))
+      mockSpotifyController.getAllChildren(
+          ListItem("id", "title", null, "subtitle", "", false, true))
     } returns flowOf(listOf(expectedListItem))
     viewModel.retrieveAndAddSubsection()
     viewModel.retrieveChild(expectedListItem)

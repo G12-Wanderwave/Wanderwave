@@ -46,7 +46,8 @@ class TrackListScreenTest : TestCase() {
   @RelaxedMockK lateinit var mockShowMessage: (String) -> Unit
   @RelaxedMockK private lateinit var mockNavController: NavHostController
 
-  @Before fun setup() {
+  @Before
+  fun setup() {
 
     every { mockNavController.navigate(any<String>()) } returns Unit
     mockNavigationActions = NavigationActions(mockNavController)
@@ -90,6 +91,7 @@ class TrackListScreenTest : TestCase() {
       coVerify { mockShowMessage wasNot Called }
     }
   }
+
   @Test
   fun canNavigateToSElectSongScreenFromTrackListScreen() = run {
     mockNavigationActions.navigateToSelectSongScreen(viewModelType.TRACKLIST)

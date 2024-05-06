@@ -6,6 +6,8 @@ import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.model.spotify.retrieveAndAddSubsectionFromSpotify
+import ch.epfl.cs311.wanderwave.model.spotify.retrieveChildFromSpotify
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,11 +32,11 @@ constructor(
 
   private var _searchQuery = MutableStateFlow("")
 
-  private val _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
-  val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
+  private var _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
+  override val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
 
-  private val _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
-  val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
+  private var _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
+  override val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
 
   init {
     observeTracks()
@@ -74,43 +76,25 @@ constructor(
   override fun addTrackToList(listName: ListType, track: Track) {
     _uiState.value.tracks += track
   }
-
   /**
    * Get all the element of the main screen and add them to the top list
    *
    * @author Menzo Bouaissi
-   * @since 3.0
+   * @since 2.0
    * @last update 3.0
    */
   override fun retrieveAndAddSubsection() {
-    viewModelScope.launch {
-      _spotifySubsectionList.value = emptyList()
-      val track = spotifyController.getAllElementFromSpotify().firstOrNull()
-      if (track != null) {
-        for (i in track) {
-          _spotifySubsectionList.value += i
-        }
-      }
-    }
+    retrieveAndAddSubsectionFromSpotify(_spotifySubsectionList, spotifyController)
   }
-
   /**
    * Get all the element of the main screen and add them to the top list
    *
    * @author Menzo Bouaissi
-   * @since 3.0
+   * @since 2.0
    * @last update 3.0
    */
   override fun retrieveChild(item: ListItem) {
-    viewModelScope.launch {
-      _childrenPlaylistTrackList.value = emptyList()
-      val children = spotifyController.getAllChildren(item).firstOrNull()
-      if (children != null) {
-        for (child in children) {
-          _childrenPlaylistTrackList.value += child
-        }
-      }
-    }
+    retrieveChildFromSpotify(item, _childrenPlaylistTrackList, spotifyController)
   }
 
   /**

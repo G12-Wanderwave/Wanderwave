@@ -16,11 +16,14 @@ import com.spotify.sdk.android.auth.AuthorizationResponse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 class SpotifyController(private val context: Context) {
@@ -296,5 +299,47 @@ class SpotifyController(private val context: Context) {
     SUCCESS,
     NOT_LOGGED_IN,
     FAILED
+  }
+}
+/**
+ * Get all the element of the main screen and add them to the top list
+ *
+ * @author Menzo Bouaissi
+ * @since 2.0
+ * @last update 3.0
+ */
+fun retrieveAndAddSubsectionFromSpotify(
+    spotifySubsectionList: MutableStateFlow<List<ListItem>>,
+    spotifyController: SpotifyController
+) {
+  GlobalScope.launch {
+    val track = spotifyController.getAllElementFromSpotify().firstOrNull()
+    if (track != null) {
+      for (i in track) {
+        spotifySubsectionList.value += i
+      }
+    }
+  }
+}
+
+/**
+ * Get all the element of the main screen and add them to the top list
+ *
+ * @author Menzo Bouaissi
+ * @since 2.0
+ * @last update 3.0
+ */
+fun retrieveChildFromSpotify(
+    item: ListItem,
+    childrenPlaylistTrackList: MutableStateFlow<List<ListItem>>,
+    spotifyController: SpotifyController
+) {
+  GlobalScope.launch {
+    val children = spotifyController.getAllChildren(item).firstOrNull()
+    if (children != null) {
+      for (child in children) {
+        childrenPlaylistTrackList.value += child
+      }
+    }
   }
 }
