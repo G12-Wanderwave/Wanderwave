@@ -3,18 +3,23 @@ import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.viewmodel.LoopMode
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
+import com.spotify.protocol.types.ListItem
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -22,6 +27,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import kotlin.time.Duration.Companion.seconds
 
 class TrackListViewModelTest {
 
@@ -360,6 +366,36 @@ class TrackListViewModelTest {
     viewModel.setLoop(LoopMode.ONE)
     viewModel.toggleLoop()
     assertEquals(LoopMode.NONE, viewModel.uiState.value.loopMode)
+  }
+  @Test
+  fun testGetAllChildrenFlow() = runBlockingTest {
+    val expectedListItem = ListItem("id", "title", null, "subtitle", "", false, true)
+    every { mockSpotifyController.getAllChildren(expectedListItem) } returns
+            flowOf(listOf(expectedListItem))
+
+    val result = mockSpotifyController.getAllChildren(expectedListItem)
+    assertEquals(expectedListItem, result.first().get(0)) // Check if the first item is as expected
+  }
+
+  @Test
+  fun testRetrieveSubsectionAndChildrenFlow() = runBlockingTest {
+    val expectedListItem = ListItem("id", "title", null, "subtitle", "", false, true)
+    every { mockSpotifyController.getAllElementFromSpotify() } returns flowOf(listOf(expectedListItem))
+    every {
+      mockSpotifyController.getAllChildren(ListItem("id", "title", null, "subtitle", "", false, true))
+    } returns flowOf(listOf(expectedListItem))
+    viewModel.retrieveAndAddSubsection()
+    viewModel.retrieveChild(expectedListItem)
+    advanceUntilIdle() // Ensure all coroutines are completed
+
+    // val result = viewModel.spotifySubsectionList.first()  // Safely access the first item
+    val flow = viewModel.spotifySubsectionList
+    val flow2 = viewModel.childrenPlaylistTrackList
+    val result = flow.timeout(2.seconds).catch {}.firstOrNull()
+    val result2 = flow2.timeout(2.seconds).catch {}.firstOrNull()
+
+    assertEquals(expectedListItem, result?.get(0))
+    assertEquals(expectedListItem, result2?.get(0))
   }
 }
 

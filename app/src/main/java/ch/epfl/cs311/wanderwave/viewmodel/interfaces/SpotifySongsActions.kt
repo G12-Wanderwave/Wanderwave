@@ -6,17 +6,6 @@ import com.spotify.protocol.types.ListItem
 import kotlinx.coroutines.flow.StateFlow
 
 interface SpotifySongsActions {
-  /**
-   * The list of subsections of the user's top songs. Each subsection is a list of tracks or
-   * playlist.
-   */
-  val spotifySubsectionList: StateFlow<List<ListItem>>
-
-  /**
-   * The list child in the subsections of the user's top songs. Each child is a list of tracks or
-   * playlist.
-   */
-  val childrenPlaylistTrackList: StateFlow<List<ListItem>>
 
   /**
    * Add a track to the list of the user's list. The list is specified by the listName parameter.

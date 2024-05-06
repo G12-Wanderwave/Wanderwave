@@ -51,10 +51,10 @@ constructor(
   val songLists: StateFlow<List<SongList>> = _songLists
 
   private val _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
-  override val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
+  val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
 
   private val _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
-  override val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
+  val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
 
   private var _uiState = MutableStateFlow(ProfileViewModel.UIState())
   val uiState: StateFlow<ProfileViewModel.UIState> = _uiState
@@ -102,7 +102,7 @@ constructor(
    *
    * @author Menzo Bouaissi
    * @since 2.0
-   * @last update 2.0
+   * @last update 3.0
    */
   override fun retrieveAndAddSubsection() {
     viewModelScope.launch {
@@ -121,7 +121,7 @@ constructor(
    *
    * @author Menzo Bouaissi
    * @since 2.0
-   * @last update 2.0
+   * @last update 3.0
    */
   override fun retrieveChild(item: ListItem) {
     viewModelScope.launch {

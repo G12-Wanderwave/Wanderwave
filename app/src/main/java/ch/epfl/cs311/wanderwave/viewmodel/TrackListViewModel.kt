@@ -31,10 +31,10 @@ constructor(
   private var _searchQuery = MutableStateFlow("")
 
   private val _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
-  override val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
+  val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
 
   private val _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
-  override val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
+  val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
 
   init {
     observeTracks()
