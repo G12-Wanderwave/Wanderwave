@@ -1,12 +1,17 @@
 package ch.epfl.cs311.wanderwave.ui
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
+import com.google.common.base.Verify.verify
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
 import io.mockk.Called
@@ -14,6 +19,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.verify
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -33,12 +39,19 @@ class TrackListScreenTest : TestCase() {
 
   @RelaxedMockK lateinit var mockSpotifyController: SpotifyController
   @RelaxedMockK lateinit var trackRepository: TrackRepository
+  @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
   @RelaxedMockK lateinit var viewModel: TrackListViewModel
 
   @RelaxedMockK lateinit var mockShowMessage: (String) -> Unit
+  @RelaxedMockK private lateinit var mockNavController: NavHostController
 
-  @Before fun setup() {}
+  @Before
+  fun setup() {
+
+    every { mockNavController.navigate(any<String>()) } returns Unit
+    mockNavigationActions = NavigationActions(mockNavController)
+  }
 
   @After
   fun tearDown() {
@@ -59,7 +72,9 @@ class TrackListScreenTest : TestCase() {
 
     viewModel = TrackListViewModel(mockSpotifyController, trackRepository)
 
-    composeTestRule.setContent { TrackListScreen(mockShowMessage, viewModel) }
+    composeTestRule.setContent {
+      TrackListScreen(mockNavigationActions, mockShowMessage, viewModel)
+    }
   }
 
   @Test
@@ -75,5 +90,11 @@ class TrackListScreenTest : TestCase() {
       advanceUntilIdle()
       coVerify { mockShowMessage wasNot Called }
     }
+  }
+
+  @Test
+  fun canNavigateToSElectSongScreenFromTrackListScreen() = run {
+    mockNavigationActions.navigateToSelectSongScreen(viewModelType.TRACKLIST)
+    verify { mockNavController.navigate("${Route.SELECT_SONG.routeString}/tracklist") }
   }
 }
