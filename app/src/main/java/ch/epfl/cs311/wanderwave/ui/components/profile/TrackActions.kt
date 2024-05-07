@@ -132,7 +132,7 @@ fun SongsListDisplay(
             onSelectTrack = { /* TODO */},
             onAddTrack = onAddTrack,
             canAddSong = canAddSong,
-            navActions = navigationActions, // TODO: Pass the correct navActions),
+            navActions = navigationActions,
             viewModelName = viewModelName)
       }
 }

@@ -91,15 +91,6 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
             modifier = Modifier.testTag("toggleSongList")) {
               Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
             }
-
-        // Call the SongsListDisplay function
-        // Buttons for adding tracks to top songs lists
-        //        Button(
-        //            onClick = { navActions.navigateToSelectSongScreen(viewModelType.PROFILE) },
-        //            modifier = Modifier.testTag("addTopSongs")) {
-        //              Text("Add Track to TOP SONGS List")
-        //            }
-
         SongsListDisplay(
             navigationActions = navActions,
             songLists = songLists,

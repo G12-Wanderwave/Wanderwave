@@ -74,8 +74,10 @@ constructor(
   }
 
   override fun addTrackToList(listName: ListType, track: Track) {
-    _uiState.value.tracks += track
+    val updatedTracks = _uiState.value.tracks + track
+    _uiState.value = _uiState.value.copy(tracks = updatedTracks)
   }
+
   /**
    * Get all the element of the main screen and add them to the top list
    *
@@ -251,7 +253,7 @@ constructor(
   }
 
   data class UiState(
-      var tracks: List<Track> = listOf(),
+      val tracks: List<Track> = listOf(),
       val queue: List<Track> = listOf(),
       val loading: Boolean = false,
       val message: String? = null,
