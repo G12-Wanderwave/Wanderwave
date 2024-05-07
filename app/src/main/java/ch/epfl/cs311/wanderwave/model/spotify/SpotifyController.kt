@@ -16,7 +16,6 @@ import com.spotify.sdk.android.auth.AuthorizationResponse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
@@ -310,9 +309,10 @@ class SpotifyController(private val context: Context) {
  */
 fun retrieveAndAddSubsectionFromSpotify(
     spotifySubsectionList: MutableStateFlow<List<ListItem>>,
-    spotifyController: SpotifyController
+    spotifyController: SpotifyController,
+    scope: CoroutineScope
 ) {
-  GlobalScope.launch {
+  scope.launch {
     val track = spotifyController.getAllElementFromSpotify().firstOrNull()
     if (track != null) {
       for (i in track) {
@@ -332,9 +332,10 @@ fun retrieveAndAddSubsectionFromSpotify(
 fun retrieveChildFromSpotify(
     item: ListItem,
     childrenPlaylistTrackList: MutableStateFlow<List<ListItem>>,
-    spotifyController: SpotifyController
+    spotifyController: SpotifyController,
+    scope: CoroutineScope
 ) {
-  GlobalScope.launch {
+  scope.launch {
     val children = spotifyController.getAllChildren(item).firstOrNull()
     if (children != null) {
       for (child in children) {

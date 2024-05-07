@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.ListType
@@ -115,7 +114,7 @@ constructor(
    * @last update 3.0
    */
   override fun retrieveAndAddSubsection() {
-    retrieveAndAddSubsectionFromSpotify(_spotifySubsectionList, spotifyController)
+    retrieveAndAddSubsectionFromSpotify(_spotifySubsectionList, spotifyController, viewModelScope)
   }
   /**
    * Get all the element of the main screen and add them to the top list
@@ -125,8 +124,8 @@ constructor(
    * @last update 3.0
    */
   override fun retrieveChild(item: ListItem) {
-    Log.d("Test32", "retrieveChild")
-    retrieveChildFromSpotify(item, this._childrenPlaylistTrackList, spotifyController)
+    retrieveChildFromSpotify(
+        item, this._childrenPlaylistTrackList, spotifyController, viewModelScope)
   }
 
   data class UIState(

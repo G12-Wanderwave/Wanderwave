@@ -84,7 +84,7 @@ constructor(
    * @last update 3.0
    */
   override fun retrieveAndAddSubsection() {
-    retrieveAndAddSubsectionFromSpotify(_spotifySubsectionList, spotifyController)
+    retrieveAndAddSubsectionFromSpotify(_spotifySubsectionList, spotifyController, viewModelScope)
   }
   /**
    * Get all the element of the main screen and add them to the top list
@@ -94,7 +94,7 @@ constructor(
    * @last update 3.0
    */
   override fun retrieveChild(item: ListItem) {
-    retrieveChildFromSpotify(item, _childrenPlaylistTrackList, spotifyController)
+    retrieveChildFromSpotify(item, _childrenPlaylistTrackList, spotifyController, viewModelScope)
   }
 
   /**
