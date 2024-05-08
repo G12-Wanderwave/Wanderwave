@@ -65,9 +65,9 @@ class ProfileConnection(
     trackConnection.addItemsIfNotExist(item.chosenSongs)
   }
 
-  fun addProfilesIfNotExist(profiles: List<Profile>) {
+  fun addProfilesIfNotExist(profiles: List<Profile?>) {
     coroutineScope.launch {
-      profiles.forEach { profile ->
+      profiles.filterNotNull().forEach { profile ->
         val querySnapshot =
             db.collection(collectionName)
                 .whereEqualTo("firebaseUid", profile.firebaseUid)
@@ -141,16 +141,6 @@ class ProfileConnection(
           }
         }
 
-    return flowOf<Profile>(
-        Profile(
-            firstName = "test",
-            lastName = "test",
-            description = "test",
-            numberOfLikes = 0,
-            isPublic = false,
-            spotifyUid = "test",
-            firebaseUid = "test",
-            topSongs = emptyList(),
-            chosenSongs = emptyList())) // super.getItem(itemId, onSuccessWrapper)
+    return super.getItem(itemId, onSuccessWrapper)
   }
 }

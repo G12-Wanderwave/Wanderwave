@@ -127,7 +127,7 @@ class BeaconConnection(
                 beacon.profileAndTrack.map { profileAndTrack ->
                   hashMapOf(
                       "creator" to
-                          db.collection("users").document(profileAndTrack.profile.firebaseUid),
+                          db.collection("users").document(profileAndTrack.profile?.firebaseUid ?: ""),
                       "track" to db.collection("tracks").document(profileAndTrack.track.id))
                 })
     return beaconMap
@@ -160,7 +160,7 @@ class BeaconConnection(
                 newTracks.map { profileAndTrack ->
                   hashMapOf(
                       "creator" to
-                          db.collection("users").document(profileAndTrack.profile.firebaseUid),
+                          db.collection("users").document(profileAndTrack.profile?.firebaseUid ?: ""),
                       "track" to db.collection("tracks").document(profileAndTrack.track.id))
                 })
           } ?: throw Exception("Beacon not found")
