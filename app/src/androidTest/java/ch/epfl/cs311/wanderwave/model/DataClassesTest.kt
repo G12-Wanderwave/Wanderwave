@@ -228,8 +228,7 @@ class DataClassesTest {
     val profileTrackAssociation2 = ProfileTrackAssociation(null, track)
     val expectedMap2 =
         hashMapOf(
-            "profile" to null,
-            "track" to track.toMap() // Assuming Track has a toMap function
+            "profile" to null, "track" to track.toMap() // Assuming Track has a toMap function
             )
     assertEquals(expectedMap2, profileTrackAssociation2.toMap())
   }
