@@ -93,9 +93,7 @@ class TrackConnection(private val database: FirebaseFirestore? = null) :
     if (TrackRef == null) return null
     return withContext(Dispatchers.IO) {
       try {
-        Log.d("Firestore", "Fetching track ${TrackRef}")
         val trackDocument = TrackRef.get()?.await()
-        Log.d("Firestore", "Fetched track ${trackDocument}")
         trackDocument?.let { Track.from(it) }
       } catch (e: Exception) {
         // Handle exceptions

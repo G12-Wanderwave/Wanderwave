@@ -110,15 +110,11 @@ abstract class FirebaseConnection<T, U> {
           }
   ): Flow<T> {
     val dataFlow = MutableStateFlow<T?>(null)
-    Log.d("Firestore", "getItem ${db.collection(collectionName)
-      .document(itemId).get()}")
     db.collection(collectionName)
         .document(itemId)
         .get()
         .addOnSuccessListener { document ->
-          Log.d("Firestore", "DocumentSnapshot data: ${document != null} ${document.data != null}")
           if (document != null && document.data != null) {
-            Log.d("Firestore", "DocumentSnapshot data: ${document.data}")
             documentToItem(document)?.let {
               dataFlow.value = it
               onSuccess(document, dataFlow)

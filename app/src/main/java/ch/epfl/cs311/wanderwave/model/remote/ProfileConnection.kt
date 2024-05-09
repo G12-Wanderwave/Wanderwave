@@ -89,13 +89,9 @@ class ProfileConnection(
       onSuccess: (DocumentSnapshot, MutableStateFlow<Profile?>) -> Unit
   ): Flow<Profile> {
 
-    Log.d("Firestore", "getItem 2: $itemId")
-
     val onSuccessWrapper: (DocumentSnapshot, MutableStateFlow<Profile?>) -> Unit =
         { document, dataFlow ->
           val profile = dataFlow.value ?: Profile.from(document)
-
-          Log.d("Firestore", "profile : $profile")
 
           profile?.let { profile ->
             val topSongsObject = document["topSongs"]
@@ -111,8 +107,6 @@ class ProfileConnection(
               topSongRefs = topSongsObject as? List<DocumentReference>
               chosenSongRefs = chosenSongsObject as? List<DocumentReference>
 
-              Log.d("Firestore", "refs : $topSongRefs $chosenSongRefs")
-
               // Use a coroutine to perform asynchronous operations
               coroutineScope.launch {
                 val TopSongsDeferred =
@@ -125,8 +119,6 @@ class ProfileConnection(
                 // Wait for all tracks to be fetched
                 val TopSongs = TopSongsDeferred?.mapNotNull { it?.await() }
                 val ChosenSongs = chosenSongsDeffered?.mapNotNull { it?.await() }
-
-                Log.d("Firestore", "songs lists : $TopSongs $ChosenSongs")
 
                 // Update the beacon with the complete list of tracks
                 val updatedBeacon =

@@ -1,7 +1,6 @@
 package ch.epfl.cs311.wanderwave.model
 
 import android.net.Uri
-import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
@@ -282,7 +281,6 @@ public class ProfileConnectionTest {
       // Define behavior for the addOnSuccessListener method
       every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentSnapshot>>()) } answers
           {
-            Log.d("Firestore", "Test in addOnSuccessListener")
             val listener = arg<OnSuccessListener<DocumentSnapshot>>(0)
 
             // Define the behavior of the mock DocumentSnapshot here
@@ -306,8 +304,6 @@ public class ProfileConnectionTest {
           collectionReference
       every { collectionReference.document("testProfile") } returns documentReference
 
-      Log.d("Firestore", "Calling get item in the test")
-
       // Call the function under test
       val retrievedProfile =
           profileConnection
@@ -315,42 +311,8 @@ public class ProfileConnectionTest {
               .filter { !it.topSongs.isEmpty() }
               .firstOrNull()
 
-      assert(retrievedProfile != null)
-
       // Verify that the get function is called on the document with the correct id
       coVerify { documentReference.get() }
-      Log.d("Firestore", "Retrieved profile: ${retrievedProfile == getTestProfile}")
-      // test all the different fields of the profile and print them
-      Log.d(
-          "Firestore",
-          "firstname: ${getTestProfile.firstName} == ${retrievedProfile!!.firstName} ${retrievedProfile.firstName == getTestProfile.firstName}")
-      Log.d(
-          "Firestore",
-          "lastname: ${getTestProfile.lastName} == ${retrievedProfile.lastName} ${retrievedProfile.lastName == getTestProfile.lastName}")
-      Log.d(
-          "Firestore",
-          "description: ${getTestProfile.description} == ${retrievedProfile.description} ${retrievedProfile.description == getTestProfile.description}")
-      Log.d(
-          "Firestore",
-          "numberOfLikes: ${getTestProfile.numberOfLikes} == ${retrievedProfile.numberOfLikes} ${retrievedProfile.numberOfLikes == getTestProfile.numberOfLikes}")
-      Log.d(
-          "Firestore",
-          "isPublic: ${getTestProfile.isPublic} == ${retrievedProfile.isPublic} ${retrievedProfile.isPublic == getTestProfile.isPublic}")
-      Log.d(
-          "Firestore",
-          "profilePictureUri: ${getTestProfile.profilePictureUri} == ${retrievedProfile.profilePictureUri} ${retrievedProfile.profilePictureUri == getTestProfile.profilePictureUri}")
-      Log.d(
-          "Firestore",
-          "spotifyUid: ${getTestProfile.spotifyUid} == ${retrievedProfile.spotifyUid} ${retrievedProfile.spotifyUid == getTestProfile.spotifyUid}")
-      Log.d(
-          "Firestore",
-          "firebaseUid: ${getTestProfile.firebaseUid} == ${retrievedProfile.firebaseUid} ${retrievedProfile.firebaseUid == getTestProfile.firebaseUid}")
-      Log.d(
-          "Firestore",
-          "topSongs: ${getTestProfile.topSongs} == ${retrievedProfile.topSongs} ${retrievedProfile.topSongs == getTestProfile.topSongs}")
-      Log.d(
-          "Firestore",
-          "chosenSongs: ${getTestProfile.chosenSongs} == ${retrievedProfile.chosenSongs} ${retrievedProfile.chosenSongs == getTestProfile.chosenSongs}")
 
       assert(getTestProfile == retrievedProfile)
     }
