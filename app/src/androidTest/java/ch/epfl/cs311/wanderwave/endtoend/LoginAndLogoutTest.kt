@@ -129,6 +129,7 @@ class LoginAndLogoutTest {
         onComposeScreen<LoginScreen>(composeTestRule) { assertIsDisplayed() }
 
         Log.d("LoginAndLogoutTest", "Test finished")
+        Intents.release()
       }
 
   @Module
