@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Profile
@@ -112,13 +113,16 @@ constructor(
    */
   fun retrieveTracksFromSpotify(scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) {
     scope.launch {
+      Log.d("ProfileViewModel", "retrieveTracksFromSpotify")
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
       if (track != null) {
         for (i in track) {
           if (i.hasChildren) {
             val children = spotifyController.getAllChildren(i).firstOrNull()
+            Log.d("ProfileViewModel", "children: $children")
             if (children != null) {
               for (child in children) {
+                Log.d("ProfileViewModel", "child: $child")
                 addTrackToList("TOP SONGS", Track(child.id, child.title, child.subtitle))
               }
             }

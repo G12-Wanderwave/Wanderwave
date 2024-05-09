@@ -6,6 +6,7 @@ import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.protocol.types.ListItem
 import io.mockk.clearAllMocks
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -153,5 +155,22 @@ class ProfileViewModelTest {
 
     assertEquals(expectedListItem, result?.get(0))
     assertEquals(expectedListItem, result2?.get(0))
+  }
+
+  @Test
+  fun testRetrieveTracksFromSpotify() = runBlocking {
+    // Mock spotifyController and its methods
+    val track = ListItem("bbbb", "bbbb", null, "bbbb", "bbbb", false, true)
+    val child = ListItem("aaaa", "aaaaa", null, "aaaaa", "aaaaa", false, true)
+
+    every { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(track))
+    every { spotifyController.getAllChildren(track) } returns flowOf(listOf(child))
+
+    // Call the function under test
+    viewModel.retrieveTracksFromSpotify(this)
+
+    // Verify that the methods were called
+    coVerify { spotifyController.getAllElementFromSpotify() }
+    coVerify { spotifyController.getAllChildren(track) }
   }
 }
