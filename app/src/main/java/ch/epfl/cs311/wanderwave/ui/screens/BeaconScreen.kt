@@ -167,14 +167,7 @@ fun SongList(
       text = stringResource(R.string.beaconTracksTitle),
       style = MaterialTheme.typography.displayMedium,
       modifier = Modifier.testTag("beaconTracksTitle"))
-  LazyColumn {
-    items(beacon.profileAndTrack) {
-      Log.d("SongList", "Track added successfully.")
-      Log.d("SongList", it.profile.toString())
-      Log.d("SongList", it.track.toString())
-      TrackItem(it, navigationActions)
-    }
-  }
+  LazyColumn { items(beacon.profileAndTrack) { TrackItem(it, navigationActions) } }
 }
 
 @Composable
@@ -235,13 +228,14 @@ internal fun TrackItem(
             modifier =
                 Modifier.size(width = 150.dp, height = 100.dp)
                     .clickable(
-                        enabled = profileAndTrack.profile.isPublic,
+                        enabled = profileAndTrack.profile?.isPublic ?: false,
                         onClick = {
-                          if (profileAndTrack.profile.isPublic) {
+                          if (profileAndTrack.profile != null && profileAndTrack.profile.isPublic) {
                             // if the profile is public, navigate to the profile view screen
                             navigationActions.navigateToProfile(profileAndTrack.profile.firebaseUid)
                           } else {
-                            // if the profile is private , output a message that say the profile is
+                            // if the profile is private , output a message that say the profile
+                            // is
                             // private, you cannot access to profile informations
                             scope.launch {
                               snackbarHostState.showSnackbar(
@@ -249,7 +243,7 @@ internal fun TrackItem(
                             }
                           }
                         }),
-            imageUri = profileAndTrack.profile.profilePictureUri,
+            imageUri = profileAndTrack.profile?.profilePictureUri ?: null,
         )
       }
     }

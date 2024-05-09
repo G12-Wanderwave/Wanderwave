@@ -21,7 +21,5 @@ interface FirebaseRepository<T> {
 
   fun deleteItem(itemId: String)
 
-  fun getItem(item: T): Flow<T>
-
   fun getItem(itemId: String): Flow<T>
 }
