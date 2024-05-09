@@ -32,7 +32,7 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
   private val _uiState = MutableStateFlow(BeaconListUiState(loading = true))
   val uiState: StateFlow<BeaconListUiState> = _uiState
 
-  private var isCooldownActive = MutableStateFlow(false)
+  var isCooldownActive = MutableStateFlow(false)
 
   // TODO: Define global constants
   private val BEACON_RANGE = 0.025 // 25 meters

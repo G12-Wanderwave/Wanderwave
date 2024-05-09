@@ -111,23 +111,6 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
 
     mockMapViewModel = MapViewModel(mockLocationSource, mockBeaconConnection)
     mockProfileViewModel = ProfileViewModel(profileRepository, spotifyController)
-    //        val track = Track("Dummy ID", "Dummy Title", "Dummy Artist")
-    //        mockProfileViewModel.createSpecificSongList("TOP_SONGS")
-    //        mockProfileViewModel.addTrackToList("TOP_SONGS", track)
-
-    //        val tracks = SongList("Dummy List", listOf(track))
-    //        val songList = listOf(tracks)
-    //        every { mockProfileViewModel.songLists.value } returns songList
-    //        every { mockProfileViewModel.profile.value } returns Profile(
-    //            "Sample First Name",
-    //            "Sample Last name",
-    //            "Sample desc",
-    //            0,
-    //            false,
-    //            null,
-    //            "Sample Profile ID",
-    //            "Sample Track ID"
-    //        )
     every { mockNavController.navigate(any<String>()) } returns Unit
     mockNavigationActions = NavigationActions(mockNavController)
 

@@ -2,6 +2,7 @@ package ch.epfl.cs311.wanderwave.ui.screens
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -70,7 +71,12 @@ fun MapScreen(
       val track = tracks.first()
       // Add listener to check if user is in beacon range and drop song if applicable
       viewModel.isInBeaconRange(track, profileViewModel.profile.value)
+    } else {
+      Log.e("MapScreen", "No song to drop !")
     }
+  } else {
+    Log.e("MapScreen", "No song list !")
+    Log.e("MapScreen", "No song to drop !")
   }
 
   WanderwaveGoogleMap(
