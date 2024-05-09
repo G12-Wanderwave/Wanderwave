@@ -110,7 +110,7 @@ class ProfileViewModelTest {
 
     // Trigger the operations that will cause the song lists to be populated
 
-    viewModel.retrieveTracksFromSpotify(this)
+    viewModel.retrieveTracksFromSpotify()
     // Wait for the job to complete which includes Flow collection
     job.join()
 
@@ -167,7 +167,7 @@ class ProfileViewModelTest {
     every { spotifyController.getAllChildren(track) } returns flowOf(listOf(child))
 
     // Call the function under test
-    viewModel.retrieveTracksFromSpotify(this)
+    viewModel.retrieveTracksFromSpotify()
 
     // Verify that the methods were called
     coVerify { spotifyController.getAllElementFromSpotify() }

@@ -10,7 +10,6 @@ import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
@@ -110,8 +109,8 @@ constructor(
    * @since 2.0
    * @last update 2.0
    */
-  fun retrieveTracksFromSpotify(scope: CoroutineScope = viewModelScope) {
-    scope.launch {
+  fun retrieveTracksFromSpotify() {
+    viewModelScope.launch {
       Log.d("ProfileViewModel", "retrieveTracksFromSpotify")
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
       if (track != null) {
