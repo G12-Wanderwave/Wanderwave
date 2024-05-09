@@ -33,11 +33,7 @@ constructor(
   private fun observeTracks() {
     viewModelScope.launch {
       repository.getAll().collect { tracks ->
-        _uiState.value =
-            UiState(
-                tracks = tracks.filter { matchesSearchQuery(it) },
-                queue = tracks.filter { matchesSearchQuery(it) },
-                loading = false)
+        _uiState.value = UiState(tracks = tracks.filter { matchesSearchQuery(it) }, loading = false)
       }
       // deal with the flow
     }
@@ -69,16 +65,6 @@ constructor(
     spotifyController.playTrackList(uiState.value.tracks, track)
   }
 
-  /** Resumes the currently paused track using the SpotifyController. */
-  fun resumeTrack() {
-    spotifyController.resumeTrack {}
-  }
-
-  /** Pauses the currently playing track using the SpotifyController. */
-  fun pauseTrack() {
-    spotifyController.pauseTrack {}
-  }
-
   fun collapse() {
     _uiState.value = _uiState.value.copy(expanded = false)
   }
@@ -89,17 +75,9 @@ constructor(
 
   data class UiState(
       val tracks: List<Track> = listOf(),
-      val queue: List<Track> = listOf(),
       val loading: Boolean = false,
-      val message: String? = null,
-      val selectedTrack: Track? = null,
-      val pausedTrack: Track? = null,
-      val isPlaying: Boolean = false,
-      val currentMillis: Int = 0,
       val expanded: Boolean = false,
-      val progress: Float = 0f,
-      val isShuffled: Boolean = false,
-      val loopMode: LoopMode = LoopMode.NONE
+      val message: String? = null
   )
 }
 

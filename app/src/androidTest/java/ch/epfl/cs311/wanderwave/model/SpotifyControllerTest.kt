@@ -35,6 +35,7 @@ import junit.framework.TestCase.assertTrue
 import kotlin.Exception
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -52,6 +53,7 @@ class SpotifyControllerTest {
 
   @get:Rule val mockkRule = MockKRule(this)
 
+  @RelaxedMockK private lateinit var mockAppRemoteFlow: MutableStateFlow<SpotifyAppRemote?>
   @RelaxedMockK private lateinit var mockAppRemote: SpotifyAppRemote
   @RelaxedMockK private lateinit var mockPlayerApi: PlayerApi
 
@@ -62,8 +64,8 @@ class SpotifyControllerTest {
   fun setup() {
     context = ApplicationProvider.getApplicationContext()
     spotifyController = SpotifyController(context)
-    spotifyController.appRemote = mockAppRemote
     mockkStatic(SpotifyAppRemote::class)
+    spotifyController.appRemote.value = mockAppRemote
     every { mockAppRemote.playerApi } returns mockPlayerApi
   }
 
@@ -170,9 +172,7 @@ class SpotifyControllerTest {
     every { mockAppRemote.playerApi } returns playerApi
     every { playerApi.play(any()) } returns callResult
     val id = "fakeid"
-    val flow = spotifyController.playTrack(Track(id, "faketitle", "fakeartist"))
-
-    val result = flow.timeout(2.seconds).catch {}.firstOrNull()
+    spotifyController.playTrack(Track(id, "faketitle", "fakeartist"))
 
     verify { playerApi.play(any()) }
   }
@@ -404,10 +404,9 @@ class SpotifyControllerTest {
       every { callResult.setErrorCallback(any()) } returns callResult
       every { callResult.cancel() } just Runs
 
-      val result = spotifyController.resumeTrack().first()
+      spotifyController.resumeTrack()
 
       verify { playerApi.resume() }
-      assertTrue(result == true)
     }
   }
 
@@ -429,10 +428,9 @@ class SpotifyControllerTest {
     every { callResult.setErrorCallback(any()) } returns callResult
     every { callResult.cancel() } just Runs
 
-    val result = spotifyController.pauseTrack().first()
+    spotifyController.pauseTrack()
 
     verify { playerApi.pause() }
-    assertTrue(result)
   }
 
   @Test
@@ -453,10 +451,9 @@ class SpotifyControllerTest {
     every { callResult.setErrorCallback(any()) } returns callResult
     every { callResult.cancel() } just Runs
 
-    val result = spotifyController.resumeTrack().first()
+    spotifyController.resumeTrack()
 
     verify { playerApi.resume() }
-    assertTrue(result)
   }
 
   @Test
@@ -571,10 +568,7 @@ class SpotifyControllerTest {
       every { mockAppRemote.playerApi } returns playerApi
       every { playerApi.play(any()) } returns callResult
       val id = "fakeid"
-      val flow = spotifyController.playTrack(Track(id, "faketitle", "fakeartist"))
-
-      val result = flow.timeout(2.seconds).catch {}.firstOrNull()
-
+      spotifyController.playTrack(Track(id, "faketitle", "fakeartist"))
       verify { playerApi.play(any()) }
     }
   }
@@ -598,10 +592,9 @@ class SpotifyControllerTest {
       every { callResult.setErrorCallback(any()) } returns callResult
       every { callResult.cancel() } just Runs
 
-      val result = spotifyController.pauseTrack().first()
+      spotifyController.pauseTrack()
 
       verify { playerApi.pause() }
-      assertTrue(result)
     }
   }
 
@@ -624,10 +617,9 @@ class SpotifyControllerTest {
       every { callResult.setErrorCallback(any()) } returns callResult
       every { callResult.cancel() } just Runs
 
-      val result = spotifyController.resumeTrack().first()
+      spotifyController.resumeTrack()
 
       verify { playerApi.resume() }
-      assertTrue(result)
     }
   }
 
@@ -647,9 +639,7 @@ class SpotifyControllerTest {
 
     every { callResult.cancel() } just Runs
 
-    val result = spotifyController.resumeTrack().first()
-
-    assertFalse(result)
+    spotifyController.resumeTrack()
   }
 
   @Test
@@ -668,9 +658,7 @@ class SpotifyControllerTest {
 
     every { callResult.cancel() } just Runs
 
-    val result = spotifyController.pauseTrack().first()
-
-    assertFalse(result)
+    spotifyController.pauseTrack()
   }
 
   @Test
@@ -689,19 +677,8 @@ class SpotifyControllerTest {
 
     every { callResult.cancel() } just Runs
 
-    val result = spotifyController.playTrack(Track("id", "title", "artist")).first()
-
-    assertFalse(result)
+    spotifyController.playTrack(Track("id", "title", "artist"))
   }
-  //    @Test
-  //    fun playTrackTest() = runBlocking {
-  //        val callResult = mockk<CallResult<Empty>>(relaxed = true)
-  //        val playerApi = mockk<PlayerApi>(relaxed = true)
-  //        every { mockAppRemote.playerApi } returns playerApi
-  //        every { playerApi.play(any()) } returns callResult
-  //        val id = "fakeid"
-  //        spotifyController.playTrack(Track(id, "faketitle", "fakeartist"))
-  //    }
 
   @ExperimentalCoroutinesApi
   @Test

@@ -8,7 +8,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.ui.TestActivity
 import ch.epfl.cs311.wanderwave.ui.components.player.ExclusivePlayer
 import ch.epfl.cs311.wanderwave.ui.screens.components.ExclusivePlayerScreen
-import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.PlayerViewModel
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -26,12 +26,12 @@ class PlayerScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
 
   @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
 
-  private lateinit var viewModel: TrackListViewModel
+  private lateinit var viewModel: PlayerViewModel
 
   @Before
   fun setup() {
-    viewModel = mockk<TrackListViewModel>(relaxed = true)
-    every { viewModel.uiState } returns MutableStateFlow(TrackListViewModel.UiState())
+    viewModel = mockk<PlayerViewModel>(relaxed = true)
+    every { viewModel.uiState } returns MutableStateFlow(PlayerViewModel.UiState())
   }
 
   @Test
