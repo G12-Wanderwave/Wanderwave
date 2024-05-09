@@ -175,7 +175,9 @@ fun ProfileButton(
               .padding(16.dp)
               .testTag("profileButton")) {
         if (navActions.getCurrentRoute() == Route.MAIN) {
-          SelectImage(modifier = Modifier.clip(CircleShape).size(50.dp), profile = currentProfile)
+          SelectImage(
+              modifier = Modifier.clip(CircleShape).size(50.dp),
+              imageUri = currentProfile?.profilePictureUri)
         }
       }
 }

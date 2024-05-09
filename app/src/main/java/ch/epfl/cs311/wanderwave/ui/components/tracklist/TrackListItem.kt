@@ -96,7 +96,7 @@ fun TrackListItemWithProfile(trackAndProfile: ProfileTrackAssociation, selected:
                           }
                         }
                       }),
-          profile = trackAndProfile.profile,
+        imageUri = trackAndProfile.profile.profilePictureUri,
       )
     }
   }
