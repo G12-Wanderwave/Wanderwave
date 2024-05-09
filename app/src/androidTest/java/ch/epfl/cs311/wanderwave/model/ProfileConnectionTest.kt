@@ -43,7 +43,7 @@ public class ProfileConnectionTest {
   @Before
   fun setup() {
     MockKAnnotations.init(this)
-    val trackConnection = TrackConnection()
+    val trackConnection = TrackConnection(firebaseFirestore)
     profileConnection = ProfileConnection(firebaseFirestore, trackConnection = trackConnection)
   }
 

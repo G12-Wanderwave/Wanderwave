@@ -496,8 +496,8 @@ public class BeaconConnectionTest {
   fun provideBeaconRepository_returnsBeaconConnection() {
     // delete as soon as possible
     val context = ApplicationProvider.getApplicationContext<Context>()
-    val trackRepository = ConnectionModule.provideTrackRepository(context)
-    val profileRepository = ConnectionModule.provideProfileRepository(context, trackRepository)
+    val trackRepository = mockk <TrackConnection>(relaxed = true)
+    val profileRepository = mockk <ProfileConnection>(relaxed = true)
     val beaconRepository =
         ConnectionModule.provideBeaconRepository(context, trackRepository, profileRepository)
     assertEquals(BeaconConnection::class.java, beaconRepository::class.java)
