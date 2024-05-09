@@ -21,7 +21,6 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
@@ -184,25 +183,22 @@ public class ProfileConnectionTest {
 
     // mock the track connection
     val trackConnection = mockk<TrackConnection>(relaxed = true)
+    val mockedDb = mockk<FirebaseFirestore>(relaxed = true)
 
     // Mock the ProfileConnection
     val profileConnection =
-        spyk(ProfileConnection(trackConnection = trackConnection), recordPrivateCalls = true)
+        spyk(
+            ProfileConnection(mockedDb, trackConnection = trackConnection),
+            recordPrivateCalls = true)
 
     // Define the behavior for the second getItem method
-    every {
-      profileConnection.getItem(
-          itemId, any<(DocumentSnapshot, MutableStateFlow<Profile?>) -> Unit>())
-    } returns flowOf<Profile>()
+    every { profileConnection.getItem(itemId) } returns flowOf<Profile>()
 
     // Call the method under test
     profileConnection.getItem(itemId)
 
     // Verify that the second getItem method was called
-    verify {
-      profileConnection.getItem(
-          itemId, any<(DocumentSnapshot, MutableStateFlow<Profile?>) -> Unit>())
-    }
+    verify { profileConnection.getItem(itemId) }
   }
 
   @Test
@@ -294,10 +290,7 @@ public class ProfileConnectionTest {
 
       // Call the function under test
       val retrievedProfile =
-          profileConnection
-              .getItem("testProfile", { _, _ -> })
-              .filter { !it.topSongs.isEmpty() }
-              .firstOrNull()
+          profileConnection.getItem("testProfile").filter { !it.topSongs.isEmpty() }.firstOrNull()
 
       // Verify that the get function is called on the document with the correct id
       coVerify { documentReference.get() }
