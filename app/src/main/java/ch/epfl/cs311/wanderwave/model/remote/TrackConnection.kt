@@ -6,6 +6,8 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.tasks.await
 
 class TrackConnection(private val database: FirebaseFirestore? = null) :
     FirebaseConnection<Track, Track>(), TrackRepository {
@@ -50,5 +52,14 @@ class TrackConnection(private val database: FirebaseFirestore? = null) :
       stateFlow.value = tracks
     }
     return stateFlow
+  }
+
+  override fun getTrackById(trackId: String): Flow<Track?> = flow {
+    val snapshot = db.collection(collectionName).document(trackId).get().await()
+    if (snapshot.exists()) {
+      emit(Track.from(snapshot))
+    } else {
+      emit(null)
+    }
   }
 }

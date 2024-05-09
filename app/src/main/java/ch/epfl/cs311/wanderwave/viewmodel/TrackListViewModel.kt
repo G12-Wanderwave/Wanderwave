@@ -47,10 +47,11 @@ constructor(
 
   fun loadRecentlyAddedTracks() {
     viewModelScope.launch {
-      appDatabase.trackRecordDao().getAllRecentlyAddedTracks().collect { trackRecords ->
-        val tracks = trackRecords.map { Track(it.trackId, "Unknown Title", "Unknown Artist") }
-        _uiState.value = _uiState.value.copy(tracks = tracks, loading = false)
-      }
+      val trackRecords =
+          appDatabase.trackRecordDao().getAllRecentlyAddedTracks().firstOrNull() ?: listOf()
+      val trackDetails =
+          trackRecords.mapNotNull { repository.getTrackById(it.trackId).firstOrNull() }
+      _uiState.value = _uiState.value.copy(tracks = trackDetails, loading = false)
     }
   }
 

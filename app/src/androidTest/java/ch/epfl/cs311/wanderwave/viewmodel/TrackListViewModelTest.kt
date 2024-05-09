@@ -1,4 +1,5 @@
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.data.TrackRecord
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
@@ -368,21 +369,32 @@ class TrackListViewModelTest {
     assertEquals(LoopMode.NONE, viewModel.uiState.value.loopMode)
   }
 
-  // Additional Test: Load Recently Added Tracks
+  @Test
+  fun toggleTrackSourceTest() = run {
+    val initial = viewModel.uiState.value.showRecentlyAdded
+    viewModel.toggleTrackSource()
+    val toggled = viewModel.uiState.value.showRecentlyAdded
+    assertNotEquals(initial, toggled)
+  }
+
   @Test
   fun loadRecentlyAddedTracksTest() = runTest {
+    // Arrange
+    val trackRecords = listOf(TrackRecord(1, "beacon1", "track1", System.currentTimeMillis()))
+    val expectedTracks = listOf(Track("track1", "Title 1", "Artist 1"))
+
+    every { appDatabase.trackRecordDao().getAllRecentlyAddedTracks() } returns flowOf(trackRecords)
+    every { repository.getTrackById(any()) } returns flowOf(expectedTracks.first())
+
+    // Act
+    viewModel.loadRecentlyAddedTracks()
+
+    // Assert
     advanceUntilIdle()
 
     assertFalse(viewModel.uiState.value.tracks.isEmpty())
-
-    // Assuming that the tracks have been returned in the expected order
-    // If the order is not guaranteed, consider using a set or checking if the list contains the
-    // expected tracks
-    assertEquals("Yeah", viewModel.uiState.value.tracks[0].title)
-    assertEquals("Queen", viewModel.uiState.value.tracks[0].artist)
-
-    // You can extend these assertions to other tracks if needed, or dynamically check against a
-    // known set of tracks
+    assertEquals(expectedTracks.first().title, viewModel.uiState.value.tracks.first().title)
+    assertEquals(expectedTracks.first().artist, viewModel.uiState.value.tracks.first().artist)
     assertFalse(viewModel.uiState.value.loading)
   }
 }
