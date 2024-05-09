@@ -64,7 +64,7 @@ class TrackListScreenTest : TestCase() {
       trackButton {
         assertIsDisplayed()
         performClick()
-        //assertTrue(viewModel.uiState.value.selectedTrack != null)
+        // assertTrue(viewModel.uiState.value.selectedTrack != null)
       }
       advanceUntilIdle()
       coVerify { mockShowMessage wasNot Called }
