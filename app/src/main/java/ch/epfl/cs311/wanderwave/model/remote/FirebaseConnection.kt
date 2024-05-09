@@ -8,7 +8,6 @@ import com.google.firebase.firestore.memoryCacheSettings
 import com.google.firebase.firestore.persistentCacheSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.tasks.await
 
@@ -126,5 +125,4 @@ abstract class FirebaseConnection<T, U> {
 
     return dataFlow.mapNotNull { it }
   }
-
 }
