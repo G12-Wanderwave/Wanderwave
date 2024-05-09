@@ -3,29 +3,63 @@ package ch.epfl.cs311.wanderwave.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class TrackListViewModel
 @Inject
 constructor(
-    private val spotifyController: SpotifyController,
-    private val repository: TrackRepository
+  private val spotifyController: SpotifyController,
+  private val appDatabase: AppDatabase,
+  private val repository: TrackRepository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(UiState(loading = true))
   val uiState: StateFlow<UiState> = _uiState
+  private var _currentBeaconId: String? = null
+  var currentBeaconId: String?
+    get() = _currentBeaconId
+    set(value) {
+      _currentBeaconId = value
+      loadTracksBasedOnSource()
+    }
 
   private var _searchQuery = MutableStateFlow("")
+
+  fun toggleTrackSource() {
+    _uiState.value = _uiState.value.copy(showRecentlyAdded = !_uiState.value.showRecentlyAdded)
+    loadTracksBasedOnSource()
+  }
+
+  fun loadTracksBasedOnSource() {
+    viewModelScope.launch {
+      _uiState.value = _uiState.value.copy(loading = true)
+      if (_uiState.value.showRecentlyAdded && currentBeaconId != null) {
+        loadRecentlyAddedTracks(currentBeaconId!!)
+      } else {
+        _uiState.value = _uiState.value.copy(tracks = listOf(), loading = false)
+      }
+    }
+  }
+
+  fun loadRecentlyAddedTracks(beaconId: String) {
+    viewModelScope.launch {
+      appDatabase.trackRecordDao().getTracksForBeacon(beaconId).collect { trackRecords ->
+        val tracks = trackRecords.map { Track(it.trackId, "Unknown Title", "Unknown Artist") }
+        _uiState.value = _uiState.value.copy(tracks = tracks, loading = false)
+      }
+    }
+  }
 
   init {
     observeTracks()
@@ -216,19 +250,21 @@ constructor(
   }
 
   data class UiState(
-      val tracks: List<Track> = listOf(),
-      val queue: List<Track> = listOf(),
-      val loading: Boolean = false,
-      val message: String? = null,
-      val selectedTrack: Track? = null,
-      val pausedTrack: Track? = null,
-      val isPlaying: Boolean = false,
-      val currentMillis: Int = 0,
-      val expanded: Boolean = false,
-      val progress: Float = 0f,
-      val isShuffled: Boolean = false,
-      val loopMode: LoopMode = LoopMode.NONE
+    val tracks: List<Track> = listOf(),
+    val queue: List<Track> = listOf(),
+    val loading: Boolean = false,
+    val message: String? = null,
+    val selectedTrack: Track? = null,
+    val pausedTrack: Track? = null,
+    val isPlaying: Boolean = false,
+    val currentMillis: Int = 0,
+    val expanded: Boolean = false,
+    val progress: Float = 0f,
+    val isShuffled: Boolean = false,
+    val loopMode: LoopMode = LoopMode.NONE,
+    val showRecentlyAdded: Boolean = true  // New state to toggle between recently added and recently viewed
   )
+
 }
 
 enum class LoopMode {

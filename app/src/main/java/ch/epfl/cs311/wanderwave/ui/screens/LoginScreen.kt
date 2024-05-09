@@ -21,7 +21,6 @@ import ch.epfl.cs311.wanderwave.ui.components.login.SignInButton
 import ch.epfl.cs311.wanderwave.ui.components.login.WelcomeTitle
 import ch.epfl.cs311.wanderwave.viewmodel.LoginScreenViewModel
 import com.spotify.sdk.android.auth.AuthorizationClient
-import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -56,10 +55,11 @@ fun LoginScreen(
     LoginAppLogo(modifier = Modifier.weight(1f))
     WelcomeTitle(modifier = Modifier.weight(4f))
     SignInButton(modifier = Modifier.weight(1f)) {
-      val intent =
-          AuthorizationClient.createLoginActivityIntent(
-              context.getActivity(), viewModel.getAuthorizationRequest())
-      launcher.launch(intent)
+      //val intent =
+        //  AuthorizationClient.createLoginActivityIntent(
+          //    context.getActivity(), viewModel.getAuthorizationRequest())
+      //launcher.launch(intent)
+      navigationActions.navigateTo(Route.TRACK_LIST)
     }
   }
 }
