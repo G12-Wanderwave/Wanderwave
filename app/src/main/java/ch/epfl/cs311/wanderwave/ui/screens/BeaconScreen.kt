@@ -242,7 +242,7 @@ internal fun TrackItem(
                             }
                           }
                         }),
-            profile = profileAndTrack.profile,
+            imageUri = profileAndTrack.profile.profilePictureUri,
         )
       }
     }
