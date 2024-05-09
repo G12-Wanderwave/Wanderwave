@@ -44,7 +44,6 @@ public class BeaconConnectionTest {
   @get:Rule val mockkRule = MockKRule(this)
   private lateinit var beaconConnection: BeaconConnection
 
-  @RelaxedMockK private lateinit var beaconConnectionMock: BeaconConnection
   private lateinit var trackConnection: TrackConnection
   private lateinit var profileConnection: ProfileConnection // Add a mock for ProfileConnection
 
