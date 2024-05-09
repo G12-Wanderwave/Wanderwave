@@ -1,7 +1,10 @@
 package ch.epfl.cs311.wanderwave.ui.components.tracklist
 
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
@@ -21,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -31,17 +36,33 @@ import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * A single track item in the track list.
+ *
+ * @param track The track to display.
+ * @param selected Whether the track is selected.
+ * @param onClick The action to perform when the track is clicked.
+ */
 @Composable
-fun TrackListItemWithProfile(
-    trackAndProfile: ProfileTrackAssociation,
-    selected: Boolean,
-    onClick: () -> Unit,
-    navigationActions: NavigationActions
-) {
+fun TrackListItem(track: Track, selected: Boolean, onClick: () -> Unit) {
   val scope = rememberCoroutineScope()
-  val snackbarHostState = remember { SnackbarHostState() }
+  val scrollState = rememberScrollState()
+  val slowScrollAnimation: AnimationSpec<Float> = TweenSpec(durationMillis = 5000, easing = { it })
+
+  LaunchedEffect(key1 = true) {
+    while (true) {
+      scope.launch {
+        scrollState.animateScrollTo(
+            value = scrollState.maxValue, animationSpec = slowScrollAnimation)
+      }
+      delay(6000)
+      scope.launch { scrollState.animateScrollTo(value = 0, animationSpec = slowScrollAnimation) }
+      delay(6000)
+    }
+  }
   Card(
       onClick = onClick,
       colors =
@@ -65,7 +86,73 @@ fun TrackListItemWithProfile(
                     modifier = Modifier.fillMaxSize(.8f),
                 )
               }
-          Column(modifier = Modifier.padding(8.dp)) {
+          Column(modifier = Modifier.padding(8.dp).horizontalScroll(scrollState)) {
+            Text(
+                text = track.title,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = track.artist,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+          }
+        }
+      }
+}
+
+/**
+ * Same as [TrackListItem] but with a profile picture on the right side of the track information.
+ * Takes a [ProfileTrackAssociation] instead of a [Track].to display profile information, as well as
+ * a [NavigationActions] to navigate to the profile view screen.
+ */
+@Composable
+fun TrackListItemWithProfile(
+    trackAndProfile: ProfileTrackAssociation,
+    selected: Boolean,
+    onClick: () -> Unit,
+    navigationActions: NavigationActions
+) {
+  val scope = rememberCoroutineScope()
+  val snackbarHostState = remember { SnackbarHostState() }
+  val scrollState = rememberScrollState()
+  val slowScrollAnimation: AnimationSpec<Float> = TweenSpec(durationMillis = 5000, easing = { it })
+
+  LaunchedEffect(key1 = true) {
+    while (true) {
+      scope.launch {
+        scrollState.animateScrollTo(
+            value = scrollState.maxValue, animationSpec = slowScrollAnimation)
+      }
+      delay(6000)
+      scope.launch { scrollState.animateScrollTo(value = 0, animationSpec = slowScrollAnimation) }
+      delay(6000)
+    }
+  }
+  Card(
+      onClick = onClick,
+      colors =
+          CardColors(
+              containerColor =
+                  if (selected) MaterialTheme.colorScheme.surfaceContainerHighest
+                  else MaterialTheme.colorScheme.surfaceContainerHigh,
+              CardDefaults.cardColors().contentColor,
+              CardDefaults.cardColors().disabledContainerColor,
+              CardDefaults.cardColors().disabledContentColor),
+      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem")) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Box(
+              modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+              contentAlignment = Alignment.Center) {
+                Image(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "Album Cover",
+                    modifier = Modifier.fillMaxSize(.8f),
+                )
+              }
+          Column(modifier = Modifier.padding(8.dp).horizontalScroll(scrollState)) {
             Text(
                 text = trackAndProfile.track.title,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -98,46 +185,6 @@ fun TrackListItemWithProfile(
                           }),
               imageUri = trackAndProfile.profile.profilePictureUri,
           )
-        }
-      }
-}
-
-@Composable
-fun TrackListItem(track: Track, selected: Boolean, onClick: () -> Unit) {
-  Card(
-      onClick = onClick,
-      colors =
-          CardColors(
-              containerColor =
-                  if (selected) MaterialTheme.colorScheme.surfaceContainerHighest
-                  else MaterialTheme.colorScheme.surfaceContainerHigh,
-              CardDefaults.cardColors().contentColor,
-              CardDefaults.cardColors().disabledContainerColor,
-              CardDefaults.cardColors().disabledContentColor),
-      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem")) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Box(
-              modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-              contentAlignment = Alignment.Center) {
-                Image(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Album Cover",
-                    modifier = Modifier.fillMaxSize(.8f),
-                )
-              }
-          Column(modifier = Modifier.padding(8.dp)) {
-            Text(
-                text = track.title,
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.titleMedium)
-            Text(
-                text = track.artist,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-          }
         }
       }
 }
