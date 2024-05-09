@@ -79,13 +79,11 @@ class BeaconConnection(
               profileAndTrackRefs = tracksObject as? List<Map<String, DocumentReference>>
               // Use a coroutine to perform asynchronous operations
               coroutineScope.launch {
-                val profileAndTracksDeferred =
-                    profileAndTrackRefs?.map { profileAndTrackRef ->
-                      async { trackConnection.fetchProfileAndTrack(profileAndTrackRef) }
-                    }
+                // Wait for all tracks to be fetched by generating tasks and computing them concurrently
+                val profileAndTracks = profileAndTrackRefs?.map { profileAndTrackRef ->
+                  async { trackConnection.fetchProfileAndTrack(profileAndTrackRef) }
+                }?.mapNotNull { it?.await() }
 
-                // Wait for all tracks to be fetched
-                val profileAndTracks = profileAndTracksDeferred?.mapNotNull { it?.await() }
                 // Update the beacon with the complete list of tracks
                 val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks ?: emptyList())
                 dataFlow.value = updatedBeacon

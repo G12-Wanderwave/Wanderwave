@@ -24,7 +24,6 @@ data class Track(
 
   companion object {
     fun from(document: DocumentSnapshot): Track? {
-      Log.d("Firestore", "DocumentSnapshot is $document")
       return if (document.exists()) {
         Track(
             id = document.id,

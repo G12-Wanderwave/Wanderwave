@@ -31,21 +31,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-/*
-data class Profile(
-    var firstName: String,
-    var lastName: String,
-    var description: String,
-    var numberOfLikes: Int,
-    var isPublic: Boolean,
-    var profilePictureUri: Uri? = null,
-    var spotifyUid: String,
-    var firebaseUid: String,
-    var topSongs: List<Track> = emptyList(),
-    var chosenSongs: List<Track> = emptyList(),
-)
- */
-
 public class ProfileConnectionTest {
 
   @get:Rule val mockkRule = MockKRule(this)
@@ -197,9 +182,12 @@ public class ProfileConnectionTest {
   fun testGetItemCallsOtherGetItem() {
     val itemId = "testItemId"
 
+    // mock the track connection
+    val trackConnection = mockk<TrackConnection>(relaxed = true)
+
     // Mock the ProfileConnection
     val profileConnection =
-        spyk(ProfileConnection(trackConnection = TrackConnection()), recordPrivateCalls = true)
+        spyk(ProfileConnection(trackConnection = trackConnection), recordPrivateCalls = true)
 
     // Define the behavior for the second getItem method
     every {

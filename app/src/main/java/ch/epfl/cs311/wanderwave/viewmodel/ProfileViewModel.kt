@@ -111,7 +111,7 @@ constructor(
    * @since 2.0
    * @last update 2.0
    */
-  fun retrieveTracksFromSpotify(scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) {
+  fun retrieveTracksFromSpotify(scope: CoroutineScope = viewModelScope) {
     scope.launch {
       Log.d("ProfileViewModel", "retrieveTracksFromSpotify")
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()

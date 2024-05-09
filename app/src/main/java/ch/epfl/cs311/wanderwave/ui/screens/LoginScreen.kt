@@ -60,35 +60,6 @@ fun LoginScreen(
           AuthorizationClient.createLoginActivityIntent(
               context.getActivity(), viewModel.getAuthorizationRequest())
       launcher.launch(intent)
-
-      // val track = Track(id = "1", title = "1", artist = "1")
-      //
-      // val profile =
-      //     Profile(
-      //         firstName = "New",
-      //         lastName = "User",
-      //         description = "No description",
-      //         numberOfLikes = 0,
-      //         isPublic = false,
-      //         spotifyUid = "newspotifyUid",
-      //         firebaseUid = "newfirebaseUid",
-      //         topSongs = listOf(track, track),
-      //         chosenSongs = listOf(track, track, track))
-      //
-      // val trackConnection = TrackConnection()
-      // val profileConnection = ProfileConnection(trackConnection = trackConnection)
-
-      // val beaconConnection =
-      //     BeaconConnection(trackConnection = trackConnection, profileConnection =
-      // profileConnection)
-
-      // profileConnection.addItemWithId(profile)
-      //
-      // GlobalScope.launch {
-      //   profileConnection.getItem(profile.firebaseUid).collect {
-      //     Log.d("Debug", "collected Profile ${it}")
-      //   }
-      // }
     }
   }
 }
