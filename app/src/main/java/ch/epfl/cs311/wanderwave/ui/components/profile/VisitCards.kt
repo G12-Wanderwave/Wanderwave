@@ -31,7 +31,7 @@ fun VisitCard(modifier: Modifier = Modifier, profile: Profile) {
                 .padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
                 .size(width = 150.dp, height = 100.dp)
                 .testTag("profilePicture"),
-        profile = profile)
+        imageUri = profile.profilePictureUri)
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),

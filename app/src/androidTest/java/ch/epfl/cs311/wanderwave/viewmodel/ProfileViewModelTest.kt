@@ -2,10 +2,11 @@ package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.repository.ProfileRepositoryImpl
+import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.protocol.types.ListItem
 import io.mockk.clearAllMocks
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -40,14 +42,14 @@ class ProfileViewModelTest {
   lateinit var viewModel: ProfileViewModel
   val testDispatcher = TestCoroutineDispatcher()
   @get:Rule val mockkRule = MockKRule(this)
-  @RelaxedMockK private lateinit var profileRepositoryImpl: ProfileRepositoryImpl
+  @RelaxedMockK private lateinit var profileRepository: ProfileConnection
 
   @RelaxedMockK private lateinit var spotifyController: SpotifyController
 
   @Before
   fun setup() {
     Dispatchers.setMain(testDispatcher)
-    viewModel = ProfileViewModel(profileRepositoryImpl, spotifyController)
+    viewModel = ProfileViewModel(profileRepository, spotifyController)
   }
 
   @After
@@ -97,7 +99,6 @@ class ProfileViewModelTest {
     every { spotifyController.getAllChildren(track) } returns flowOf(listOf(track2))
 
     viewModel.createSpecificSongList("TOP_SONGS")
-
     // Start observing the Flow before triggering actions that modify it
     val job = launch {
       viewModel.songLists.collect { songLists ->
@@ -108,7 +109,8 @@ class ProfileViewModelTest {
     }
 
     // Trigger the operations that will cause the song lists to be populated
-    viewModel.retrieveTracks(this)
+
+    viewModel.retrieveTracksFromSpotify()
     // Wait for the job to complete which includes Flow collection
     job.join()
 
@@ -116,6 +118,7 @@ class ProfileViewModelTest {
     advanceUntilIdle()
 
     // Optionally check additional conditions after ensuring Flow had time to collect
+
     assertFalse(
         "Song list should not be empty after adding a track", viewModel.songLists.value.isEmpty())
     assertEquals(
@@ -140,9 +143,8 @@ class ProfileViewModelTest {
     every {
       spotifyController.getAllChildren(ListItem("id", "title", null, "subtitle", "", false, true))
     } returns flowOf(listOf(expectedListItem))
-
-    viewModel.retrieveAndAddSubsection(this)
-    viewModel.retrieveChild(expectedListItem, this)
+    viewModel.retrieveAndAddSubsection()
+    viewModel.retrieveChild(expectedListItem)
     advanceUntilIdle() // Ensure all coroutines are completed
 
     // val result = viewModel.spotifySubsectionList.first()  // Safely access the first item
@@ -153,5 +155,22 @@ class ProfileViewModelTest {
 
     assertEquals(expectedListItem, result?.get(0))
     assertEquals(expectedListItem, result2?.get(0))
+  }
+
+  @Test
+  fun testRetrieveTracksFromSpotify() = runBlocking {
+    // Mock spotifyController and its methods
+    val track = ListItem("bbbb", "bbbb", null, "bbbb", "bbbb", false, true)
+    val child = ListItem("aaaa", "aaaaa", null, "aaaaa", "aaaaa", false, true)
+
+    every { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(track))
+    every { spotifyController.getAllChildren(track) } returns flowOf(listOf(child))
+
+    // Call the function under test
+    viewModel.retrieveTracksFromSpotify()
+
+    // Verify that the methods were called
+    coVerify { spotifyController.getAllElementFromSpotify() }
+    coVerify { spotifyController.getAllChildren(track) }
   }
 }

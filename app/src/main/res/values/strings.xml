@@ -2,15 +2,15 @@
     <string name="app_name">wanderwave</string>
     <string name="upper_case_app_name">Wanderwave</string>
 
-    <string name="milestone_number">Milestone 1</string>
-    <string name="milestone_date">2024.04.12</string>
+    <string name="milestone_number">Milestone 2</string>
+    <string name="milestone_date">2024.05.03</string>
 
     <string name="welcome_title">Welcome</string>
     <string name="welcome_subtitle">Ready to discover new music?</string>
     <string name="button_label">Sign-in with Spotify</string>
 
     <string name="map">Map</string>
-    <string name="main">Main</string>
+    <string name="profile">Profile</string>
     <string name="trackList">Track List</string>
 
 
@@ -19,4 +19,7 @@
     <string name="permission_request_title">Permissions needed</string>
     <string name="permission_request_text_location">In order to provide a full experience, Wanderwave needs access to this device\'s precise location. Please enable location permissions in the next window.</string>
     <string name="permission_request_confirm_button">I understand</string>
+    <string name="beaconTitle">Beacon</string>
+    <string name="beaconLocation">at %1$s</string>
+    <string name="beaconTracksTitle">Tracks</string>
 </resources>

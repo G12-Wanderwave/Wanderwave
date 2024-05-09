@@ -80,21 +80,13 @@ fun EditProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel
                   )
 
               viewModel.updateProfile(profileCopy)
-              navActions.navigateToTopLevel(Route.PROFILE)
+              navActions.goBack()
             },
-            onCancel = { navActions.navigateToTopLevel(Route.PROFILE) })
-
-        Spacer(Modifier.padding(18.dp))
-        Button(
-            onClick = {
+            onCancel = { navActions.goBack() },
+            onDelete = {
               viewModel.deleteProfile()
               navActions.navigateToTopLevel(Route.LOGIN)
-            },
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-            border = BorderStroke(1.dp, md_theme_light_error),
-            modifier = Modifier.width(100.dp).testTag("deleteButton")) {
-              Text(text = "Delete profile", color = md_theme_light_error)
-            }
+            })
       }
 }
 
@@ -166,7 +158,7 @@ fun EditableTextFields(
  * @last update 1.0
  */
 @Composable
-fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit) {
+fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit, onDelete: () -> Unit) {
   Column(
       verticalArrangement = Arrangement.spacedBy(2.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
@@ -175,7 +167,6 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit) {
             colors = ButtonDefaults.buttonColors(containerColor = md_theme_light_primary),
             modifier = Modifier.width(100.dp).testTag("saveButton")) {
               Text("Save")
-              // TODO: Send the data to the server
             }
         Spacer(modifier = Modifier.width(8.dp))
         Button(
@@ -184,6 +175,14 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit) {
             border = BorderStroke(1.dp, md_theme_light_error),
             modifier = Modifier.width(100.dp).testTag("cancelButton")) {
               Text(text = "Cancel", color = md_theme_light_error)
+            }
+        Spacer(Modifier.padding(8.dp))
+        Button(
+            onClick = onDelete,
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+            border = BorderStroke(1.dp, md_theme_light_error),
+            modifier = Modifier.width(200.dp).testTag("deleteButton")) {
+              Text(text = "Delete profile", color = md_theme_light_error)
             }
       }
 }

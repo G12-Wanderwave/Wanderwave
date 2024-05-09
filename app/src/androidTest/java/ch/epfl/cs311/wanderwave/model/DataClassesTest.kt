@@ -1,17 +1,23 @@
 package ch.epfl.cs311.wanderwave.model
 
+import android.net.Uri
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
+import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -19,15 +25,17 @@ import org.junit.Test
 class DataClassesTest {
   // Testing of all the data classes, I think it's better to test them all together
   @get:Rule val mockkRule = MockKRule(this)
-  private lateinit var beaconConnection: BeaconConnection
+  private lateinit var trackConnection: TrackConnection
+  private lateinit var profileConnection: ProfileConnection
 
   @RelaxedMockK private lateinit var document: DocumentSnapshot
 
   @Before
   fun setup() {
-    beaconConnection = BeaconConnection()
-
     MockKAnnotations.init(this)
+
+    trackConnection = mockk<TrackConnection>(relaxed = true)
+    profileConnection = mockk<ProfileConnection>(relaxed = true)
 
     // Set up the document mock to return some tracks
     every { document.id } returns "someId"
@@ -122,17 +130,32 @@ class DataClassesTest {
   }
 
   @Test
-  fun beaconToMap() {
-    val location = Location(1.0, 1.0, "Test Location")
-    val beacon = Beacon("Test Id", location, listOf())
-    val beaconMap: Map<String, Any> = beacon.toMap()
-    // test beacon behaviour
-    assertEquals("Test Id", beacon.id)
-    assertEquals(location, beacon.location)
-    assertEquals(listOf<Track>(), beacon.tracks)
-    assertEquals("Test Id", beaconMap["id"])
-    assertEquals(location.toMap(), beaconMap["location"])
-    assertEquals(listOf<Track>(), beaconMap["tracks"])
+  fun toMapTest() {
+    val profile =
+        Profile(
+            firstName = "John",
+            lastName = "Doe",
+            description = "Test description",
+            numberOfLikes = 10,
+            isPublic = true,
+            profilePictureUri = Uri.parse("https://example.com/image.jpg"),
+            spotifyUid = "spotify123",
+            firebaseUid = "firebase123")
+
+    val expectedMap =
+        hashMapOf(
+            "firstName" to "John",
+            "lastName" to "Doe",
+            "description" to "Test description",
+            "numberOfLikes" to 10,
+            "spotifyUid" to "spotify123",
+            "firebaseUid" to "firebase123",
+            "isPublic" to true,
+            "profilePictureUri" to "https://example.com/image.jpg",
+            "chosenSongs" to listOf<DocumentReference>(),
+            "topSongs" to listOf<DocumentReference>())
+
+    assertEquals(expectedMap, profile.toMap())
   }
 
   @Test
@@ -164,5 +187,117 @@ class DataClassesTest {
 
     // assert if the track is null
     assert(track2 == null)
+  }
+
+  @Test
+  fun profileTrackAssociationInitializesCorrectly() {
+    val mockProfile = mockk<Profile>()
+    val mockTrack = mockk<Track>()
+    val association = ProfileTrackAssociation(mockProfile, mockTrack)
+
+    assertEquals(mockProfile, association.profile)
+    assertEquals(mockTrack, association.track)
+  }
+
+  @Test
+  fun profileTrackToMapTest() {
+    val profile =
+        Profile(
+            firstName = "John",
+            lastName = "Doe",
+            description = "Test description",
+            numberOfLikes = 10,
+            isPublic = true,
+            profilePictureUri = Uri.parse("https://example.com/image.jpg"),
+            spotifyUid = "spotify123",
+            firebaseUid = "firebase123")
+
+    val track = Track() // Assuming Track has a no-argument constructor
+
+    val profileTrackAssociation = ProfileTrackAssociation(profile, track)
+
+    val expectedMap =
+        hashMapOf(
+            "profile" to profile.toMap(),
+            "track" to track.toMap() // Assuming Track has a toMap function
+            )
+
+    assertEquals(expectedMap, profileTrackAssociation.toMap())
+
+    // test if the profile is null
+    val profileTrackAssociation2 = ProfileTrackAssociation(null, track)
+    val expectedMap2 =
+        hashMapOf(
+            "profile" to null, "track" to track.toMap() // Assuming Track has a toMap function
+            )
+    assertEquals(expectedMap2, profileTrackAssociation2.toMap())
+  }
+
+  @Test
+  fun noArgumentConstructorCreatesEmptyTrack() {
+    val track = Track()
+    assertEquals("", track.id)
+    assertEquals("", track.title)
+    assertEquals("", track.artist)
+  }
+
+  @Test
+  fun documentToTrackExistWithNullValues() {
+    every { document.exists() } returns true
+    every { document.id } returns "someId"
+    every { document.getString("title") } returns null
+    every { document.getString("artist") } returns null
+
+    val track = Track.from(document)
+    // assert if the track is not null
+    assert(track != null)
+    // assert if the track has the default values
+    assertEquals("someId", track!!.id)
+    assertEquals("", track.title)
+    assertEquals("", track.artist)
+  }
+
+  @Test
+  fun distanceBetween_returnsZeroForSameLocation() {
+    val location = Location(46.519962, 6.633597)
+    assertEquals(0.0, location.distanceBetween(location), 0.001)
+  }
+
+  @Test
+  fun distanceBetween_returnsCorrectDistanceForDifferentLocations() {
+    val location1 = Location(46.803246, 7.139212)
+    val location2 = Location(46.029423, 8.835748)
+    val expectedDistance = 156.0
+    assertEquals(expectedDistance, location1.distanceBetween(location2), 1.0)
+  }
+
+  fun profileTrackAssociation_equalsReturnsTrueForSameData() {
+    val mockProfile = mockk<Profile>()
+    val mockTrack = mockk<Track>()
+    val association1 = ProfileTrackAssociation(mockProfile, mockTrack)
+    val association2 = ProfileTrackAssociation(mockProfile, mockTrack)
+
+    assertEquals(association1, association2)
+  }
+
+  @Test
+  fun profileTrackAssociation_equalsReturnsFalseForDifferentData() {
+    val mockProfile1 = mockk<Profile>()
+    val mockProfile2 = mockk<Profile>()
+    val mockTrack = mockk<Track>()
+    val association1 = ProfileTrackAssociation(mockProfile1, mockTrack)
+    val association2 = ProfileTrackAssociation(mockProfile2, mockTrack)
+
+    assertNotEquals(association1, association2)
+  }
+
+  @Test
+  fun profileTrackAssociation_hashCodeIsConsistent() {
+    val mockProfile = mockk<Profile>()
+    val mockTrack = mockk<Track>()
+    val association = ProfileTrackAssociation(mockProfile, mockTrack)
+
+    val initialHashCode = association.hashCode()
+    assertEquals(initialHashCode, association.hashCode())
   }
 }

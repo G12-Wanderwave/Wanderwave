@@ -10,6 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -27,19 +31,16 @@ import coil.compose.AsyncImage
  * @param profile the profile of the user
  * @author Menzo Bouaissi
  * @since 1.0
- * @last update 1.0
+ * @last update 3.0
  */
 @Composable
-fun SelectImage(modifier: Modifier, profile: Profile) {
-  if (profile.profilePictureUri != null) {
-    AsyncImage(
-        model = profile.profilePictureUri,
-        contentDescription = "Profile picture",
-        modifier = modifier)
+fun SelectImage(modifier: Modifier, imageUri: Uri?) {
+  if (imageUri != null) {
+    AsyncImage(model = imageUri, contentDescription = "Profile picture", modifier = modifier)
   } else {
     Image(
         painter = painterResource(id = R.drawable.profile_picture),
-        contentDescription = "Profile picture",
+        contentDescription = "Default profile picture",
         modifier = modifier)
   }
 }
@@ -51,18 +52,21 @@ fun SelectImage(modifier: Modifier, profile: Profile) {
  * @param onImageChange enable to transmit the changed to the caller
  * @author Menzo Bouaissi
  * @since 1.0
- * @last update 1.0
+ * @last update 3.0
  */
 @Composable
 fun ImageSelection(profile: Profile, onImageChange: (Uri?) -> Unit) {
-  // var imageUri by remember { mutableStateOf<Uri?>(null) }
+  var imageUri by remember { mutableStateOf(profile.profilePictureUri) }
+
   val launcher =
       rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri?
         ->
-        if (uri != null) profile.copy(profilePictureUri = uri)
+        imageUri = uri
         onImageChange(uri)
       }
+
   Box(modifier = Modifier.fillMaxWidth()) {
+    // Pass `imageUri` directly to `AsyncImage`
     SelectImage(
         modifier =
             Modifier.padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
@@ -70,6 +74,6 @@ fun ImageSelection(profile: Profile, onImageChange: (Uri?) -> Unit) {
                 .clickable { launcher.launch("image/*") }
                 .align(Alignment.Center)
                 .testTag("profilePicture"),
-        profile = profile)
+        imageUri = imageUri)
   }
 }
