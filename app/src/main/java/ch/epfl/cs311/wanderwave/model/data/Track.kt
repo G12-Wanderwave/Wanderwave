@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.model.data
 
-import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 
 data class Track(
