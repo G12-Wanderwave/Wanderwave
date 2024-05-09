@@ -348,6 +348,15 @@ public class ProfileConnectionTest {
         profileConnection.isUidExisting("testUid", callback)
 
         verify { callback.invoke(true, any()) }
+
+        // same but document size is 0
+        every { mockQuerySnapshot.isEmpty } returns true
+        every { mockQuerySnapshot.size() } returns 0
+        every { mockQuerySnapshot.documents } returns listOf()
+
+        profileConnection.isUidExisting("testUid", callback)
+
+        verify { callback.invoke(false, null) }
       }
     }
   }
