@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.ui
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
@@ -18,7 +19,6 @@ import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -33,18 +33,13 @@ class TrackListScreenTest : TestCase() {
 
   @RelaxedMockK lateinit var mockSpotifyController: SpotifyController
   @RelaxedMockK lateinit var trackRepository: TrackRepository
+  @RelaxedMockK lateinit var appDatabase: AppDatabase
 
   @RelaxedMockK lateinit var viewModel: TrackListViewModel
 
   @RelaxedMockK lateinit var mockShowMessage: (String) -> Unit
 
   @Before fun setup() {}
-
-  @After
-  fun tearDown() {
-    // Dispatchers.resetMain()
-    // comment
-  }
 
   private fun setupViewModel(result: Boolean) {
 
@@ -57,7 +52,7 @@ class TrackListScreenTest : TestCase() {
                 Track("is 2", "Track 2", "Artist 2"),
             ))
 
-    viewModel = TrackListViewModel(mockSpotifyController, trackRepository)
+    viewModel = TrackListViewModel(mockSpotifyController, appDatabase, trackRepository)
 
     composeTestRule.setContent { TrackListScreen(mockShowMessage, viewModel) }
   }

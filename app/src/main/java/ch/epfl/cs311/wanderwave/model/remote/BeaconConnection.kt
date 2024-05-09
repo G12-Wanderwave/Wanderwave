@@ -194,11 +194,12 @@ class BeaconConnection(
                           track))
                 }
             transaction.update(beaconRef, "tracks", newTracks.map { it.toMap() })
-              // After updating Firestore, save the track addition locally
-              coroutineScope.launch {
-                  appDatabase.trackRecordDao().insertTrackRecord(TrackRecord(beaconId = beaconId, trackId = track.id))
-              }
-
+            // After updating Firestore, save the track addition locally
+            coroutineScope.launch {
+              appDatabase
+                  .trackRecordDao()
+                  .insertTrackRecord(TrackRecord(beaconId = beaconId, trackId = track.id))
+            }
           } ?: throw Exception("Beacon not found")
         }
         .addOnSuccessListener { onComplete(true) }

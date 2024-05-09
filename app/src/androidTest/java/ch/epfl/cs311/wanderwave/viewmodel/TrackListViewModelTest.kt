@@ -1,4 +1,5 @@
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.viewmodel.LoopMode
@@ -18,7 +19,11 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -31,6 +36,7 @@ class TrackListViewModelTest {
 
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
   @RelaxedMockK private lateinit var repository: TrackRepository
+  @RelaxedMockK private lateinit var appDatabase: AppDatabase
 
   private val testDispatcher = TestCoroutineDispatcher()
   private lateinit var track: Track
@@ -72,7 +78,7 @@ class TrackListViewModelTest {
 
     every { repository.getAll() } returns flowOf(trackList)
 
-    viewModel = TrackListViewModel(mockSpotifyController, repository)
+    viewModel = TrackListViewModel(mockSpotifyController, appDatabase, repository)
 
     runBlocking { viewModel.uiState.first { !it.loading } }
   }

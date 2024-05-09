@@ -7,21 +7,21 @@ import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
 class TrackListViewModel
 @Inject
 constructor(
-  private val spotifyController: SpotifyController,
-  private val appDatabase: AppDatabase,
-  private val repository: TrackRepository
+    private val spotifyController: SpotifyController,
+    private val appDatabase: AppDatabase,
+    private val repository: TrackRepository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(UiState(loading = true))
@@ -250,21 +250,21 @@ constructor(
   }
 
   data class UiState(
-    val tracks: List<Track> = listOf(),
-    val queue: List<Track> = listOf(),
-    val loading: Boolean = false,
-    val message: String? = null,
-    val selectedTrack: Track? = null,
-    val pausedTrack: Track? = null,
-    val isPlaying: Boolean = false,
-    val currentMillis: Int = 0,
-    val expanded: Boolean = false,
-    val progress: Float = 0f,
-    val isShuffled: Boolean = false,
-    val loopMode: LoopMode = LoopMode.NONE,
-    val showRecentlyAdded: Boolean = true  // New state to toggle between recently added and recently viewed
+      val tracks: List<Track> = listOf(),
+      val queue: List<Track> = listOf(),
+      val loading: Boolean = false,
+      val message: String? = null,
+      val selectedTrack: Track? = null,
+      val pausedTrack: Track? = null,
+      val isPlaying: Boolean = false,
+      val currentMillis: Int = 0,
+      val expanded: Boolean = false,
+      val progress: Float = 0f,
+      val isShuffled: Boolean = false,
+      val loopMode: LoopMode = LoopMode.NONE,
+      val showRecentlyAdded: Boolean =
+          true // New state to toggle between recently added and recently viewed
   )
-
 }
 
 enum class LoopMode {

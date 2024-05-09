@@ -13,36 +13,35 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.Dispatchers
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
 
 @Module
 @InstallIn(SingletonComponent::class)
 object ConnectionModule {
 
-    @Provides
-    @Singleton
-    fun provideBeaconRepository(
-        @ApplicationContext context: Context,
-        appDatabase: AppDatabase  // Inject AppDatabase here
-    ): BeaconRepository {
-        return BeaconConnection(
-            trackConnection = TrackConnection(),
-            profileConnection = ProfileConnection(),
-            appDatabase = appDatabase,  // Use the injected AppDatabase
-            ioDispatcher = Dispatchers.IO
-        )
-    }
+  @Provides
+  @Singleton
+  fun provideBeaconRepository(
+      @ApplicationContext context: Context,
+      appDatabase: AppDatabase // Inject AppDatabase here
+  ): BeaconRepository {
+    return BeaconConnection(
+        trackConnection = TrackConnection(),
+        profileConnection = ProfileConnection(),
+        appDatabase = appDatabase, // Use the injected AppDatabase
+        ioDispatcher = Dispatchers.IO)
+  }
 
-    @Provides
-    @Singleton
-    fun provideTrackRepository(@ApplicationContext context: Context): TrackRepository {
-        return TrackConnection()
-    }
+  @Provides
+  @Singleton
+  fun provideTrackRepository(@ApplicationContext context: Context): TrackRepository {
+    return TrackConnection()
+  }
 
-    @Provides
-    @Singleton
-    fun provideProfileRepository(@ApplicationContext context: Context): ProfileRepository {
-        return ProfileConnection()
-    }
+  @Provides
+  @Singleton
+  fun provideProfileRepository(@ApplicationContext context: Context): ProfileRepository {
+    return ProfileConnection()
+  }
 }

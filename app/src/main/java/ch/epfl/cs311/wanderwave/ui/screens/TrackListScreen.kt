@@ -29,40 +29,34 @@ fun TrackListScreen(
     showMessage: (String) -> Unit,
     viewModel: TrackListViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var searchQuery by remember { mutableStateOf("") }
+  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+  var searchQuery by remember { mutableStateOf("") }
 
-    LaunchedEffect(uiState.message) { uiState.message?.let { message -> showMessage(message) } }
+  LaunchedEffect(uiState.message) { uiState.message?.let { message -> showMessage(message) } }
 
-    Column(modifier = Modifier.testTag("trackListScreen")) {
-        TextField(
-            value = searchQuery,
-            onValueChange = { query ->
-                searchQuery = query
-                viewModel.setSearchQuery(query)
-            },
-            label = { Text("Search Tracks") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .testTag("searchBar")
-        )
+  Column(modifier = Modifier.testTag("trackListScreen")) {
+    TextField(
+        value = searchQuery,
+        onValueChange = { query ->
+          searchQuery = query
+          viewModel.setSearchQuery(query)
+        },
+        label = { Text("Search Tracks") },
+        modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("searchBar"))
 
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(16.dp)) {
-            Text("Show Recently Added")
-            Switch(
-                checked = uiState.showRecentlyAdded,
-                onCheckedChange = { viewModel.toggleTrackSource() },
-                colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.secondary)
-            )
-        }
-
-        TrackList(
-            tracks = uiState.tracks,
-            title = if (uiState.showRecentlyAdded) "Recently Added Tracks" else "Recently Viewed Tracks",
-            onAddTrack = {},
-            onSelectTrack = {}
-        )
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(16.dp)) {
+      Text("Show Recently Added")
+      Switch(
+          checked = uiState.showRecentlyAdded,
+          onCheckedChange = { viewModel.toggleTrackSource() },
+          colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.secondary))
     }
-}
 
+    TrackList(
+        tracks = uiState.tracks,
+        title =
+            if (uiState.showRecentlyAdded) "Recently Added Tracks" else "Recently Viewed Tracks",
+        onAddTrack = {},
+        onSelectTrack = {})
+  }
+}
