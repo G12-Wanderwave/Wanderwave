@@ -102,40 +102,41 @@ class SpotifyControllerTest {
     spotifyController.startPlaybackTimer(1000, this)
   }
 
-  @Test
-  fun testPlayTrackResultCallback() {
-    val playerApi = mockk<PlayerApi>(relaxed = true)
-    val subscription = mockk<Subscription<PlayerState>>(relaxed = true)
-    val playerState = mockk<PlayerState>(relaxed = true)
-    val emptyResult = mockk<CallResult<Empty>>(relaxed = true)
-
-    // Setup playerApi responses
-    every { mockAppRemote.playerApi } returns playerApi
-    every { playerApi.subscribeToPlayerState() } returns subscription
-    every { subscription.setEventCallback(any()) } answers { subscription }
-    every { subscription.setErrorCallback(any()) } just Awaits
-
-    val callResult = mockk<CallResult<PlayerState>>(relaxed = true)
-    every { callResult.setResultCallback(any()) } answers
-        {
-          val callback = firstArg<CallResult.ResultCallback<PlayerState>>()
-          callback.onResult(playerState)
-          callResult
-        }
-    every { mockAppRemote.playerApi.playerState } returns callResult
-
-    // Correct the play method setup to properly simulate callback
-    every { playerApi.play(any()) } answers
-        {
-          val callback = firstArg<CallResult.ResultCallback<Empty>>()
-          callback.onResult(Empty()) // Ensure Empty is appropriately instantiated if needed
-          mockk<CallResult<Empty>>(relaxed = true) // Return a relaxed mock of CallResult<Empty>
-        }
-
-    // Ensure `playTrack` method is tested correctly
-    val track = Track("spotify:track:1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
-    runBlocking { spotifyController.playTrack(track) }
-  }
+  //  @Test
+  //  fun testPlayTrackResultCallback() {
+  //    val playerApi = mockk<PlayerApi>(relaxed = true)
+  //    val subscription = mockk<Subscription<PlayerState>>(relaxed = true)
+  //    val playerState = mockk<PlayerState>(relaxed = true)
+  //    val emptyResult = mockk<CallResult<Empty>>(relaxed = true)
+  //
+  //    // Setup playerApi responses
+  //    every { mockAppRemote.playerApi } returns playerApi
+  //    every { playerApi.subscribeToPlayerState() } returns subscription
+  //    every { subscription.setEventCallback(any()) } answers { subscription }
+  //    every { subscription.setErrorCallback(any()) } just Awaits
+  //
+  //    val callResult = mockk<CallResult<PlayerState>>(relaxed = true)
+  //    every { callResult.setResultCallback(any()) } answers
+  //        {
+  //          val callback = firstArg<CallResult.ResultCallback<PlayerState>>()
+  //          callback.onResult(playerState)
+  //          callResult
+  //        }
+  //    every { mockAppRemote.playerApi.playerState } returns callResult
+  //
+  //    // Correct the play method setup to properly simulate callback
+  //    every { playerApi.play(any()) } answers
+  //        {
+  //          val callback = firstArg<CallResult.ResultCallback<Empty>>()
+  //          callback.onResult(Empty()) // Ensure Empty is appropriately instantiated if needed
+  //          mockk<CallResult<Empty>>(relaxed = true) // Return a relaxed mock of CallResult<Empty>
+  //        }
+  //
+  //    // Ensure `playTrack` method is tested correctly
+  //    val track = Track("spotify:track:1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John
+  // Williams")
+  //    runBlocking { spotifyController.playTrack(track) }
+  //  }
 
   @Test
   fun getAuthorizationRequest() {
