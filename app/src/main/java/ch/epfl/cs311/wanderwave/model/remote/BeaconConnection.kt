@@ -58,49 +58,35 @@ class BeaconConnection(
     profileConnection.addProfilesIfNotExist(item.profileAndTrack.map { it.profile })
   }
 
-  override fun getItem(itemId: String): Flow<Beacon> {
-    return getItem(itemId) { _, _ -> }
-  }
+  override fun documentTransform(document: DocumentSnapshot, dataFlow: MutableStateFlow<Beacon?>) {
+    val beacon: Beacon? = dataFlow.value ?: Beacon.from(document) ?: null
 
-  override fun getItem(
-      itemId: String,
-      onSuccess: (DocumentSnapshot, MutableStateFlow<Beacon?>) -> Unit
-  ): Flow<Beacon> {
-    val onSuccessWrapper: (DocumentSnapshot, MutableStateFlow<Beacon?>) -> Unit =
-        { document, dataFlow ->
-          val beacon = dataFlow.value ?: Beacon.from(document) ?: null
+    beacon?.let { beacon ->
+      val tracksObject = document["tracks"]
 
-          beacon?.let { beacon ->
-            val tracksObject = document["tracks"]
+      var profileAndTrackRefs: List<Map<String, DocumentReference>>?
 
-            var profileAndTrackRefs: List<Map<String, DocumentReference>>?
+      if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
+        profileAndTrackRefs = tracksObject as? List<Map<String, DocumentReference>>
+        // Use a coroutine to perform asynchronous operations
+        coroutineScope.launch {
+          // Wait for all tracks to be fetched by generating tasks and computing them
+          // concurrently
+          val profileAndTracks =
+              profileAndTrackRefs
+                  ?.map { profileAndTrackRef ->
+                    async { trackConnection.fetchProfileAndTrack(profileAndTrackRef) }
+                  }
+                  ?.mapNotNull { it?.await() }
 
-            if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
-              profileAndTrackRefs = tracksObject as? List<Map<String, DocumentReference>>
-              // Use a coroutine to perform asynchronous operations
-              coroutineScope.launch {
-                // Wait for all tracks to be fetched by generating tasks and computing them
-                // concurrently
-                val profileAndTracks =
-                    profileAndTrackRefs
-                        ?.map { profileAndTrackRef ->
-                          async { trackConnection.fetchProfileAndTrack(profileAndTrackRef) }
-                        }
-                        ?.mapNotNull { it?.await() }
-
-                // Update the beacon with the complete list of tracks
-                val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks ?: emptyList())
-                dataFlow.value = updatedBeacon
-              }
-
-              onSuccess(document, dataFlow)
-            } else {
-              Log.e("Firestore", "tracks has Wrong Firebase Format")
-            }
-          } ?: { Log.e("Firestore", "Error fetching beacon") }
+          // Update the beacon with the complete list of tracks
+          val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks ?: emptyList())
+          dataFlow.value = updatedBeacon
         }
-
-    return super.getItem(itemId, onSuccessWrapper)
+      } else {
+        Log.e("Firestore", "tracks has Wrong Firebase Format")
+      }
+    } ?: { Log.e("Firestore", "Error fetching beacon") }
   }
 
   override fun getAll(): Flow<List<Beacon>> {
