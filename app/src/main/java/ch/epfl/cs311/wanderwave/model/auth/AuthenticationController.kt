@@ -3,7 +3,7 @@ package ch.epfl.cs311.wanderwave.model.auth
 import ch.epfl.cs311.wanderwave.model.repository.AuthTokenRepository
 import com.google.firebase.auth.FirebaseAuth
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
@@ -18,7 +18,8 @@ class AuthenticationController
 constructor(
     private val auth: FirebaseAuth,
     private val httpClient: OkHttpClient,
-    private val tokenRepository: AuthTokenRepository
+    private val tokenRepository: AuthTokenRepository,
+    private val ioDispatcher: CoroutineDispatcher
 ) {
 
   private val AUTH_SERVICE_URL = "https://us-central1-wanderwave-95743.cloudfunctions.net"
@@ -47,7 +48,7 @@ constructor(
 
   suspend fun refreshTokenIfNecessary(): Boolean {
     if (auth.currentUser == null) {
-      return withContext(Dispatchers.IO) { refreshSpotifyToken() }
+      return refreshSpotifyToken()
     }
     return true
   }
@@ -66,7 +67,9 @@ constructor(
             .post("code=$authenticationCode".toRequestBody())
             .build()
 
-    val responseJson = httpClient.newCall(request).execute().body?.string() ?: return false
+    val responseJson =
+        withContext(ioDispatcher) { httpClient.newCall(request).execute().body?.string() }
+            ?: return false
     return storeAndUseNewTokens(responseJson)
   }
 
@@ -104,7 +107,9 @@ constructor(
             .post("refresh_token=$refreshToken".toRequestBody())
             .build()
 
-    val responseJson = httpClient.newCall(request).execute().body?.string() ?: return false
+    val responseJson =
+        withContext(ioDispatcher) { httpClient.newCall(request).execute().body?.string() }
+            ?: return false
     return storeAndUseNewTokens(responseJson)
   }
 
@@ -119,12 +124,4 @@ constructor(
   fun deauthenticate() {
     auth.signOut()
   }
-
-  private data class TokenResponse(
-      val accessToken: String,
-      val refreshToken: String?,
-      val firebaseToken: String
-  )
-
-  private data class State(val isSignedIn: Boolean = false)
 }

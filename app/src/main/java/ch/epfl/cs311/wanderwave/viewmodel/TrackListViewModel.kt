@@ -1,13 +1,12 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +31,7 @@ constructor(
   }
 
   private fun observeTracks() {
-    CoroutineScope(Dispatchers.IO).launch {
+    viewModelScope.launch {
       repository.getAll().collect { tracks ->
         _uiState.value =
             UiState(
@@ -54,7 +53,7 @@ constructor(
   fun setSearchQuery(query: String) {
     searchJob?.cancel()
     searchJob =
-        CoroutineScope(Dispatchers.IO).launch {
+        viewModelScope.launch {
           delay(300) // Debounce time in milliseconds
           _searchQuery.value = query
           observeTracks() // Re-filter tracks when search query changes
@@ -62,39 +61,23 @@ constructor(
   }
 
   /**
-   * Selects the given track and updates the UI state accordingly.
+   * Plays the given track using the SpotifyController.
    *
-   * @param track The track to select.
+   * @param track The track to play.
    */
-  fun selectTrack(track: Track) {
+  fun playTrack(track: Track) {
     spotifyController.playTrackList(uiState.value.tracks, track)
   }
 
-  //  /**
-  //   * Plays the selected track if it's not already playing or resumes the paused track if it's
-  // the
-  //   * same as the selected track. If no track is selected, it updates the UI state with an
-  //   * appropriate message.
-  //   */
-  //  fun play() {
-  //    if (_uiState.value.selectedTrack != null && !_uiState.value.isPlaying) {
-  //
-  //      if (_uiState.value.pausedTrack == _uiState.value.selectedTrack) {
-  //        resumeTrack()
-  //      } else {
-  //        playTrack(_uiState.value.selectedTrack!!)
-  //      }
-  //
-  //      _uiState.value = _uiState.value.copy(isPlaying = true)
-  //    } else {
-  //      if (!_uiState.value.isPlaying) {
-  //        _uiState.value = _uiState.value.copy(message = "No track selected")
-  //      } else {
-  //        _uiState.value = _uiState.value.copy(message = "Track already playing")
-  //      }
-  //    }
-  //  }
-  //
+  /** Resumes the currently paused track using the SpotifyController. */
+  fun resumeTrack() {
+    spotifyController.resumeTrack { }
+  }
+
+  /** Pauses the currently playing track using the SpotifyController. */
+  fun pauseTrack() {
+    spotifyController.pauseTrack { }
+  }
 
   fun collapse() {
     _uiState.value = _uiState.value.copy(expanded = false)

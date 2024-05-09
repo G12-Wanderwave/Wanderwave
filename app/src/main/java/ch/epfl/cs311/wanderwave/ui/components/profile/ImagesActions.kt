@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.ui.components.profile
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -31,7 +32,8 @@ import coil.compose.AsyncImage
  */
 @Composable
 fun SelectImage(modifier: Modifier, profile: Profile) {
-  if (profile.profilePictureUri != null) {
+  Log.d("SelectImage", profile.profilePictureUri.toString())
+  if (profile.profilePictureUri != null && profile.profilePictureUri.toString() != "") {
     AsyncImage(
         model = profile.profilePictureUri,
         contentDescription = "Profile picture",

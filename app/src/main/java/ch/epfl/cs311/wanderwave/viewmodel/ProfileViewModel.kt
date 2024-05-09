@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
@@ -8,8 +9,6 @@ import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
@@ -22,7 +21,7 @@ data class SongList(val name: String, val tracks: List<Track> = mutableListOf())
 class ProfileViewModel
 @Inject
 constructor(
-    private val profileRepository: ProfileRepository,
+    private val repository: ProfileRepository, // TODO revoir
     private val spotifyController: SpotifyController
 ) : ViewModel() {
 
@@ -54,6 +53,9 @@ constructor(
 
   private val _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
+
+  private var _uiState = MutableStateFlow(ProfileViewModel.UIState())
+  val uiState: StateFlow<ProfileViewModel.UIState> = _uiState
 
   fun createSpecificSongList(listType: String) {
     val listName =
@@ -88,11 +90,11 @@ constructor(
 
   fun updateProfile(updatedProfile: Profile) {
     _profile.value = updatedProfile
-    profileRepository.updateItem(updatedProfile)
+    repository.updateItem(updatedProfile)
   }
 
   fun deleteProfile() {
-    profileRepository.deleteItem(_profile.value)
+    repository.deleteItem(_profile.value)
   }
 
   fun togglePublicMode() {
@@ -107,7 +109,7 @@ constructor(
    * @last update 2.0
    */
   fun retrieveTracks() {
-    CoroutineScope(Dispatchers.IO).launch {
+    viewModelScope.launch {
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
       if (track != null) {
         for (i in track) {
@@ -132,7 +134,7 @@ constructor(
    * @last update 2.0
    */
   fun retrieveAndAddSubsection() {
-    CoroutineScope(Dispatchers.IO).launch {
+    viewModelScope.launch {
       _spotifySubsectionList.value = emptyList()
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
       if (track != null) {
@@ -151,7 +153,7 @@ constructor(
    * @last update 2.0
    */
   fun retrieveChild(item: ListItem) {
-    CoroutineScope(Dispatchers.IO).launch {
+    viewModelScope.launch {
       _childrenPlaylistTrackList.value = emptyList()
       val children = spotifyController.getAllChildren(item).firstOrNull()
       if (children != null) {
@@ -170,4 +172,18 @@ constructor(
       spotifyController.playTrack(track)
     }
   }
+
+  fun getProfileByID(id: String) {
+    viewModelScope.launch {
+      repository.getItem(id).collect { fetchedProfile ->
+        _uiState.value = UIState(profile = fetchedProfile, isLoading = false)
+      }
+    }
+  }
+
+  data class UIState(
+      val profile: Profile? = null,
+      val isLoading: Boolean = true,
+      val error: String? = null
+  )
 }

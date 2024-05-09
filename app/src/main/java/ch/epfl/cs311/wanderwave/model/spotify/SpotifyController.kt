@@ -106,7 +106,7 @@ class SpotifyController(private val context: Context) {
   fun playTrack(track: Track, onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
     appRemote.value?.let {
       it.playerApi
-          .play("spotify:track:${track.id}")
+          .play(track.id)
           .setResultCallback { onSuccess() }
           .setErrorCallback { error -> onFailure(error) }
     }
@@ -125,7 +125,7 @@ class SpotifyController(private val context: Context) {
     val trackToPlay = track ?: trackList[0]
     appRemote.value?.let {
       it.playerApi
-          .play("spotify:track:${trackToPlay.id}")
+          .play(trackToPlay.id)
           .setResultCallback {
             this.trackList = trackList
             onSuccess()

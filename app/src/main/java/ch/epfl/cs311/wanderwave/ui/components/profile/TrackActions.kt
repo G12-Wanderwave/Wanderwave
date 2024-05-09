@@ -1,9 +1,15 @@
 package ch.epfl.cs311.wanderwave.ui.components.profile
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -19,37 +25,7 @@ import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.viewmodel.SongList
-
-/**
- * Composable that displays a list of tracks. Each track is represented by the TrackItem composable.
- *
- * @param tracks List of tracks to display.
- * @author Ayman Bakiri
- * @author Menzo Bouaissi (add the scrollable list)
- * @since 1.0
- * @last update 2.0
- */
-@Composable
-fun TracksList(tracks: List<Track>) {
-  tracks.forEach { track -> key(track.id) { TrackItem(track = track) } }
-}
-
-/**
- * Composable that displays information for a single track, including its ID, title, and artist.
- *
- * @param track The track data to display.
- * @author Ayman Bakiri
- * @since 1.0
- * @last update 1.0
- */
-@Composable
-fun TrackItem(track: Track) {
-  Column(modifier = Modifier.padding(8.dp).testTag("trackItem_${track.id}")) {
-    Text(text = "ID: ${track.id}", style = MaterialTheme.typography.bodyMedium)
-    Text(text = "Title: ${track.title}", style = MaterialTheme.typography.bodyMedium)
-    Text(text = "Artist: ${track.artist}", style = MaterialTheme.typography.bodyMedium)
-  }
-}
+import com.spotify.protocol.types.ListItem
 
 /**
  * Dialog composable that allows the user to add a new track by entering the track ID, title, and
@@ -78,45 +54,50 @@ fun AddTrackDialog(
   var newTrackArtist by remember { mutableStateOf(initialTrackArtist) }
 
   AlertDialog(
-      onDismissRequest = onDismiss,
-      title = { Text("Add New Track") },
-      text = {
-        Column {
-          OutlinedTextField(
-              value = newTrackId,
-              onValueChange = { newTrackId = it },
-              label = { Text("Track ID") },
-              modifier = Modifier.testTag("trackIdInput"))
-          OutlinedTextField(
-              value = newTrackTitle,
-              onValueChange = { newTrackTitle = it },
-              label = { Text("Track Title") },
-              modifier = Modifier.testTag("trackTitleInput"))
-          OutlinedTextField(
-              value = newTrackArtist,
-              onValueChange = { newTrackArtist = it },
-              label = { Text("Track Artist") },
-              modifier = Modifier.testTag("trackArtistInput"))
-        }
-      },
-      confirmButton = {
-        Button(
-            onClick = {
-              onAddTrack(Track(newTrackId, newTrackTitle, newTrackArtist))
-              newTrackId = "" // Resetting the state
-              newTrackTitle = ""
-              newTrackArtist = ""
-            },
-            modifier = Modifier.testTag("confirmAddTrack")) {
-              Text("Add")
-            }
-      },
-      dismissButton = {
-        Button(onClick = onDismiss, modifier = Modifier.testTag("cancelAddTrack")) {
-          Text("Cancel")
-        }
-      },
-      modifier = Modifier.testTag(dialogTestTag))
+    onDismissRequest = onDismiss,
+    title = { Text("Add New Track") },
+    text = {
+      Column {
+        OutlinedTextField(
+          value = newTrackId,
+          onValueChange = { newTrackId = it },
+          label = { Text("Track ID") },
+          modifier = Modifier.testTag("trackIdInput")
+        )
+        OutlinedTextField(
+          value = newTrackTitle,
+          onValueChange = { newTrackTitle = it },
+          label = { Text("Track Title") },
+          modifier = Modifier.testTag("trackTitleInput")
+        )
+        OutlinedTextField(
+          value = newTrackArtist,
+          onValueChange = { newTrackArtist = it },
+          label = { Text("Track Artist") },
+          modifier = Modifier.testTag("trackArtistInput")
+        )
+      }
+    },
+    confirmButton = {
+      Button(
+        onClick = {
+          onAddTrack(Track(newTrackId, newTrackTitle, newTrackArtist))
+          newTrackId = "" // Resetting the state
+          newTrackTitle = ""
+          newTrackArtist = ""
+        },
+        modifier = Modifier.testTag("confirmAddTrack")
+      ) {
+        Text("Add")
+      }
+    },
+    dismissButton = {
+      Button(onClick = onDismiss, modifier = Modifier.testTag("cancelAddTrack")) {
+        Text("Cancel")
+      }
+    },
+    modifier = Modifier.testTag(dialogTestTag)
+  )
 }
 
 /**
@@ -134,7 +115,8 @@ fun SongsListDisplay(
     songLists: List<SongList>,
     isTopSongsListVisible: Boolean,
     onAddTrack: (Track) -> Unit,
-    onSelectTrack: (Track) -> Unit
+    onSelectTrack: (Track) -> Unit,
+    canAddSong: Boolean = true
 ) {
   val name = if (isTopSongsListVisible) "TOP SONGS" else "CHOSEN SONGS"
   songLists
@@ -144,6 +126,8 @@ fun SongsListDisplay(
             tracks = songList.tracks,
             title = name,
             onSelectTrack = onSelectTrack,
-            onAddTrack = onAddTrack)
+            onAddTrack = onAddTrack,
+            canAddSong = canAddSong)
       }
+
 }

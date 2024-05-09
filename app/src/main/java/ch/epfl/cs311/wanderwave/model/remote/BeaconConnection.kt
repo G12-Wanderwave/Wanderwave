@@ -2,12 +2,14 @@ package ch.epfl.cs311.wanderwave.model.remote
 
 import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Beacon
+import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -18,10 +20,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-class BeaconConnection
-@Inject
-constructor(private val database: FirebaseFirestore? = null, val trackConnection: TrackConnection) :
-    FirebaseConnection<Beacon, Beacon>(), BeaconRepository {
+class BeaconConnection(
+    private val database: FirebaseFirestore? = null,
+    val trackConnection: TrackConnection,
+    val profileConnection: ProfileConnection,
+    private val ioDispatcher: CoroutineDispatcher
+) : FirebaseConnection<Beacon, Beacon>(), BeaconRepository {
 
   override val collectionName: String = "beacons"
 
@@ -39,17 +43,20 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
 
   override fun addItem(item: Beacon) {
     super.addItem(item)
-    trackConnection.addItemsIfNotExist(item.tracks)
+    trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
+    profileConnection.addProfilesIfNotExist(item.profileAndTrack.map { it.profile })
   }
 
   override fun addItemWithId(item: Beacon) {
     super.addItemWithId(item)
-    trackConnection.addItemsIfNotExist(item.tracks)
+    trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
+    profileConnection.addProfilesIfNotExist(item.profileAndTrack.map { it.profile })
   }
 
   override fun updateItem(item: Beacon) {
     super.updateItem(item)
-    trackConnection.addItemsIfNotExist(item.tracks)
+    trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
+    profileConnection.addProfilesIfNotExist(item.profileAndTrack.map { it.profile })
   }
 
   override fun getItem(itemId: String): Flow<Beacon> {
@@ -65,25 +72,23 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
 
               val tracksObject = document["tracks"]
 
-              var trackRefs: List<Map<String, DocumentReference>>?
+              var profileAndTrackRefs: List<Map<String, DocumentReference>>?
 
               if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
-                trackRefs = tracksObject as List<Map<String, DocumentReference>>
-                // Continue with the code
+                profileAndTrackRefs = tracksObject as? List<Map<String, DocumentReference>>
+
                 // Use a coroutine to perform asynchronous operations
                 coroutineScope.launch {
-                  val tracksDeferred =
-                      trackRefs?.map { trackRef ->
-                        // track ref is a map with a single key "track" and a DocumentReference
-                        // value
-                        async { fetchTrack(trackRef["track"]) }
+                  val profileAndTracksDeferred =
+                      profileAndTrackRefs?.map { profileAndTrackRef ->
+                        async { fetchTrack(profileAndTrackRef) }
                       }
 
                   // Wait for all tracks to be fetched
-                  val tracks = tracksDeferred?.mapNotNull { it?.await() }
+                  val profileAndTracks = profileAndTracksDeferred?.mapNotNull { it?.await() }
 
                   // Update the beacon with the complete list of tracks
-                  val updatedBeacon = beacon.copy(tracks = tracks ?: emptyList())
+                  val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks ?: emptyList())
                   dataFlow.value = updatedBeacon
                 }
               } else {
@@ -103,18 +108,30 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
   }
 
   // Fetch a track from a DocumentReference asynchronously
-  suspend fun fetchTrack(trackRef: DocumentReference?): Track? {
-    if (trackRef == null) return null
-    return withContext(Dispatchers.IO) {
+  suspend fun fetchTrack(
+      profileAndTrackRef: Map<String, DocumentReference>?
+  ): ProfileTrackAssociation? {
+    if (profileAndTrackRef == null) return null
+    return withContext(ioDispatcher) {
       try {
-        val trackDocument = trackRef?.get()?.await()
-        if (trackDocument != null) {
-          Track.from(trackDocument)
-        } else {
-          null
+
+        var profile: Profile? = null
+        var track: Track? = null
+        val trackDocument = profileAndTrackRef["track"]?.get()?.await()
+        trackDocument?.let { track = Track.from(it) }
+        val profileDocument = profileAndTrackRef["creator"]?.get()?.await()
+        profileDocument?.let { profile = Profile.from(it) }
+        Log.d("Firestore", "Fetched track:${track?.title}, profile:${profile?.firstName}")
+        if (profile == null || track == null) {
+          return@withContext null
         }
+
+        ProfileTrackAssociation(
+            profile = profileDocument?.let { Profile.from(it) }!!,
+            track = trackDocument?.let { Track.from(it) }!!)
       } catch (e: Exception) {
-        Log.e("Firestore", "Error fetching track: ${e.message}")
+        // Handle exceptions
+        Log.e("Firestore", "Error fetching track:${e.message}")
         null
       }
     }
@@ -143,8 +160,11 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
             "id" to beacon.id,
             "location" to beacon.location.toMap(),
             "tracks" to
-                beacon.tracks.map { track ->
-                  db.collection(trackConnection.collectionName).document(track.id)
+                beacon.profileAndTrack.map { profileAndTrack ->
+                  hashMapOf(
+                      "creator" to
+                          db.collection("users").document(profileAndTrack.profile.firebaseUid),
+                      "track" to db.collection("tracks").document(profileAndTrack.track.id))
                 })
     return beaconMap
   }
@@ -155,7 +175,21 @@ constructor(private val database: FirebaseFirestore? = null, val trackConnection
           val snapshot = transaction.get(beaconRef)
           val beacon = Beacon.from(snapshot)
           beacon?.let {
-            val newTracks = ArrayList(it.tracks).apply { add(track) }
+            val newTracks =
+                ArrayList(it.profileAndTrack).apply {
+                  add(
+                      ProfileTrackAssociation(
+                          Profile(
+                              "Sample First Name",
+                              "Sample last name",
+                              "Sample desc",
+                              0,
+                              false,
+                              null,
+                              "My Firebase UID",
+                              track.id),
+                          track))
+                }
             transaction.update(beaconRef, "tracks", newTracks.map { it.toMap() })
           } ?: throw Exception("Beacon not found")
         }

@@ -114,7 +114,6 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
     AboutButton(modifier = Modifier, navActions = navActions)
   }
 }
-
 /**
  * This handle the logic behind the switch that can permit the user to switch to the anonymous mode
  *

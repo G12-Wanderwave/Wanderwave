@@ -46,6 +46,6 @@ fun TrackListScreen(
         uiState.tracks,
         title = "All Tracks",
         onAddTrack = {},
-        onSelectTrack = viewModel::selectTrack)
+        onSelectTrack = viewModel::playTrack)
   }
 }

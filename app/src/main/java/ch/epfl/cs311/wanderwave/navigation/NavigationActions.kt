@@ -16,6 +16,7 @@ enum class Route(val routeString: String, val showBottomBar: Boolean) {
   PROFILE("profile", true),
   EDIT_PROFILE("editprofile", true),
   BEACON("beacon", true),
+  VIEW_PROFILE("viewProfile", false),
   SELECT_SONG("selectsong", false);
 
   companion object {
@@ -72,6 +73,11 @@ class NavigationActions(navController: NavHostController) {
   fun navigateToBeacon(beaconId: String) {
     navigationController.navigate("${Route.BEACON.routeString}/$beaconId")
     _currentRouteFlow.value = Route.BEACON
+  }
+
+  fun navigateToProfile(profileId: String) {
+    navigationController.navigate("${Route.VIEW_PROFILE.routeString}/$profileId")
+    _currentRouteFlow.value = Route.PROFILE
   }
 
   fun goBack() {

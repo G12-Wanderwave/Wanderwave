@@ -8,6 +8,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -16,6 +17,6 @@ object RepositoryModule {
   @Provides
   @Singleton
   fun provideAuthTokenRepository(appDatabase: AppDatabase): AuthTokenRepository {
-    return LocalAuthTokenRepository(appDatabase)
+    return LocalAuthTokenRepository(appDatabase, Dispatchers.IO)
   }
 }
