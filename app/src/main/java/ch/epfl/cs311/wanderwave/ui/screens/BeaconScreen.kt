@@ -230,20 +230,19 @@ internal fun TrackItem(
                     .clickable(
                         enabled = profileAndTrack.profile?.isPublic ?: false,
                         onClick = {
-                          profileAndTrack.profile?.let {
-                            if (profileAndTrack.profile.isPublic) {
-                              // if the profile is public, navigate to the profile view screen
-                              navigationActions.navigateToProfile(
-                                  profileAndTrack.profile.firebaseUid)
-                            } else {
-                              // if the profile is private , output a message that say the profile
-                              // is
-                              // private, you cannot access to profile informations
-                              scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    "This profile is private, you cannot access profile information.")
-                              }
+                          if (profileAndTrack.profile != null && profileAndTrack.profile.isPublic) {
+                            // if the profile is public, navigate to the profile view screen
+                            navigationActions.navigateToProfile(
+                                profileAndTrack.profile.firebaseUid)
+                          } else {
+                            // if the profile is private , output a message that say the profile
+                            // is
+                            // private, you cannot access to profile informations
+                            scope.launch {
+                              snackbarHostState.showSnackbar(
+                                  "This profile is private, you cannot access profile information.")
                             }
+
                           }
                         }),
             imageUri = profileAndTrack.profile?.profilePictureUri ?: null,
