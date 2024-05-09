@@ -31,19 +31,17 @@ import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
 
 @Composable
 fun TrackList(
-  tracks: List<Track>,
-  title: String? = null,
-  canAddSong: Boolean = true,
-  onAddTrack: (Track) -> Unit,
-  onSelectTrack: (Track) -> Unit,
+    tracks: List<Track>,
+    title: String? = null,
+    canAddSong: Boolean = true,
+    onAddTrack: (Track) -> Unit,
+    onSelectTrack: (Track) -> Unit,
 ) {
   Column {
     var showDialog by remember { mutableStateOf(false) }
 
     Row(
-        modifier = Modifier
-          .fillMaxWidth()
-          .padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween) {
           if (title != null) {
@@ -64,12 +62,12 @@ fun TrackList(
     LazyColumn {
       items(tracks) { track ->
         TrackListItem(
-          track,
-          track == selectedTrack,
-          onClick = {
-            selectedTrack = track
-            onSelectTrack(track)
-          })
+            track,
+            track == selectedTrack,
+            onClick = {
+              selectedTrack = track
+              onSelectTrack(track)
+            })
       }
     }
     if (showDialog) {
@@ -92,63 +90,61 @@ fun TrackList(
 
 @Composable
 fun TrackListWithProfiles(
-  tracks: List<ProfileTrackAssociation>,
-title: String? = null,
-canAddSong: Boolean = true,
-onAddTrack: (Track) -> Unit,
-onSelectTrack: (Track) -> Unit,
-  navigationActions: NavigationActions
+    tracks: List<ProfileTrackAssociation>,
+    title: String? = null,
+    canAddSong: Boolean = true,
+    onAddTrack: (Track) -> Unit,
+    onSelectTrack: (Track) -> Unit,
+    navigationActions: NavigationActions
 ) {
   Column {
     var showDialog by remember { mutableStateOf(false) }
 
     Row(
-      modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 16.dp, vertical = 8.dp),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.SpaceBetween) {
-      if (title != null) {
-        Text(
-          text = title,
-          style = MaterialTheme.typography.headlineMedium,
-          modifier = Modifier.testTag("trackListTitle"))
-      }
-      if (canAddSong) {
-        IconButton(onClick = { showDialog = true }) { // Toggle dialog visibility
-          Icon(
-            imageVector = Icons.Filled.Add,
-            contentDescription = stringResource(R.string.beaconTitle))
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween) {
+          if (title != null) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.testTag("trackListTitle"))
+          }
+          if (canAddSong) {
+            IconButton(onClick = { showDialog = true }) { // Toggle dialog visibility
+              Icon(
+                  imageVector = Icons.Filled.Add,
+                  contentDescription = stringResource(R.string.beaconTitle))
+            }
+          }
         }
-      }
-    }
     var selectedTrack by remember { mutableStateOf<Track?>(null) }
     LazyColumn {
       items(tracks) { trackAndProfile ->
         TrackListItemWithProfile(
-          trackAndProfile,
-          trackAndProfile.track == selectedTrack,
-          navigationActions = navigationActions,
-          onClick = {
-            selectedTrack = trackAndProfile.track
-            onSelectTrack(trackAndProfile.track)
-          })
+            trackAndProfile,
+            trackAndProfile.track == selectedTrack,
+            navigationActions = navigationActions,
+            onClick = {
+              selectedTrack = trackAndProfile.track
+              onSelectTrack(trackAndProfile.track)
+            })
       }
     }
     if (showDialog) {
       AddTrackDialog(
-        onAddTrack = {
-          onAddTrack(it)
-          showDialog = false
-        },
-        onDismiss = {
-          showDialog = false // Close dialog on dismiss
-        },
-        initialTrackId = "",
-        initialTrackTitle = "",
-        initialTrackArtist = "",
-        dialogTestTag = "addTrackDialog" // For testing purposes
-      )
+          onAddTrack = {
+            onAddTrack(it)
+            showDialog = false
+          },
+          onDismiss = {
+            showDialog = false // Close dialog on dismiss
+          },
+          initialTrackId = "",
+          initialTrackTitle = "",
+          initialTrackArtist = "",
+          dialogTestTag = "addTrackDialog" // For testing purposes
+          )
     }
   }
 }

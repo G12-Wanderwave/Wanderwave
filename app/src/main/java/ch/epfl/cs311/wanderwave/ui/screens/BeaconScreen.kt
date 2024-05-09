@@ -1,40 +1,17 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
 import android.util.Log
-import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.TweenSpec
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,13 +22,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
-import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
-import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackListWithProfiles
 import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
@@ -59,8 +34,6 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
@@ -83,13 +56,14 @@ fun BeaconScreen(
 
   val uiState = viewModel.uiState.collectAsState().value
   Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp),
+      modifier = Modifier.fillMaxSize().padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         if (!uiState.isLoading) {
           BeaconScreen(
-              beacon = uiState.beacon!!, viewModel::addTrackToBeacon, viewModel::selectTrack, navigationActions)
+              beacon = uiState.beacon!!,
+              viewModel::addTrackToBeacon,
+              viewModel::selectTrack,
+              navigationActions)
         } else {
           LoadingScreen()
         }
@@ -104,10 +78,7 @@ private fun BeaconScreen(
     navigationActions: NavigationActions
 ) {
   Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(8.dp)
-        .testTag("beaconScreen"),
+      modifier = Modifier.fillMaxSize().padding(8.dp).testTag("beaconScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
         SongList(beacon, addTrackToBeacon, onSelectTrack, navigationActions)
@@ -134,35 +105,17 @@ fun BeaconInformation(location: Location) {
                 CameraPosition(LatLng(location.latitude, location.longitude), 15f, 0f, 0f)),
         locationSource = null,
         modifier =
-        Modifier
-          .fillMaxWidth()
-          .aspectRatio(4f / 3)
-          .padding(4.dp)
-          .clip(RoundedCornerShape(8.dp))
-          .testTag("beaconMap"),
+            Modifier.fillMaxWidth()
+                .aspectRatio(4f / 3)
+                .padding(4.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .testTag("beaconMap"),
         controlsEnabled = false,
     ) {
       BeaconMapMarker(location.toLatLng(), location.name)
     }
   }
 }
-
-// TODO : @Jonas, pls look at it again
-// @Composable
-// fun SongList(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit) {
-//    TrackList(
-//        beacon.profileAndTrack,
-//        title = stringResource(R.string.beaconTracksTitle),
-//        onAddTrack = {
-//            addTrackToBeacon(beacon.id, it) { success ->
-//                if (success) {
-//                    Log.d("SongList", "Track added successfully.")
-//                } else {
-//                    Log.e("SongList", "Failed to add track.")
-//                }
-//            }
-//        })
-// }
 
 @Composable
 fun SongList(
@@ -172,29 +125,29 @@ fun SongList(
     navigationActions: NavigationActions
 ) {
   TrackListWithProfiles(
-    tracks = beacon.profileAndTrack,
-    title = stringResource(R.string.beaconTracksTitle),
-    onAddTrack = { track: Track ->
-      addTrackToBeacon(beacon.id, track) { success ->
-        if (success) {
-          Log.d("SongList", "Track added successfully.")
-        } else {
-          Log.e("SongList", "Failed to add track.")
+      tracks = beacon.profileAndTrack,
+      title = stringResource(R.string.beaconTracksTitle),
+      onAddTrack = { track: Track ->
+        addTrackToBeacon(beacon.id, track) { success ->
+          if (success) {
+            Log.d("SongList", "Track added successfully.")
+          } else {
+            Log.e("SongList", "Failed to add track.")
+          }
         }
-      }
-    },
-    onSelectTrack = onSelectTrack,
-    navigationActions = navigationActions
-  )
+      },
+      onSelectTrack = onSelectTrack,
+      navigationActions = navigationActions)
 }
-//@Composable
-//internal fun TrackItem(
+// @Composable
+// internal fun TrackItem(
 //    profileAndTrack: ProfileTrackAssociation,
 //    navigationActions: NavigationActions
-//) {
+// ) {
 //  val scrollState = rememberScrollState()
 //  val scope = rememberCoroutineScope()
-//  val slowScrollAnimation: AnimationSpec<Float> = TweenSpec(durationMillis = 5000, easing = { it })
+//  val slowScrollAnimation: AnimationSpec<Float> = TweenSpec(durationMillis = 5000, easing = { it
+// })
 //  val snackbarHostState = remember { SnackbarHostState() }
 //
 //  LaunchedEffect(key1 = true) {
@@ -249,13 +202,16 @@ fun SongList(
 //                        onClick = {
 //                          if (profileAndTrack.profile.isPublic) {
 //                            // if the profile is public, navigate to the profile view screen
-//                            navigationActions.navigateToProfile(profileAndTrack.profile.firebaseUid)
+//
+// navigationActions.navigateToProfile(profileAndTrack.profile.firebaseUid)
 //                          } else {
-//                            // if the profile is private , output a message that say the profile is
+//                            // if the profile is private , output a message that say the profile
+// is
 //                            // private, you cannot access to profile informations
 //                            scope.launch {
 //                              snackbarHostState.showSnackbar(
-//                                  "This profile is private, you cannot access profile information.")
+//                                  "This profile is private, you cannot access profile
+// information.")
 //                            }
 //                          }
 //                        }),
@@ -265,5 +221,5 @@ fun SongList(
 //    }
 //  }
 //  SnackbarHost(hostState = snackbarHostState)
-//>>>>>>> main
-//}
+// >>>>>>> main
+// }

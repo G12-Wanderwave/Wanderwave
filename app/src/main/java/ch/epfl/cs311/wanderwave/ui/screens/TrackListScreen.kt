@@ -43,9 +43,6 @@ fun TrackListScreen(
                 .testTag("searchBar") // Adding a test tag for the search bar
         )
     TrackList(
-        uiState.tracks,
-        title = "All Tracks",
-        onAddTrack = {},
-        onSelectTrack = viewModel::playTrack)
+        uiState.tracks, title = "All Tracks", onAddTrack = {}, onSelectTrack = viewModel::playTrack)
   }
 }

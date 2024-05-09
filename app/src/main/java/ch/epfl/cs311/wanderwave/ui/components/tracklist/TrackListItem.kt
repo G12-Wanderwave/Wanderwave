@@ -27,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -35,71 +34,72 @@ import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
 import kotlinx.coroutines.launch
 
 @Composable
-fun TrackListItemWithProfile(trackAndProfile: ProfileTrackAssociation, selected: Boolean, onClick: () -> Unit, navigationActions: NavigationActions) {
+fun TrackListItemWithProfile(
+    trackAndProfile: ProfileTrackAssociation,
+    selected: Boolean,
+    onClick: () -> Unit,
+    navigationActions: NavigationActions
+) {
   val scope = rememberCoroutineScope()
   val snackbarHostState = remember { SnackbarHostState() }
   Card(
-    onClick = onClick,
-    colors =
-    CardColors(
-      containerColor =
-      if (selected) MaterialTheme.colorScheme.surfaceContainerHighest
-      else MaterialTheme.colorScheme.surfaceContainerHigh,
-      CardDefaults.cardColors().contentColor,
-      CardDefaults.cardColors().disabledContainerColor,
-      CardDefaults.cardColors().disabledContentColor),
-    modifier = Modifier
-      .height(80.dp)
-      .fillMaxWidth()
-      .padding(4.dp)
-      .testTag("trackItem")) {
-    Row(
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Box(
-        modifier = Modifier
-          .fillMaxHeight()
-          .aspectRatio(1f),
-        contentAlignment = Alignment.Center) {
-        Image(
-          imageVector = Icons.Default.PlayArrow,
-          contentDescription = "Album Cover",
-          modifier = Modifier.fillMaxSize(.8f),
-        )
+      onClick = onClick,
+      colors =
+          CardColors(
+              containerColor =
+                  if (selected) MaterialTheme.colorScheme.surfaceContainerHighest
+                  else MaterialTheme.colorScheme.surfaceContainerHigh,
+              CardDefaults.cardColors().contentColor,
+              CardDefaults.cardColors().disabledContainerColor,
+              CardDefaults.cardColors().disabledContentColor),
+      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem")) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Box(
+              modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+              contentAlignment = Alignment.Center) {
+                Image(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "Album Cover",
+                    modifier = Modifier.fillMaxSize(.8f),
+                )
+              }
+          Column(modifier = Modifier.padding(8.dp)) {
+            Text(
+                text = trackAndProfile.track.title,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = trackAndProfile.track.artist,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+          }
+          SelectImage(
+              modifier =
+                  Modifier.size(width = 150.dp, height = 100.dp)
+                      .clickable(
+                          enabled = trackAndProfile.profile.isPublic,
+                          onClick = {
+                            if (trackAndProfile.profile.isPublic) {
+                              // if the profile is public, navigate to the profile view screen
+                              navigationActions.navigateToProfile(
+                                  trackAndProfile.profile.firebaseUid)
+                            } else {
+                              // if the profile is private , output a message that say the profile
+                              // is
+                              // private, you cannot access to profile informations
+                              scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    "This profile is private, you cannot access profile information.")
+                              }
+                            }
+                          }),
+              imageUri = trackAndProfile.profile.profilePictureUri,
+          )
+        }
       }
-      Column(modifier = Modifier.padding(8.dp)) {
-        Text(
-          text = trackAndProfile.track.title,
-          color = MaterialTheme.colorScheme.onSurface,
-          style = MaterialTheme.typography.titleMedium)
-        Text(
-          text = trackAndProfile.track.artist,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-          style = MaterialTheme.typography.bodyMedium,
-        )
-      }
-      SelectImage(
-          modifier =
-              Modifier.size(width = 150.dp, height = 100.dp)
-                  .clickable(
-                      enabled = trackAndProfile.profile.isPublic,
-                      onClick = {
-                        if (trackAndProfile.profile.isPublic) {
-                          // if the profile is public, navigate to the profile view screen
-                          navigationActions.navigateToProfile(trackAndProfile.profile.firebaseUid)
-                        } else {
-                          // if the profile is private , output a message that say the profile is
-                          // private, you cannot access to profile informations
-                          scope.launch {
-                            snackbarHostState.showSnackbar(
-                                "This profile is private, you cannot access profile information.")
-                          }
-                        }
-                      }),
-        imageUri = trackAndProfile.profile.profilePictureUri,
-      )
-    }
-  }
 }
 
 @Composable
@@ -114,18 +114,12 @@ fun TrackListItem(track: Track, selected: Boolean, onClick: () -> Unit) {
               CardDefaults.cardColors().contentColor,
               CardDefaults.cardColors().disabledContainerColor,
               CardDefaults.cardColors().disabledContentColor),
-      modifier = Modifier
-        .height(80.dp)
-        .fillMaxWidth()
-        .padding(4.dp)
-        .testTag("trackItem")) {
+      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
           Box(
-              modifier = Modifier
-                .fillMaxHeight()
-                .aspectRatio(1f),
+              modifier = Modifier.fillMaxHeight().aspectRatio(1f),
               contentAlignment = Alignment.Center) {
                 Image(
                     imageVector = Icons.Default.PlayArrow,

@@ -71,12 +71,12 @@ constructor(
 
   /** Resumes the currently paused track using the SpotifyController. */
   fun resumeTrack() {
-    spotifyController.resumeTrack { }
+    spotifyController.resumeTrack {}
   }
 
   /** Pauses the currently playing track using the SpotifyController. */
   fun pauseTrack() {
-    spotifyController.pauseTrack { }
+    spotifyController.pauseTrack {}
   }
 
   fun collapse() {
