@@ -228,21 +228,24 @@ internal fun TrackItem(
             modifier =
                 Modifier.size(width = 150.dp, height = 100.dp)
                     .clickable(
-                        enabled = profileAndTrack.profile.isPublic,
+                        enabled = profileAndTrack.profile?.isPublic ?: false,
                         onClick = {
-                          if (profileAndTrack.profile.isPublic) {
-                            // if the profile is public, navigate to the profile view screen
-                            navigationActions.navigateToProfile(profileAndTrack.profile.firebaseUid)
-                          } else {
-                            // if the profile is private , output a message that say the profile is
-                            // private, you cannot access to profile informations
-                            scope.launch {
-                              snackbarHostState.showSnackbar(
-                                  "This profile is private, you cannot access profile information.")
+                          profileAndTrack.profile?.let {
+                            if (profileAndTrack.profile.isPublic) {
+                              // if the profile is public, navigate to the profile view screen
+                              navigationActions.navigateToProfile(profileAndTrack.profile.firebaseUid)
+                            } else {
+                              // if the profile is private , output a message that say the profile is
+                              // private, you cannot access to profile informations
+                              scope.launch {
+                                snackbarHostState.showSnackbar(
+                                  "This profile is private, you cannot access profile information."
+                                )
+                              }
                             }
                           }
                         }),
-            imageUri = profileAndTrack.profile.profilePictureUri,
+            imageUri = profileAndTrack.profile?.profilePictureUri ?: null,
         )
       }
     }
