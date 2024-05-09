@@ -62,9 +62,16 @@ fun MapScreen(
     onDispose { viewModel.cameraPosition.value = cameraPositionState.position }
   }
 
-  // Add listener to check if user is in beacon range and drop song if applicable
-  viewModel.isInBeaconRange(
-      profileViewModel.songLists.value.first().tracks.first(), profileViewModel.profile.value)
+  // Check if there is a song to drop
+  val songLists = profileViewModel.songLists.value
+  if (songLists.isNotEmpty()) {
+    val tracks = songLists.first().tracks
+    if (tracks.isNotEmpty()) {
+      val track = tracks.first()
+      // Add listener to check if user is in beacon range and drop song if applicable
+      viewModel.isInBeaconRange(track, profileViewModel.profile.value)
+    }
+  }
 
   WanderwaveGoogleMap(
       cameraPositionState = cameraPositionState,

@@ -17,10 +17,13 @@ import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
+import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import com.google.android.gms.maps.LocationSource
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
@@ -52,6 +55,10 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
 
   @RelaxedMockK private lateinit var mockLocationSource: LocationSource
   @RelaxedMockK private lateinit var mockMapViewModel: MapViewModel
+  @RelaxedMockK private lateinit var mockProfileViewModel: ProfileViewModel
+
+  @RelaxedMockK private lateinit var profileRepository: ProfileConnection
+  @RelaxedMockK private lateinit var spotifyController: SpotifyController
 
   @RelaxedMockK private lateinit var mockBeaconConnection: BeaconConnection
 
@@ -103,10 +110,30 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
                                     "Sample Artist Name"))))))
 
     mockMapViewModel = MapViewModel(mockLocationSource, mockBeaconConnection)
+    mockProfileViewModel = ProfileViewModel(profileRepository, spotifyController)
+    //        val track = Track("Dummy ID", "Dummy Title", "Dummy Artist")
+    //        mockProfileViewModel.createSpecificSongList("TOP_SONGS")
+    //        mockProfileViewModel.addTrackToList("TOP_SONGS", track)
+
+    //        val tracks = SongList("Dummy List", listOf(track))
+    //        val songList = listOf(tracks)
+    //        every { mockProfileViewModel.songLists.value } returns songList
+    //        every { mockProfileViewModel.profile.value } returns Profile(
+    //            "Sample First Name",
+    //            "Sample Last name",
+    //            "Sample desc",
+    //            0,
+    //            false,
+    //            null,
+    //            "Sample Profile ID",
+    //            "Sample Track ID"
+    //        )
     every { mockNavController.navigate(any<String>()) } returns Unit
     mockNavigationActions = NavigationActions(mockNavController)
 
-    composeTestRule.setContent { MapScreen(mockNavigationActions, mockMapViewModel) }
+    composeTestRule.setContent {
+      MapScreen(mockNavigationActions, mockMapViewModel, mockProfileViewModel)
+    }
 
     try {
       locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true)
