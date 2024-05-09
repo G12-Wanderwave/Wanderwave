@@ -38,14 +38,9 @@ class LoginAndUseMediaControllerEndToEndTest :
 
   @Before
   fun setup() {
-    // Mock SpotifyController methods
     every { mockSpotifyController.connectRemote() } returns
         flowOf(SpotifyController.ConnectResult.SUCCESS)
-    // Add other method mocks as needed
-
-    // Mock AuthenticationController methods
     every { mockAuthenticationController.isSignedIn() } returns true
-    // Add other method mocks as needed
   }
 
   @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
