@@ -1,7 +1,9 @@
 package ch.epfl.cs311.wanderwave.model.data
 
 import android.net.Uri
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 
 data class Profile(
     var firstName: String,
@@ -12,9 +14,18 @@ data class Profile(
     var profilePictureUri: Uri? = null,
     var spotifyUid: String,
     var firebaseUid: String,
+    var topSongs: List<Track> = emptyList(),
+    var chosenSongs: List<Track> = emptyList(),
 ) {
 
-  fun toMap(): HashMap<String, Any> {
+  fun toMap(db: FirebaseFirestore? = null): Map<String, Any> {
+    val topSongsReferences: List<DocumentReference> =
+        db?.let { nonNulldb -> topSongs.map { nonNulldb.collection("tracks").document(it.id) } }
+            ?: emptyList()
+    val chosenSongsReferences: List<DocumentReference> =
+        db?.let { nonNulldb -> chosenSongs.map { nonNulldb.collection("tracks").document(it.id) } }
+            ?: emptyList()
+
     return hashMapOf(
         "firstName" to firstName,
         "lastName" to lastName,
@@ -23,7 +34,10 @@ data class Profile(
         "spotifyUid" to spotifyUid,
         "firebaseUid" to firebaseUid,
         "isPublic" to isPublic,
-        "profilePictureUri" to (profilePictureUri?.toString() ?: ""))
+        "profilePictureUri" to (profilePictureUri?.toString() ?: ""),
+        "topSongs" to topSongsReferences,
+        "chosenSongs" to chosenSongsReferences,
+    )
   }
 
   companion object {

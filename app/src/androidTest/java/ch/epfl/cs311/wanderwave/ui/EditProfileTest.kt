@@ -114,7 +114,7 @@ class EditProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
       saveButton {
         assertIsDisplayed()
         performClick()
-        verify { mockNavigationActions.navigateToTopLevel(Route.PROFILE) }
+        verify { mockNavigationActions.goBack() }
       }
     }
   }
@@ -125,7 +125,7 @@ class EditProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
       cancelButton {
         assertIsDisplayed()
         performClick()
-        verify { mockNavigationActions.navigateToTopLevel(Route.PROFILE) }
+        verify { mockNavigationActions.goBack() }
       }
     }
   }

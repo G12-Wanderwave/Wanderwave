@@ -42,7 +42,7 @@ abstract class FirebaseConnection<T, U> {
 
   open fun addItem(item: T) {
     val itemMap = itemToMap(item)
-
+    Log.d("Conneciton", "beacon map : ${itemMap}")
     db.collection(collectionName)
         .add(itemMap)
         .addOnFailureListener { e -> Log.e("Firestore", "Error adding document: ", e) }
@@ -87,20 +87,18 @@ abstract class FirebaseConnection<T, U> {
         .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully updated!") }
   }
 
-  fun deleteItem(item: T) {
+  open fun deleteItem(item: T) {
     val itemId = getItemId(item)
     deleteItem(itemId)
   }
 
-  fun deleteItem(itemId: String) {
+  open fun deleteItem(itemId: String) {
     db.collection(collectionName)
         .document(itemId)
         .delete()
         .addOnFailureListener { e -> Log.e("Firestore", "Error deleting document: ", e) }
         .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully deleted!") }
   }
-
-  fun getItem(item: T): Flow<T> = getItem(getItemId(item))
 
   open fun getItem(itemId: String): Flow<T> {
     val dataFlow = MutableStateFlow<T?>(null)
@@ -109,11 +107,19 @@ abstract class FirebaseConnection<T, U> {
         .get()
         .addOnSuccessListener { document ->
           if (document != null && document.data != null) {
-            documentToItem(document)?.let { dataFlow.value = it }
+            documentToItem(document)?.let {
+              dataFlow.value = it
+              documentTransform(document, dataFlow)
+            }
           }
         }
         .addOnFailureListener { e -> Log.e("Firestore", "Error getting document: ", e) }
 
     return dataFlow.mapNotNull { it }
   }
+
+  open internal fun documentTransform(
+      documentSnapshot: DocumentSnapshot,
+      stateFlow: MutableStateFlow<T?>
+  ) {}
 }
