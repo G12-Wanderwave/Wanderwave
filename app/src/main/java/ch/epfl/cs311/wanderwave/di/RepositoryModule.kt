@@ -25,14 +25,14 @@ object RepositoryModule {
   @Provides
   @Singleton
   fun provideBeaconRepository(
-    @ApplicationContext context: Context,
-    trackRepository: TrackRepository,
-    profileRepository: ProfileRepository
+      @ApplicationContext context: Context,
+      trackRepository: TrackRepository,
+      profileRepository: ProfileRepository
   ): BeaconRepository {
     return BeaconConnection(
-      trackConnection = trackRepository as TrackConnection,
-      profileConnection = profileRepository as ProfileConnection,
-      ioDispatcher = Dispatchers.IO)
+        trackConnection = trackRepository as TrackConnection,
+        profileConnection = profileRepository as ProfileConnection,
+        ioDispatcher = Dispatchers.IO)
   }
 
   @Provides
@@ -44,8 +44,8 @@ object RepositoryModule {
   @Provides
   @Singleton
   fun provideProfileRepository(
-    @ApplicationContext context: Context,
-    trackRepository: TrackRepository
+      @ApplicationContext context: Context,
+      trackRepository: TrackRepository
   ): ProfileRepository {
     return ProfileConnection(trackConnection = trackRepository as TrackConnection)
   }

@@ -497,7 +497,8 @@ public class BeaconConnectionTest {
     val context = ApplicationProvider.getApplicationContext<Context>()
     val trackRepository = mockk<TrackConnection>(relaxed = true)
     val profileRepository = mockk<ProfileConnection>(relaxed = true)
-    val beaconRepository = BeaconConnection(firestore, trackConnection, profileConnection, UnconfinedTestDispatcher())
+    val beaconRepository =
+        BeaconConnection(firestore, trackConnection, profileConnection, UnconfinedTestDispatcher())
     assertEquals(BeaconConnection::class.java, beaconRepository::class.java)
   }
 

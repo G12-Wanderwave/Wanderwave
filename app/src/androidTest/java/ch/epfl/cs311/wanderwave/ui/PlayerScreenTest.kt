@@ -7,7 +7,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import ch.epfl.cs311.wanderwave.ui.TestActivity
 import ch.epfl.cs311.wanderwave.ui.components.player.ExclusivePlayer
 import ch.epfl.cs311.wanderwave.ui.screens.components.ExclusivePlayerScreen
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel

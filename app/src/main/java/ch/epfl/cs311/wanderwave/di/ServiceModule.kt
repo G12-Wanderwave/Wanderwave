@@ -43,7 +43,7 @@ object ServiceModule {
   @Singleton
   fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
     return Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, "app_database")
-      .build()
+        .build()
   }
 
   @Provides
@@ -57,6 +57,4 @@ object ServiceModule {
   fun provideOkHttpClient(): OkHttpClient {
     return OkHttpClient()
   }
-
-
 }
