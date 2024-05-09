@@ -5,6 +5,8 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import ch.epfl.cs311.wanderwave.MainActivity
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
+import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.ui.screens.AppScreen
 import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
@@ -13,23 +15,40 @@ import ch.epfl.cs311.wanderwave.ui.screens.components.ExclusivePlayerScreen
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
-import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.kakaocup.compose.node.element.ComposeScreen
+import io.mockk.every
+import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-@HiltAndroidTest
 class LoginAndUseMediaControllerEndToEndTest :
     TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
 
-  @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
-
   @get:Rule val mockkRule = MockKRule(this)
+
+  @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
+  @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
+
+  @Before
+  fun setup() {
+    // Mock SpotifyController methods
+    every { mockSpotifyController.connectRemote() } returns
+        flowOf(SpotifyController.ConnectResult.SUCCESS)
+    // Add other method mocks as needed
+
+    // Mock AuthenticationController methods
+    every { mockAuthenticationController.isSignedIn() } returns true
+    // Add other method mocks as needed
+  }
+
+  @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
 
   @get:Rule
   val permissionRule: GrantPermissionRule =
