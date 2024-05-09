@@ -79,7 +79,6 @@ class TrackListViewModelTest {
     every { repository.getAll() } returns flowOf(trackList)
 
     viewModel = TrackListViewModel(mockSpotifyController, appDatabase, repository)
-    viewModel.currentBeaconId = "beacon_123" // This is a hypothetical property
 
     runBlocking { viewModel.uiState.first { !it.loading } }
   }
@@ -372,8 +371,6 @@ class TrackListViewModelTest {
   // Additional Test: Load Recently Added Tracks
   @Test
   fun loadRecentlyAddedTracksTest() = runTest {
-    val beaconId = "spotify:track:3C7RbG9Co0zjO7CsuEOqRa"
-    viewModel.loadRecentlyAddedTracks(beaconId)
     advanceUntilIdle()
 
     assertFalse(viewModel.uiState.value.tracks.isEmpty())

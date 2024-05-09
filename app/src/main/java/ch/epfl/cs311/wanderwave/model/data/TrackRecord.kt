@@ -8,5 +8,5 @@ data class TrackRecord(
     @PrimaryKey(autoGenerate = true) val id: Int = 0, // Unique ID for each record
     val beaconId: String, // ID of the beacon to which the track was added
     val trackId: String, // ID of the track added to the beacon
-    val timestamp: Long = System.currentTimeMillis() // Timestamp when the record was created
+    val timestamp: Long // Timestamp should be passed when creating an instance
 )

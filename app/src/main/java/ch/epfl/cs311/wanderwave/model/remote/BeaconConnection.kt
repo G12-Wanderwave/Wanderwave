@@ -198,7 +198,11 @@ class BeaconConnection(
             coroutineScope.launch {
               appDatabase
                   .trackRecordDao()
-                  .insertTrackRecord(TrackRecord(beaconId = beaconId, trackId = track.id))
+                  .insertTrackRecord(
+                      TrackRecord(
+                          beaconId = beaconId,
+                          trackId = track.id,
+                          timestamp = System.currentTimeMillis()))
             }
           } ?: throw Exception("Beacon not found")
         }

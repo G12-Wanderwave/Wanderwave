@@ -18,9 +18,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
@@ -41,11 +43,11 @@ fun TrackListScreen(
           searchQuery = query
           viewModel.setSearchQuery(query)
         },
-        label = { Text("Search Tracks") },
+        label = { Text(stringResource(R.string.search_tracks)) }, // Use string resource
         modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("searchBar"))
 
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(16.dp)) {
-      Text("Show Recently Added")
+      Text(stringResource(R.string.show_recently_added)) // Use string resource
       Switch(
           checked = uiState.showRecentlyAdded,
           onCheckedChange = { viewModel.toggleTrackSource() },
@@ -55,8 +57,9 @@ fun TrackListScreen(
     TrackList(
         tracks = uiState.tracks,
         title =
-            if (uiState.showRecentlyAdded) "Recently Added Tracks" else "Recently Viewed Tracks",
+            if (uiState.showRecentlyAdded) stringResource(R.string.recently_added_tracks)
+            else stringResource(R.string.recently_viewed_tracks),
         onAddTrack = {},
-        onSelectTrack = {})
+        onSelectTrack = viewModel::selectTrack)
   }
 }

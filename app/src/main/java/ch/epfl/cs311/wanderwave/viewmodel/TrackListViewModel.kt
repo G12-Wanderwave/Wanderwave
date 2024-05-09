@@ -26,13 +26,6 @@ constructor(
 
   private val _uiState = MutableStateFlow(UiState(loading = true))
   val uiState: StateFlow<UiState> = _uiState
-  private var _currentBeaconId: String? = null
-  var currentBeaconId: String?
-    get() = _currentBeaconId
-    set(value) {
-      _currentBeaconId = value
-      loadTracksBasedOnSource()
-    }
 
   private var _searchQuery = MutableStateFlow("")
 
@@ -44,17 +37,17 @@ constructor(
   fun loadTracksBasedOnSource() {
     viewModelScope.launch {
       _uiState.value = _uiState.value.copy(loading = true)
-      if (_uiState.value.showRecentlyAdded && currentBeaconId != null) {
-        loadRecentlyAddedTracks(currentBeaconId!!)
+      if (_uiState.value.showRecentlyAdded) {
+        loadRecentlyAddedTracks()
       } else {
         _uiState.value = _uiState.value.copy(tracks = listOf(), loading = false)
       }
     }
   }
 
-  fun loadRecentlyAddedTracks(beaconId: String) {
+  fun loadRecentlyAddedTracks() {
     viewModelScope.launch {
-      appDatabase.trackRecordDao().getTracksForBeacon(beaconId).collect { trackRecords ->
+      appDatabase.trackRecordDao().getAllRecentlyAddedTracks().collect { trackRecords ->
         val tracks = trackRecords.map { Track(it.trackId, "Unknown Title", "Unknown Artist") }
         _uiState.value = _uiState.value.copy(tracks = tracks, loading = false)
       }
