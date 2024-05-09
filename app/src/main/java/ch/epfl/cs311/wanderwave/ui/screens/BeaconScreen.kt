@@ -232,8 +232,7 @@ internal fun TrackItem(
                         onClick = {
                           if (profileAndTrack.profile != null && profileAndTrack.profile.isPublic) {
                             // if the profile is public, navigate to the profile view screen
-                            navigationActions.navigateToProfile(
-                                profileAndTrack.profile.firebaseUid)
+                            navigationActions.navigateToProfile(profileAndTrack.profile.firebaseUid)
                           } else {
                             // if the profile is private , output a message that say the profile
                             // is
@@ -242,7 +241,6 @@ internal fun TrackItem(
                               snackbarHostState.showSnackbar(
                                   "This profile is private, you cannot access profile information.")
                             }
-
                           }
                         }),
             imageUri = profileAndTrack.profile?.profilePictureUri ?: null,

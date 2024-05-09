@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.model.data
 
+import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 
 data class Track(
@@ -23,6 +24,7 @@ data class Track(
 
   companion object {
     fun from(document: DocumentSnapshot): Track? {
+      Log.d("Firestore", "DocumentSnapshot is $document")
       return if (document.exists()) {
         Track(
             id = document.id,

@@ -126,6 +126,8 @@ class ProfileConnection(
                 val TopSongs = TopSongsDeferred?.mapNotNull { it?.await() }
                 val ChosenSongs = chosenSongsDeffered?.mapNotNull { it?.await() }
 
+                Log.d("Firestore", "songs lists : $TopSongs $ChosenSongs")
+
                 // Update the beacon with the complete list of tracks
                 val updatedBeacon =
                     profile.copy(
