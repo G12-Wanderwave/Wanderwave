@@ -8,6 +8,7 @@ import com.google.firebase.firestore.memoryCacheSettings
 import com.google.firebase.firestore.persistentCacheSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.tasks.await
 
@@ -109,7 +110,6 @@ abstract class FirebaseConnection<T, U> {
           { _: DocumentSnapshot, _: MutableStateFlow<T?> ->
           }
   ): Flow<T> {
-    Log.d("Firestore", "getItem 5: $itemId")
     val dataFlow = MutableStateFlow<T?>(null)
     db.collection(collectionName)
         .document(itemId)
@@ -125,5 +125,52 @@ abstract class FirebaseConnection<T, U> {
         .addOnFailureListener { e -> Log.e("Firestore", "Error getting document: ", e) }
 
     return dataFlow.mapNotNull { it }
+  }
+
+  fun automaticGetItem(template: FirebaseTemplateObject): Flow<T?> {
+
+    // test the type of the template object
+    if (template is FirebaseTemplateNode) {
+
+      // if it's a node, just get the child
+      val dataFlow = MutableStateFlow<T?>(null)
+
+      db.collection(template.collectionName)
+          .document(template.str)
+          .get()
+          .addOnSuccessListener { document ->
+            if (document != null && document.data != null) {
+              documentToItem(document)?.let { dataFlow.value = it }
+            }
+          }
+          .addOnFailureListener { e -> Log.e("Firestore", "Error getting document: ", e) }
+
+      return dataFlow
+    }
+
+    if (template is FirebaseTemplateDocument) {
+      // this is the main document type
+      val dataFlow = MutableStateFlow<T?>(null)
+      // fetch all the childrens of the document, and return the combined flow
+
+    }
+
+    if (template is FirebaseTemplateList) {
+
+      // get all the childrens of the list
+      val dataFlow = MutableStateFlow<T?>(null)
+      db.collection(template.collectionName)
+          .get()
+          .addOnSuccessListener { documents ->
+            documents.documents.forEach { document ->
+              if (document != null && document.data != null) {
+                documentToItem(document)?.let { dataFlow.value = it }
+              }
+            }
+          }
+          .addOnFailureListener { e -> Log.e("Firestore", "Error getting documents: ", e) }
+    }
+
+    return flowOf()
   }
 }

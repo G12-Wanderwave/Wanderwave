@@ -69,10 +69,10 @@ class BeaconConnection(
     val onSuccessWrapper: (DocumentSnapshot, MutableStateFlow<Beacon?>) -> Unit =
         { document, dataFlow ->
           val beacon = dataFlow.value ?: Beacon.from(document) ?: null
-          Log.d("BeaconConnection", "Beacon fetched successfully ${document["tracks"]}")
+
           beacon?.let { beacon ->
             val tracksObject = document["tracks"]
-            Log.d("BeaconConnection", "tracks object: $tracksObject")
+
             var profileAndTrackRefs: List<Map<String, DocumentReference>>?
 
             if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
@@ -127,7 +127,8 @@ class BeaconConnection(
                 beacon.profileAndTrack.map { profileAndTrack ->
                   hashMapOf(
                       "creator" to
-                          db.collection("users").document(profileAndTrack.profile?.firebaseUid ?: ""),
+                          db.collection("users")
+                              .document(profileAndTrack.profile?.firebaseUid ?: ""),
                       "track" to db.collection("tracks").document(profileAndTrack.track.id))
                 })
     return beaconMap
@@ -160,7 +161,8 @@ class BeaconConnection(
                 newTracks.map { profileAndTrack ->
                   hashMapOf(
                       "creator" to
-                          db.collection("users").document(profileAndTrack.profile?.firebaseUid ?: ""),
+                          db.collection("users")
+                              .document(profileAndTrack.profile?.firebaseUid ?: ""),
                       "track" to db.collection("tracks").document(profileAndTrack.track.id))
                 })
           } ?: throw Exception("Beacon not found")
