@@ -79,6 +79,7 @@ class TrackListViewModelTest {
     every { repository.getAll() } returns flowOf(trackList)
 
     viewModel = TrackListViewModel(mockSpotifyController, appDatabase, repository)
+    viewModel.currentBeaconId = "beacon_123" // This is a hypothetical property
 
     runBlocking { viewModel.uiState.first { !it.loading } }
   }
@@ -367,6 +368,24 @@ class TrackListViewModelTest {
     viewModel.toggleLoop()
     assertEquals(LoopMode.NONE, viewModel.uiState.value.loopMode)
   }
-}
 
-// for the CI rerun to be removed
+  // Additional Test: Load Recently Added Tracks
+  @Test
+  fun loadRecentlyAddedTracksTest() = runTest {
+    val beaconId = "spotify:track:3C7RbG9Co0zjO7CsuEOqRa"
+    viewModel.loadRecentlyAddedTracks(beaconId)
+    advanceUntilIdle()
+
+    assertFalse(viewModel.uiState.value.tracks.isEmpty())
+
+    // Assuming that the tracks have been returned in the expected order
+    // If the order is not guaranteed, consider using a set or checking if the list contains the
+    // expected tracks
+    assertEquals("Yeah", viewModel.uiState.value.tracks[0].title)
+    assertEquals("Queen", viewModel.uiState.value.tracks[0].artist)
+
+    // You can extend these assertions to other tracks if needed, or dynamically check against a
+    // known set of tracks
+    assertFalse(viewModel.uiState.value.loading)
+  }
+}
