@@ -2,7 +2,7 @@ package ch.epfl.cs311.wanderwave.model
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import ch.epfl.cs311.wanderwave.di.ConnectionModule
+import ch.epfl.cs311.wanderwave.di.RepositoryModule
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
@@ -499,7 +499,7 @@ public class BeaconConnectionTest {
     val trackRepository = mockk<TrackConnection>(relaxed = true)
     val profileRepository = mockk<ProfileConnection>(relaxed = true)
     val beaconRepository =
-        ConnectionModule.provideBeaconRepository(context, trackRepository, profileRepository)
+        RepositoryModule.provideBeaconRepository(context, trackRepository, profileRepository)
     assertEquals(BeaconConnection::class.java, beaconRepository::class.java)
   }
 
