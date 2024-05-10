@@ -206,6 +206,7 @@ class AuthenticationControllerTest {
     val expectedResponse = "success response"
     val call = mockk<Call>()
     every { mockHttpClient.newCall(any()) } returns call
+    coEvery { authenticationController.refreshSpotifyToken() } returns true
     every { call.execute() } returns
         mockk { every { body } returns mockk { every { string() } returns expectedResponse } }
     coEvery {
