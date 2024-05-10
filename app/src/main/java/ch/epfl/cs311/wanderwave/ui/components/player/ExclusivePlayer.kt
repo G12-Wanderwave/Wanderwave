@@ -41,7 +41,7 @@ fun ExclusivePlayer(
 ) {
   val viewModel: TrackListViewModel = hiltViewModel()
   Column(
-      modifier = Modifier.fillMaxSize().padding(bottom = 84.dp).testTag("exclusivePlayer"),
+      modifier = Modifier.testTag("exclusivePlayer").fillMaxSize().padding(bottom = 84.dp),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.SpaceBetween) {
         PlayerDragHandleComponent(checked)
@@ -128,13 +128,17 @@ fun VotingButtonsComponent(selectedVote: MutableIntState) {
 @Composable
 fun TrackInfoComponent(uiState: TrackListViewModel.UiState) {
   Column(
-      modifier = Modifier.fillMaxWidth(),
+      modifier = Modifier.fillMaxWidth().testTag("trackInfo"),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center) {
         Text(
-            text = uiState.selectedTrack?.artist ?: "", style = MaterialTheme.typography.titleSmall)
+            text = uiState.selectedTrack?.artist ?: "",
+            style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.testTag("artist"))
         Text(
-            text = uiState.selectedTrack?.title ?: "", style = MaterialTheme.typography.titleMedium)
+            text = uiState.selectedTrack?.title ?: "",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.testTag("title"))
       }
 }
 
@@ -163,7 +167,7 @@ fun PlayerControlRowComponent(viewModel: TrackListViewModel, uiState: TrackListV
   Row(
       horizontalArrangement = Arrangement.SpaceAround,
       verticalAlignment = Alignment.CenterVertically,
-      modifier = Modifier.fillMaxWidth()) {
+      modifier = Modifier.fillMaxWidth().testTag("playerControl")) {
         ShuffleButton(viewModel, uiState)
         PlayerIconButton(
             onClick = { viewModel.skipBackward() },
@@ -183,7 +187,7 @@ fun PlayerControlRowComponent(viewModel: TrackListViewModel, uiState: TrackListV
 @Composable
 fun ShuffleButton(viewModel: TrackListViewModel, uiState: TrackListViewModel.UiState) {
   IconButton(
-      onClick = { viewModel.toggleShuffle() }, modifier = Modifier.testTag("toggleShuffle")) {
+      onClick = { viewModel.toggleShuffle() }, modifier = Modifier.testTag("shuffleButton")) {
         if (!uiState.isShuffled) {
           Icon(
               painter = painterResource(id = R.drawable.shuffle_off_icon),
@@ -204,7 +208,7 @@ fun ShuffleButton(viewModel: TrackListViewModel, uiState: TrackListViewModel.UiS
 fun PlayPauseButton(viewModel: TrackListViewModel, uiState: TrackListViewModel.UiState) {
   IconButton(
       onClick = { if (uiState.isPlaying) viewModel.pause() else viewModel.play() },
-      modifier = Modifier.size(70.dp)) {
+      modifier = Modifier.size(70.dp).testTag("playPauseButton")) {
         if (uiState.isPlaying) {
           Icon(
               painter = painterResource(id = R.drawable.pause_icon),
@@ -223,7 +227,7 @@ fun PlayPauseButton(viewModel: TrackListViewModel, uiState: TrackListViewModel.U
 
 @Composable
 fun RepeatButton(viewModel: TrackListViewModel, uiState: TrackListViewModel.UiState) {
-  IconButton(onClick = { viewModel.toggleLoop() }, modifier = Modifier.testTag("toggleRepeat")) {
+  IconButton(onClick = { viewModel.toggleLoop() }, modifier = Modifier.testTag("loopButton")) {
     when (uiState.loopMode) {
       LoopMode.NONE ->
           Icon(
