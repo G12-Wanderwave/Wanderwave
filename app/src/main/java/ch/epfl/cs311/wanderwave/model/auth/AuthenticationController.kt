@@ -1,9 +1,13 @@
 package ch.epfl.cs311.wanderwave.model.auth
 
+import android.util.Log
 import ch.epfl.cs311.wanderwave.model.repository.AuthTokenRepository
 import com.google.firebase.auth.FirebaseAuth
+import java.net.HttpURLConnection
+import java.net.URL
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
@@ -78,6 +82,8 @@ constructor(
     val firebaseToken = response.getString("firebase_token")
     val spotifyAccessToken = response.getString("access_token")
     val spotifyRefreshToken = response.getString("refresh_token")
+
+    Log.d("AuthenticationController", "SPOTIFY Access token: $spotifyAccessToken")
 
     tokenRepository.setAuthToken(
         AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN,
