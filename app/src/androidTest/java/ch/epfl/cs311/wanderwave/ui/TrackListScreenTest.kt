@@ -13,6 +13,8 @@ import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import com.google.common.base.Verify.verify
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
 import io.mockk.Called
 import io.mockk.coVerify
@@ -31,11 +33,14 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class TrackListScreenTest : TestCase() {
 
   @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
 
   @get:Rule val mockkRule = MockKRule(this)
+
+  @get:Rule val hiltRule = HiltAndroidRule(this)
 
   @RelaxedMockK lateinit var mockSpotifyController: SpotifyController
   @RelaxedMockK lateinit var trackRepository: TrackRepository

@@ -14,6 +14,7 @@ import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.spotify.protocol.types.ListItem
+import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
 import io.mockk.Runs
@@ -40,6 +41,8 @@ class EditProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
   @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
 
   @get:Rule val mockkRule = MockKRule(this)
+
+  @get:Rule val hiltRule = HiltAndroidRule(this)
 
   lateinit var viewModel: ProfileViewModel
 
@@ -114,7 +117,7 @@ class EditProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
       saveButton {
         assertIsDisplayed()
         performClick()
-        verify { mockNavigationActions.navigateToTopLevel(Route.PROFILE) }
+        verify { mockNavigationActions.goBack() }
       }
     }
   }
@@ -125,7 +128,7 @@ class EditProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
       cancelButton {
         assertIsDisplayed()
         performClick()
-        verify { mockNavigationActions.navigateToTopLevel(Route.PROFILE) }
+        verify { mockNavigationActions.goBack() }
       }
     }
   }

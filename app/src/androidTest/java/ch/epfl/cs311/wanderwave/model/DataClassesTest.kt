@@ -9,6 +9,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -150,7 +151,9 @@ class DataClassesTest {
             "spotifyUid" to "spotify123",
             "firebaseUid" to "firebase123",
             "isPublic" to true,
-            "profilePictureUri" to "https://example.com/image.jpg")
+            "profilePictureUri" to "https://example.com/image.jpg",
+            "chosenSongs" to listOf<DocumentReference>(),
+            "topSongs" to listOf<DocumentReference>())
 
     assertEquals(expectedMap, profile.toMap())
   }
@@ -220,6 +223,14 @@ class DataClassesTest {
             )
 
     assertEquals(expectedMap, profileTrackAssociation.toMap())
+
+    // test if the profile is null
+    val profileTrackAssociation2 = ProfileTrackAssociation(null, track)
+    val expectedMap2 =
+        hashMapOf(
+            "profile" to null, "track" to track.toMap() // Assuming Track has a toMap function
+            )
+    assertEquals(expectedMap2, profileTrackAssociation2.toMap())
   }
 
   @Test

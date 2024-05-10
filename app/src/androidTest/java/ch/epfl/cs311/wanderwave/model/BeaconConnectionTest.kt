@@ -1,9 +1,8 @@
 package ch.epfl.cs311.wanderwave.model
 
 import android.content.Context
-import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
-import ch.epfl.cs311.wanderwave.di.ConnectionModule
+import ch.epfl.cs311.wanderwave.di.RepositoryModule
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
@@ -25,13 +24,11 @@ import com.google.firebase.firestore.Transaction
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -46,7 +43,6 @@ public class BeaconConnectionTest {
   @get:Rule val mockkRule = MockKRule(this)
   private lateinit var beaconConnection: BeaconConnection
 
-  @RelaxedMockK private lateinit var beaconConnectionMock: BeaconConnection
   private lateinit var trackConnection: TrackConnection
   private lateinit var profileConnection: ProfileConnection // Add a mock for ProfileConnection
 
@@ -284,146 +280,6 @@ public class BeaconConnectionTest {
   }
 
   @Test
-  fun testFetchTrack() = runBlocking {
-    // Mock the DocumentReference
-    val mockTrackDocumentReference = mockk<DocumentReference>()
-    val mockProfileDocumentReference = mockk<DocumentReference>()
-
-    // Mock the DocumentSnapshot
-    val mockDocumentSnapshot = mockk<DocumentSnapshot>()
-
-    // Mock the Track
-    val mockTrack = Track("testTrackId", "Test Title", "Test Artist")
-    val mockProfile =
-        Profile(
-            "Test First Name",
-            "Test Last Name",
-            "Test Description",
-            10,
-            true,
-            Uri.parse("https://example.com/profile.jpg"),
-            "Test Spotify Uid",
-            "Test Firebase Uid")
-
-    val mockProfileTrackAssociation = ProfileTrackAssociation(mockProfile, mockTrack)
-
-    // Define behavior for the get() method on the DocumentReference to return the mock task
-    coEvery { mockTrackDocumentReference.get() } returns
-        mockk {
-          every { isComplete } returns true
-          every { isSuccessful } returns true
-          every { result } returns mockDocumentSnapshot
-          every { getException() } returns null
-          every { isCanceled } returns false
-        }
-
-    coEvery { mockProfileDocumentReference.get() } returns
-        mockk {
-          every { isComplete } returns true
-          every { isSuccessful } returns true
-          every { result } returns mockDocumentSnapshot
-          every { getException() } returns null
-          every { isCanceled } returns false
-        }
-
-    // Define behavior for the DocumentSnapshot
-    every { mockDocumentSnapshot.exists() } returns true
-    every { mockDocumentSnapshot.id } returns mockTrack.id
-    every { mockDocumentSnapshot.getString("title") } returns mockTrack.title
-    every { mockDocumentSnapshot.getString("artist") } returns mockTrack.artist
-    every { mockDocumentSnapshot.getString("firstName") } returns mockProfile.firstName
-    every { mockDocumentSnapshot.getString("lastName") } returns mockProfile.lastName
-    every { mockDocumentSnapshot.getString("description") } returns mockProfile.description
-    every { mockDocumentSnapshot.getLong("numberOfLikes") } returns
-        mockProfile.numberOfLikes.toLong()
-    every { mockDocumentSnapshot.getBoolean("isPublic") } returns mockProfile.isPublic
-    every { mockDocumentSnapshot.getString("spotifyUid") } returns mockProfile.spotifyUid
-    every { mockDocumentSnapshot.getString("firebaseUid") } returns mockProfile.firebaseUid
-    every { mockDocumentSnapshot.getString("profilePictureUri") } returns
-        mockProfile.profilePictureUri.toString()
-
-    var retrievedTrackAndProfile: ProfileTrackAssociation? = null
-
-    val mapOfDocumentReferences =
-        mapOf("creator" to mockProfileDocumentReference, "track" to mockTrackDocumentReference)
-
-    // Call the function under test
-    async { retrievedTrackAndProfile = beaconConnection.fetchTrack(mapOfDocumentReferences) }
-        .await()
-
-    // Verify that the get function is called on the document with the correct id
-    coVerify { mockTrackDocumentReference.get() }
-
-    // Assert that the retrieved track is the same as the mock track
-    assertEquals(mockProfileTrackAssociation, retrievedTrackAndProfile)
-  }
-
-  @Test
-  fun testFetchTrackNullDocumentReference() = runBlocking {
-    // Call the function under test
-    val retrievedTrack = beaconConnection.fetchTrack(null)
-
-    // Assert that the retrieved track is null
-    assertEquals(null, retrievedTrack)
-  }
-
-  @Test
-  fun testFetchTrackNullTrackDocument() = runBlocking {
-    // Mock the DocumentReference
-    val mockDocumentReference = mockk<DocumentReference>()
-
-    // Define behavior for the get() method on the DocumentReference to return the mock task
-    coEvery { mockDocumentReference.get() } returns
-        mockk {
-          every { isComplete } returns true
-          every { isSuccessful } returns true
-          every { result } returns null
-          every { getException() } returns null
-          every { isCanceled } returns false
-        }
-
-    val documentReferenceMap =
-        mapOf("track" to mockDocumentReference, "creator" to mockDocumentReference)
-
-    // Call the function under test
-    val retrievedTrack = beaconConnection.fetchTrack(documentReferenceMap)
-
-    // Verify that the get function is called on the document with the correct id
-    coVerify { mockDocumentReference.get() }
-
-    // Assert that the retrieved track is null
-    assertEquals(null, retrievedTrack)
-  }
-
-  @Test
-  fun testFetchTrackException() = runBlocking {
-    // Mock the DocumentReference
-    val mockDocumentReference = mockk<DocumentReference>()
-
-    // Define behavior for the get() method on the DocumentReference to return the mock task
-    coEvery { mockDocumentReference.get() } returns
-        mockk {
-          every { isComplete } returns true
-          every { isSuccessful } returns false
-          every { result } returns null
-          every { getException() } returns Exception("Test Exception")
-          every { isCanceled } returns false
-        }
-
-    val documentReferenceMap =
-        mapOf("track" to mockDocumentReference, "creator" to mockDocumentReference)
-
-    // Call the function under test
-    val retrievedTrack = beaconConnection.fetchTrack(documentReferenceMap)
-
-    // Verify that the get function is called on the document with the correct id
-    coVerify { mockDocumentReference.get() }
-
-    // Assert that the retrieved track is null
-    assertEquals(null, retrievedTrack)
-  }
-
-  @Test
   fun testGetAllItems() = runBlocking {
     withTimeout(3000) {
       // Mock the Task
@@ -640,7 +496,10 @@ public class BeaconConnectionTest {
   fun provideBeaconRepository_returnsBeaconConnection() {
     // delete as soon as possible
     val context = ApplicationProvider.getApplicationContext<Context>()
-    val beaconRepository = ConnectionModule.provideBeaconRepository(context)
+    val trackRepository = mockk<TrackConnection>(relaxed = true)
+    val profileRepository = mockk<ProfileConnection>(relaxed = true)
+    val beaconRepository =
+        RepositoryModule.provideBeaconRepository(context, trackRepository, profileRepository)
     assertEquals(BeaconConnection::class.java, beaconRepository::class.java)
   }
 
