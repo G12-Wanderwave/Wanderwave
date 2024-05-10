@@ -20,11 +20,10 @@ import kotlin.math.*
 import kotlin.random.Random
 
 private const val EARTH_RADIUS = 6371.0
-private const val BEACON_RADIUS = 1.0
+private const val BEACON_RADIUS = 2.0
 private const val BEACON_COUNT = 20
-private const val NUMBER_ITERATION = 5
-private const val MIN_REVIEWS = 100
-private const val MIN_BEACON_DISTANCE = 100.0
+private const val NUMBER_ITERATION = 2
+private const val MIN_BEACON_DISTANCE = 0.1
 
 val types: List<String> =
   listOf(
@@ -42,6 +41,7 @@ val types: List<String> =
     "courthouse",
     "drugstore",
     "embassy",
+    "establishment",
     "fire_station",
     "hindu_temple",
     "hospital",
@@ -54,6 +54,7 @@ val types: List<String> =
     "primary_school",
     "spa",
     "stadium",
+    "store",
     "subway_station",
     "synagogue",
     "tourist_attraction",
@@ -78,7 +79,7 @@ val types: List<String> =
  */
 fun placeBeaconsRandomly(beacons: List<Beacon>, location: Location): List<Beacon> {
   var finalBeacons = mutableListOf<Beacon>()
-  var nearbyBeacons = findNearbyBeacons(location, beacons, BEACON_RADIUS)
+  var nearbyBeacons = findNearbyBeacons(location, beacons)
   if (nearbyBeacons.size < BEACON_COUNT) {
     var currentMaxDistance = 0.0
     repeat(NUMBER_ITERATION) {
@@ -91,6 +92,7 @@ fun placeBeaconsRandomly(beacons: List<Beacon>, location: Location): List<Beacon
       }
     }
   }
+  Log.d("BeaconPlacer", "Placed $finalBeacons beacons")
   return finalBeacons
 }
 
@@ -147,15 +149,39 @@ fun findRandomBeacon(location: Location, newBeacons: MutableList<Beacon>, it: In
  * @since 2.0
  * @last update 2.0
  */
-fun findNearbyBeacons(userPosition: Location, beacons: List<Beacon>, radius: Double): List<Beacon> {
+fun findNearbyBeacons(userPosition: Location, beacons: List<Beacon>): List<Beacon> {
   var nearbyBeacons = mutableListOf<Beacon>()
   beacons.forEach { beacon ->
-    if ((userPosition.distanceBetween(beacon.location)) < radius) {
+    if ((userPosition.distanceBetween(beacon.location)) < BEACON_RADIUS) {
       nearbyBeacons += beacon
     }
   }
   return nearbyBeacons
 }
+
+/**
+ *
+ *
+ * @param userPosition the user's location
+ * @param beacons the list of existing beacons
+ * @param radius the radius in which the beacons are considered to be nearby
+ * @return the list of nearby beacons
+ * @author Menzo Bouaissi
+ * @since 2.0
+ * @last update 2.0
+ */
+fun hasEnoughBeacons(userPosition: Location, beacons: List<Beacon>): Boolean{
+  var nearbyBeacons = mutableListOf<Beacon>()
+  beacons.forEach {
+    if ((userPosition.distanceBetween(it.location)) < BEACON_RADIUS) {
+      nearbyBeacons += it
+    }
+  }
+  Log.d("BeaconPlacer", "Found ${nearbyBeacons.size} nearby beacons"  )
+  return nearbyBeacons.size==BEACON_COUNT
+}
+
+
 
 /**
  * This function generates a random latitude and longitude from a given position and distance. It
@@ -204,21 +230,22 @@ fun randomLatLongFromPosition(userPosition: Location, distance: Double): Locatio
  */
 fun createNearbyBeacons(
   location: Location,
-  nearbyBeacons:  MutableStateFlow<List<Beacon>>,
+  nearbyBeacons: MutableStateFlow<List<Beacon>>,
   radius: Double,
   context: Context,
-  scope: CoroutineScope
+  scope: CoroutineScope,
+  onComplete: () -> Unit
 ) {
-  scope.launch{
-    // Initialize the list of new Beacons
+  scope.launch {
     if (radius <= 0.0) {
       throw IllegalArgumentException("Radius must be positive")
     }
+
     val newBeacons = mutableListOf<Beacon>()
     val nearbyPOIs = MutableStateFlow<List<Location>>(emptyList())
-    // Get the nearby points of interest
-    getNearbyPOIs(context, location, radius, nearbyPOIs, nearbyBeacons, newBeacons)
-    Log.d("BeaconList", nearbyBeacons.value.toString())
+
+    // Pass the `onComplete` callback to `getNearbyPOIs`
+    getNearbyPOIs(context, location, radius, nearbyPOIs, nearbyBeacons, newBeacons, onComplete)
   }
 }
 
@@ -230,66 +257,62 @@ fun createNearbyBeacons(
  * @param radius The radius in which to search for POIs.
  * @return A list of nearby POIs.
  */
-fun getNearbyPOIs(context: Context, location: Location, radius: Double,
-                  nearbyPOIs: MutableStateFlow<List<Location>>, nearbyBeacons: MutableStateFlow<List<Beacon>>, newBeacons: MutableList<Beacon>){
-  // Initialize the list of nearby POIs
-
-  // Initialize the Places API
+fun getNearbyPOIs(
+  context: Context,
+  location: Location,
+  radius: Double,
+  nearbyPOIs: MutableStateFlow<List<Location>>,
+  nearbyBeacons: MutableStateFlow<List<Beacon>>,
+  newBeacons: MutableList<Beacon>,
+  onComplete: () -> Unit
+) {
   Places.initialize(context, BuildConfig.MAPS_API_KEY)
-
-  // Create a new Places client instance
   val placesClient = Places.createClient(context)
 
-  // Define the fields to request
   val placeFieldID = Place.Field.ID
   val placeFieldName = Place.Field.NAME
   val placeFieldLatLng = Place.Field.LAT_LNG
-  val placeFields = listOf(placeFieldID, placeFieldName, placeFieldLatLng)
+  val placeFieldTypes = Place.Field.TYPES
+  val placeFieldRating = Place.Field.RATING
 
-  // Create a new FindCurrentPlaceRequest
+  val placeFields = listOf(placeFieldID, placeFieldName, placeFieldLatLng, placeFieldTypes, placeFieldRating)
+
   val request = FindCurrentPlaceRequest.newInstance(placeFields)
 
-  // Check if the app has the required permissions
   if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
     PackageManager.PERMISSION_GRANTED) {
-    // Use the Places API to find nearby places
     placesClient
       .findCurrentPlace(request)
       .addOnSuccessListener { response ->
         for (placeLikelihood in response.placeLikelihoods) {
           val place = placeLikelihood.place
-          // Conversion to make computing distances easier
           val placeLoc = Location(place.latLng.latitude, place.latLng.longitude, place.name)
 
-          if (location.distanceBetween(placeLoc) <= radius // Check if the place is of a certain type
-          ) {
-            Log.d("PlacesApi", "Place found: ${place.name}")
-            nearbyPOIs.value += placeLoc
-          }
+          if ((location.distanceBetween(placeLoc) <= radius) &&
+            place.placeTypes.any { types.contains(it) }
+          ) nearbyPOIs.value += placeLoc
         }
-        // Place new beacons at the nearby points of interest
         nearbyPOIs.value.forEach { poi ->
-          // Check if POI is far enough from existing beacons
-          if (nearbyBeacons.value.all() { beacon ->
-              beacon.location.distanceBetween(poi) > MIN_BEACON_DISTANCE
-            } &&
-            newBeacons.all() { beacon -> beacon.location.distanceBetween(poi) > MIN_BEACON_DISTANCE }) {
-            newBeacons.add(Beacon("", poi))
-            Log.d("PlacesApi", "Beacon added: ${poi.name}"  )
+          if (nearbyBeacons.value.all { it.location.distanceBetween(poi) > MIN_BEACON_DISTANCE } &&
+            newBeacons.all { it.location.distanceBetween(poi) > MIN_BEACON_DISTANCE }) {
+            newBeacons.add(Beacon(poi.name, poi))
           }
         }
-        nearbyBeacons.value+= newBeacons
-        Log.d("BeaconList", nearbyBeacons.value.toString())
+        nearbyBeacons.value += newBeacons
+
+        // Invoke `onComplete` after processing API results
+        onComplete()
       }
       .addOnFailureListener { exception ->
         if (exception is ApiException) {
           Log.e("PlacesApi", "Place not found: ${exception.statusCode}")
           Log.e("PlacesApi", "Place not found: ${exception.message}")
-          Log.e("PlacesApi", "Place not found: ${exception.localizedMessage}")
-          Log.e("PlacesApi", "Place not found: ${exception.cause}")
         } else {
-          Log.e("Error", "An error occurred: " + exception.message)
+          Log.e("Error", "An error occurred: ${exception.message}")
         }
+
+        // Call `onComplete` to ensure failure also triggers it
+        onComplete()
       }
   }
 }

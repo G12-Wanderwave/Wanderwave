@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.utils.createNearbyBeacons
+import ch.epfl.cs311.wanderwave.model.utils.placeBeaconsRandomly
 import com.google.android.gms.maps.LocationSource
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -43,22 +44,28 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
   private fun observeBeacons() {
     viewModelScope.launch {
       beaconRepository.getAll().collect { beacons ->
+        _beaconList.value = beacons // Ensure `beaconList` is updated
         _uiState.value = BeaconListUiState(beacons = beacons, loading = false)
       }
     }
   }
+
   fun retrieveBeacons(location: Location1, context: Context) {
     viewModelScope.launch {
-      createNearbyBeacons( location,_beaconList,1000.0,context,viewModelScope)
-      addBeacon(_beaconList.value)
-      Log.d("BeaconList", _beaconList.value.toString())
+      // Update _uiState to reflect a loading state
+      _uiState.value = BeaconListUiState(loading = true)
 
-    }
-  }
-  private fun addBeacon(beacons: List<Beacon>) {
-    viewModelScope.launch {
-      _uiState.value = BeaconListUiState(beacons = _uiState.value.beacons + beacons, loading = false)
-
+      createNearbyBeacons(
+        location,
+        _beaconList,
+        10000.0,
+        context,
+        viewModelScope
+      ) {
+        val updatedBeacons = _beaconList.value + placeBeaconsRandomly(_beaconList.value, location)
+        // Update _uiState again once data is fetched
+        _uiState.value = BeaconListUiState(beacons = updatedBeacons, loading = false)
+      }
     }
   }
   @RequiresPermission(
