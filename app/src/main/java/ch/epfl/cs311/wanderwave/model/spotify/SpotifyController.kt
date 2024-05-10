@@ -305,7 +305,7 @@ constructor(
   // https://developer.spotify.com/documentation/web-api
   suspend fun spotifyGetFromURL(url: String): String {
     var answer: String
-      withContext(Dispatchers.IO) { answer = authenticationController.makeApiRequest(URL(url)) }
+    withContext(Dispatchers.IO) { answer = authenticationController.makeApiRequest(URL(url)) }
     return answer
   }
 
