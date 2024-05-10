@@ -45,7 +45,10 @@ fun TrackList(
     var selectedTrack by remember { mutableStateOf<Track?>(null) }
 
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier =
+            Modifier.fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .testTag("trackCard"),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween) {
           if (title != null) {
@@ -56,6 +59,7 @@ fun TrackList(
           }
           if (canAddSong) {
             IconButton(
+                modifier = Modifier.testTag("addTrackButton"),
                 onClick = {
                   navActions.navigateToSelectSongScreen(viewModelName)
                 }) { // Toggle dialog visibility

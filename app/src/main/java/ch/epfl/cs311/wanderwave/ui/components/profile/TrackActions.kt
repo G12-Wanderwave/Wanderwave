@@ -155,7 +155,12 @@ fun TrackItem(listItem: ListItem, onClick: () -> Unit) {
               disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariant,
               disabledContentColor = MaterialTheme.colorScheme.error // Example color
               ),
-      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).clickable(onClick = onClick)) {
+      modifier =
+          Modifier.height(80.dp)
+              .fillMaxWidth()
+              .padding(4.dp)
+              .clickable(onClick = onClick)
+              .testTag("trackItemCard")) {
         Row {
           Column(modifier = Modifier.padding(8.dp)) {
             Text(text = listItem.title, style = MaterialTheme.typography.titleMedium)

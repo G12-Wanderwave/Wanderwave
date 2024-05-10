@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.ListType
@@ -126,6 +127,7 @@ constructor(
   override fun retrieveChild(item: ListItem) {
     retrieveChildFromSpotify(
         item, this._childrenPlaylistTrackList, spotifyController, viewModelScope)
+    Log.d("ProfileViewModel", "retrieveChild: ${_childrenPlaylistTrackList.value}")
   }
 
   data class UIState(
