@@ -114,4 +114,45 @@ class TrackConnectionTest {
     // Verify that the delete function is called on the document with the correct id
     verify { documentReference.delete() }
   }
+
+  @Test
+  fun testGetTrackById() = runBlocking {
+    // Define a specific track ID and create a corresponding track
+    val testTrackId = "testTrack"
+    val expectedTrack = Track(testTrackId, "Test Title", "Test Artist")
+
+    // Mock the DocumentSnapshot to simulate Firebase Firestore behavior
+    val mockDocumentSnapshot = mockk<DocumentSnapshot>(relaxed = true)
+    val mockTask = mockk<Task<DocumentSnapshot>>(relaxed = true)
+
+    // Set the behavior of the mock DocumentSnapshot
+    every { mockDocumentSnapshot.exists() } returns true
+    every { mockDocumentSnapshot.id } returns expectedTrack.id
+    every { mockDocumentSnapshot.getString("id") } returns expectedTrack.id
+    every { mockDocumentSnapshot.getString("title") } returns expectedTrack.title
+    every { mockDocumentSnapshot.getString("artist") } returns expectedTrack.artist
+
+    // Simulate the behavior of the get() method on DocumentReference
+    every { documentReference.get() } returns mockTask
+    every { mockTask.isSuccessful } returns true
+    every { mockTask.result } returns mockDocumentSnapshot
+
+    // Trigger the success listener immediately when it's added
+    every { mockTask.addOnSuccessListener(any()) } answers
+        {
+          firstArg<OnSuccessListener<DocumentSnapshot>>().onSuccess(mockDocumentSnapshot)
+          mockTask
+        }
+
+    // Adjust the Firestore mock to use the correct document reference when a specific ID is
+    // requested
+    every { collectionReference.document(testTrackId) } returns documentReference
+
+    // Call the function under test and capture the result
+    val retrievedTrack = trackConnection.getTrackById(testTrackId).first()
+
+    // Verify the correct document is accessed and the correct track is returned
+    verify { collectionReference.document(testTrackId) }
+    assertEquals(expectedTrack, retrievedTrack)
+  }
 }
