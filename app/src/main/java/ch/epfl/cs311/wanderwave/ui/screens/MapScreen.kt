@@ -18,6 +18,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
+import ch.epfl.cs311.wanderwave.model.data.Location
+import ch.epfl.cs311.wanderwave.model.utils.createNearbyBeacons
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
@@ -44,6 +46,7 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
   val context = LocalContext.current
   val cameraPositionState: CameraPositionState = rememberCameraPositionState {}
   val mapIsLoaded = remember { mutableStateOf(false) }
+val beacons: List<Beacon> = viewModel.uiState.collectAsStateWithLifecycle().value.beacons
 
   val permissionState =
       rememberMultiplePermissionsState(
@@ -73,8 +76,8 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
     val location = viewModel.getLastKnownLocation(context)
     LaunchedEffect(location != null, mapIsLoaded.value) {
       if (location != null && mapIsLoaded.value) {
-        moveCamera(cameraPositionState, location, viewModel.cameraPosition.value)
-
+          moveCamera(cameraPositionState, location, viewModel.cameraPosition.value)
+          createNearbyBeacons(Location(location.latitude,location.longitude), beacons, 1000.0, context)
       }
     }
   }
