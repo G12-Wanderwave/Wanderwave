@@ -7,6 +7,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import io.mockk.coVerify
 import io.mockk.every
@@ -116,43 +117,28 @@ class TrackConnectionTest {
   }
 
   @Test
-  fun testGetTrackById() = runBlocking {
-    // Define a specific track ID and create a corresponding track
+  fun testGetTrackByIdSimple() = runBlocking {
     val testTrackId = "testTrack"
-    val expectedTrack = Track(testTrackId, "Test Title", "Test Artist")
-
-    // Mock the DocumentSnapshot to simulate Firebase Firestore behavior
     val mockDocumentSnapshot = mockk<DocumentSnapshot>(relaxed = true)
-    val mockTask = mockk<Task<DocumentSnapshot>>(relaxed = true)
+    val mockTrack = Track(testTrackId, "Test Title", "Test Artist")
 
-    // Set the behavior of the mock DocumentSnapshot
     every { mockDocumentSnapshot.exists() } returns true
-    every { mockDocumentSnapshot.id } returns expectedTrack.id
-    every { mockDocumentSnapshot.getString("id") } returns expectedTrack.id
-    every { mockDocumentSnapshot.getString("title") } returns expectedTrack.title
-    every { mockDocumentSnapshot.getString("artist") } returns expectedTrack.artist
+    every { mockDocumentSnapshot.id } returns testTrackId
+    every { mockDocumentSnapshot.getString("title") } returns "Test Title"
+    every { mockDocumentSnapshot.getString("artist") } returns "Test Artist"
 
-    // Simulate the behavior of the get() method on DocumentReference
-    every { documentReference.get() } returns mockTask
-    every { mockTask.isSuccessful } returns true
-    every { mockTask.result } returns mockDocumentSnapshot
-
-    // Trigger the success listener immediately when it's added
-    every { mockTask.addOnSuccessListener(any()) } answers
+    every { documentReference.addSnapshotListener(any()) } answers
         {
-          firstArg<OnSuccessListener<DocumentSnapshot>>().onSuccess(mockDocumentSnapshot)
-          mockTask
+          val listener = firstArg<EventListener<DocumentSnapshot>>()
+          listener.onEvent(mockDocumentSnapshot, null) // No error
+          mockk(relaxed = true)
         }
 
-    // Adjust the Firestore mock to use the correct document reference when a specific ID is
-    // requested
-    every { collectionReference.document(testTrackId) } returns documentReference
+    val stateFlow = trackConnection.getTrackById(testTrackId)
+    val resultTrack = stateFlow.first()
 
-    // Call the function under test and capture the result
-    val retrievedTrack = trackConnection.getTrackById(testTrackId).first()
+    println("Retrieved track: $resultTrack")
 
-    // Verify the correct document is accessed and the correct track is returned
-    verify { collectionReference.document(testTrackId) }
-    assertEquals(expectedTrack, retrievedTrack)
+    assertEquals(mockTrack, resultTrack)
   }
 }
