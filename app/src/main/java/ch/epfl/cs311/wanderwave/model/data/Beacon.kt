@@ -11,10 +11,20 @@ data class Beacon(
     val location: Location,
 
     /** List of tracks that are broadcast from the beacon */
-    val tracks: List<Track> = listOf<Track>(),
+    var profileAndTrack: List<ProfileTrackAssociation> = listOf<ProfileTrackAssociation>(),
 ) {
-  fun toMap(): Map<String, Any> {
-    return hashMapOf("id" to id, "location" to location.toMap(), "tracks" to listOf<Track>())
+
+  /**
+   * Add a track to the beacon
+   *
+   * @param track the track to add
+   */
+  fun addTrack(track: Track, profile: Profile) {
+    // Check if the track is already in the beacon
+    // TODO: In the future, add a popularity metric if song is added multiple time?
+    if (!profileAndTrack.any { it.track == track }) {
+      profileAndTrack = profileAndTrack + ProfileTrackAssociation(profile, track)
+    }
   }
 
   companion object {
@@ -27,9 +37,9 @@ data class Beacon(
         val name = locationMap?.get("name") as? String ?: ""
         val location = Location(latitude, longitude, name)
 
-        val tracks = listOf<Track>()
+        val profileAndTrack = listOf<ProfileTrackAssociation>()
 
-        Beacon(id = id, location = location, tracks = tracks)
+        Beacon(id = id, location = location, profileAndTrack = profileAndTrack)
       } else {
         null
       }

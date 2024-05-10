@@ -9,6 +9,9 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -31,7 +34,9 @@ class LocalAuthTokenRepositoryTest {
     every { mockDatabase.authTokenDao() } returns mockAuthTokenDao
     every { mockAuthTokenDao.setAuthToken(any()) } returns Unit
     every { mockAuthTokenDao.deleteAuthToken(any()) } returns Unit
-    localAuthTokenRepository = LocalAuthTokenRepository(mockDatabase)
+
+    val testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
+    localAuthTokenRepository = LocalAuthTokenRepository(mockDatabase, testDispatcher)
 
     val now = System.currentTimeMillis() / 1000 + 3600
 
@@ -57,7 +62,7 @@ class LocalAuthTokenRepositoryTest {
   }
 
   @Test
-  fun canSetTokens() {
+  fun canSetTokens() = runBlocking {
     localAuthTokenRepository.setAuthToken(
         AuthTokenRepository.AuthTokenType.FIREBASE_TOKEN, "firebaseToken", 123L)
 
@@ -91,7 +96,7 @@ class LocalAuthTokenRepositoryTest {
   }
 
   @Test
-  fun canGetTokens() {
+  fun canGetTokens() = runBlocking {
     val firebaseToken =
         localAuthTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.FIREBASE_TOKEN)
     assert(firebaseToken == "firebaseToken")
@@ -108,7 +113,7 @@ class LocalAuthTokenRepositoryTest {
   }
 
   @Test
-  fun canDeleteTokens() {
+  fun canDeleteTokens() = runBlocking {
     localAuthTokenRepository.deleteAuthToken(AuthTokenRepository.AuthTokenType.FIREBASE_TOKEN)
     verify { mockAuthTokenDao.deleteAuthToken(AuthTokenRepository.AuthTokenType.FIREBASE_TOKEN.id) }
 
@@ -125,7 +130,7 @@ class LocalAuthTokenRepositoryTest {
   }
 
   @Test
-  fun doNotGetExpiredToken() {
+  fun doNotGetExpiredToken() = runBlocking {
     every {
       mockAuthTokenDao.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_REFRESH_TOKEN.id)
     } returns

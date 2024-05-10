@@ -26,6 +26,7 @@ class BeaconScreenViewModelTest {
     val viewModel = BeaconViewModel(beaconConnection)
     val track = Track("trackId", "trackName", "trackArtist")
     viewModel.addTrackToBeacon("beaconId", track, {})
+
     verify { beaconConnection.addTrackToBeacon("beaconId", track, any()) }
   }
 }

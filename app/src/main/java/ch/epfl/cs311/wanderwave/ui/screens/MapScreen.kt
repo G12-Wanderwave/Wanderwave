@@ -2,6 +2,7 @@ package ch.epfl.cs311.wanderwave.ui.screens
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -22,6 +23,7 @@ import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
@@ -38,9 +40,13 @@ fun needToRequestPermissions(permissionState: MultiplePermissionsState): Boolean
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
-@SuppressLint("MissingPermission")
+@SuppressLint("MissingPermission", "StateFlowValueCalledInComposition")
 @Composable
-fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hiltViewModel()) {
+fun MapScreen(
+    navigationActions: NavigationActions,
+    viewModel: MapViewModel = hiltViewModel(),
+    profileViewModel: ProfileViewModel = hiltViewModel()
+) {
   val context = LocalContext.current
   val cameraPositionState: CameraPositionState = rememberCameraPositionState {}
   val mapIsLoaded = remember { mutableStateOf(false) }
@@ -55,6 +61,22 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
   // remember the camera position when navigating away
   DisposableEffect(Unit) {
     onDispose { viewModel.cameraPosition.value = cameraPositionState.position }
+  }
+
+  // Check if there is a song to drop
+  val songLists = profileViewModel.songLists.value
+  if (songLists.isNotEmpty()) {
+    val tracks = songLists.first().tracks
+    if (tracks.isNotEmpty()) {
+      val track = tracks.first()
+      // Add listener to check if user is in beacon range and drop song if applicable
+      viewModel.isInBeaconRange(track, profileViewModel.profile.value)
+    } else {
+      Log.e("MapScreen", "No song to drop !")
+    }
+  } else {
+    Log.e("MapScreen", "No song list !")
+    Log.e("MapScreen", "No song to drop !")
   }
 
   WanderwaveGoogleMap(

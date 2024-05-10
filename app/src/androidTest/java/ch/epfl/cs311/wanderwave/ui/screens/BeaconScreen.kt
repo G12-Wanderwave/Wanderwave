@@ -10,6 +10,6 @@ class BeaconScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
   val beaconTitle = onNode { hasTestTag("beaconTitle") }
   val beaconLocation = onNode { hasTestTag("beaconLocation") }
   val beaconMap = onNode { hasTestTag("beaconMap") }
-  val beaconTracksTitle = onNode { hasTestTag("beaconTracksTitle") }
+  val beaconTracksTitle = onNode { hasTestTag("trackListTitle") }
   val trackItem = onNode { hasTestTag("trackItem") }
 }
