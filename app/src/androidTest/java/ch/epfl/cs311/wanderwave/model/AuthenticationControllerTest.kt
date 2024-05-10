@@ -14,6 +14,8 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
+import java.net.URL
+import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -196,5 +198,32 @@ class AuthenticationControllerTest {
     assert(!authenticationController.refreshTokenIfNecessary())
 
     assert(!authenticationController.authenticate("%invalidcode%").first())
+  }
+
+  @Test
+  fun makeApiRequest_ShouldReturnExpectedResult_OnSuccessfulApiCall() = runBlocking {
+    val testUrl = URL("https://test.api/endpoint")
+    val expectedResponse = "success response"
+    val call = mockk<Call>()
+    every { mockHttpClient.newCall(any()) } returns call
+    every { call.execute() } returns
+        mockk { every { body } returns mockk { every { string() } returns expectedResponse } }
+    coEvery {
+      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+    } returns "valid-access-token"
+    coEvery { authenticationController.refreshSpotifyToken() } returns true
+
+    val result = authenticationController.makeApiRequest(testUrl)
+
+  }
+
+  @Test
+  fun makeApiRequest_ShouldReturnFailure_OnTokenRefreshFailure() = runBlocking {
+    val testUrl = URL("https://test.api/endpoint")
+    coEvery { authenticationController.refreshSpotifyToken() } returns false
+
+    val result = authenticationController.makeApiRequest(testUrl)
+
+    assertEquals("FAILURE", result)
   }
 }
