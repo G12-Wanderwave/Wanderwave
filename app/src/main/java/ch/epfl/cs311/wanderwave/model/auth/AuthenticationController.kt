@@ -124,4 +124,28 @@ constructor(
   fun deauthenticate() {
     auth.signOut()
   }
+
+  suspend fun makeApiRequest(url: URL): String {
+    Log.d("AuthenticationController", "Making request to $url")
+
+    // refresh the access token if necessary
+    if (!refreshSpotifyToken()) {
+      Log.d("AuthenticationController", "Failed to refresh Spotify token")
+      return "FAILURE"
+    }
+    // Get the access token from the AuthTokenRepository
+    val accessToken =
+        tokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+
+    Log.d("AuthenticationController", "Access token: $accessToken")
+    (withContext(Dispatchers.IO) { url.openConnection() } as HttpURLConnection).run {
+      requestMethod = "GET"
+
+      setRequestProperty("Authorization", "Bearer $accessToken")
+
+      inputStream.bufferedReader().use {
+        return it.readText()
+      }
+    }
+  }
 }
