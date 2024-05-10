@@ -12,6 +12,10 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
+import com.spotify.protocol.types.ListItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -200,31 +204,22 @@ fun randomLatLongFromPosition(userPosition: Location, distance: Double): Locatio
  */
 fun createNearbyBeacons(
   location: Location,
-  nearbyBeacons: List<Beacon>,
+  nearbyBeacons:  MutableStateFlow<List<Beacon>>,
   radius: Double,
-  context: Context
-): List<Beacon> {
-  // Initialize the list of new Beacons
-  if (radius <= 0.0) {
-    throw IllegalArgumentException("Radius must be positive")
-  }
-  val newBeacons = mutableListOf<Beacon>()
-
-  // Get the nearby points of interest
-  val nearbyPOIs = getNearbyPOIs(context, location, radius)
-
-  // Place new beacons at the nearby points of interest
-  for (poi in nearbyPOIs) {
-    // Check if POI is far enough from existing beacons
-    if (nearbyBeacons.all() { beacon ->
-        beacon.location.distanceBetween(poi) > MIN_BEACON_DISTANCE
-      } &&
-      newBeacons.all() { beacon -> beacon.location.distanceBetween(poi) > MIN_BEACON_DISTANCE }) {
-      newBeacons.add(Beacon("", poi))
+  context: Context,
+  scope: CoroutineScope
+) {
+  scope.launch{
+    // Initialize the list of new Beacons
+    if (radius <= 0.0) {
+      throw IllegalArgumentException("Radius must be positive")
     }
+    val newBeacons = mutableListOf<Beacon>()
+    val nearbyPOIs = MutableStateFlow<List<Location>>(emptyList())
+    // Get the nearby points of interest
+    getNearbyPOIs(context, location, radius, nearbyPOIs, nearbyBeacons, newBeacons)
+    Log.d("BeaconList", nearbyBeacons.value.toString())
   }
-
-  return newBeacons
 }
 
 /**
@@ -235,9 +230,9 @@ fun createNearbyBeacons(
  * @param radius The radius in which to search for POIs.
  * @return A list of nearby POIs.
  */
-fun getNearbyPOIs(context: Context, location: Location, radius: Double): List<Location> {
+fun getNearbyPOIs(context: Context, location: Location, radius: Double,
+                  nearbyPOIs: MutableStateFlow<List<Location>>, nearbyBeacons: MutableStateFlow<List<Beacon>>, newBeacons: MutableList<Beacon>){
   // Initialize the list of nearby POIs
-  val nearbyPOIs = mutableListOf<Location>()
 
   // Initialize the Places API
   Places.initialize(context, BuildConfig.MAPS_API_KEY)
@@ -266,15 +261,25 @@ fun getNearbyPOIs(context: Context, location: Location, radius: Double): List<Lo
           // Conversion to make computing distances easier
           val placeLoc = Location(place.latLng.latitude, place.latLng.longitude, place.name)
 
-          if (location.distanceBetween(placeLoc) <= radius &&
-            place.reviews.size >= MIN_REVIEWS && // Check if the place has enough reviews
-            place.placeTypes.any() {
-              types.contains(it)
-            } // Check if the place is of a certain type
+          if (location.distanceBetween(placeLoc) <= radius // Check if the place is of a certain type
           ) {
-            nearbyPOIs.add(placeLoc)
+            Log.d("PlacesApi", "Place found: ${place.name}")
+            nearbyPOIs.value += placeLoc
           }
         }
+        // Place new beacons at the nearby points of interest
+        nearbyPOIs.value.forEach { poi ->
+          // Check if POI is far enough from existing beacons
+          if (nearbyBeacons.value.all() { beacon ->
+              beacon.location.distanceBetween(poi) > MIN_BEACON_DISTANCE
+            } &&
+            newBeacons.all() { beacon -> beacon.location.distanceBetween(poi) > MIN_BEACON_DISTANCE }) {
+            newBeacons.add(Beacon("", poi))
+            Log.d("PlacesApi", "Beacon added: ${poi.name}"  )
+          }
+        }
+        nearbyBeacons.value+= newBeacons
+        Log.d("BeaconList", nearbyBeacons.value.toString())
       }
       .addOnFailureListener { exception ->
         if (exception is ApiException) {
@@ -287,5 +292,4 @@ fun getNearbyPOIs(context: Context, location: Location, radius: Double): List<Lo
         }
       }
   }
-  return nearbyPOIs
 }

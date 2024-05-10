@@ -19,7 +19,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
-import ch.epfl.cs311.wanderwave.model.utils.createNearbyBeacons
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
@@ -77,7 +76,9 @@ val beacons: List<Beacon> = viewModel.uiState.collectAsStateWithLifecycle().valu
     LaunchedEffect(location != null, mapIsLoaded.value) {
       if (location != null && mapIsLoaded.value) {
           moveCamera(cameraPositionState, location, viewModel.cameraPosition.value)
-          createNearbyBeacons(Location(location.latitude,location.longitude), beacons, 1000.0, context)
+          val location = Location(location.latitude,location.longitude)
+          viewModel.retrieveBeacons(location,context)
+
       }
     }
   }
