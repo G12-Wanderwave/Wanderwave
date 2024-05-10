@@ -20,10 +20,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.profile.TrackItem
-import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 
 /**
  * Screen to select a song from Spotify
@@ -36,7 +37,7 @@ import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectSongScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
+fun SelectSongScreen(navActions: NavigationActions, viewModel: SpotifySongsActions) {
   val mainList by viewModel.spotifySubsectionList.collectAsState()
   val childrenPlaylistTrackList by viewModel.childrenPlaylistTrackList.collectAsState()
 
@@ -71,7 +72,8 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: ProfileViewModel)
                         viewModel.retrieveChild(listItem)
                       } else {
                         viewModel.addTrackToList(
-                            "TOP SONGS", Track(listItem.id, listItem.title, listItem.subtitle))
+                            ListType.TOP_SONGS,
+                            Track(listItem.id, listItem.title, listItem.subtitle))
                         navActions.goBack()
                       }
                     })
