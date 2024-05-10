@@ -1,17 +1,46 @@
 package ch.epfl.cs311.wanderwave.utils
 
+import android.Manifest
+import android.content.Context
+import android.location.LocationManager
 import android.util.Log
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.rule.GrantPermissionRule
+import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
+import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
+import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.utils.computeDistanceBetweenBeacons
+import ch.epfl.cs311.wanderwave.model.utils.createNearbyBeacons
 import ch.epfl.cs311.wanderwave.model.utils.findNearbyBeacons
 import ch.epfl.cs311.wanderwave.model.utils.findRandomBeacon
+import ch.epfl.cs311.wanderwave.model.utils.getNearbyPOIs
 import ch.epfl.cs311.wanderwave.model.utils.placeBeaconsRandomly
 import ch.epfl.cs311.wanderwave.model.utils.randomLatLongFromPosition
+import ch.epfl.cs311.wanderwave.model.utils.types
+import com.google.android.gms.tasks.OnSuccessListener
+import com.google.android.gms.tasks.Task
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.PlaceLikelihood
+import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
+import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse
+import com.google.android.libraries.places.api.net.PlacesClient
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.junit4.MockKRule
+import io.mockk.mockk
+import io.mockk.mockkStatic
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -19,13 +48,315 @@ private const val BEACON_COUNT = 20
 
 @RunWith(AndroidJUnit4::class)
 class BeaconPlacerTest : TestCase() {
-  val location = Location(46.519962, 6.633597)
+  val location2 = Location(46.519962, 6.633597)
+
+  @get:Rule
+  val mockkRule = MockKRule(this)
+  @get:Rule
+  val permissionRule: GrantPermissionRule =
+    GrantPermissionRule.grant(
+      Manifest.permission.ACCESS_COARSE_LOCATION,
+      Manifest.permission.ACCESS_FINE_LOCATION,
+    )
+  private val context = InstrumentationRegistry.getInstrumentation().context
+
+  private val locationManager =
+    context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+  val location =
+    android.location.Location(LocationManager.GPS_PROVIDER).apply {
+      latitude = 46.519962
+      longitude = 6.633597
+      time = System.currentTimeMillis()
+      elapsedRealtimeNanos = System.nanoTime()
+    }
+
+  @Before
+  fun setup() {
+    MockKAnnotations.init(this)
+    try {
+      locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true)
+      locationManager.setTestProviderLocation(LocationManager.GPS_PROVIDER, location)
+    } catch (e: SecurityException) {
+      e.printStackTrace()
+    }
+  }
+
+  @Test
+  fun createNearbyBeacons_addsNewBeaconsWhenNearbyPOIsAreFarFromExistingBeacons() {
+    val location = Location(46.519962, 6.633597)
+
+    val nearbyBeacons =
+      listOf(
+        Beacon(
+          id = "testBeacon",
+          location = Location(1.0, 1.0, "Test Location"),
+          profileAndTrack =
+          listOf(
+            ProfileTrackAssociation(
+              Profile(
+                "Sample First Name",
+                "Sample last name",
+                "Sample desc",
+                0,
+                false,
+                null,
+                "Sample Profile ID",
+                "Sample Track ID"),
+              Track("Sample Track ID", "Sample Track Title", "Sample Artist Name")
+            )
+          )))
+
+    //
+    val context = ApplicationProvider.getApplicationContext<Context>()
+
+    mockkStatic("ch.epfl.cs311.wanderwave.model.utils.BeaconPlacerKt")
+    every { getNearbyPOIs(any(), any(), any()) } returns
+            listOf(
+              Location(0.0, 0.0),
+            )
+    val result = createNearbyBeacons(location, nearbyBeacons, 1000.0, context)
+
+    assertTrue(result.isNotEmpty())
+  }
+
+  @Test
+  fun createNearbyBeacons_NobeaconsAdded() {
+    val location = Location(46.519962, 6.633597)
+
+    val nearbyBeacons =
+      listOf(
+        Beacon(
+          id = "testBeacon",
+          location = Location(1.0, 1.0, "Test Location"),
+          profileAndTrack =
+          listOf(
+            ProfileTrackAssociation(
+              Profile(
+                "Sample First Name",
+                "Sample last name",
+                "Sample desc",
+                0,
+                false,
+                null,
+                "Sample Profile ID",
+                "Sample Track ID"),
+              Track("Sample Track ID", "Sample Track Title", "Sample Artist Name")
+            )
+          )))
+    val context = ApplicationProvider.getApplicationContext<Context>()
+
+    mockkStatic("ch.epfl.cs311.wanderwave.model.utils.BeaconPlacerKt")
+    every { getNearbyPOIs(any(), any(), any()) } returns
+            listOf(
+              Location(46.519962, 6.633591),
+            )
+    val result = createNearbyBeacons(location, nearbyBeacons, 1000.0, context)
+
+    assertTrue(result.isNotEmpty())
+  }
+
+  @Test
+  fun createNearbyBeacons_addsOneBeaconOnly() {
+    val location = Location(46.519962, 6.633597)
+
+    val nearbyBeacons =
+      listOf(
+        Beacon(
+          id = "testBeacon",
+          location = Location(1.0, 1.0, "Test Location"),
+          profileAndTrack =
+          listOf(
+            ProfileTrackAssociation(
+              Profile(
+                "Sample First Name",
+                "Sample last name",
+                "Sample desc",
+                0,
+                false,
+                null,
+                "Sample Profile ID",
+                "Sample Track ID"),
+              Track("Sample Track ID", "Sample Track Title", "Sample Artist Name")
+            )
+          )))
+    val context = ApplicationProvider.getApplicationContext<Context>()
+
+    mockkStatic("ch.epfl.cs311.wanderwave.model.utils.BeaconPlacerKt")
+    every { getNearbyPOIs(any(), any(), any()) } returns
+            listOf(Location(0.0000001, 6.2), Location(0.0, 6.2))
+    val result = createNearbyBeacons(location, nearbyBeacons, 1000.0, context)
+
+    assertTrue(result.isNotEmpty())
+    assertEquals(1, result.size)
+  }
+
+  @Test
+  fun createNearbyBeaconsWithNegativeRadius() {
+    val location = Location(46.519962, 6.633597)
+
+    val nearbyBeacons =
+      listOf(
+        Beacon(
+          id = "testBeacon",
+          location = Location(1.0, 1.0, "Test Location"),
+          profileAndTrack =
+          listOf(
+            ProfileTrackAssociation(
+              Profile(
+                "Sample First Name",
+                "Sample last name",
+                "Sample desc",
+                0,
+                false,
+                null,
+                "Sample Profile ID",
+                "Sample Track ID"),
+              Track("Sample Track ID", "Sample Track Title", "Sample Artist Name")
+            )
+          )))
+    val context = ApplicationProvider.getApplicationContext<Context>()
+
+    mockkStatic("ch.epfl.cs311.wanderwave.model.utils.BeaconPlacerKt")
+    every { getNearbyPOIs(any(), any(), any()) } returns
+            listOf(Location(0.0000001, 6.2), Location(0.0, 6.2))
+
+    // Assert that IllegalArgumentException is thrown for negative radius
+    val exception =
+      Assert.assertThrows(IllegalArgumentException::class.java) {
+        createNearbyBeacons(location, nearbyBeacons, -1.0, context)
+      }
+
+    assertEquals("Radius must be positive", exception.message)
+  }
+
+  @Test
+  fun testGetNearbyPOIs_PermissionGranted_ReturnsPOIs() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    val location = Location(46.519962, 6.633597)
+    val radius = 1000.0
+    val placeFields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
+    Places.initialize(context, BuildConfig.MAPS_API_KEY)
+
+    // Mock the response
+    val mockResponse = mockk<FindCurrentPlaceResponse>()
+    val mockPlaceLikelihood = mockk<PlaceLikelihood>()
+    val mockPlace = mockk<Place>()
+    every { mockPlace.name } returns "Test Place"
+    every { mockPlace.latLng } returns com.google.android.gms.maps.model.LatLng(46.519962, 6.633597)
+    every { mockPlaceLikelihood.place } returns mockPlace
+    every { mockResponse.placeLikelihoods } returns listOf(mockPlaceLikelihood)
+    // Mock the request and the task
+    val request = FindCurrentPlaceRequest.newInstance(placeFields)
+    val mockTask = mockk<Task<FindCurrentPlaceResponse>>()
+
+    every { mockTask.isSuccessful } returns true
+    every { mockTask.result } returns mockResponse
+    every {
+      mockTask.addOnSuccessListener(any<OnSuccessListener<FindCurrentPlaceResponse>>())
+    } answers
+            {
+              val listener = arg<OnSuccessListener<FindCurrentPlaceResponse>>(0)
+              listener.onSuccess(mockResponse)
+              mockTask
+            }
+    every { mockTask.addOnFailureListener(any()) } answers { mockTask }
+
+    val result = getNearbyPOIs(context, location, radius)
+
+    // Assertions
+    assertTrue(result.isEmpty())
+  }
+
+  @Test
+  fun testGetNearbyPOIs_ThrowsRuntimeException() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    val location = Location(46.519962, 6.633597)
+    val radius = 1000.0
+    val placeFields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
+    Places.initialize(context, BuildConfig.MAPS_API_KEY)
+
+    // Mock the response
+    val mockResponse = mockk<FindCurrentPlaceResponse>()
+    val mockPlaceLikelihood = mockk<PlaceLikelihood>()
+    val mockPlace = mockk<Place>()
+    every { mockPlace.name } returns "Test Place"
+    every { mockPlace.latLng } returns com.google.android.gms.maps.model.LatLng(46.519962, 6.633597)
+    every { mockPlaceLikelihood.place } returns mockPlace
+    every { mockResponse.placeLikelihoods } returns listOf(mockPlaceLikelihood)
+
+    // Mock the PlacesClient and its findCurrentPlace method
+    val placesClient = mockk<PlacesClient>()
+    val task = mockk<Task<FindCurrentPlaceResponse>>()
+    every { task.isSuccessful } returns false
+    every { task.exception } returns NoSuchFieldException()
+    every { placesClient.findCurrentPlace(any()) } returns task
+
+    // Mock the request and the task
+    val request = FindCurrentPlaceRequest.newInstance(placeFields)
+    val mockTask = mockk<Task<FindCurrentPlaceResponse>>()
+
+    every {
+      mockTask.addOnSuccessListener(any<OnSuccessListener<FindCurrentPlaceResponse>>())
+    } answers
+            {
+              val listener = arg<OnSuccessListener<FindCurrentPlaceResponse>>(0)
+              listener.onSuccess(mockResponse)
+              mockTask
+            }
+    every { mockTask.addOnFailureListener(any()) } answers { mockTask }
+
+    val result = getNearbyPOIs(context, location, radius)
+
+    // Assertions
+    assertTrue(result.isEmpty())
+  }
+
+  @Test
+  fun typesList_containsExpectedElements() {
+    val expectedTypes =
+      listOf(
+        "airport",
+        "amusement_park",
+        "aquarium",
+        "art_gallery",
+        "spa",
+        "bowling_alley",
+        "cafe",
+        "campground",
+        "casino",
+        "church",
+        "city_hall",
+        "courthouse",
+        "drugstore",
+        "embassy",
+        "fire_station",
+        "hindu_temple",
+        "hospital",
+        "library",
+        "light_rail_station",
+        "local_government_office",
+        "movie_theater",
+        "museum",
+        "park",
+        "primary_school",
+        "spa",
+        "stadium",
+        "subway_station",
+        "synagogue",
+        "tourist_attraction",
+        "train_station",
+        "transit_station",
+        "university",
+        "zoo")
+
+    assertEquals(expectedTypes, types)
+  }
 
   @Test
   fun placeBeaconRandomly_addsBeaconWhenCountIsLessThanThreshold() {
     val beacons = listOf<Beacon>()
 
-    val result = placeBeaconsRandomly(beacons, location)
+    val result = placeBeaconsRandomly(beacons, location2)
     assertTrue(result.isNotEmpty())
   }
 
@@ -33,7 +364,7 @@ class BeaconPlacerTest : TestCase() {
   fun placeBeaconRandomly_doesNotAddBeaconWhenCountIsEqualToThreshold() {
     val beacons = List(BEACON_COUNT) { Beacon("beacon$it", Location(46.519962, 6.633597)) }
 
-    val result = placeBeaconsRandomly(beacons, location)
+    val result = placeBeaconsRandomly(beacons, location2)
 
     assertEquals(0, result.size)
   }
@@ -44,7 +375,7 @@ class BeaconPlacerTest : TestCase() {
     val beacons =
         List(BEACON_COUNT - nbrMissing) { Beacon("beacon$it", Location(46.519962, 6.633597)) }
 
-    val result = placeBeaconsRandomly(beacons, location)
+    val result = placeBeaconsRandomly(beacons, location2)
 
     assertEquals(nbrMissing, result.size)
   }
@@ -53,7 +384,7 @@ class BeaconPlacerTest : TestCase() {
   fun placeBeaconRandomly_selectsBeaconsWithMaxDistance() {
     val beacons = listOf<Beacon>()
 
-    val result = placeBeaconsRandomly(beacons, location)
+    val result = placeBeaconsRandomly(beacons, location2)
 
     val maxDistance = computeDistanceBetweenBeacons(result.toMutableList(), beacons)
     result.forEachIndexed { index, beacon ->
@@ -80,7 +411,7 @@ class BeaconPlacerTest : TestCase() {
   fun findRandomBeacon_addsBeaconToNewBeacons() {
     val newBeacons = mutableListOf<Beacon>()
 
-    findRandomBeacon(location, newBeacons, 0)
+    findRandomBeacon(location2, newBeacons, 0)
     Log.d("value of the random beacon ", newBeacons.toString())
     assertEquals(1, newBeacons.size)
   }
@@ -145,7 +476,7 @@ class BeaconPlacerTest : TestCase() {
 
     val result = randomLatLongFromPosition(userPosition, distance)
 
-    val actualDistance = location.distanceBetween(result)
+    val actualDistance = location2.distanceBetween(result)
     Log.d("distance", "$actualDistance")
     assertTrue(actualDistance <= distance)
   }

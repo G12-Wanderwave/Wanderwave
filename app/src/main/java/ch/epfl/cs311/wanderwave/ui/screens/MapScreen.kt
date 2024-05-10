@@ -74,6 +74,7 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
     LaunchedEffect(location != null, mapIsLoaded.value) {
       if (location != null && mapIsLoaded.value) {
         moveCamera(cameraPositionState, location, viewModel.cameraPosition.value)
+
       }
     }
   }
