@@ -136,9 +136,6 @@ class TrackConnectionTest {
 
     val stateFlow = trackConnection.getTrackById(testTrackId)
     val resultTrack = stateFlow.first()
-
-    println("Retrieved track: $resultTrack")
-
     assertEquals(mockTrack, resultTrack)
   }
 }
