@@ -51,4 +51,18 @@ class TrackConnection(private val database: FirebaseFirestore? = null) :
     }
     return stateFlow
   }
+
+  override fun getTrackById(trackId: String): Flow<Track?> {
+    val stateFlow = MutableStateFlow<Track?>(null)
+    db.collection(collectionName).document(trackId).addSnapshotListener { snapshot, error ->
+      if (error != null) {
+        stateFlow.value = null
+      } else if (snapshot != null && snapshot.exists()) {
+        stateFlow.value = documentToItem(snapshot)
+      } else {
+        stateFlow.value = null
+      }
+    }
+    return stateFlow
+  }
 }

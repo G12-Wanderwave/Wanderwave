@@ -21,7 +21,6 @@ import ch.epfl.cs311.wanderwave.ui.components.login.SignInButton
 import ch.epfl.cs311.wanderwave.ui.components.login.WelcomeTitle
 import ch.epfl.cs311.wanderwave.viewmodel.LoginScreenViewModel
 import com.spotify.sdk.android.auth.AuthorizationClient
-import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(

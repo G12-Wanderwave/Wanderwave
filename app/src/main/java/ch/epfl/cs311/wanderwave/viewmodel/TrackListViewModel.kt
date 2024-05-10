@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,6 +20,7 @@ class TrackListViewModel
 @Inject
 constructor(
     private val spotifyController: SpotifyController,
+    private val appDatabase: AppDatabase,
     private val repository: TrackRepository
 ) : ViewModel() {
 
@@ -26,6 +28,32 @@ constructor(
   val uiState: StateFlow<UiState> = _uiState
 
   private var _searchQuery = MutableStateFlow("")
+
+  fun toggleTrackSource() {
+    _uiState.value = _uiState.value.copy(showRecentlyAdded = !_uiState.value.showRecentlyAdded)
+    loadTracksBasedOnSource()
+  }
+
+  fun loadTracksBasedOnSource() {
+    viewModelScope.launch {
+      _uiState.value = _uiState.value.copy(loading = true)
+      if (_uiState.value.showRecentlyAdded) {
+        loadRecentlyAddedTracks()
+      } else {
+        _uiState.value = _uiState.value.copy(tracks = listOf(), loading = false)
+      }
+    }
+  }
+
+  fun loadRecentlyAddedTracks() {
+    viewModelScope.launch {
+      val trackRecords =
+          appDatabase.trackRecordDao().getAllRecentlyAddedTracks().firstOrNull() ?: listOf()
+      val trackDetails =
+          trackRecords.mapNotNull { repository.getTrackById(it.trackId).firstOrNull() }
+      _uiState.value = _uiState.value.copy(tracks = trackDetails, loading = false)
+    }
+  }
 
   init {
     observeTracks()
@@ -227,7 +255,9 @@ constructor(
       val expanded: Boolean = false,
       val progress: Float = 0f,
       val isShuffled: Boolean = false,
-      val loopMode: LoopMode = LoopMode.NONE
+      val loopMode: LoopMode = LoopMode.NONE,
+      val showRecentlyAdded: Boolean =
+          true // New state to toggle between recently added and recently viewed
   )
 }
 

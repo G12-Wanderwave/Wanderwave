@@ -7,13 +7,16 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -113,5 +116,52 @@ class TrackConnectionTest {
 
     // Verify that the delete function is called on the document with the correct id
     verify { documentReference.delete() }
+  }
+
+  @Test
+  fun testGetTrackById() = runBlocking {
+    val testTrackId = "testTrack"
+    val mockDocumentSnapshot = mockk<DocumentSnapshot>(relaxed = true)
+    val mockTrack = Track(testTrackId, "Test Title", "Test Artist")
+
+    every { mockDocumentSnapshot.exists() } returns true
+    every { mockDocumentSnapshot.id } returns testTrackId
+    every { mockDocumentSnapshot.getString("title") } returns "Test Title"
+    every { mockDocumentSnapshot.getString("artist") } returns "Test Artist"
+
+    every { documentReference.addSnapshotListener(any()) } answers
+        {
+          val listener = firstArg<EventListener<DocumentSnapshot>>()
+          listener.onEvent(mockDocumentSnapshot, null) // No error
+          mockk(relaxed = true)
+        }
+
+    val stateFlow = trackConnection.getTrackById(testTrackId)
+    val resultTrack = stateFlow.first()
+    assertEquals(mockTrack, resultTrack)
+
+    every { mockDocumentSnapshot.exists() } returns false
+    every { documentReference.addSnapshotListener(any()) } answers
+        {
+          val listener = firstArg<EventListener<DocumentSnapshot>>()
+          listener.onEvent(mockDocumentSnapshot, null)
+          mockk(relaxed = true)
+        }
+
+    val stateFlowNotExist = trackConnection.getTrackById(testTrackId)
+    val resultTrackNotExist = stateFlowNotExist.first()
+    assertNull(resultTrackNotExist)
+
+    val mockError = mockk<FirebaseFirestoreException>(relaxed = true)
+    every { documentReference.addSnapshotListener(any()) } answers
+        {
+          val listener = firstArg<EventListener<DocumentSnapshot>>()
+          listener.onEvent(null, mockError) // With error
+          mockk(relaxed = true)
+        }
+
+    val stateFlowError = trackConnection.getTrackById(testTrackId)
+    val resultTrackError = stateFlowError.first()
+    assertNull(resultTrackError)
   }
 }

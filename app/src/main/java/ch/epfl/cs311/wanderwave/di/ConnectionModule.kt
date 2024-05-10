@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.di
 
 import android.content.Context
+import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
@@ -21,10 +22,14 @@ object ConnectionModule {
 
   @Provides
   @Singleton
-  fun provideBeaconRepository(@ApplicationContext context: Context): BeaconRepository {
+  fun provideBeaconRepository(
+      @ApplicationContext context: Context,
+      appDatabase: AppDatabase // Inject AppDatabase here
+  ): BeaconRepository {
     return BeaconConnection(
         trackConnection = TrackConnection(),
         profileConnection = ProfileConnection(),
+        appDatabase = appDatabase, // Use the injected AppDatabase
         ioDispatcher = Dispatchers.IO)
   }
 
