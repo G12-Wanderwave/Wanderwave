@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.model.auth
 import android.util.Log
 import ch.epfl.cs311.wanderwave.model.repository.AuthTokenRepository
 import com.google.firebase.auth.FirebaseAuth
+import java.io.FileNotFoundException
 import java.net.HttpURLConnection
 import java.net.URL
 import javax.inject.Inject
@@ -155,14 +156,17 @@ constructor(
         tokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
 
     Log.d("AuthenticationController", "Access token: $accessToken")
-    (withContext(Dispatchers.IO) { url.openConnection() } as HttpURLConnection).run {
-      requestMethod = "GET"
-
-      setRequestProperty("Authorization", "Bearer $accessToken")
-
-      inputStream.bufferedReader().use {
-        return it.readText()
+    return try {
+      (withContext(Dispatchers.IO) { url.openConnection() } as HttpURLConnection).run {
+        requestMethod = "GET"
+        setRequestProperty("Authorization", "Bearer $accessToken")
+        inputStream.bufferedReader().use {
+          return it.readText()
+        }
       }
+    } catch (e: FileNotFoundException) {
+      Log.e("AuthenticationController", "Failed to make API request: ${e.message}")
+      "FAILURE"
     }
   }
 }

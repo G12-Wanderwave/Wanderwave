@@ -20,7 +20,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import org.junit.Before
@@ -42,6 +44,8 @@ class AuthenticationControllerTest {
 
   private lateinit var authenticationController: AuthenticationController
 
+  private lateinit var testDispatcher: TestDispatcher
+
   private val dummyUser =
       AuthenticationUserData(
           "testid", "testemail", "testDisplayName", "https://example.com/testphoto.jpg")
@@ -49,10 +53,11 @@ class AuthenticationControllerTest {
   @OptIn(ExperimentalCoroutinesApi::class)
   @Before
   fun setup() {
-    val testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
+    testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
     authenticationController =
         AuthenticationController(
             mockFirebaseAuth, mockHttpClient, mockTokenRepository, testDispatcher)
+    coEvery { authenticationController.refreshSpotifyToken() } returns true
   }
 
   fun setupDummyUserSignedIn() {
@@ -202,17 +207,46 @@ class AuthenticationControllerTest {
 
   @Test
   fun makeApiRequest_ShouldReturnExpectedResult_OnSuccessfulApiCall() = runBlocking {
-    val testUrl = URL("https://test.api/endpoint")
-    val expectedResponse = "success response"
+    setupDummyUserSignedIn()
+    val mockFirebaseUser =
+        mockk<com.google.firebase.auth.FirebaseUser> {
+          every { uid } returns "testid"
+          every { email } returns null
+          every { displayName } returns null
+          every { photoUrl } returns null
+        }
+
+    val task =
+        mockk<Task<AuthResult>> {
+          every { result } returns mockk { every { user } returns mockFirebaseUser }
+          every { isComplete } returns true
+          every { isSuccessful } returns true
+          every { isCanceled } returns false
+          every { exception } returns null
+        }
+
+    every { mockFirebaseAuth.currentUser } returns null
+    every { mockFirebaseAuth.signInWithCustomToken("testtoken-firebase") } returns task
+
+    coEvery {
+      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_REFRESH_TOKEN)
+    } returns "REFRESH_TOKEN"
+
+    val testUrl = URL("https://api.spotify.com/v1/albums/4aawyAB9vmqN3uQ7FjRGTy")
     val call = mockk<Call>()
     every { mockHttpClient.newCall(any()) } returns call
-    coEvery { authenticationController.refreshSpotifyToken() } returns true
-    every { call.execute() } returns
-        mockk { every { body } returns mockk { every { string() } returns expectedResponse } }
+
     coEvery {
-      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
-    } returns "valid-access-token"
-    coEvery { authenticationController.refreshSpotifyToken() } returns true
+      withContext(testDispatcher) { mockHttpClient.newCall(any()).execute().body?.string() }
+    } returns
+        """
+            {
+              "firebase_token": "testtoken-firebase",
+              "access_token": "testtoken-spotify-access",
+              "refresh_token": "testtoken-spotify-refresh"
+            }
+            """
+            .trimIndent()
 
     val result = authenticationController.makeApiRequest(testUrl)
 
