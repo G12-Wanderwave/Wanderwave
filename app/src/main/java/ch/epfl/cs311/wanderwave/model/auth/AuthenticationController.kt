@@ -8,7 +8,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
@@ -81,7 +80,7 @@ constructor(
 
   private suspend fun storeAndUseNewTokens(responseJson: String): Boolean {
     if (responseJson.isEmpty()) {
-      Log.d("AuthenticationController", "Received empty JSON response")
+      Log.e("AuthenticationController", "Received empty JSON response")
       return false
     }
 
@@ -90,8 +89,6 @@ constructor(
       val firebaseToken = response.getString("firebase_token")
       val spotifyAccessToken = response.getString("access_token")
       val spotifyRefreshToken = response.getString("refresh_token")
-
-      Log.d("AuthenticationController", "SPOTIFY Access token: $spotifyAccessToken")
 
       tokenRepository.setAuthToken(
           AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN,
@@ -144,20 +141,19 @@ constructor(
   }
 
   suspend fun makeApiRequest(url: URL): String {
-    Log.d("AuthenticationController", "Making request to $url")
 
     // refresh the access token if necessary
     if (!refreshSpotifyToken()) {
-      Log.d("AuthenticationController", "Failed to refresh Spotify token")
+      Log.e("AuthenticationController", "Failed to refresh Spotify token")
       return "FAILURE"
     }
     // Get the access token from the AuthTokenRepository
     val accessToken =
         tokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
 
-    Log.d("AuthenticationController", "Access token: $accessToken")
+    Log.i("AuthenticationController", "Access token available: ${accessToken != null}")
     return try {
-      (withContext(Dispatchers.IO) { url.openConnection() } as HttpURLConnection).run {
+      (withContext(ioDispatcher) { url.openConnection() } as HttpURLConnection).run {
         requestMethod = "GET"
         setRequestProperty("Authorization", "Bearer $accessToken")
         inputStream.bufferedReader().use {
