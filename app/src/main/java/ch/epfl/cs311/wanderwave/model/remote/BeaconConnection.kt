@@ -19,17 +19,17 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 class BeaconConnection(
-    private val database: FirebaseFirestore? = null,
+    private val database: FirebaseFirestore,
     val trackConnection: TrackConnection,
     val profileConnection: ProfileConnection,
     private val ioDispatcher: CoroutineDispatcher
-) : FirebaseConnection<Beacon, Beacon>(), BeaconRepository {
+) : FirebaseConnection<Beacon, Beacon>(database), BeaconRepository {
 
   override val collectionName: String = "beacons"
 
   override val getItemId = { beacon: Beacon -> beacon.id }
 
-  override val db = database ?: super.db
+  override val db = database
 
   // You can create a CoroutineScope instance
   private val coroutineScope = CoroutineScope(Dispatchers.Main)

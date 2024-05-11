@@ -11,6 +11,9 @@ import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.memoryCacheSettings
+import com.google.firebase.firestore.persistentCacheSettings
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,8 +29,21 @@ object RepositoryModule {
   @Provides
   @Singleton
   fun provideFirestore(@ApplicationContext context: Context): FirebaseFirestore {
-    return FirebaseFirestore.getInstance()
+    return FirebaseFirestore.getInstance().apply {
+      firestoreSettings =
+          FirebaseFirestoreSettings.Builder()
+              .setLocalCacheSettings(memoryCacheSettings {}) // Memory cache settings
+              .setLocalCacheSettings(
+                  persistentCacheSettings { FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED })
+              .build()
+    }
   }
+
+  // If you want to use data exclusively from the local cache, you can use the following code:
+  // db.disableNetwork().addOnCompleteListener {
+  //   // Do offline things
+  //   // ...
+  // }
 
   @Provides
   @Singleton
