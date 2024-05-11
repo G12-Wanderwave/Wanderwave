@@ -91,7 +91,7 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
                  viewModel.changeChosenSongs()
                       },
             modifier = Modifier.testTag("toggleSongList")) {
-              Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
+              Text(if (isTopSongsListVisible) "Show CHOSEN TOPS" else "Show LIKED SONGS")
             }
         SongsListDisplay(
             navigationActions = navActions,

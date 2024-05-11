@@ -26,6 +26,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.profile.TrackItem
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
+import com.spotify.protocol.types.ListItem
 
 /**
  * Screen to select a song from Spotify
@@ -43,7 +44,7 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: SpotifySongsActio
     val likedSongsList by viewModel.likedSongsTrackList.collectAsState()
     val childrenPlaylistTrackList by viewModel.childrenPlaylistTrackList.collectAsState()
     // Conditionally display the list based on isChosenSongs state
-    var displayedList by remember { mutableStateOf(subsectionList) }
+    var displayedList by remember { mutableStateOf(emptyList<ListItem>()) }
 
     val isTopSongsListVisible by viewModel.isTopSongsListVisible.collectAsState(false)
 
@@ -54,13 +55,12 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: SpotifySongsActio
     }
 
     if (isTopSongsListVisible) {
-
         LaunchedEffect(subsectionList) { displayedList = subsectionList }
-   } else {
+        LaunchedEffect(childrenPlaylistTrackList) { displayedList = childrenPlaylistTrackList }
+    } else {
         LaunchedEffect(likedSongsList) { displayedList = likedSongsList }
     }
 
-    LaunchedEffect(childrenPlaylistTrackList) { displayedList = childrenPlaylistTrackList }
 
 
     Scaffold(

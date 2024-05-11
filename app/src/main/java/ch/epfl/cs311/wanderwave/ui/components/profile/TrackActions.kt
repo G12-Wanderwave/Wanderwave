@@ -100,7 +100,7 @@ fun AddTrackDialog(
 /**
  * Displays either the "TOP SONGS" or "CHOSEN SONGS" list based on a toggle.
  *
- * @param songLists List of song lists including "TOP SONGS" and "CHOSEN SONGS".
+ * @param songLists List of song lists including "TOP SONGS" and "LIKED SONGS".
  * @param isTopSongsListVisible Boolean state to toggle between showing "TOP SONGS" or "CHOSEN
  *   SONGS".
  *     @param onAddTrack Callback function to be invoked when a track is added.
@@ -111,7 +111,7 @@ fun AddTrackDialog(
  *     @author Menzo Bouaissi
  *     @author Ayman Bakiri
  *     @since 1.0
- *     @last update 2.0
+ *     @last update 3.0
  */
 @Composable
 fun SongsListDisplay(
