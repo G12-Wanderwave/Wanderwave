@@ -52,6 +52,14 @@ class BeaconConnection(
     profileConnection.addProfilesIfNotExist(item.profileAndTrack.map { it.profile })
   }
 
+  override suspend fun addItemAndGetId(item: Beacon): String? {
+    val id = super.addItemAndGetId(item)
+    id?.let {
+      trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
+    }
+    return id
+  }
+
   override fun updateItem(item: Beacon) {
     super.updateItem(item)
     trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
