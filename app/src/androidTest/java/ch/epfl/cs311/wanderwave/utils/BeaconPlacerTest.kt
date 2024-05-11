@@ -10,8 +10,10 @@ import ch.epfl.cs311.wanderwave.model.data.Location
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.mockk.MockKAnnotations
 import io.mockk.junit4.MockKRule
+import junit.framework.TestCase.assertTrue
 import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
 import org.junit.runner.RunWith
 
 private const val BEACON_COUNT = 20
@@ -23,21 +25,21 @@ class BeaconPlacerTest : TestCase() {
   @get:Rule val mockkRule = MockKRule(this)
   @get:Rule
   val permissionRule: GrantPermissionRule =
-      GrantPermissionRule.grant(
-          Manifest.permission.ACCESS_COARSE_LOCATION,
-          Manifest.permission.ACCESS_FINE_LOCATION,
-      )
+    GrantPermissionRule.grant(
+      Manifest.permission.ACCESS_COARSE_LOCATION,
+      Manifest.permission.ACCESS_FINE_LOCATION,
+    )
   private val context = InstrumentationRegistry.getInstrumentation().context
 
   private val locationManager =
-      context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
   val location =
-      android.location.Location(LocationManager.GPS_PROVIDER).apply {
-        latitude = 46.519962
-        longitude = 6.633597
-        time = System.currentTimeMillis()
-        elapsedRealtimeNanos = System.nanoTime()
-      }
+    android.location.Location(LocationManager.GPS_PROVIDER).apply {
+      latitude = 46.519962
+      longitude = 6.633597
+      time = System.currentTimeMillis()
+      elapsedRealtimeNanos = System.nanoTime()
+    }
 
   @Before
   fun setup() {
@@ -48,6 +50,11 @@ class BeaconPlacerTest : TestCase() {
     } catch (e: SecurityException) {
       e.printStackTrace()
     }
+  }
+
+  @Test
+  fun placerHolder() {
+    assertTrue(true)
   }
 
   //  @Test
