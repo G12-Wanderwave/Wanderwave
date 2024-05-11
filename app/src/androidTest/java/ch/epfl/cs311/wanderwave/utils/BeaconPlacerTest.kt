@@ -25,21 +25,21 @@ class BeaconPlacerTest : TestCase() {
   @get:Rule val mockkRule = MockKRule(this)
   @get:Rule
   val permissionRule: GrantPermissionRule =
-    GrantPermissionRule.grant(
-      Manifest.permission.ACCESS_COARSE_LOCATION,
-      Manifest.permission.ACCESS_FINE_LOCATION,
-    )
+      GrantPermissionRule.grant(
+          Manifest.permission.ACCESS_COARSE_LOCATION,
+          Manifest.permission.ACCESS_FINE_LOCATION,
+      )
   private val context = InstrumentationRegistry.getInstrumentation().context
 
   private val locationManager =
-    context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+      context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
   val location =
-    android.location.Location(LocationManager.GPS_PROVIDER).apply {
-      latitude = 46.519962
-      longitude = 6.633597
-      time = System.currentTimeMillis()
-      elapsedRealtimeNanos = System.nanoTime()
-    }
+      android.location.Location(LocationManager.GPS_PROVIDER).apply {
+        latitude = 46.519962
+        longitude = 6.633597
+        time = System.currentTimeMillis()
+        elapsedRealtimeNanos = System.nanoTime()
+      }
 
   @Before
   fun setup() {
