@@ -21,10 +21,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.profile.TrackItem
-import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 
 /**
  * Screen to select a song from Spotify
@@ -37,33 +38,35 @@ import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectSongScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
-    // Observing states from ViewModel
-    val mainList by viewModel.spotifySubsectionList.collectAsState()
-    val childrenPlaylistTrackList by viewModel.childrenPlaylistTrackList.collectAsState()
-    val likedSongs by viewModel.likedSongs.collectAsState()
-    val isChosenSongs = viewModel.isChosenSongs
-
+fun SelectSongScreen(navActions: NavigationActions, viewModel: SpotifySongsActions) {
+  val mainList by viewModel.spotifySubsectionList.collectAsState()
+  val childrenPlaylistTrackList by viewModel.childrenPlaylistTrackList.collectAsState()
     // Conditionally display the list based on isChosenSongs state
     var displayedList by remember { mutableStateOf(mainList) }
 
-    LaunchedEffect(Unit) {
-        viewModel.retrieveAndAddSubsection()
-        viewModel.getLikedTracks()  // Ensuring liked tracks are fetched and updated
-    }
-    LaunchedEffect(mainList) {
-        if (isChosenSongs) {
-            displayedList = mainList
-        }
-    }
-    LaunchedEffect(childrenPlaylistTrackList) {
-        if (isChosenSongs) {
-            displayedList = childrenPlaylistTrackList
-        }
-    }
-    LaunchedEffect(isChosenSongs) {
-        displayedList = if (isChosenSongs) mainList else likedSongs
-    }
+//    LaunchedEffect(Unit) {
+//        viewModel.retrieveAndAddSubsection()
+//        viewModel.getLikedTracks()  // Ensuring liked tracks are fetched and updated
+//    }
+//    LaunchedEffect(mainList) {
+//        if (isChosenSongs) {
+//            displayedList = mainList
+//        }
+//    }
+//    LaunchedEffect(childrenPlaylistTrackList) {
+//        if (isChosenSongs) {
+//            displayedList = childrenPlaylistTrackList
+//        }
+//    }
+//    LaunchedEffect(isChosenSongs) {
+//        displayedList = if (isChosenSongs) mainList else likedSongs
+//    }
+
+
+    LaunchedEffect(Unit) { viewModel.retrieveAndAddSubsection() }
+    LaunchedEffect(mainList) { displayedList = mainList }
+
+    LaunchedEffect(childrenPlaylistTrackList) { displayedList = childrenPlaylistTrackList }
 
     Scaffold(
         topBar = {
@@ -85,15 +88,15 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: ProfileViewModel)
                 TrackItem(
                     listItem,
                     onClick = {
-                        if (listItem.hasChildren) {
-                            viewModel.retrieveChild(listItem)
-                        } else {
-                            viewModel.addTrackToList(
-                                if (isChosenSongs) "LIKED SONGS" else "CHOSEN SONGS",
-                                Track(listItem.id, listItem.title, listItem.subtitle)
-                            )
-                            navActions.goBack()
-                        }
+
+                      if (listItem.hasChildren) {
+                        viewModel.retrieveChild(listItem)
+                      } else {
+                        viewModel.addTrackToList(
+                            ListType.TOP_SONGS,
+                            Track(listItem.id, listItem.title, listItem.subtitle))
+                        navActions.goBack()
+                      }
                     })
             }
         }

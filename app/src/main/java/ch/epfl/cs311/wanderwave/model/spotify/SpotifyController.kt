@@ -2,6 +2,7 @@ package ch.epfl.cs311.wanderwave.model.spotify
 
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -10,6 +11,7 @@ import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.ContentApi
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.android.appremote.api.error.NotLoggedInException
+import com.spotify.protocol.types.ImageUri
 import com.spotify.protocol.types.ListItem
 import com.spotify.protocol.types.PlayerState
 import com.spotify.sdk.android.auth.AuthorizationRequest
@@ -23,9 +25,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 
 class SpotifyController
 @Inject
@@ -314,4 +319,76 @@ constructor(
     NOT_LOGGED_IN,
     FAILED
   }
+}
+/**
+ * Get all the element of the main screen and add them to the top list
+ *
+ * @author Menzo Bouaissi
+ * @since 2.0
+ * @last update 3.0
+ */
+fun retrieveAndAddSubsectionFromSpotify(
+    spotifySubsectionList: MutableStateFlow<List<ListItem>>,
+    spotifyController: SpotifyController,
+    scope: CoroutineScope
+) {
+  scope.launch {
+    val track = spotifyController.getAllElementFromSpotify().firstOrNull()
+    if (track != null) {
+      for (i in track) {
+        spotifySubsectionList.value += i
+      }
+    }
+  }
+}
+
+/**
+ * Get all the element of the main screen and add them to the top list
+ *
+ * @author Menzo Bouaissi
+ * @since 2.0
+ * @last update 3.0
+ */
+fun retrieveChildFromSpotify(
+    item: ListItem,
+    childrenPlaylistTrackList: MutableStateFlow<List<ListItem>>,
+    spotifyController: SpotifyController,
+    scope: CoroutineScope
+) {
+  scope.launch {
+    val children = spotifyController.getAllChildren(item).firstOrNull()
+    if (children != null) {
+      for (child in children) {
+        childrenPlaylistTrackList.value += child
+      }
+    }
+  }
+}
+
+suspend fun getLikedTracks(likedSongsTrackList: MutableStateFlow<List<ListItem>>,
+                           spotifyController: SpotifyController,
+                           scope: CoroutineScope) {
+    scope.launch {
+        val url = "https://api.spotify.com/v1/me/tracks"
+        try {
+            val jsonResponse = spotifyController.spotifyGetFromURL("$url?limit=50")  // TODO : revoir la limite
+            parseTracks(jsonResponse,likedSongsTrackList)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+}
+
+fun parseTracks(jsonResponse: String,  likedSongsTrackList: MutableStateFlow<List<ListItem>>,) {
+    val jsonObject = JSONObject(jsonResponse)
+    val items = jsonObject.getJSONArray("items")
+    likedSongsTrackList.value = emptyList()
+    for (i in 0 until items.length()) {
+        val track = items.getJSONObject(i).getJSONObject("track")
+        val id = track.getString("id")
+        val name = track.getString("name")
+        val artistsArray = track.getJSONArray("artists")
+        val artist = artistsArray.getJSONObject(0).getString("name")  // Gets the primary artist
+        likedSongsTrackList.value += ListItem(id, "", ImageUri(""), name, artist, false, false)
+    }
 }
