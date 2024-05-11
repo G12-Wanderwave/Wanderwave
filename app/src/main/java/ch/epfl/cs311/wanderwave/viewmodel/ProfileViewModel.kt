@@ -118,7 +118,6 @@ constructor(
 
   fun changeChosenSongs() {
     _isTopSongsListVisible.value = !_isTopSongsListVisible.value
-    Log.d("ProfileViewModel", "isTopSongsListVisible: $isTopSongsListVisible")
   }
 
 
