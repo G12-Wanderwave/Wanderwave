@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.di.ServiceModule.provideLocationSource
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
@@ -22,6 +23,7 @@ import com.spotify.protocol.types.ListItems
 import com.spotify.protocol.types.PlayerState
 import io.mockk.Awaits
 import io.mockk.Runs
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -59,14 +61,17 @@ class SpotifyControllerTest {
 
   private lateinit var spotifyController: SpotifyController
   private lateinit var context: Context
+  private lateinit var authenticationController: AuthenticationController
 
   @Before
   fun setup() {
     context = ApplicationProvider.getApplicationContext()
-    spotifyController = SpotifyController(context)
+    authenticationController = mockk<AuthenticationController>()
+    spotifyController = SpotifyController(context, authenticationController)
     spotifyController.appRemote = mockAppRemote
     mockkStatic(SpotifyAppRemote::class)
     every { mockAppRemote.playerApi } returns mockPlayerApi
+    coEvery { authenticationController.makeApiRequest(any()) } returns "Test"
   }
 
   @Test
@@ -882,5 +887,30 @@ class SpotifyControllerTest {
 
     // Verify the returned LocationSource is an instance of FastLocationSource
     assertTrue(locationSource is FastLocationSource)
+  }
+
+  @Test
+  fun spotifyGetFromURLTest() = runBlocking {
+    val callResult = mockk<CallResult<ListItems>>(relaxed = true)
+    val contentApi = mockk<ContentApi>(relaxed = true)
+    every { mockAppRemote.contentApi } returns contentApi
+    every { contentApi.getRecommendedContentItems(any()) } returns callResult
+
+    val matchingAlbum = ListItem("id:album1", "uri1", null, "Album Title", "album", true, false)
+    val matchingPlaylist =
+        ListItem("id:playlist1", "uri2", null, "Playlist Title", "playlist", true, false)
+    val nonMatchingItem = ListItem("id:track1", "uri3", null, "Track Title", "track", true, false)
+    val items = listOf(matchingAlbum, matchingPlaylist, nonMatchingItem)
+    val itemsArray = items.toTypedArray()
+
+    every { callResult.setResultCallback(any()) } answers
+        {
+          val callback = firstArg<CallResult.ResultCallback<ListItems>>()
+          callback.onResult(ListItems(0, 0, 0, itemsArray))
+          callResult
+        }
+
+    val result = spotifyController.spotifyGetFromURL("https://test.api/endpoint")
+
   }
 }

@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.model.spotify
 import android.content.Context
 import android.util.Log
 import ch.epfl.cs311.wanderwave.BuildConfig
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
@@ -13,6 +14,8 @@ import com.spotify.protocol.types.ListItem
 import com.spotify.protocol.types.PlayerState
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
+import java.net.URL
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -22,8 +25,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class SpotifyController(private val context: Context) {
+class SpotifyController
+@Inject
+constructor(
+    private val context: Context,
+    private val authenticationController: AuthenticationController
+) {
 
   private val CLIENT_ID = BuildConfig.SPOTIFY_CLIENT_ID
   private val REDIRECT_URI = "wanderwave-auth://callback"
@@ -290,6 +299,14 @@ class SpotifyController(private val context: Context) {
           }
       awaitClose { callResult?.cancel() }
     }
+  }
+
+  // Look at the reference section of the documentation to know how to format the URL
+  // https://developer.spotify.com/documentation/web-api
+  suspend fun spotifyGetFromURL(url: String): String {
+    var answer: String
+    withContext(Dispatchers.IO) { answer = authenticationController.makeApiRequest(URL(url)) }
+    return answer
   }
 
   enum class ConnectResult {
