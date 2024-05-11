@@ -21,23 +21,18 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.Transaction
-import io.mockk.Awaits
-import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.junit4.MockKRule
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
@@ -352,35 +347,36 @@ public class BeaconConnectionTest {
   }
 
   @Test
-  fun testAddItemAndGetId() { runTest {
-    // Call the function under test
-    every { documentReference.id } returns beacon.id
-    val mockTask: Task<DocumentReference> = mockk {
-      every { isComplete } returns true
-      every { isSuccessful } returns true
-      every { result } returns documentReference
-      every { exception } returns null
-      every { isCanceled } returns false
+  fun testAddItemAndGetId() {
+    runTest {
+      // Call the function under test
+      every { documentReference.id } returns beacon.id
+      val mockTask: Task<DocumentReference> = mockk {
+        every { isComplete } returns true
+        every { isSuccessful } returns true
+        every { result } returns documentReference
+        every { exception } returns null
+        every { isCanceled } returns false
+      }
+      coEvery { collectionReference.add(any()) } coAnswers { mockTask }
+      val id = beaconConnection.addItemAndGetId(beacon)
+
+      assertEquals(beacon.id, id)
+
+      // now test with null id by have unsuccessful task
+      val mockTask2: Task<DocumentReference> = mockk {
+        every { isComplete } returns true
+        every { isSuccessful } returns false
+        every { result } returns null
+        every { exception } returns null
+        every { isCanceled } returns false
+      }
+
+      coEvery { collectionReference.add(any()) } coAnswers { mockTask2 }
+      val id2 = beaconConnection.addItemAndGetId(beacon)
+
+      assertEquals(null, id2)
     }
-    coEvery { collectionReference.add(any()) } coAnswers {mockTask}
-    val id = beaconConnection.addItemAndGetId(beacon)
-
-    assertEquals(beacon.id, id)
-
-    // now test with null id by have unsuccessful task
-    val mockTask2: Task<DocumentReference> = mockk {
-      every { isComplete } returns true
-      every { isSuccessful } returns false
-      every { result } returns null
-      every { exception } returns null
-      every { isCanceled } returns false
-    }
-
-    coEvery { collectionReference.add(any()) } coAnswers {mockTask2}
-    val id2 = beaconConnection.addItemAndGetId(beacon)
-
-    assertEquals(null, id2)
-  }
   }
 
   @Test
