@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -37,45 +38,64 @@ import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectSongScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
-  val mainList by viewModel.spotifySubsectionList.collectAsState()
-  val childrenPlaylistTrackList by viewModel.childrenPlaylistTrackList.collectAsState()
+    // Observing states from ViewModel
+    val mainList by viewModel.spotifySubsectionList.collectAsState()
+    val childrenPlaylistTrackList by viewModel.childrenPlaylistTrackList.collectAsState()
+    val likedSongs by viewModel.likedSongs.collectAsState()
+    val isChosenSongs = viewModel.isChosenSongs
 
-  var displayedList by remember { mutableStateOf(mainList) }
+    // Conditionally display the list based on isChosenSongs state
+    var displayedList by remember { mutableStateOf(mainList) }
 
-  LaunchedEffect(Unit) { viewModel.retrieveAndAddSubsection() }
-  LaunchedEffect(mainList) { displayedList = mainList }
+    LaunchedEffect(Unit) {
+        viewModel.retrieveAndAddSubsection()
+        viewModel.getLikedTracks()  // Ensuring liked tracks are fetched and updated
+    }
+    LaunchedEffect(mainList) {
+        if (isChosenSongs) {
+            displayedList = mainList
+        }
+    }
+    LaunchedEffect(childrenPlaylistTrackList) {
+        if (isChosenSongs) {
+            displayedList = childrenPlaylistTrackList
+        }
+    }
+    LaunchedEffect(isChosenSongs) {
+        displayedList = if (isChosenSongs) mainList else likedSongs
+    }
 
-  LaunchedEffect(childrenPlaylistTrackList) { displayedList = childrenPlaylistTrackList }
-
-  Scaffold(
-      topBar = {
-        TopAppBar(
-            title = { Text("Select Song") },
-            navigationIcon = {
-              IconButton(onClick = { navActions.goBack() }) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = "Go back")
-              }
-            })
-      }) { innerPadding -> // This is the padding parameter you need to use
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Select Song") },
+                navigationIcon = {
+                    IconButton(onClick = { navActions.goBack() }) {
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Go back")
+                    }
+                }
+            )
+        }) { innerPadding ->
         LazyColumn(
-            contentPadding = innerPadding, // Apply the innerPadding to the LazyColumn
-            modifier =
-                Modifier.padding(
-                    all = 16.dp) // Additional padding can still be applied here if needed
-            ) {
-              items(displayedList, key = { it.id }) { listItem ->
+            contentPadding = innerPadding,
+            modifier = Modifier.padding(all = 16.dp)
+        ) {
+            items(displayedList, key = { it.id }) { listItem ->
+                Log.d("SelectSongScreen", "listItem: $listItem" )
                 TrackItem(
                     listItem,
                     onClick = {
-                      if (listItem.hasChildren) {
-                        viewModel.retrieveChild(listItem)
-                      } else {
-                        viewModel.addTrackToList(
-                            "TOP SONGS", Track(listItem.id, listItem.title, listItem.subtitle))
-                        navActions.goBack()
-                      }
+                        if (listItem.hasChildren) {
+                            viewModel.retrieveChild(listItem)
+                        } else {
+                            viewModel.addTrackToList(
+                                if (isChosenSongs) "LIKED SONGS" else "CHOSEN SONGS",
+                                Track(listItem.id, listItem.title, listItem.subtitle)
+                            )
+                            navActions.goBack()
+                        }
                     })
-              }
             }
-      }
+        }
+    }
 }

@@ -85,7 +85,10 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
         }
         // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
         Button(
-            onClick = { isTopSongsListVisible = !isTopSongsListVisible },
+            onClick = {
+                isTopSongsListVisible = !isTopSongsListVisible
+                 viewModel.changeChosenSongs()
+                      },
             modifier = Modifier.testTag("toggleSongList")) {
               Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
             }

@@ -1,12 +1,14 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import android.util.Log
+import android.util.MutableBoolean
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import com.spotify.protocol.types.ImageUri
 import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -14,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 // Define a simple class for a song list
 data class SongList(val name: String, val tracks: List<Track> = mutableListOf())
@@ -39,8 +42,8 @@ constructor(
               profilePictureUri = null))
   val profile: StateFlow<Profile> = _profile
 
-  private val _isInEditMode = MutableStateFlow(false)
-  val isInEditMode: StateFlow<Boolean> = _isInEditMode
+
+  var isChosenSongs = true
 
   private val _isInPublicMode = MutableStateFlow(false)
   val isInPublicMode: StateFlow<Boolean> = _isInPublicMode
@@ -52,11 +55,17 @@ constructor(
   private val _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
   val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
 
+  private val _likedSongs = MutableStateFlow<List<ListItem>>(emptyList())
+  val likedSongs: StateFlow<List<ListItem>> = _likedSongs
+
   private val _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
 
   private var _uiState = MutableStateFlow(ProfileViewModel.UIState())
   val uiState: StateFlow<ProfileViewModel.UIState> = _uiState
+
+
+
 
   fun createSpecificSongList(listType: String) {
     val listName =
@@ -111,16 +120,13 @@ constructor(
    */
   fun retrieveTracksFromSpotify() {
     viewModelScope.launch {
-      Log.d("ProfileViewModel", "retrieveTracksFromSpotify")
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
       if (track != null) {
         for (i in track) {
           if (i.hasChildren) {
             val children = spotifyController.getAllChildren(i).firstOrNull()
-            Log.d("ProfileViewModel", "children: $children")
             if (children != null) {
               for (child in children) {
-                Log.d("ProfileViewModel", "child: $child")
                 addTrackToList("TOP SONGS", Track(child.id, child.title, child.subtitle))
               }
             }
@@ -146,6 +152,37 @@ constructor(
           _spotifySubsectionList.value += i
         }
       }
+    }
+  }
+
+
+  fun changeChosenSongs() {
+    isChosenSongs = !isChosenSongs
+    Log.d("ProfileViewModel", "isChosenSongs: $isChosenSongs")
+  }
+  suspend fun getLikedTracks() {
+    viewModelScope.launch {
+      val url = "https://api.spotify.com/v1/me/tracks"
+      try {
+        val jsonResponse = spotifyController.spotifyGetFromURL("$url?limit=50")  // TODO : revoir la limite
+        parseTracks(jsonResponse)
+      } catch (e: Exception) {
+        e.printStackTrace()
+      }
+    }
+  }
+
+  fun parseTracks(jsonResponse: String) {
+    val jsonObject = JSONObject(jsonResponse)
+    val items = jsonObject.getJSONArray("items")
+    _likedSongs.value = emptyList()
+    for (i in 0 until items.length()) {
+      val track = items.getJSONObject(i).getJSONObject("track")
+      val id = track.getString("id")
+      val name = track.getString("name")
+      val artistsArray = track.getJSONArray("artists")
+      val artist = artistsArray.getJSONObject(0).getString("name")  // Gets the primary artist
+      _likedSongs.value += ListItem(id, "", ImageUri(""), name, artist, false, false)
     }
   }
 
