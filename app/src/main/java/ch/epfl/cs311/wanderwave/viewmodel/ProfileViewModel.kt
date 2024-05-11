@@ -1,6 +1,10 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.ListType
@@ -8,6 +12,7 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
 import ch.epfl.cs311.wanderwave.model.spotify.retrieveAndAddSubsectionFromSpotify
 import ch.epfl.cs311.wanderwave.model.spotify.retrieveChildFromSpotify
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
@@ -46,7 +51,8 @@ constructor(
   val profile: StateFlow<Profile> = _profile
 
 
-  var isChosenSongs = true
+  private val _isTopSongsListVisible = MutableStateFlow(true)
+  override val isTopSongsListVisible: StateFlow<Boolean> = _isTopSongsListVisible
 
   private val _isInEditMode = MutableStateFlow(false)
   val isInEditMode: StateFlow<Boolean> = _isInEditMode
@@ -64,11 +70,11 @@ constructor(
   private var _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   override val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
 
-  private var _uiState = MutableStateFlow(ProfileViewModel.UIState())
-  val uiState: StateFlow<ProfileViewModel.UIState> = _uiState
+  private var _uiState = MutableStateFlow(UIState())
+  val uiState: StateFlow<UIState> = _uiState
 
-  private val _likedSongs = MutableStateFlow<List<ListItem>>(emptyList())
-  val likedSongs: StateFlow<List<ListItem>> = _likedSongs
+  private val _likedSongsTrackList= MutableStateFlow<List<ListItem>>(emptyList())
+  override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
 
 
   fun createSpecificSongList(listType: ListType) {
@@ -111,8 +117,8 @@ constructor(
 
 
   fun changeChosenSongs() {
-    isChosenSongs = !isChosenSongs
-    Log.d("ProfileViewModel", "isChosenSongs: $isChosenSongs")
+    _isTopSongsListVisible.value = !_isTopSongsListVisible.value
+    Log.d("ProfileViewModel", "isTopSongsListVisible: $isTopSongsListVisible")
   }
 
 
@@ -143,6 +149,11 @@ constructor(
   override fun retrieveChild(item: ListItem) {
     retrieveChildFromSpotify(
       item, this._childrenPlaylistTrackList, spotifyController, viewModelScope)
+  }
+
+
+  override suspend fun getLikedTracks() {
+    getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
   }
 
   data class UIState(

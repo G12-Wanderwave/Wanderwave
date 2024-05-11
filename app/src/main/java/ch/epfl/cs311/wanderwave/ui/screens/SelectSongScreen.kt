@@ -39,34 +39,29 @@ import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectSongScreen(navActions: NavigationActions, viewModel: SpotifySongsActions) {
-  val mainList by viewModel.spotifySubsectionList.collectAsState()
-  val childrenPlaylistTrackList by viewModel.childrenPlaylistTrackList.collectAsState()
+    val subsectionList by viewModel.spotifySubsectionList.collectAsState()
+    val likedSongsList by viewModel.likedSongsTrackList.collectAsState()
+    val childrenPlaylistTrackList by viewModel.childrenPlaylistTrackList.collectAsState()
     // Conditionally display the list based on isChosenSongs state
-    var displayedList by remember { mutableStateOf(mainList) }
+    var displayedList by remember { mutableStateOf(subsectionList) }
 
-//    LaunchedEffect(Unit) {
-//        viewModel.retrieveAndAddSubsection()
-//        viewModel.getLikedTracks()  // Ensuring liked tracks are fetched and updated
-//    }
-//    LaunchedEffect(mainList) {
-//        if (isChosenSongs) {
-//            displayedList = mainList
-//        }
-//    }
-//    LaunchedEffect(childrenPlaylistTrackList) {
-//        if (isChosenSongs) {
-//            displayedList = childrenPlaylistTrackList
-//        }
-//    }
-//    LaunchedEffect(isChosenSongs) {
-//        displayedList = if (isChosenSongs) mainList else likedSongs
-//    }
+    val isTopSongsListVisible by viewModel.isTopSongsListVisible.collectAsState(false)
 
 
-    LaunchedEffect(Unit) { viewModel.retrieveAndAddSubsection() }
-    LaunchedEffect(mainList) { displayedList = mainList }
+    LaunchedEffect(Unit) {
+        viewModel.retrieveAndAddSubsection()
+        viewModel.getLikedTracks()
+    }
+
+    if (isTopSongsListVisible) {
+
+        LaunchedEffect(subsectionList) { displayedList = subsectionList }
+   } else {
+        LaunchedEffect(likedSongsList) { displayedList = likedSongsList }
+    }
 
     LaunchedEffect(childrenPlaylistTrackList) { displayedList = childrenPlaylistTrackList }
+
 
     Scaffold(
         topBar = {
@@ -84,19 +79,18 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: SpotifySongsActio
             modifier = Modifier.padding(all = 16.dp)
         ) {
             items(displayedList, key = { it.id }) { listItem ->
-                Log.d("SelectSongScreen", "listItem: $listItem" )
                 TrackItem(
                     listItem,
                     onClick = {
 
-                      if (listItem.hasChildren) {
-                        viewModel.retrieveChild(listItem)
-                      } else {
-                        viewModel.addTrackToList(
-                            ListType.TOP_SONGS,
-                            Track(listItem.id, listItem.title, listItem.subtitle))
-                        navActions.goBack()
-                      }
+                        if (listItem.hasChildren) {
+                            viewModel.retrieveChild(listItem)
+                        } else {
+                            viewModel.addTrackToList(
+                        isTopSongsListVisible?.let { if (it) ListType.TOP_SONGS else ListType.LIKED_SONGS }?:ListType.TOP_SONGS,
+                                Track(listItem.id, listItem.title, listItem.subtitle))
+                            navActions.goBack()
+                        }
                     })
             }
         }

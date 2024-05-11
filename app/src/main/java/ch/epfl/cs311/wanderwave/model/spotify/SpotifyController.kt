@@ -365,7 +365,7 @@ fun retrieveChildFromSpotify(
   }
 }
 
-suspend fun getLikedTracks(likedSongsTrackList: MutableStateFlow<List<ListItem>>,
+suspend fun getLikedTracksFromSpotify(likedSongsTrackList: MutableStateFlow<List<ListItem>>,
                            spotifyController: SpotifyController,
                            scope: CoroutineScope) {
     scope.launch {

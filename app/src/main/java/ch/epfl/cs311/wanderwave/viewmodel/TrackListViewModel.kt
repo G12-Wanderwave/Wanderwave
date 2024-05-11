@@ -6,6 +6,7 @@ import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
 import ch.epfl.cs311.wanderwave.model.spotify.retrieveAndAddSubsectionFromSpotify
 import ch.epfl.cs311.wanderwave.model.spotify.retrieveChildFromSpotify
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
@@ -30,6 +31,11 @@ constructor(
   private val _uiState = MutableStateFlow(UiState(loading = true))
   val uiState: StateFlow<UiState> = _uiState
 
+
+  private val _isTopSongsListVisible = MutableStateFlow(true)
+  override val isTopSongsListVisible: StateFlow<Boolean> = _isTopSongsListVisible
+
+
   private var _searchQuery = MutableStateFlow("")
 
   private var _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
@@ -38,6 +44,8 @@ constructor(
   private var _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   override val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
 
+  private val _likedSongsTrackList= MutableStateFlow<List<ListItem>>(emptyList())
+  override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
   init {
     observeTracks()
     spotifyController.setOnTrackEndCallback { skipForward() }
@@ -250,6 +258,11 @@ constructor(
   /** Sets the looping state of the player. */
   fun setLoop(loopMode: LoopMode) {
     _uiState.value = _uiState.value.copy(loopMode = loopMode)
+  }
+
+
+  override suspend fun getLikedTracks() {
+    getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
   }
 
   data class UiState(
