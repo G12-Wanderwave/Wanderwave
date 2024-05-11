@@ -78,10 +78,9 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
     LaunchedEffect(location != null, mapIsLoaded.value) {
       if (location != null && mapIsLoaded.value) {
           moveCamera(cameraPositionState, location, viewModel.cameraPosition.value)
-          val location = Location(location.latitude,location.longitude)
-          if (!hasEnoughBeacons(location,beacons)) {
-              viewModel.retrieveBeacons(location, context)
-          }
+
+
+
       }
     }
   }

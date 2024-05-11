@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.utils.createNearbyBeacons
+import ch.epfl.cs311.wanderwave.model.utils.hasEnoughBeacons
 import ch.epfl.cs311.wanderwave.model.utils.placeBeaconsRandomly
 import com.google.android.gms.maps.LocationSource
 import com.google.android.gms.maps.model.CameraPosition
@@ -60,6 +61,7 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
         _beaconList,
         10000.0,
         context,
+        beaconRepository,
         viewModelScope
       ) {
         val updatedBeacons = _beaconList.value + placeBeaconsRandomly(_beaconList.value, location)
@@ -83,6 +85,10 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
         location = l
       }
     }
+    if (location != null)
+      if (!hasEnoughBeacons(Location1(location.latitude, location.longitude),_uiState.value.beacons))
+      retrieveBeacons(Location1(location.latitude, location.longitude), context)
+  Log.d("MapViewModel", "getLastKnownLocation: $location" )
     return location?.let { LatLng(it.latitude, it.longitude) }
   }
 }

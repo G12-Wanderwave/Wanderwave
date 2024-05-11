@@ -9,6 +9,8 @@ import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import com.google.android.gms.common.api.ApiException
+import ch.epfl.cs311.wanderwave.model.remote.FirebaseConnection
+import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
@@ -129,9 +131,9 @@ fun computeDistanceBetweenBeacons(newBeacons: MutableList<Beacon>, beacons: List
 fun findRandomBeacon(location: Location, newBeacons: MutableList<Beacon>, it: Int) {
   val randomLocation = randomLatLongFromPosition(location, BEACON_RADIUS)
   val newBeacon =
-      Beacon(
-          id = "beacon${newBeacons.size + it}", // TODO: modify the ID!!!!!!!!
-          location = Location(randomLocation.latitude, randomLocation.longitude))
+    Beacon(
+      id = "beacon${newBeacons.size + it}", // TODO: modify the ID!!!!!!!!
+      location = Location(randomLocation.latitude, randomLocation.longitude))
   newBeacons.add(newBeacon)
 }
 
@@ -203,12 +205,12 @@ fun randomLatLongFromPosition(userPosition: Location, distance: Double): Locatio
 
   // New latitude in radians
   val newLat =
-      asin(sin(latRad) * cos(angularDistance) + cos(latRad) * sin(angularDistance) * cos(bearing))
+    asin(sin(latRad) * cos(angularDistance) + cos(latRad) * sin(angularDistance) * cos(bearing))
 
   // New longitude in radians
   val newLon =
-      lonRad +
-          atan2(
+    lonRad +
+            atan2(
               sin(bearing) * sin(angularDistance) * cos(latRad),
               cos(angularDistance) - sin(latRad) * sin(newLat))
 
@@ -233,8 +235,9 @@ fun createNearbyBeacons(
   nearbyBeacons: MutableStateFlow<List<Beacon>>,
   radius: Double,
   context: Context,
+  beaconRepository: BeaconRepository,
   scope: CoroutineScope,
-  onComplete: () -> Unit
+  onComplete: () -> Unit,
 ) {
   scope.launch {
     if (radius <= 0.0) {
@@ -245,7 +248,7 @@ fun createNearbyBeacons(
     val nearbyPOIs = MutableStateFlow<List<Location>>(emptyList())
 
     // Pass the `onComplete` callback to `getNearbyPOIs`
-    getNearbyPOIs(context, location, radius, nearbyPOIs, nearbyBeacons, newBeacons, onComplete)
+    getNearbyPOIs(context, location, radius, nearbyPOIs, nearbyBeacons, newBeacons,beaconRepository, onComplete)
   }
 }
 
@@ -264,6 +267,7 @@ fun getNearbyPOIs(
   nearbyPOIs: MutableStateFlow<List<Location>>,
   nearbyBeacons: MutableStateFlow<List<Beacon>>,
   newBeacons: MutableList<Beacon>,
+  beaconRepository: BeaconRepository,
   onComplete: () -> Unit
 ) {
   Places.initialize(context, BuildConfig.MAPS_API_KEY)
@@ -296,6 +300,8 @@ fun getNearbyPOIs(
           if (nearbyBeacons.value.all { it.location.distanceBetween(poi) > MIN_BEACON_DISTANCE } &&
             newBeacons.all { it.location.distanceBetween(poi) > MIN_BEACON_DISTANCE }) {
             newBeacons.add(Beacon(poi.name, poi))
+            val temp = beaconRepository.addItemWithId(Beacon(poi.name, poi))
+            Log.d("Temp was added " , temp.toString() )
           }
         }
         nearbyBeacons.value += newBeacons
