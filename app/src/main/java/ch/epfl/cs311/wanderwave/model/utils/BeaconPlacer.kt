@@ -8,63 +8,59 @@ import androidx.core.content.ContextCompat
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
-import com.google.android.gms.common.api.ApiException
-import ch.epfl.cs311.wanderwave.model.remote.FirebaseConnection
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
+import com.google.android.gms.common.api.ApiException
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
-import com.spotify.protocol.types.ListItem
+import kotlin.math.*
+import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlin.math.*
-import kotlin.random.Random
 
 private const val EARTH_RADIUS = 6371.0
 private const val BEACON_RADIUS = 2.0
 private const val BEACON_COUNT = 20
-private const val NUMBER_ITERATION = 2
 private const val MIN_BEACON_DISTANCE = 0.1
 
 val types: List<String> =
-  listOf(
-    "airport",
-    "amusement_park",
-    "aquarium",
-    "art_gallery",
-    "spa",
-    "bowling_alley",
-    "cafe",
-    "campground",
-    "casino",
-    "church",
-    "city_hall",
-    "courthouse",
-    "drugstore",
-    "embassy",
-    "establishment",
-    "fire_station",
-    "hindu_temple",
-    "hospital",
-    "library",
-    "light_rail_station",
-    "local_government_office",
-    "movie_theater",
-    "museum",
-    "park",
-    "primary_school",
-    "spa",
-    "stadium",
-    "store",
-    "subway_station",
-    "synagogue",
-    "tourist_attraction",
-    "train_station",
-    "transit_station",
-    "university",
-    "zoo")
-
+    listOf(
+        "airport",
+        "amusement_park",
+        "aquarium",
+        "art_gallery",
+        "spa",
+        "bowling_alley",
+        "cafe",
+        "campground",
+        "casino",
+        "church",
+        "city_hall",
+        "courthouse",
+        "drugstore",
+        "embassy",
+        "establishment",
+        "fire_station",
+        "hindu_temple",
+        "hospital",
+        "library",
+        "light_rail_station",
+        "local_government_office",
+        "movie_theater",
+        "museum",
+        "park",
+        "primary_school",
+        "spa",
+        "stadium",
+        "store",
+        "subway_station",
+        "synagogue",
+        "tourist_attraction",
+        "train_station",
+        "transit_station",
+        "university",
+        "zoo")
 
 /**
  * This function places beacons randomly in the vicinity of the user's location. It first checks if
@@ -79,23 +75,19 @@ val types: List<String> =
  * @since 2.0
  * @last update 2.0
  */
-fun placeBeaconsRandomly(beacons: List<Beacon>, location: Location): List<Beacon> {
-  var finalBeacons = mutableListOf<Beacon>()
+fun placeBeaconsRandomly(
+    beacons: List<Beacon>,
+    location: Location,
+    beaconRepository: BeaconRepository
+): List<Beacon> {
+  val newBeacons = mutableListOf<Beacon>()
   var nearbyBeacons = findNearbyBeacons(location, beacons)
   if (nearbyBeacons.size < BEACON_COUNT) {
-    var currentMaxDistance = 0.0
-    repeat(NUMBER_ITERATION) {
-      val newBeacons = mutableListOf<Beacon>()
-      repeat(BEACON_COUNT - nearbyBeacons.size) { findRandomBeacon(location, newBeacons, it) }
-      var newMaxDistance = computeDistanceBetweenBeacons(newBeacons, beacons)
-      if (newMaxDistance > currentMaxDistance || finalBeacons.isEmpty()) {
-        currentMaxDistance = newMaxDistance
-        finalBeacons = newBeacons
-      }
+    repeat(BEACON_COUNT - nearbyBeacons.size) {
+      findRandomBeacon(location, newBeacons, it, beaconRepository)
     }
   }
-  Log.d("BeaconPlacer", "Placed $finalBeacons beacons")
-  return finalBeacons
+  return newBeacons
 }
 
 /**
@@ -128,12 +120,17 @@ fun computeDistanceBetweenBeacons(newBeacons: MutableList<Beacon>, beacons: List
  * @since 2.0
  * @last update 2.0
  */
-fun findRandomBeacon(location: Location, newBeacons: MutableList<Beacon>, it: Int) {
+fun findRandomBeacon(
+    location: Location,
+    newBeacons: MutableList<Beacon>,
+    it: Int,
+    beaconRepository: BeaconRepository
+) {
   val randomLocation = randomLatLongFromPosition(location, BEACON_RADIUS)
   val newBeacon =
-    Beacon(
-      id = "beacon${newBeacons.size + it}", // TODO: modify the ID!!!!!!!!
-      location = Location(randomLocation.latitude, randomLocation.longitude))
+      Beacon(
+          id = "beacon${newBeacons.size + it}", // TODO a modifier
+          location = Location(randomLocation.latitude, randomLocation.longitude))
   newBeacons.add(newBeacon)
 }
 
@@ -162,8 +159,6 @@ fun findNearbyBeacons(userPosition: Location, beacons: List<Beacon>): List<Beaco
 }
 
 /**
- *
- *
  * @param userPosition the user's location
  * @param beacons the list of existing beacons
  * @param radius the radius in which the beacons are considered to be nearby
@@ -172,18 +167,15 @@ fun findNearbyBeacons(userPosition: Location, beacons: List<Beacon>): List<Beaco
  * @since 2.0
  * @last update 2.0
  */
-fun hasEnoughBeacons(userPosition: Location, beacons: List<Beacon>): Boolean{
+fun hasEnoughBeacons(userPosition: Location, beacons: List<Beacon>): Boolean {
   var nearbyBeacons = mutableListOf<Beacon>()
   beacons.forEach {
     if ((userPosition.distanceBetween(it.location)) < BEACON_RADIUS) {
       nearbyBeacons += it
     }
   }
-  Log.d("BeaconPlacer", "Found ${nearbyBeacons.size} nearby beacons"  )
-  return nearbyBeacons.size==BEACON_COUNT
+  return nearbyBeacons.size == BEACON_COUNT
 }
-
-
 
 /**
  * This function generates a random latitude and longitude from a given position and distance. It
@@ -205,12 +197,12 @@ fun randomLatLongFromPosition(userPosition: Location, distance: Double): Locatio
 
   // New latitude in radians
   val newLat =
-    asin(sin(latRad) * cos(angularDistance) + cos(latRad) * sin(angularDistance) * cos(bearing))
+      asin(sin(latRad) * cos(angularDistance) + cos(latRad) * sin(angularDistance) * cos(bearing))
 
   // New longitude in radians
   val newLon =
-    lonRad +
-            atan2(
+      lonRad +
+          atan2(
               sin(bearing) * sin(angularDistance) * cos(latRad),
               cos(angularDistance) - sin(latRad) * sin(newLat))
 
@@ -219,7 +211,6 @@ fun randomLatLongFromPosition(userPosition: Location, distance: Double): Locatio
 
   return Location(newLatDeg, newLonDeg)
 }
-
 
 /**
  * Create new beacons at nearby points of interest.
@@ -231,13 +222,13 @@ fun randomLatLongFromPosition(userPosition: Location, distance: Double): Locatio
  * @return A list of new beacons.
  */
 fun createNearbyBeacons(
-  location: Location,
-  nearbyBeacons: MutableStateFlow<List<Beacon>>,
-  radius: Double,
-  context: Context,
-  beaconRepository: BeaconRepository,
-  scope: CoroutineScope,
-  onComplete: () -> Unit,
+    location: Location,
+    nearbyBeacons: MutableStateFlow<List<Beacon>>,
+    radius: Double,
+    context: Context,
+    beaconRepository: BeaconRepository,
+    scope: CoroutineScope,
+    onComplete: () -> Unit,
 ) {
   scope.launch {
     if (radius <= 0.0) {
@@ -248,7 +239,15 @@ fun createNearbyBeacons(
     val nearbyPOIs = MutableStateFlow<List<Location>>(emptyList())
 
     // Pass the `onComplete` callback to `getNearbyPOIs`
-    getNearbyPOIs(context, location, radius, nearbyPOIs, nearbyBeacons, newBeacons,beaconRepository, onComplete)
+    getNearbyPOIs(
+        context,
+        location,
+        radius,
+        nearbyPOIs,
+        nearbyBeacons,
+        newBeacons,
+        beaconRepository,
+        onComplete)
   }
 }
 
@@ -261,14 +260,14 @@ fun createNearbyBeacons(
  * @return A list of nearby POIs.
  */
 fun getNearbyPOIs(
-  context: Context,
-  location: Location,
-  radius: Double,
-  nearbyPOIs: MutableStateFlow<List<Location>>,
-  nearbyBeacons: MutableStateFlow<List<Beacon>>,
-  newBeacons: MutableList<Beacon>,
-  beaconRepository: BeaconRepository,
-  onComplete: () -> Unit
+    context: Context,
+    location: Location,
+    radius: Double,
+    nearbyPOIs: MutableStateFlow<List<Location>>,
+    nearbyBeacons: MutableStateFlow<List<Beacon>>,
+    newBeacons: MutableList<Beacon>,
+    beaconRepository: BeaconRepository,
+    onComplete: () -> Unit
 ) {
   Places.initialize(context, BuildConfig.MAPS_API_KEY)
   val placesClient = Places.createClient(context)
@@ -279,46 +278,47 @@ fun getNearbyPOIs(
   val placeFieldTypes = Place.Field.TYPES
   val placeFieldRating = Place.Field.RATING
 
-  val placeFields = listOf(placeFieldID, placeFieldName, placeFieldLatLng, placeFieldTypes, placeFieldRating)
+  val placeFields =
+      listOf(placeFieldID, placeFieldName, placeFieldLatLng, placeFieldTypes, placeFieldRating)
 
   val request = FindCurrentPlaceRequest.newInstance(placeFields)
 
   if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
-    PackageManager.PERMISSION_GRANTED) {
+      PackageManager.PERMISSION_GRANTED) {
     placesClient
-      .findCurrentPlace(request)
-      .addOnSuccessListener { response ->
-        for (placeLikelihood in response.placeLikelihoods) {
-          val place = placeLikelihood.place
-          val placeLoc = Location(place.latLng.latitude, place.latLng.longitude, place.name)
+        .findCurrentPlace(request)
+        .addOnSuccessListener { response ->
+          for (placeLikelihood in response.placeLikelihoods) {
+            val place = placeLikelihood.place
+            val placeLoc = Location(place.latLng.latitude, place.latLng.longitude, place.name)
 
-          if ((location.distanceBetween(placeLoc) <= radius) &&
-            place.placeTypes.any { types.contains(it) }
-          ) nearbyPOIs.value += placeLoc
-        }
-        nearbyPOIs.value.forEach { poi ->
-          if (nearbyBeacons.value.all { it.location.distanceBetween(poi) > MIN_BEACON_DISTANCE } &&
-            newBeacons.all { it.location.distanceBetween(poi) > MIN_BEACON_DISTANCE }) {
-            newBeacons.add(Beacon(poi.name, poi))
-            val temp = beaconRepository.addItemWithId(Beacon(poi.name, poi))
-            Log.d("Temp was added " , temp.toString() )
+            if ((location.distanceBetween(placeLoc) <= radius) &&
+                place.placeTypes.any { types.contains(it) })
+                nearbyPOIs.value += placeLoc
           }
-        }
-        nearbyBeacons.value += newBeacons
+          nearbyPOIs.value.forEach { poi ->
+            if (nearbyBeacons.value.all {
+              it.location.distanceBetween(poi) > MIN_BEACON_DISTANCE
+            } && newBeacons.all { it.location.distanceBetween(poi) > MIN_BEACON_DISTANCE }) {
+              newBeacons.add(Beacon(poi.name, poi))
+              val temp = beaconRepository.addItemWithId(Beacon(poi.name, poi))
+            }
+          }
+          nearbyBeacons.value += newBeacons
 
-        // Invoke `onComplete` after processing API results
-        onComplete()
-      }
-      .addOnFailureListener { exception ->
-        if (exception is ApiException) {
-          Log.e("PlacesApi", "Place not found: ${exception.statusCode}")
-          Log.e("PlacesApi", "Place not found: ${exception.message}")
-        } else {
-          Log.e("Error", "An error occurred: ${exception.message}")
+          // Invoke `onComplete` after processing API results
+          onComplete()
         }
+        .addOnFailureListener { exception ->
+          if (exception is ApiException) {
+            Log.e("PlacesApi", "Place not found: ${exception.statusCode}")
+            Log.e("PlacesApi", "Place not found: ${exception.message}")
+          } else {
+            Log.e("Error", "An error occurred: ${exception.message}")
+          }
 
-        // Call `onComplete` to ensure failure also triggers it
-        onComplete()
-      }
+          // Call `onComplete` to ensure failure also triggers it
+          onComplete()
+        }
   }
 }

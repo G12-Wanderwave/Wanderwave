@@ -4,12 +4,12 @@ import android.Manifest
 import android.content.Context
 import android.location.Location
 import android.location.LocationManager
-import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Beacon
+import ch.epfl.cs311.wanderwave.model.data.Location as Location1
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.utils.createNearbyBeacons
 import ch.epfl.cs311.wanderwave.model.utils.hasEnoughBeacons
@@ -22,7 +22,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import ch.epfl.cs311.wanderwave.model.data.Location as Location1
 
 @HiltViewModel
 class MapViewModel
@@ -34,10 +33,9 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
   private val _uiState = MutableStateFlow(BeaconListUiState(loading = true))
   val uiState: StateFlow<BeaconListUiState> = _uiState
 
-
-
   private var _beaconList = MutableStateFlow<List<Beacon>>(emptyList())
   val beaconList: StateFlow<List<Beacon>> = _beaconList
+
   init {
     observeBeacons()
   }
@@ -57,19 +55,16 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
       _uiState.value = BeaconListUiState(loading = true)
 
       createNearbyBeacons(
-        location,
-        _beaconList,
-        10000.0,
-        context,
-        beaconRepository,
-        viewModelScope
-      ) {
-        val updatedBeacons = _beaconList.value + placeBeaconsRandomly(_beaconList.value, location)
-        // Update _uiState again once data is fetched
-        _uiState.value = BeaconListUiState(beacons = updatedBeacons, loading = false)
-      }
+          location, _beaconList, 10000.0, context, beaconRepository, viewModelScope) {
+            val updatedBeacons =
+                _beaconList.value +
+                    placeBeaconsRandomly(_beaconList.value, location, beaconRepository)
+            // Update _uiState again once data is fetched
+            _uiState.value = BeaconListUiState(beacons = updatedBeacons, loading = false)
+          }
     }
   }
+
   @RequiresPermission(
       allOf =
           [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION])
@@ -86,9 +81,9 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
       }
     }
     if (location != null)
-      if (!hasEnoughBeacons(Location1(location.latitude, location.longitude),_uiState.value.beacons))
-      retrieveBeacons(Location1(location.latitude, location.longitude), context)
-  Log.d("MapViewModel", "getLastKnownLocation: $location" )
+        if (!hasEnoughBeacons(
+            Location1(location.latitude, location.longitude), _uiState.value.beacons))
+            retrieveBeacons(Location1(location.latitude, location.longitude), context)
     return location?.let { LatLng(it.latitude, it.longitude) }
   }
 }
