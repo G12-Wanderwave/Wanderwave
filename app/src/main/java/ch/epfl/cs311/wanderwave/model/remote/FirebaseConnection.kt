@@ -96,6 +96,11 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
     return dataFlow.mapNotNull { it }
   }
 
+  /**
+   * Transforms the document snapshot or performs additional operations on the stateFlow.
+   * This function is intended to be overridden in subclasses if specific behavior is needed.
+   * If not overridden, it defaults to a no-op (no operation).
+   */
   open internal fun documentTransform(
       documentSnapshot: DocumentSnapshot,
       stateFlow: MutableStateFlow<T?>
