@@ -364,6 +364,16 @@ fun retrieveChildFromSpotify(
   }
 }
 
+/**
+ * Get all the liked tracks of the user and add them to the likedSongs list.
+ *
+ * @param likedSongsTrackList the list of liked songs
+ * @param spotifyController the SpotifyController
+ * @param scope the CoroutineScope
+ * @author Menzo Bouaissi
+ * @since 3.0
+ * @last update 3.0
+ */
 suspend fun getLikedTracksFromSpotify(
     likedSongsTrackList: MutableStateFlow<List<ListItem>>,
     spotifyController: SpotifyController,
@@ -381,6 +391,15 @@ suspend fun getLikedTracksFromSpotify(
   }
 }
 
+/**
+ * Parse the JSON response from the Spotify API to get the liked songs of the user.
+ *
+ * @param jsonResponse the JSON response from the Spotify API
+ * @param likedSongsTrackList the list of liked songs
+ * @author Menzo Bouaissi
+ * @since 3.0
+ * @last update 3.0
+ */
 fun parseTracks(
     jsonResponse: String,
     likedSongsTrackList: MutableStateFlow<List<ListItem>>,

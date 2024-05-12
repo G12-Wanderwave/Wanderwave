@@ -116,4 +116,22 @@ class ProfileViewModelTest {
     assertEquals(expectedListItem, result?.get(0))
     assertEquals(expectedListItem, result2?.get(0))
   }
+
+  @Test
+  fun changeChosenSongsTogglesVisibility() = runBlockingTest {
+    // Initially, the visibility is true
+    assertTrue(viewModel.isTopSongsListVisible.value)
+
+    // Call the function to change visibility
+    viewModel.changeChosenSongs()
+
+    // Now, the visibility should be false
+    assertFalse(viewModel.isTopSongsListVisible.value)
+
+    // Call the function again to change visibility back
+    viewModel.changeChosenSongs()
+
+    // The visibility should be true again
+    assertTrue(viewModel.isTopSongsListVisible.value)
+  }
 }

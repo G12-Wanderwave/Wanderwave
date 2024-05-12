@@ -141,6 +141,13 @@ constructor(
         item, this._childrenPlaylistTrackList, spotifyController, viewModelScope)
   }
 
+  /**
+   * Get all the liked tracks of the user and add them to the likedSongs list.
+   *
+   * @author Menzo Bouaissi
+   * @since 3.0
+   * @last update 3.0
+   */
   override suspend fun getLikedTracks() {
     getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
   }
