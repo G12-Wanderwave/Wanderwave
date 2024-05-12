@@ -14,8 +14,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-class TrackConnection(private val database: FirebaseFirestore? = null) :
-    FirebaseConnection<Track, Track>(), TrackRepository {
+class TrackConnection(private val database: FirebaseFirestore) :
+    FirebaseConnection<Track, Track>(database), TrackRepository {
 
   // THe goal is to have the Id of the firebase document to match the id of the spotify track
 
@@ -23,7 +23,7 @@ class TrackConnection(private val database: FirebaseFirestore? = null) :
 
   override val getItemId = { track: Track -> track.id }
 
-  override val db = database ?: super.db
+  override val db = database
 
   // Document to Track
   override fun documentToItem(document: DocumentSnapshot): Track? {
