@@ -48,14 +48,14 @@ abstract class FirebaseConnection<T, U> {
         .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully added!") }
   }
 
-  suspend fun addItemAndGetId(item: T): String? {
+  open suspend fun addItemAndGetId(item: T): String? {
     val itemMap = itemToMap(item)
     var documentId: String? = null
 
     try {
       val documentReference = db.collection(collectionName).add(itemMap).await()
 
-      Log.d("Firestore", "DocumentSnapshot successfully added!")
+      Log.d("Firestore", "DocumentSnapshot successfully added! ${documentReference.id}")
       documentId = documentReference.id
     } catch (e: Exception) {
       Log.e("Firestore", "Error adding document: ", e)
