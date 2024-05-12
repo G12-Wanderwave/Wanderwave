@@ -88,7 +88,6 @@ class SpotifyControllerTest {
     every { mockAppRemote.playerApi } returns mockPlayerApi
     coEvery { authenticationController.makeApiRequest(any()) } returns "Test"
 
-    coEvery { spotifyController.spotifyGetFromURL(any()) } returns "Test"
     mockScope = mockk<CoroutineScope>()
   }
 
