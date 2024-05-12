@@ -1,9 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import android.util.Log
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,7 +13,6 @@ import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
 import ch.epfl.cs311.wanderwave.model.spotify.retrieveAndAddSubsectionFromSpotify
 import ch.epfl.cs311.wanderwave.model.spotify.retrieveChildFromSpotify
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
-import com.spotify.protocol.types.ImageUri
 import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -24,7 +20,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 
 // Define a simple class for a song list
 data class SongList(val name: ListType, val tracks: List<Track> = mutableListOf())
@@ -33,23 +28,22 @@ data class SongList(val name: ListType, val tracks: List<Track> = mutableListOf(
 class ProfileViewModel
 @Inject
 constructor(
-  private val repository: ProfileRepository, // TODO revoir
-  private val spotifyController: SpotifyController
+    private val repository: ProfileRepository, // TODO revoir
+    private val spotifyController: SpotifyController
 ) : ViewModel(), SpotifySongsActions {
 
   private val _profile =
-    MutableStateFlow(
-      Profile(
-        firstName = "My FirstName",
-        lastName = "My LastName",
-        description = "My Description",
-        numberOfLikes = 0,
-        isPublic = true,
-        spotifyUid = "My Spotify UID",
-        firebaseUid = "My Firebase UID",
-        profilePictureUri = null))
+      MutableStateFlow(
+          Profile(
+              firstName = "My FirstName",
+              lastName = "My LastName",
+              description = "My Description",
+              numberOfLikes = 0,
+              isPublic = true,
+              spotifyUid = "My Spotify UID",
+              firebaseUid = "My Firebase UID",
+              profilePictureUri = null))
   val profile: StateFlow<Profile> = _profile
-
 
   private val _isTopSongsListVisible = MutableStateFlow(true)
   override val isTopSongsListVisible: StateFlow<Boolean> = _isTopSongsListVisible
@@ -73,9 +67,8 @@ constructor(
   private var _uiState = MutableStateFlow(UIState())
   val uiState: StateFlow<UIState> = _uiState
 
-  private val _likedSongsTrackList= MutableStateFlow<List<ListItem>>(emptyList())
+  private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
-
 
   fun createSpecificSongList(listType: ListType) {
     val listName = listType // Check if the list already exists
@@ -90,15 +83,15 @@ constructor(
   // Function to add a track to a song list
   override fun addTrackToList(listName: ListType, track: Track) {
     val updatedLists =
-      _songLists.value.map { list ->
-        if (list.name == listName) {
-          if (list.tracks.contains(track)) return@map list
+        _songLists.value.map { list ->
+          if (list.name == listName) {
+            if (list.tracks.contains(track)) return@map list
 
-          list.copy(tracks = ArrayList(list.tracks).apply { add(track) })
-        } else {
-          list
+            list.copy(tracks = ArrayList(list.tracks).apply { add(track) })
+          } else {
+            list
+          }
         }
-      }
     _songLists.value = updatedLists
   }
 
@@ -115,11 +108,9 @@ constructor(
     _isInPublicMode.value = !_isInPublicMode.value
   }
 
-
   fun changeChosenSongs() {
     _isTopSongsListVisible.value = !_isTopSongsListVisible.value
   }
-
 
   fun getProfileByID(id: String) {
     viewModelScope.launch {
@@ -147,17 +138,16 @@ constructor(
    */
   override fun retrieveChild(item: ListItem) {
     retrieveChildFromSpotify(
-      item, this._childrenPlaylistTrackList, spotifyController, viewModelScope)
+        item, this._childrenPlaylistTrackList, spotifyController, viewModelScope)
   }
-
 
   override suspend fun getLikedTracks() {
     getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
   }
 
   data class UIState(
-    val profile: Profile? = null,
-    val isLoading: Boolean = true,
-    val error: String? = null
+      val profile: Profile? = null,
+      val isLoading: Boolean = true,
+      val error: String? = null
   )
 }

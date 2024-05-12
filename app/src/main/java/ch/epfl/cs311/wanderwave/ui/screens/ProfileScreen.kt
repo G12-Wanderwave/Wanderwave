@@ -66,7 +66,7 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
   val currentProfileState by viewModel.profile.collectAsState()
   val songLists by viewModel.songLists.collectAsState()
   val dialogListType by remember { mutableStateOf(ListType.TOP_SONGS) }
-    val isTopSongsListVisible by viewModel.isTopSongsListVisible.collectAsState(false)
+  val isTopSongsListVisible by viewModel.isTopSongsListVisible.collectAsState(false)
 
   val currentProfile: Profile = currentProfileState
   LaunchedEffect(Unit) {
@@ -87,9 +87,7 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
         }
         // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
         Button(
-            onClick = {
-                 viewModel.changeChosenSongs()
-                      },
+            onClick = { viewModel.changeChosenSongs() },
             modifier = Modifier.testTag("toggleSongList")) {
               Text(if (isTopSongsListVisible) "Show CHOSEN TOPS" else "Show LIKED SONGS")
             }

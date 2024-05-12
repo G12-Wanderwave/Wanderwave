@@ -31,10 +31,8 @@ constructor(
   private val _uiState = MutableStateFlow(UiState(loading = true))
   val uiState: StateFlow<UiState> = _uiState
 
-
   private val _isTopSongsListVisible = MutableStateFlow(true)
   override val isTopSongsListVisible: StateFlow<Boolean> = _isTopSongsListVisible
-
 
   private var _searchQuery = MutableStateFlow("")
 
@@ -44,8 +42,9 @@ constructor(
   private var _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   override val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
 
-  private val _likedSongsTrackList= MutableStateFlow<List<ListItem>>(emptyList())
+  private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
+
   init {
     observeTracks()
     spotifyController.setOnTrackEndCallback { skipForward() }
@@ -259,7 +258,6 @@ constructor(
   fun setLoop(loopMode: LoopMode) {
     _uiState.value = _uiState.value.copy(loopMode = loopMode)
   }
-
 
   override suspend fun getLikedTracks() {
     getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)

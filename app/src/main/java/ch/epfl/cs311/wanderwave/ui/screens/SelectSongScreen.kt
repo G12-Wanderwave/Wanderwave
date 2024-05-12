@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -40,59 +39,53 @@ import com.spotify.protocol.types.ListItem
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectSongScreen(navActions: NavigationActions, viewModel: SpotifySongsActions) {
-    val subsectionList by viewModel.spotifySubsectionList.collectAsState()
-    val likedSongsList by viewModel.likedSongsTrackList.collectAsState()
-    val childrenPlaylistTrackList by viewModel.childrenPlaylistTrackList.collectAsState()
-    // Conditionally display the list based on isChosenSongs state
-    var displayedList by remember { mutableStateOf(emptyList<ListItem>()) }
+  val subsectionList by viewModel.spotifySubsectionList.collectAsState()
+  val likedSongsList by viewModel.likedSongsTrackList.collectAsState()
+  val childrenPlaylistTrackList by viewModel.childrenPlaylistTrackList.collectAsState()
+  // Conditionally display the list based on isChosenSongs state
+  var displayedList by remember { mutableStateOf(emptyList<ListItem>()) }
 
-    val isTopSongsListVisible by viewModel.isTopSongsListVisible.collectAsState(false)
+  val isTopSongsListVisible by viewModel.isTopSongsListVisible.collectAsState(false)
 
+  LaunchedEffect(Unit) {
+    viewModel.retrieveAndAddSubsection()
+    viewModel.getLikedTracks()
+  }
 
-    LaunchedEffect(Unit) {
-        viewModel.retrieveAndAddSubsection()
-        viewModel.getLikedTracks()
-    }
+  if (isTopSongsListVisible) {
+    LaunchedEffect(subsectionList) { displayedList = subsectionList }
+    LaunchedEffect(childrenPlaylistTrackList) { displayedList = childrenPlaylistTrackList }
+  } else {
+    LaunchedEffect(likedSongsList) { displayedList = likedSongsList }
+  }
 
-    if (isTopSongsListVisible) {
-        LaunchedEffect(subsectionList) { displayedList = subsectionList }
-        LaunchedEffect(childrenPlaylistTrackList) { displayedList = childrenPlaylistTrackList }
-    } else {
-        LaunchedEffect(likedSongsList) { displayedList = likedSongsList }
-    }
-
-
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Select Song") },
-                navigationIcon = {
-                    IconButton(onClick = { navActions.goBack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Go back")
-                    }
-                }
-            )
-        }) { innerPadding ->
-        LazyColumn(
-            contentPadding = innerPadding,
-            modifier = Modifier.padding(all = 16.dp)
-        ) {
-            items(displayedList, key = { it.id }) { listItem ->
-                TrackItem(
-                    listItem,
-                    onClick = {
-
-                        if (listItem.hasChildren) {
-                            viewModel.retrieveChild(listItem)
-                        } else {
-                            viewModel.addTrackToList(
-                        isTopSongsListVisible?.let { if (it) ListType.TOP_SONGS else ListType.LIKED_SONGS }?:ListType.TOP_SONGS,
-                                Track(listItem.id, listItem.title, listItem.subtitle))
-                            navActions.goBack()
-                        }
-                    })
-            }
+  Scaffold(
+      topBar = {
+        TopAppBar(
+            title = { Text("Select Song") },
+            navigationIcon = {
+              IconButton(onClick = { navActions.goBack() }) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = "Go back")
+              }
+            })
+      }) { innerPadding ->
+        LazyColumn(contentPadding = innerPadding, modifier = Modifier.padding(all = 16.dp)) {
+          items(displayedList, key = { it.id }) { listItem ->
+            TrackItem(
+                listItem,
+                onClick = {
+                  if (listItem.hasChildren) {
+                    viewModel.retrieveChild(listItem)
+                  } else {
+                    viewModel.addTrackToList(
+                        isTopSongsListVisible?.let {
+                          if (it) ListType.TOP_SONGS else ListType.LIKED_SONGS
+                        } ?: ListType.TOP_SONGS,
+                        Track(listItem.id, listItem.title, listItem.subtitle))
+                    navActions.goBack()
+                  }
+                })
+          }
         }
-    }
+      }
 }

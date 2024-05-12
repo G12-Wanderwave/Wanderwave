@@ -1,10 +1,8 @@
 package ch.epfl.cs311.wanderwave.viewmodel.interfaces
 
-import androidx.compose.runtime.mutableStateOf
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.spotify.protocol.types.ListItem
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 interface SpotifySongsActions {
@@ -45,13 +43,11 @@ interface SpotifySongsActions {
   fun retrieveChild(item: ListItem)
 
   /**
-   * Get all the liked tracks of the user and add them to the likedSongs
-   * list.
+   * Get all the liked tracks of the user and add them to the likedSongs list.
    *
    * @author Menzo Bouaissi
    * @since 3.0
    * @last update 3.0
    */
   suspend fun getLikedTracks()
-
 }

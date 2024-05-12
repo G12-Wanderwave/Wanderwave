@@ -2,7 +2,6 @@ package ch.epfl.cs311.wanderwave.model.spotify
 
 import android.content.Context
 import android.util.Log
-import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -365,30 +364,36 @@ fun retrieveChildFromSpotify(
   }
 }
 
-suspend fun getLikedTracksFromSpotify(likedSongsTrackList: MutableStateFlow<List<ListItem>>,
-                           spotifyController: SpotifyController,
-                           scope: CoroutineScope) {
-    scope.launch {
-        val url = "https://api.spotify.com/v1/me/tracks"
-        try {
-            val jsonResponse = spotifyController.spotifyGetFromURL("$url?limit=50")  // TODO : revoir la limite
-            parseTracks(jsonResponse,likedSongsTrackList)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+suspend fun getLikedTracksFromSpotify(
+    likedSongsTrackList: MutableStateFlow<List<ListItem>>,
+    spotifyController: SpotifyController,
+    scope: CoroutineScope
+) {
+  scope.launch {
+    val url = "https://api.spotify.com/v1/me/tracks"
+    try {
+      val jsonResponse =
+          spotifyController.spotifyGetFromURL("$url?limit=50") // TODO : revoir la limite
+      parseTracks(jsonResponse, likedSongsTrackList)
+    } catch (e: Exception) {
+      e.printStackTrace()
     }
+  }
 }
 
-fun parseTracks(jsonResponse: String,  likedSongsTrackList: MutableStateFlow<List<ListItem>>,) {
-    val jsonObject = JSONObject(jsonResponse)
-    val items = jsonObject.getJSONArray("items")
-    likedSongsTrackList.value = emptyList()
-    for (i in 0 until items.length()) {
-        val track = items.getJSONObject(i).getJSONObject("track")
-        val id = track.getString("id")
-        val name = track.getString("name")
-        val artistsArray = track.getJSONArray("artists")
-        val artist = artistsArray.getJSONObject(0).getString("name")  // Gets the primary artist
-        likedSongsTrackList.value += ListItem(id, "", ImageUri(""), name, artist, false, false)
-    }
+fun parseTracks(
+    jsonResponse: String,
+    likedSongsTrackList: MutableStateFlow<List<ListItem>>,
+) {
+  val jsonObject = JSONObject(jsonResponse)
+  val items = jsonObject.getJSONArray("items")
+  likedSongsTrackList.value = emptyList()
+  for (i in 0 until items.length()) {
+    val track = items.getJSONObject(i).getJSONObject("track")
+    val id = track.getString("id")
+    val name = track.getString("name")
+    val artistsArray = track.getJSONArray("artists")
+    val artist = artistsArray.getJSONObject(0).getString("name") // Gets the primary artist
+    likedSongsTrackList.value += ListItem(id, "", ImageUri(""), name, artist, false, false)
+  }
 }
