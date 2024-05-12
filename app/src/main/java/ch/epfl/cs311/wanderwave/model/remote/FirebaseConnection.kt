@@ -24,7 +24,6 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
     db.collection(collectionName)
         .add(itemMap)
         .addOnFailureListener { e -> Log.e("Firestore", "Error adding document: ", e) }
-        .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully added!") }
   }
 
   suspend fun addItemAndGetId(item: T): String? {
@@ -34,7 +33,6 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
     try {
       val documentReference = db.collection(collectionName).add(itemMap).await()
 
-      Log.d("Firestore", "DocumentSnapshot successfully added!")
       documentId = documentReference.id
     } catch (e: Exception) {
       Log.e("Firestore", "Error adding document: ", e)
@@ -51,7 +49,6 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
         .document(itemId)
         .set(itemMap)
         .addOnFailureListener { e -> Log.e("Firestore", "Error adding document: ", e) }
-        .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully added!") }
   }
 
   open fun updateItem(item: T) {
@@ -62,7 +59,6 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
         .document(itemId)
         .set(itemMap) // Use set to update the document
         .addOnFailureListener { e -> Log.e("Firestore", "Error updating document: ", e) }
-        .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully updated!") }
   }
 
   open fun deleteItem(item: T) {
@@ -75,7 +71,6 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
         .document(itemId)
         .delete()
         .addOnFailureListener { e -> Log.e("Firestore", "Error deleting document: ", e) }
-        .addOnSuccessListener { Log.d("Firestore", "DocumentSnapshot successfully deleted!") }
   }
 
   open fun getItem(itemId: String): Flow<T> {
