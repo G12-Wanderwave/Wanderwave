@@ -8,7 +8,6 @@ import androidx.core.content.ContextCompat
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
-import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import com.google.android.gms.common.api.ApiException
 import com.google.android.libraries.places.api.Places
@@ -303,15 +302,15 @@ suspend fun getNearbyPOIs(
             if (nearbyBeacons.value.all {
               it.location.distanceBetween(poi) > MIN_BEACON_DISTANCE
             } && newBeacons.all { it.location.distanceBetween(poi) > MIN_BEACON_DISTANCE }) {
-                val beacon = Beacon(poi.name, poi)
+              val beacon = Beacon(poi.name, poi)
               newBeacons.add(beacon)
-                scope.launch {
-                    val id = beaconRepository.addItemAndGetId(beacon)
-                    if (id != null) {
-                        beacon.copy(id = id, location = poi, profileAndTrack = listOf())
-                    }
-                   // beaconRepository.updateItem(beacon)
+              scope.launch {
+                val id = beaconRepository.addItemAndGetId(beacon)
+                if (id != null) {
+                  beacon.copy(id = id, location = poi, profileAndTrack = listOf())
                 }
+                // beaconRepository.updateItem(beacon)
+              }
             }
           }
           nearbyBeacons.value += newBeacons
