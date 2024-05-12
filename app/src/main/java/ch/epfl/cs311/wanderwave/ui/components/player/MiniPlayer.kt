@@ -47,13 +47,13 @@ fun MiniPlayer(
           Box(modifier = Modifier.weight(1f).background(Color.Black)) {}
 
           MiniPlayerTitle(
-              modifier = Modifier.weight(4f),
+              modifier = Modifier.weight(4f).testTag("miniPlayerTitle"),
               isPlaying = uiStateFlow.value.isPlaying,
               onTitleClick = onTitleClick,
               track = uiStateFlow.value.selectedTrack)
 
           PlayPauseButton(
-              modifier = Modifier.weight(1f),
+              modifier = Modifier.weight(1f).testTag("miniPlayerPlayButton"),
               isPlaying = uiStateFlow.value.isPlaying,
               onPlayClick = onPlayClick,
               onPauseClick = onPauseClick)

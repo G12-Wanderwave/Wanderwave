@@ -71,6 +71,7 @@ fun AppScaffold(navController: NavHostController) {
   LaunchedEffect(currentRouteState) { showBottomBar = currentRouteState?.showBottomBar ?: false }
 
   Scaffold(
+      modifier = Modifier.testTag("appScaffold"),
       bottomBar = {
         if (showBottomBar) {
           AppBottomBar(
