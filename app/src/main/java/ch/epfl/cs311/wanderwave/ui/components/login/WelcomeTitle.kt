@@ -10,26 +10,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.ui.components.animated.AnimatedAppIcon
 
 @Composable
-fun WelcomeTitle(modifier: Modifier) {
+fun AppLogoWithTitle(
+    modifier: Modifier,
+    initialColor: Color,
+    finalColor: Color,
+    title: String,
+    subTitle: String
+) {
   Column(
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally,
       modifier = modifier.fillMaxWidth()) {
-        AnimatedAppIcon(initialColor = MaterialTheme.colorScheme.primary, finalColor = Color.Red)
+        AnimatedAppIcon(initialColor = initialColor, finalColor = finalColor)
         Text(
-            text = stringResource(id = R.string.welcome_title),
+            text = title,
             style = MaterialTheme.typography.displayLarge,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.testTag("welcomeTitle"))
         Text(
-            text = stringResource(id = R.string.welcome_subtitle),
+            text = subTitle,
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface,
