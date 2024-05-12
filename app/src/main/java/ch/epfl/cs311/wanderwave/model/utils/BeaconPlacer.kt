@@ -232,10 +232,6 @@ fun createNearbyBeacons(
     onComplete: () -> Unit,
 ) {
   scope.launch {
-    if (radius <= 0.0) {
-      throw IllegalArgumentException("Radius must be positive")
-    }
-
     val newBeacons = mutableListOf<Beacon>()
     val nearbyPOIs = MutableStateFlow<List<Location>>(emptyList())
 
@@ -309,19 +305,17 @@ suspend fun getNearbyPOIs(
                 if (id != null) {
                   beacon.copy(id = id, location = poi, profileAndTrack = listOf())
                 }
-                // beaconRepository.updateItem(beacon)
               }
             }
           }
           nearbyBeacons.value += newBeacons
-
-          // Invoke `onComplete` after processing API results
           onComplete()
         }
         .addOnFailureListener { exception ->
           if (exception is ApiException) {
             Log.e("PlacesApi", "Place not found: ${exception.statusCode}")
             Log.e("PlacesApi", "Place not found: ${exception.message}")
+            Log.e("PlacesApi", "Place not found: ${exception.localizedMessage}")
           } else {
             Log.e("Error", "An error occurred: ${exception.message}")
           }

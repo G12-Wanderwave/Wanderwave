@@ -122,8 +122,6 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
             PackageManager.PERMISSION_GRANTED) {
       fusedLocationClient.requestLocationUpdates(
           locationRequest, locationCallback, Looper.getMainLooper())
-    } else {
-      Log.e("MapViewModel", "Location permission not granted")
     }
   }
 }

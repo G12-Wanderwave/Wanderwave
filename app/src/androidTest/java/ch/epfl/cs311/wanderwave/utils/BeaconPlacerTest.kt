@@ -12,6 +12,7 @@ import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.utils.computeDistanceBetweenBeacons
 import ch.epfl.cs311.wanderwave.model.utils.findNearbyBeacons
 import ch.epfl.cs311.wanderwave.model.utils.findRandomBeacon
+import ch.epfl.cs311.wanderwave.model.utils.hasEnoughBeacons
 import ch.epfl.cs311.wanderwave.model.utils.placeBeaconsRandomly
 import ch.epfl.cs311.wanderwave.model.utils.randomLatLongFromPosition
 import ch.epfl.cs311.wanderwave.model.utils.types
@@ -20,7 +21,9 @@ import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -232,5 +235,25 @@ class BeaconPlacerTest : TestCase() {
 
     val actualDistance = location2.distanceBetween(result)
     assertTrue(actualDistance <= distance)
+  }
+
+  @Test
+  fun hasEnoughBeaconsReturnsTrueWhenBeaconCountIsMet() = runBlockingTest {
+    val userPosition = Location(0.0, 0.0)
+    val beacons = List(BEACON_COUNT) { Beacon("", Location(0.0, 0.0)) }
+
+    val result = hasEnoughBeacons(userPosition, beacons)
+
+    assertTrue(result)
+  }
+
+  @Test
+  fun hasEnoughBeaconsReturnsFalseWhenBeaconCountIsNotMet() = runBlockingTest {
+    val userPosition = Location(0.0, 0.0)
+    val beacons = List(BEACON_COUNT - 1) { Beacon("", Location(0.0, 0.0)) }
+
+    val result = hasEnoughBeacons(userPosition, beacons)
+
+    assertFalse(result)
   }
 }
