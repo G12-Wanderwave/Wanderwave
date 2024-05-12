@@ -44,7 +44,6 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
   val context = LocalContext.current
   val cameraPositionState: CameraPositionState = rememberCameraPositionState {}
   val mapIsLoaded = remember { mutableStateOf(false) }
-  val beacons: List<Beacon> = viewModel.uiState.collectAsStateWithLifecycle().value.beacons
 
   val permissionState =
       rememberMultiplePermissionsState(
