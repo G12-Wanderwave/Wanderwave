@@ -77,10 +77,7 @@ class TrackConnection(private val database: FirebaseFirestore) :
           return@withContext null
         }
 
-        ProfileTrackAssociation(
-            profile = profile ?: null,
-            track = track!!
-        )
+        ProfileTrackAssociation(profile = profile ?: null, track = track!!)
       } catch (e: Exception) {
         // Handle exceptions
         Log.e("Firestore", "Error fetching track:${e.message}")
