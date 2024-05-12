@@ -24,7 +24,6 @@ import com.google.android.gms.maps.LocationSource
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,11 +32,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class MapViewModel
 @Inject
-constructor(
-    @ApplicationContext private val context: Context,
-    val locationSource: LocationSource,
-    private val beaconRepository: BeaconRepository
-) : ViewModel() {
+constructor(val locationSource: LocationSource, private val beaconRepository: BeaconRepository) :
+    ViewModel() {
   val cameraPosition = MutableLiveData<CameraPosition?>()
 
   private val _uiState = MutableStateFlow(BeaconListUiState(loading = true))
@@ -50,7 +46,6 @@ constructor(
 
   init {
     observeBeacons()
-    startLocationUpdates()
   }
 
   private fun observeBeacons() {
@@ -97,7 +92,7 @@ constructor(
     return location?.let { LatLng(it.latitude, it.longitude) }
   }
 
-  private fun startLocationUpdates() {
+  fun startLocationUpdates(context: Context) {
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     val locationRequest =
         LocationRequest.create().apply {
