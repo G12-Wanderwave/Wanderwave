@@ -22,7 +22,6 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
   companion object {
     const val ADD_SUCCESS_LOG_MESSAGE = "DocumentSnapshot successfully added !!"
     const val ADD_FAILURE_LOG_MESSAGE = "Error adding document: "
-
   }
 
   open fun addItem(item: T) {
@@ -104,9 +103,9 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
   }
 
   /**
-   * Transforms the document snapshot or performs additional operations on the stateFlow.
-   * This function is intended to be overridden in subclasses if specific behavior is needed.
-   * If not overridden, it defaults to a no-op (no operation).
+   * Transforms the document snapshot or performs additional operations on the stateFlow. This
+   * function is intended to be overridden in subclasses if specific behavior is needed. If not
+   * overridden, it defaults to a no-op (no operation).
    */
   open internal fun documentTransform(
       documentSnapshot: DocumentSnapshot,
