@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -20,7 +21,7 @@ fun WelcomeTitle(modifier: Modifier) {
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally,
       modifier = modifier.fillMaxWidth()) {
-        AnimatedAppIcon()
+        AnimatedAppIcon(initialColor = MaterialTheme.colorScheme.primary, finalColor = Color.Red)
         Text(
             text = stringResource(id = R.string.welcome_title),
             style = MaterialTheme.typography.displayLarge,

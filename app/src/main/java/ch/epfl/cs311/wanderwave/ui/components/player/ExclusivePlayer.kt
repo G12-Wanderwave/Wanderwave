@@ -272,7 +272,7 @@ fun VotingButtons(selectedVote: MutableState<Int>, onVoteSelected: (Int) -> Unit
   Row(
       horizontalArrangement = Arrangement.SpaceAround,
       verticalAlignment = Alignment.CenterVertically,
-      modifier = Modifier.fillMaxWidth()) {
+      modifier = Modifier.fillMaxWidth().testTag("votingButtons")) {
         voteOptions.forEachIndexed { index, vote ->
           VotingButton(
               vote = vote,
