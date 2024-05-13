@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.ListType
+import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
@@ -11,6 +12,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.verify
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -118,5 +120,20 @@ class ProfileViewModelTest {
 
     assertEquals(expectedListItem, result?.get(0))
     assertEquals(expectedListItem, result2?.get(0))
+  }
+
+  @Test
+  fun testCreateProfile() = runBlockingTest {
+    every { profileRepository.isUidExisting("firebaseUid", any()) } answers
+        {
+          val callback = arg<(Boolean, Profile?) -> Unit>(1)
+          callback(false, null)
+        }
+
+    viewModel.getProfileByID("firebaseUid", true)
+
+    verify { profileRepository.addItemWithId(any()) }
+
+    viewModel.getProfileByID("firebaseUid", false)
   }
 }

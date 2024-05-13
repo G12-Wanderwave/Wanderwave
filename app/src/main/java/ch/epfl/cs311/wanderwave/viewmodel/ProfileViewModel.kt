@@ -101,7 +101,7 @@ constructor(
     _isInPublicMode.value = !_isInPublicMode.value
   }
 
-  suspend fun getProfileByID(id: String, create: Boolean = false) {
+  suspend fun getProfileByID(id: String, create: Boolean) {
     repository.isUidExisting(id) { exists, fetchedProfile ->
       if (exists) {
         _profile.value = fetchedProfile!!
@@ -117,7 +117,7 @@ constructor(
     }
   }
 
-  suspend fun getProfileOfCurrentUser(create: Boolean = false) {
+  suspend fun getProfileOfCurrentUser(create: Boolean) {
     val currentUserId = authenticationController.getUserData()!!.id
     getProfileByID(currentUserId, create)
   }

@@ -57,7 +57,7 @@ fun ProfileViewOnlyScreen(
 
   LaunchedEffect(profileId) {
     if (profileId != null) {
-      viewModel.getProfileByID(profileId)
+      viewModel.getProfileByID(profileId, false)
     } else {
       withContext(Dispatchers.Main) {
         navigationActions.navigateTo(Route.MAIN)
