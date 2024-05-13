@@ -8,6 +8,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -374,7 +375,7 @@ class TrackListViewModelTest {
   @Test
   fun playTrack() = run {
     viewModel.playTrack(track)
-    assertEquals(viewModel.uiState.value., track)
+    verify { mockSpotifyController.playTrack(track) }
   }
 
   @Test
