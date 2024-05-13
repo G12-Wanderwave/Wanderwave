@@ -159,7 +159,10 @@ class SpotifyController(private val context: Context) {
   ) {
     val currentTrack = playerState().firstOrNull()?.track
     val currentIndex =
-        trackList?.indexOfFirst { track -> "spotify:track:${track.id}" == currentTrack?.uri } ?: -1
+        trackList?.indexOfFirst { track -> track.id == currentTrack?.uri } ?: -1
+    Log.d("SpotifyController", "Skipping $direction")
+    Log.d("SpotifyController", "Track list: $trackList")
+    Log.d("SpotifyController", "Current index: $currentIndex")
     if (currentIndex != -1) {
       val nextIndex = (currentIndex + direction) % trackList!!.size
       val nextTrack = trackList!![nextIndex]
