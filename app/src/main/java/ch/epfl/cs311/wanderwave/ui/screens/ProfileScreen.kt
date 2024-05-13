@@ -70,6 +70,7 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
 
   val currentProfile: Profile = currentProfileState ?: return
   LaunchedEffect(Unit) {
+    viewModel.getProfileOfCurrentUser(true)
     viewModel.createSpecificSongList(ListType.TOP_SONGS)
     viewModel.createSpecificSongList(ListType.CHOSEN_SONGS)
   }

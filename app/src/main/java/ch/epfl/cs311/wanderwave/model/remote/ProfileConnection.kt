@@ -26,14 +26,11 @@ class ProfileConnection(
   override val db = database
   private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-  override fun isUidExisting(spotifyUid: String, callback: (Boolean, Profile?) -> Unit) {
+  override fun isUidExisting(firebaseUid: String, callback: (Boolean, Profile?) -> Unit) {
     db.collection("users")
-        .whereEqualTo("spotifyUid", spotifyUid)
+        .document(firebaseUid)
         .get()
-        .addOnSuccessListener { documents ->
-          val isExisting = documents.size() > 0
-          callback(isExisting, if (isExisting) documentToItem(documents.documents[0]) else null)
-        }
+        .addOnSuccessListener { document -> callback(true, documentToItem(document)) }
         .addOnFailureListener { exception ->
           Log.w("Firestore", "Error getting documents: ", exception)
           callback(false, null) // Assuming failure means document doesn't exist
