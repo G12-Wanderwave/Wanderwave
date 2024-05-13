@@ -123,7 +123,7 @@ jobs:
           force-avd-creation: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew connectedCheck --parallel --build-cache
+          script: ./gradlew connectedCheck --parallel --build-cache > instrumentation_test_log.txt
 
       # This step generates the coverage report which will be used later in the semster for monitoring purposes
       - name: Generate coverage
@@ -135,3 +135,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew build sonar --info
+
+        #   Upload the coverage report to codecov# Save the instrumentation test log as an artifact
+      - name: Save test logs
+        uses: actions/upload-artifact@v2
+        with:
+          name: instrumentation-test-logs
+          path: instrumentation_test_log.txt
