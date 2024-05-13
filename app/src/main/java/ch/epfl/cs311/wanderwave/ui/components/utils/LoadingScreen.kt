@@ -6,9 +6,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import ch.epfl.cs311.wanderwave.ui.components.login.AppLogoWithTitle
+import ch.epfl.cs311.wanderwave.ui.theme.coldEnd
+import ch.epfl.cs311.wanderwave.ui.theme.coldStart
 
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {
@@ -27,6 +28,3 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
         }
       }
 }
-
-val coldStart = Color(0xFF03045E)
-val coldEnd = Color(0xFFCAF0F8)

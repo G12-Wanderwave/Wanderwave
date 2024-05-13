@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.ui.theme.orange
+import ch.epfl.cs311.wanderwave.ui.theme.pink
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 import ch.epfl.cs311.wanderwave.viewmodel.LoopMode
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
@@ -307,5 +308,3 @@ fun VotingButton(
         modifier = Modifier.size(20.dp))
   }
 }
-
-val pink = Color(0xFFFE3C72)
