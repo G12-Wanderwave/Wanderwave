@@ -25,6 +25,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.data.viewModelType
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
 
 @Composable
@@ -33,7 +35,9 @@ fun TrackList(
     title: String? = null,
     onAddTrack: (Track) -> Unit,
     onSelectTrack: (Track) -> Unit = {},
-    canAddSong: Boolean = true
+    canAddSong: Boolean = true,
+    navActions: NavigationActions,
+    viewModelName: viewModelType
 ) {
 
   Column {
@@ -41,7 +45,10 @@ fun TrackList(
     var selectedTrack by remember { mutableStateOf<Track?>(null) }
 
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier =
+            Modifier.fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .testTag("trackCard"),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween) {
           if (title != null) {
@@ -51,11 +58,15 @@ fun TrackList(
                 modifier = Modifier.testTag("trackListTitle"))
           }
           if (canAddSong) {
-            IconButton(onClick = { showDialog = true }) { // Toggle dialog visibility
-              Icon(
-                  imageVector = Icons.Filled.Add,
-                  contentDescription = stringResource(R.string.beaconTitle))
-            }
+            IconButton(
+                modifier = Modifier.testTag("addTrackButton"),
+                onClick = {
+                  navActions.navigateToSelectSongScreen(viewModelName)
+                }) { // Toggle dialog visibility
+                  Icon(
+                      imageVector = Icons.Filled.Add,
+                      contentDescription = stringResource(R.string.beaconTitle))
+                }
           }
         }
     LazyColumn {

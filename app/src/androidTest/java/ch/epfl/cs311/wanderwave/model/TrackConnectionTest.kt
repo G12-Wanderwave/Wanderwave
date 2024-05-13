@@ -11,6 +11,7 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -47,7 +48,6 @@ class TrackConnectionTest {
     track = Track("testTrack", "Test Title", "Test Artist")
 
     // Define behavior for the mocks
-    every { firestore.collection(any()) } returns mockk(relaxed = true)
     every { collectionReference.document(track.id) } returns documentReference
     every { firestore.collection(any()) } returns collectionReference
 
@@ -331,5 +331,45 @@ class TrackConnectionTest {
 
     // Assert that the retrieved track is null
     assertEquals(null, retrievedTrack)
+  }
+
+  @Test
+  fun testAddItemsIfNotExist() = runBlocking {
+    // Mock the Task
+    val mockTask = mockk<Task<QuerySnapshot>>()
+    val mockQuerySnapshot = mockk<QuerySnapshot>()
+    val mockDocumentSnapshot = mockk<DocumentSnapshot>()
+
+    // Define behavior for the addOnSuccessListener method
+    every { mockTask.addOnSuccessListener(any<OnSuccessListener<QuerySnapshot>>()) } answers
+        {
+          val listener = arg<OnSuccessListener<QuerySnapshot>>(0)
+
+          // Define the behavior of the mock QuerySnapshot here
+          listener.onSuccess(mockQuerySnapshot)
+          mockTask
+        }
+    every { mockTask.addOnFailureListener(any()) } answers { mockTask }
+
+    // Define behavior for the get() method on the DocumentReference to return the mock task
+    every { firestore.collection(trackConnection.collectionName) } returns collectionReference
+    every { collectionReference.whereEqualTo("id", track.id) } returns collectionReference
+    every { collectionReference.get() } returns mockTask
+
+    // Define behavior for the QuerySnapshot
+    every { mockQuerySnapshot.isEmpty } returns true
+    every { mockQuerySnapshot.documents } returns listOf(mockDocumentSnapshot)
+
+    every { mockDocumentSnapshot.exists() } returns true
+    every { mockDocumentSnapshot.id } returns track.id
+    every { mockDocumentSnapshot.getString("title") } returns track.title
+    every { mockDocumentSnapshot.getString("artist") } returns track.artist
+
+    // Call the function under test
+    trackConnection.addItemsIfNotExist(listOf(track))
+
+    // Verify that the get function is called on the document with the correct id
+    coVerify { collectionReference.whereEqualTo("id", track.id) }
+    coVerify { collectionReference.get() }
   }
 }
