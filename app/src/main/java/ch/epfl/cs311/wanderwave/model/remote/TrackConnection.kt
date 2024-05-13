@@ -72,14 +72,12 @@ class TrackConnection(private val database: FirebaseFirestore) :
         trackDocument?.let { track = Track.from(it) }
         val profileDocument = profileAndTrackRef["creator"]?.get()?.await()
         profileDocument?.let { profile = Profile.from(it) }
-        if (profile == null || track == null) {
-          Log.e("Firestore", "Error fetching profile or track, firebase format is wrong")
+        if (profile == null) {
+          Log.e("Firestore", "Error fetching the track, firebase format is wrong")
           return@withContext null
         }
 
-        ProfileTrackAssociation(
-            profile = profileDocument?.let { Profile.from(it) }!!,
-            track = trackDocument?.let { Track.from(it) }!!)
+        ProfileTrackAssociation(profile = profile ?: null, track = track!!)
       } catch (e: Exception) {
         // Handle exceptions
         Log.e("Firestore", "Error fetching track:${e.message}")
