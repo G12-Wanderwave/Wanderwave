@@ -375,7 +375,7 @@ class TrackListViewModelTest {
   @Test
   fun playTrack() = run {
     viewModel.playTrack(track)
-    verify { mockSpotifyController.playTrack(track) }
+    verify { mockSpotifyController.playTrackList(any(), track) }
   }
 
   @Test
