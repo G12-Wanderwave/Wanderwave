@@ -85,6 +85,22 @@ class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSup
     coEvery { profileRepository.deleteItem(any<String>()) } just Runs
     coEvery { profileRepository.deleteItem(any<Profile>()) } just Runs
 
+    coEvery { profileRepository.isUidExisting(any(), any()) } answers {
+      val callback = arg<(Boolean, Profile?) -> Unit>(1)
+      callback(true, Profile(
+          "My FirstName",
+          "My LastName",
+          "My Description",
+          0,
+          true,
+          null,
+          "spotifyUid",
+          "firebaseUid",
+          listOf(),
+          listOf(),
+      ))
+    }
+
     // Mocking SpotifyController
     coEvery { spotifyController.getChildren(any()) } returns
         flowOf(ListItem("", "", null, "", "", false, false))
