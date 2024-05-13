@@ -50,14 +50,8 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
   }
 
   open fun addItemWithId(item: T) {
-    val itemId = getItemId(item)
-    val itemMap = itemToMap(item)
-
-    db.collection(collectionName)
-        .document(itemId)
-        .set(itemMap)
-        .addOnFailureListener { e -> Log.e("Firestore", ADD_FAILURE_LOG_MESSAGE, e) }
-        .addOnSuccessListener { Log.d("Firestore", ADD_SUCCESS_LOG_MESSAGE) }
+    // implementation is the same but we want to leave it for clarity
+    updateItem(item)
   }
 
   open fun updateItem(item: T) {

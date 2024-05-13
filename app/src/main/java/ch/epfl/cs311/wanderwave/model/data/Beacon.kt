@@ -18,7 +18,7 @@ data class Beacon(
     fun from(document: DocumentSnapshot): Beacon? {
       return if (document.exists()) {
         val id = document.id
-        val locationMap = document.get("location") as? Map<String, Any>
+        val locationMap = document.get("location") as? Map<String, Any> ?: mapOf()
         val latitude = locationMap?.get("latitude") as? Double ?: 0.0
         val longitude = locationMap?.get("longitude") as? Double ?: 0.0
         val name = locationMap?.get("name") as? String ?: ""
