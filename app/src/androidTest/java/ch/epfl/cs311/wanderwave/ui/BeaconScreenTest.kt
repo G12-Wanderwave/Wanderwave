@@ -64,7 +64,6 @@ class BeaconScreenTest {
                                 "Sample Track ID"),
                             Track("Sample Track ID", "Sample Track Title", "Sample Artist Name")))))
 
-    coEvery { beaconConnection.getItem(any<Beacon>()) } returns beaconFlow
     coEvery { beaconConnection.getItem(any<String>()) } returns beaconFlow
 
     val viewModel = BeaconViewModel(beaconConnection, mockSpotifyController)

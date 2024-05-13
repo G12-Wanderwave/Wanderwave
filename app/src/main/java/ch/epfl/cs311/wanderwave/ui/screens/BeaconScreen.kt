@@ -136,6 +136,8 @@ fun SongList(
           }
         }
       },
-      onSelectTrack = onSelectTrack,
-      navigationActions = navigationActions)
+    navigationActions = navigationActions,
+    canAddSong = true,
+    onSelectTrack = onSelectTrack,
+  )
 }
