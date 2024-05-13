@@ -3,38 +3,16 @@ package ch.epfl.cs311.wanderwave.model.remote
 import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.google.firebase.firestore.memoryCacheSettings
-import com.google.firebase.firestore.persistentCacheSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.tasks.await
 
-abstract class FirebaseConnection<T, U> {
+abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
 
   abstract val collectionName: String
 
   abstract val getItemId: (T) -> String
-
-  open val db =
-      FirebaseFirestore.getInstance().apply {
-        firestoreSettings =
-            FirebaseFirestoreSettings.Builder()
-                .setLocalCacheSettings(memoryCacheSettings {}) // Memory cache settings
-                .setLocalCacheSettings(
-                    persistentCacheSettings {
-                      FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED
-                    } // Persistence cache settings (default)
-                    )
-                .build()
-      }
-
-  // If you want to use data exclusively from the local cache, you can use the following code:
-  // db.disableNetwork().addOnCompleteListener {
-  //   // Do offline things
-  //   // ...
-  // }
 
   abstract fun documentToItem(document: DocumentSnapshot): T?
 

@@ -12,7 +12,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.data.viewModelType
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.viewmodel.SongList
 
@@ -90,27 +93,37 @@ fun AddTrackDialog(
  * @param songLists List of song lists including "TOP SONGS" and "CHOSEN SONGS".
  * @param isTopSongsListVisible Boolean state to toggle between showing "TOP SONGS" or "CHOSEN
  *   SONGS".
- *     * @author Ayman Bakiri
- *     * @since 1.0
- *     * @last update 1.0
+ *     @param onAddTrack Callback function to be invoked when a track is added.
+ *     @param canAddSong Boolean state to enable or disable adding a song.
+ *     @param viewModelName The name of the view model.
+ *     @param navigationActions The navigation actions.
+ *
+ *     @author Menzo Bouaissi
+ *     @author Ayman Bakiri
+ *     @since 1.0
+ *     @last update 2.0
  */
 @Composable
 fun SongsListDisplay(
+    navigationActions: NavigationActions,
     songLists: List<SongList>,
     isTopSongsListVisible: Boolean,
     onAddTrack: (Track) -> Unit,
     onSelectTrack: (Track) -> Unit,
-    canAddSong: Boolean = true
+    canAddSong: Boolean = true,
+    viewModelName: viewModelType = viewModelType.NULL
 ) {
-  val name = if (isTopSongsListVisible) "TOP SONGS" else "CHOSEN SONGS"
+  val name = if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.CHOSEN_SONGS
   songLists
       .firstOrNull { it.name == name }
       ?.let { songList ->
         TrackList(
             tracks = songList.tracks,
-            title = name,
+            title = name.name,
             onSelectTrack = onSelectTrack,
             onAddTrack = onAddTrack,
-            canAddSong = canAddSong)
+            canAddSong = canAddSong,
+            navActions = navigationActions,
+            viewModelName = viewModelName)
       }
 }

@@ -34,7 +34,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.profile.ClickableIcon
@@ -63,13 +65,13 @@ val INPUT_BOX_NAM_SIZE = 150.dp
 fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
   val currentProfileState by viewModel.profile.collectAsState()
   val songLists by viewModel.songLists.collectAsState()
-  val dialogListType by remember { mutableStateOf("TOP SONGS") }
+  val dialogListType by remember { mutableStateOf(ListType.TOP_SONGS) }
   var isTopSongsListVisible by remember { mutableStateOf(true) }
 
   val currentProfile: Profile = currentProfileState ?: return
   LaunchedEffect(Unit) {
-    viewModel.createSpecificSongList("TOP_SONGS")
-    viewModel.createSpecificSongList("CHOSEN_SONGS")
+    viewModel.createSpecificSongList(ListType.TOP_SONGS)
+    viewModel.createSpecificSongList(ListType.CHOSEN_SONGS)
   }
 
   Column(
@@ -89,23 +91,17 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
             modifier = Modifier.testTag("toggleSongList")) {
               Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
             }
-
-        // Call the SongsListDisplay function
-        // Buttons for adding tracks to top songs lists
-        Button(
-            onClick = { navActions.navigateTo(Route.SELECT_SONG) },
-            modifier = Modifier.testTag("addTopSongs")) {
-              Text("Add Track to TOP SONGS List")
-            }
-
         SongsListDisplay(
+            navigationActions = navActions,
             songLists = songLists,
             isTopSongsListVisible = isTopSongsListVisible,
             onAddTrack = { track ->
               viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
               viewModel.addTrackToList(dialogListType, track)
             },
-            onSelectTrack = { track -> viewModel.selectTrack(track, dialogListType) })
+            onSelectTrack = { track -> viewModel.selectTrack(track, dialogListType.name) },
+            viewModelName = viewModelType.PROFILE,
+        )
       }
 
   Row {

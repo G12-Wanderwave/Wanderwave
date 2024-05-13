@@ -3,6 +3,8 @@ package ch.epfl.cs311.wanderwave.navigation
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import ch.epfl.cs311.wanderwave.R
+import ch.epfl.cs311.wanderwave.model.data.viewModelType
+import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -78,6 +80,12 @@ class NavigationActions(navController: NavHostController) {
   fun navigateToProfile(profileId: String) {
     navigationController.navigate("${Route.VIEW_PROFILE.routeString}/$profileId")
     _currentRouteFlow.value = Route.PROFILE
+  }
+
+  fun navigateToSelectSongScreen(viewModelType: viewModelType) {
+    val type =
+        viewModelType.name.lowercase(Locale.getDefault()) // Converts enum to a lowercase string
+    navigationController.navigate("${Route.SELECT_SONG.routeString}/$type")
   }
 
   fun goBack() {

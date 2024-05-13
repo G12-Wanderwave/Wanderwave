@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
 
@@ -35,7 +36,9 @@ fun TrackList(
     title: String? = null,
     canAddSong: Boolean = true,
     onAddTrack: (Track) -> Unit,
-    onSelectTrack: (Track) -> Unit,
+    onSelectTrack: (Track) -> Unit = {},
+    navActions: NavigationActions,
+    viewModelName: viewModelType
 ) {
   Column {
     var showDialog by remember { mutableStateOf(false) }
@@ -51,11 +54,14 @@ fun TrackList(
                 modifier = Modifier.testTag("trackListTitle"))
           }
           if (canAddSong) {
-            IconButton(onClick = { showDialog = true }) { // Toggle dialog visibility
-              Icon(
-                  imageVector = Icons.Filled.Add,
-                  contentDescription = stringResource(R.string.beaconTitle))
-            }
+            IconButton(
+                onClick = {
+                  navActions.navigateToSelectSongScreen(viewModelName)
+                }) { // Toggle dialog visibility
+                  Icon(
+                      imageVector = Icons.Filled.Add,
+                      contentDescription = stringResource(R.string.beaconTitle))
+                }
           }
         }
     var selectedTrack by remember { mutableStateOf<Track?>(null) }

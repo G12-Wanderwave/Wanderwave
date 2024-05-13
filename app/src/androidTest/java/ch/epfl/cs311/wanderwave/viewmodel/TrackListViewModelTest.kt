@@ -1,7 +1,9 @@
+import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
+import com.spotify.protocol.types.ListItem
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -12,12 +14,16 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
 
 class TrackListViewModelTest {
 
@@ -352,6 +358,50 @@ class TrackListViewModelTest {
   //    viewModel.toggleLoop()
   //    assertEquals(LoopMode.NONE, viewModel.uiState.value.loopMode)
   //  }
+
+  @Test
+  fun collapseTrackList() = run {
+    viewModel.collapse()
+    assertFalse(viewModel.uiState.value.expanded)
+  }
+
+  @Test
+  fun expandTrackList() = run {
+    viewModel.expand()
+    assertTrue(viewModel.uiState.value.expanded)
+  }
+
+  @Test
+  fun playTrack() = run {
+    viewModel.playTrack(track)
+    assertEquals(viewModel.uiState.value., track)
+  }
+
+  @Test
+  fun testRetrieveSubsectionAndChildrenFlow() =
+      testDispatcher.runBlockingTest {
+        val expectedListItem = ListItem("id", "title", null, "subtitle", "", false, true)
+        every { mockSpotifyController.getAllElementFromSpotify() } returns
+            flowOf(listOf(expectedListItem))
+        every {
+          mockSpotifyController.getAllChildren(
+              ListItem("id", "title", null, "subtitle", "", false, true))
+        } returns flowOf(listOf(expectedListItem))
+
+        viewModel.retrieveAndAddSubsection()
+        viewModel.retrieveChild(expectedListItem)
+
+        advanceUntilIdle() // This replaces advanceTimeBy and ensures all coroutines are completed
+
+        val result = viewModel.spotifySubsectionList.first() // Safely access the first item
+        val result2 = viewModel.childrenPlaylistTrackList.first() // Safely access the first item
+        Log.d(
+            "TrackListViewModel23",
+            "retrieveAndAddSubsection: ${viewModel.spotifySubsectionList.value}")
+
+        assertEquals(listOf(expectedListItem), result)
+        assertEquals(listOf(expectedListItem), result2)
+      }
 }
 
 // for the CI rerun to be removed
