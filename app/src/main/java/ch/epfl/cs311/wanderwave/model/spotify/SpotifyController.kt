@@ -331,14 +331,8 @@ fun retrieveAndAddSubsectionFromSpotify(
     spotifyController: SpotifyController,
     scope: CoroutineScope
 ) {
-  scope.launch {
-    val track = spotifyController.getAllElementFromSpotify().firstOrNull()
-    if (track != null) {
-      for (i in track) {
-        spotifySubsectionList.value += i
-      }
-    }
-  }
+  val track = spotifyController.getAllElementFromSpotify()
+  checkIfNullAndAddToAList(track, spotifySubsectionList, scope)
 }
 
 /**
@@ -354,11 +348,20 @@ fun retrieveChildFromSpotify(
     spotifyController: SpotifyController,
     scope: CoroutineScope
 ) {
+  val children = spotifyController.getAllChildren(item)
+  checkIfNullAndAddToAList(children, childrenPlaylistTrackList, scope)
+}
+
+fun checkIfNullAndAddToAList(
+    items: Flow<List<ListItem>>,
+    list: MutableStateFlow<List<ListItem>>,
+    scope: CoroutineScope
+) {
   scope.launch {
-    val children = spotifyController.getAllChildren(item).firstOrNull()
-    if (children != null) {
-      for (child in children) {
-        childrenPlaylistTrackList.value += child
+    val value = items.firstOrNull()
+    if (value != null) {
+      for (child in value) {
+        list.value += child
       }
     }
   }
