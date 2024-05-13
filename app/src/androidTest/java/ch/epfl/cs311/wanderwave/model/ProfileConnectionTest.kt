@@ -118,23 +118,6 @@ public class ProfileConnectionTest {
   }
 
   @Test
-  fun testAddProfilesIfNotExist() {
-    val profiles =
-        listOf(
-            Profile(
-                firstName = "New",
-                lastName = "User",
-                description = "No description",
-                numberOfLikes = 0,
-                isPublic = false,
-                spotifyUid = "newspotifyUid",
-                firebaseUid = "newfirebaseUid"))
-
-    every { querySnapshot.isEmpty } returns true
-    profileConnection.addProfilesIfNotExist(profiles)
-  }
-
-  @Test
   fun testAddItem() {
     val profile =
         Profile(

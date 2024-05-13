@@ -42,20 +42,16 @@ class BeaconConnection(
   override fun addItem(item: Beacon) {
     super.addItem(item)
     trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
-    profileConnection.addProfilesIfNotExist(item.profileAndTrack.map { it.profile })
-    Log.d("BeaconConnection", "Beacon added successfully")
   }
 
   override fun addItemWithId(item: Beacon) {
     super.addItemWithId(item)
     trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
-    profileConnection.addProfilesIfNotExist(item.profileAndTrack.map { it.profile })
   }
 
   override fun updateItem(item: Beacon) {
     super.updateItem(item)
     trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
-    profileConnection.addProfilesIfNotExist(item.profileAndTrack.map { it.profile })
   }
 
   override fun documentTransform(document: DocumentSnapshot, dataFlow: MutableStateFlow<Beacon?>) {

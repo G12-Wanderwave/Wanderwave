@@ -62,21 +62,6 @@ class ProfileConnection(
     trackConnection.addItemsIfNotExist(item.chosenSongs)
   }
 
-  fun addProfilesIfNotExist(profiles: List<Profile?>) {
-    coroutineScope.launch {
-      profiles.filterNotNull().forEach { profile ->
-        val querySnapshot =
-            db.collection(collectionName)
-                .whereEqualTo("firebaseUid", profile.firebaseUid)
-                .get()
-                .await()
-        if (querySnapshot.isEmpty) {
-          addItemWithId(profile)
-        }
-      }
-    }
-  }
-
   override fun documentTransform(document: DocumentSnapshot, dataFlow: MutableStateFlow<Profile?>) {
     val profile = dataFlow.value ?: Profile.from(document)
 
