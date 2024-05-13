@@ -226,7 +226,7 @@ class SpotifyController(private val context: Context) {
     val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
     return callbackFlow {
       val callResult =
-          appRemote?.let { it ->
+          appRemote?.let {
             it.contentApi
                 .getRecommendedContentItems(ContentApi.ContentType.DEFAULT)
                 .setResultCallback {
@@ -252,7 +252,7 @@ class SpotifyController(private val context: Context) {
 
     return callbackFlow {
       val callResult =
-          appRemote?.let { it ->
+          appRemote?.let {
             it.contentApi
                 .getChildrenOfItem(listItem, 50, 0)
                 .setResultCallback {
@@ -281,7 +281,7 @@ class SpotifyController(private val context: Context) {
 
     return callbackFlow {
       val callResult =
-          appRemote?.let { it ->
+          appRemote?.let {
             it.contentApi
                 .getChildrenOfItem(listItem, 50, 0)
                 .setResultCallback {
