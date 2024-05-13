@@ -68,7 +68,7 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
   val dialogListType by remember { mutableStateOf(ListType.TOP_SONGS) }
   var isTopSongsListVisible by remember { mutableStateOf(true) }
 
-  val currentProfile: Profile = currentProfileState ?: return
+  val currentProfile: Profile = currentProfileState
   LaunchedEffect(Unit) {
     viewModel.createSpecificSongList(ListType.TOP_SONGS)
     viewModel.createSpecificSongList(ListType.CHOSEN_SONGS)
@@ -172,7 +172,7 @@ fun ProfileButton(
         if (navActions.getCurrentRoute() == Route.MAIN) {
           SelectImage(
               modifier = Modifier.clip(CircleShape).size(50.dp),
-              imageUri = currentProfile?.profilePictureUri)
+              imageUri = currentProfile.profilePictureUri)
         }
       }
 }
