@@ -129,7 +129,7 @@ class SpotifyControllerTest {
   fun testGetAlbumImage_EmptyResponse() = runBlocking {
     val accessToken = "test_access_token"
     coEvery { authenticationController.getAccessToken() } returns accessToken
-    // ktfmt
+    // ktfmt2
     val responseBody = """{}"""
     val mockResponseBody = mockk<ResponseBody> { every { string() } returns responseBody }
     val mockResponse =
