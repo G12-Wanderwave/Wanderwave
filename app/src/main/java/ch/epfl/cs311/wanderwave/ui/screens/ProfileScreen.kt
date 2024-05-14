@@ -34,7 +34,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.profile.ClickableIcon
@@ -63,13 +65,13 @@ val INPUT_BOX_NAM_SIZE = 150.dp
 fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
   val currentProfileState by viewModel.profile.collectAsState()
   val songLists by viewModel.songLists.collectAsState()
-  val dialogListType by remember { mutableStateOf("TOP SONGS") }
-  var isTopSongsListVisible by remember { mutableStateOf(true) }
+  val dialogListType by remember { mutableStateOf(ListType.TOP_SONGS) }
+  val isTopSongsListVisible by viewModel.isTopSongsListVisible.collectAsState(false)
 
-  val currentProfile: Profile = currentProfileState ?: return
+  val currentProfile: Profile = currentProfileState
   LaunchedEffect(Unit) {
-    viewModel.createSpecificSongList("TOP_SONGS")
-    viewModel.createSpecificSongList("CHOSEN_SONGS")
+    viewModel.createSpecificSongList(ListType.TOP_SONGS)
+    viewModel.createSpecificSongList(ListType.LIKED_SONGS)
   }
 
   Column(
@@ -85,26 +87,20 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
         }
         // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
         Button(
-            onClick = { isTopSongsListVisible = !isTopSongsListVisible },
+            onClick = { viewModel.changeChosenSongs() },
             modifier = Modifier.testTag("toggleSongList")) {
-              Text(if (isTopSongsListVisible) "Show CHOSEN SONGS" else "Show TOP SONGS")
+              Text(if (isTopSongsListVisible) "Show CHOSEN TOPS" else "Show LIKED SONGS")
             }
-
-        // Call the SongsListDisplay function
-        // Buttons for adding tracks to top songs lists
-        Button(
-            onClick = { navActions.navigateTo(Route.SELECT_SONG) },
-            modifier = Modifier.testTag("addTopSongs")) {
-              Text("Add Track to TOP SONGS List")
-            }
-
         SongsListDisplay(
+            navigationActions = navActions,
             songLists = songLists,
             isTopSongsListVisible = isTopSongsListVisible,
             onAddTrack = { track ->
               viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
               viewModel.addTrackToList(dialogListType, track)
-            })
+            },
+            viewModelName = viewModelType.PROFILE,
+        )
       }
 
   Row {

@@ -9,6 +9,8 @@ import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.model.spotify.parseTracks
+import com.google.common.base.CharMatcher.any
 import com.spotify.android.appremote.api.Connector.ConnectionListener
 import com.spotify.android.appremote.api.ContentApi
 import com.spotify.android.appremote.api.PlayerApi
@@ -18,6 +20,7 @@ import com.spotify.protocol.client.CallResult
 import com.spotify.protocol.client.ErrorCallback
 import com.spotify.protocol.client.Subscription
 import com.spotify.protocol.types.Empty
+import com.spotify.protocol.types.ImageUri
 import com.spotify.protocol.types.ListItem
 import com.spotify.protocol.types.ListItems
 import com.spotify.protocol.types.PlayerState
@@ -32,19 +35,24 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
+import java.net.URL
+import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
 import kotlin.Exception
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -59,12 +67,19 @@ class SpotifyControllerTest {
   @RelaxedMockK private lateinit var mockAppRemote: SpotifyAppRemote
   @RelaxedMockK private lateinit var mockPlayerApi: PlayerApi
 
-  private lateinit var spotifyController: SpotifyController
+  @RelaxedMockK private lateinit var spotifyController: SpotifyController
   private lateinit var context: Context
   private lateinit var authenticationController: AuthenticationController
 
+  @RelaxedMockK private lateinit var mockScope: CoroutineScope
+
+  val dispatcher = UnconfinedTestDispatcher()
+
   @Before
   fun setup() {
+    mockkStatic(SpotifyAppRemote::class)
+
+    spotifyController = mockk(relaxed = true)
     context = ApplicationProvider.getApplicationContext()
     authenticationController = mockk<AuthenticationController>()
     spotifyController = SpotifyController(context, authenticationController)
@@ -72,6 +87,8 @@ class SpotifyControllerTest {
     mockkStatic(SpotifyAppRemote::class)
     every { mockAppRemote.playerApi } returns mockPlayerApi
     coEvery { authenticationController.makeApiRequest(any()) } returns "Test"
+
+    mockScope = mockk<CoroutineScope>()
   }
 
   @Test
@@ -700,15 +717,6 @@ class SpotifyControllerTest {
 
     assertFalse(result)
   }
-  //    @Test
-  //    fun playTrackTest() = runBlocking {
-  //        val callResult = mockk<CallResult<Empty>>(relaxed = true)
-  //        val playerApi = mockk<PlayerApi>(relaxed = true)
-  //        every { mockAppRemote.playerApi } returns playerApi
-  //        every { playerApi.play(any()) } returns callResult
-  //        val id = "fakeid"
-  //        spotifyController.playTrack(Track(id, "faketitle", "fakeartist"))
-  //    }
 
   @ExperimentalCoroutinesApi
   @Test
@@ -911,6 +919,60 @@ class SpotifyControllerTest {
         }
 
     val result = spotifyController.spotifyGetFromURL("https://test.api/endpoint")
-
   }
+
+  @Test
+  fun parseTracksSuccessfullyParsesTracks() {
+    val jsonResponse =
+        """
+    {
+        "items": [
+            {
+                "track": {
+                    "id": "1",
+                    "name": "Track 1",
+                    "artists": [
+                        {
+                            "name": "Artist 1"
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+"""
+            .trimIndent()
+
+    val likedSongsTrackList: MutableStateFlow<List<ListItem>> =
+        MutableStateFlow<List<ListItem>>(emptyList())
+
+    parseTracks(jsonResponse, likedSongsTrackList)
+    assertEquals(likedSongsTrackList.value.size, 1)
+    assertEquals(
+        likedSongsTrackList.value[0],
+        ListItem("1", "", ImageUri(""), "Track 1", "Artist 1", false, false))
+  }
+
+  @Test
+  fun parseTracksHandlesEmptyResponse() {
+    val likedSongsTrackList: MutableStateFlow<List<ListItem>> =
+        MutableStateFlow<List<ListItem>>(emptyList())
+    val jsonResponse =
+        """
+    {
+        "items": []
+    }
+"""
+            .trimIndent()
+    parseTracks(jsonResponse, likedSongsTrackList)
+    assertEquals(likedSongsTrackList.value.size, 0)
+  }
+}
+
+interface UrlFactory {
+  fun create(urlString: String): URL
+}
+
+class SimpleUrlFactory : UrlFactory {
+  override fun create(urlString: String): URL = URL(urlString)
 }
