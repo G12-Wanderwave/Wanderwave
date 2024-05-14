@@ -89,21 +89,19 @@ class PlayerViewModelTest {
 
   }
 
-//  @Test
-//  fun songPausesProperly() = run {
-//    var isPaused = false
-//    playerState = mockk<PlayerState>(relaxed = true)
-//    every { mockSpotifyController.playerState() } returns flowOf(playerState)
-//    every { playerState.isPaused } returns true
-//    every { mockSpotifyController.pauseTrack {  } } answers {
-//       isPaused = true
-//    }
-//
-//    viewModel.pause()
-//    Assert.assertTrue(playerState.isPaused)
-//    Assert.assertFalse(viewModel.uiState.value.isPlaying)
-//  }
-//
+  @Test
+  fun songPausesProperly() = run {
+    var playerState = PlayerState(mockk(), false, .1f, 0, mockk(), mockk())
+    every { mockSpotifyController.playerState() } returns flowOf(playerState)
+    every { mockSpotifyController.pauseTrack(any(), any()) } answers {
+       playerState = PlayerState(mockk(), true, .1f, 0, mockk(), mockk())
+    }
+
+    viewModel.pause()
+    Assert.assertTrue(playerState.isPaused)
+    Assert.assertFalse(viewModel.uiState.value.isPlaying)
+  }
+
 //  @Test
 //  fun songResumesProperly() = run {
 //    viewModel.selectTrack(track)
