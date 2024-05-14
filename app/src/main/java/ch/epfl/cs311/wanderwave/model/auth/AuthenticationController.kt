@@ -140,6 +140,10 @@ constructor(
     auth.signOut()
   }
 
+  suspend fun getAccessToken(): String? {
+    return tokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+  }
+
   suspend fun makeApiRequest(url: URL): String {
 
     // refresh the access token if necessary

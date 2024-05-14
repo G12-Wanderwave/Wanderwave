@@ -14,8 +14,6 @@ import com.spotify.protocol.types.ListItem
 import com.spotify.protocol.types.PlayerState
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
-import java.net.URL
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -26,6 +24,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
+import java.net.URL
+import javax.inject.Inject
 
 class SpotifyController
 @Inject
@@ -46,6 +49,7 @@ constructor(
           "user-read-private")
 
   var playbackTimer: Job? = null
+  private val httpClient = OkHttpClient()
 
   private val connectionParams =
       ConnectionParams.Builder(CLIENT_ID).setRedirectUri(REDIRECT_URI).showAuthView(true).build()
@@ -298,6 +302,58 @@ constructor(
                 .setErrorCallback { trySend(list + ListItem("", "", null, "", "", false, false)) }
           }
       awaitClose { callResult?.cancel() }
+    }
+  }
+
+  /**
+   * Retrieve the image URL of an album.
+   *
+   * @param albumId The Spotify ID of the album.
+   * @return A Flow that emits the album image URL as a string.
+   */
+  fun getAlbumImage(albumId: String): Flow<String?> {
+    return callbackFlow {
+      val accessToken = authenticationController.getAccessToken()
+
+      if (accessToken == null) {
+        trySend(null)
+        close()
+        return@callbackFlow
+      }
+
+      val request =
+          Request.Builder()
+              .url("https://api.spotify.com/v1/albums/$albumId")
+              .addHeader("Authorization", "Bearer $accessToken")
+              .build()
+
+      withContext(Dispatchers.IO) {
+        try {
+          val response = httpClient.newCall(request).execute()
+          if (response.isSuccessful) {
+            val responseBody = response.body?.string()
+            if (!responseBody.isNullOrEmpty()) {
+              val jsonObject = JSONObject(responseBody)
+              val images = jsonObject.getJSONArray("images")
+              if (images.length() > 0) {
+                val imageUrl = images.getJSONObject(0).getString("url")
+                trySend(imageUrl)
+              } else {
+                trySend(null)
+              }
+            } else {
+              trySend(null)
+            }
+          } else {
+            trySend(null)
+          }
+        } catch (e: Exception) {
+          Log.e("SpotifyController", "Error fetching album image: ${e.message}")
+          trySend(null)
+        }
+      }
+
+      awaitClose {}
     }
   }
 
