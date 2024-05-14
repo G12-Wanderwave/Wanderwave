@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.ListType
@@ -13,6 +14,7 @@ import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -106,14 +108,14 @@ constructor(
     }
   }
 
-  fun loadProfile(spotifyUid: String) {
+  fun loadProfile(spotifyUid: String, snackbarHostState: SnackbarHostState, scope: CoroutineScope) {
     viewModelScope.launch {
       repository.isUidExisting(spotifyUid) { exists, profile ->
         if (exists && profile != null) {
           _profile.value = profile
         } else {
-          // Handle the case where the profile does not exist
-          // For example, create a new profile or show an error message
+          // Show a snackbar message if the profile does not exist
+          scope.launch { snackbarHostState.showSnackbar("Profile does not exist.") }
         }
       }
     }
