@@ -155,6 +155,7 @@ class ProfileViewModelTest {
 
     viewModel.loadProfile(spotifyUid, snackbarHostState, scope)
     advanceUntilIdle()
+    // ktfmt
 
     assertEquals(expectedProfile, viewModel.profile.value)
 
