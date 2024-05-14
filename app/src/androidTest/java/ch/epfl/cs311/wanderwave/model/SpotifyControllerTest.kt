@@ -37,6 +37,7 @@ import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
@@ -52,7 +53,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.time.Duration.Companion.seconds
 
 @RunWith(AndroidJUnit4::class)
 class SpotifyControllerTest {
@@ -69,6 +69,7 @@ class SpotifyControllerTest {
 
   @Before
   fun setup() {
+
     context = ApplicationProvider.getApplicationContext()
     authenticationController = mockk<AuthenticationController>()
     spotifyController = SpotifyController(context, authenticationController)
@@ -130,7 +131,6 @@ class SpotifyControllerTest {
     coEvery { authenticationController.getAccessToken() } returns accessToken
 
     val responseBody = """{}"""
-
     val mockResponseBody = mockk<ResponseBody> { every { string() } returns responseBody }
 
     val mockResponse =
@@ -140,7 +140,6 @@ class SpotifyControllerTest {
         }
 
     coEvery { httpClient.newCall(any()).execute() } returns mockResponse
-
     val result = spotifyController.getAlbumImage("albumId").first()
 
     assertNull(result)
