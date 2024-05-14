@@ -15,7 +15,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 // Define a simple class for a song list
@@ -25,7 +24,7 @@ data class SongList(val name: ListType, val tracks: List<Track> = mutableListOf(
 class ProfileViewModel
 @Inject
 constructor(
-    private val repository: ProfileRepository, // TODO revoir
+    private val repository: ProfileRepository,
     private val spotifyController: SpotifyController
 ) : ViewModel(), SpotifySongsActions {
 
@@ -88,11 +87,11 @@ constructor(
 
   fun updateProfile(updatedProfile: Profile) {
     _profile.value = updatedProfile
-    repository.updateItem(updatedProfile)
+    viewModelScope.launch { repository.updateItem(updatedProfile) }
   }
 
   fun deleteProfile() {
-    repository.deleteItem(_profile.value)
+    viewModelScope.launch { repository.deleteItem(_profile.value) }
   }
 
   fun togglePublicMode() {
@@ -106,6 +105,20 @@ constructor(
       }
     }
   }
+
+  fun loadProfile(spotifyUid: String) {
+    viewModelScope.launch {
+      repository.isUidExisting(spotifyUid) { exists, profile ->
+        if (exists && profile != null) {
+          _profile.value = profile
+        } else {
+          // Handle the case where the profile does not exist
+          // For example, create a new profile or show an error message
+        }
+      }
+    }
+  }
+
   /**
    * Get all the element of the main screen and add them to the top list
    *
