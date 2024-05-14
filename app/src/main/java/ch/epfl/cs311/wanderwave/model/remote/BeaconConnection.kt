@@ -69,7 +69,7 @@ class BeaconConnection(
       var profileAndTrackRefs: List<Map<String, DocumentReference>>?
 
       if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
-        profileAndTrackRefs = tracksObject as? List<Map<String, DocumentReference>>
+        profileAndTrackRefs = tracksObject as List<Map<String, DocumentReference>>
         // Use a coroutine to perform asynchronous operations
         coroutineScope.launch {
           // Wait for all tracks to be fetched by generating tasks and computing them
@@ -79,7 +79,7 @@ class BeaconConnection(
                   ?.map { profileAndTrackRef ->
                     async { trackConnection.fetchProfileAndTrack(profileAndTrackRef) }
                   }
-                  ?.mapNotNull { it?.await() }
+                  ?.mapNotNull { it.await() }
 
           // Update the beacon with the complete list of tracks
           val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks ?: emptyList())
@@ -127,7 +127,7 @@ class BeaconConnection(
   override fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
     val beaconRef = db.collection("beacons").document(beaconId)
     db.runTransaction { transaction ->
-          val snapshot = transaction.get(beaconRef)
+          val snapshot = transaction[beaconRef]
           val beacon = Beacon.from(snapshot)
           beacon?.let {
             val newTracks =

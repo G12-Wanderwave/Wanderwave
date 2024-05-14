@@ -91,7 +91,7 @@ class TrackConnection(private val database: FirebaseFirestore) :
     if (TrackRef == null) return null
     return withContext(Dispatchers.IO) {
       try {
-        val trackDocument = TrackRef.get()?.await()
+        val trackDocument = TrackRef.get().await()
         trackDocument?.let { Track.from(it) }
       } catch (e: Exception) {
         // Handle exceptions

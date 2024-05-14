@@ -66,7 +66,7 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
           location, _beaconList, 10000.0, context, beaconRepository, viewModelScope) {
             val updatedBeacons =
                 _beaconList
-                    .value // +  placeBeaconsRandomly(_beaconList.value, location, beaconRepository)
+                    .value
             // Update _uiState again once data is fetched
             _uiState.value = BeaconListUiState(beacons = updatedBeacons, loading = false)
           }

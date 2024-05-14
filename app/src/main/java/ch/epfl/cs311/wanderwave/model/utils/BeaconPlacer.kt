@@ -100,7 +100,7 @@ fun placeBeaconsRandomly(
  * @since 2.0
  * @last update 2.0
  */
-fun computeDistanceBetweenBeacons(newBeacons: MutableList<Beacon>, beacons: List<Beacon>): Double {
+fun computeDistanceBetweenBeacons(newBeacons: List<Beacon>, beacons: List<Beacon>): Double {
   var distance = 0.0
   newBeacons.forEach { beacon ->
     beacons.forEach { existingBeacon ->
@@ -129,7 +129,7 @@ fun findRandomBeacon(
   val randomLocation = randomLatLongFromPosition(location, BEACON_RADIUS)
   val newBeacon =
       Beacon(
-          id = "", // TODO a modifier
+          id = "",
           location = Location(randomLocation.latitude, randomLocation.longitude))
 
   newBeacons.add(newBeacon)
