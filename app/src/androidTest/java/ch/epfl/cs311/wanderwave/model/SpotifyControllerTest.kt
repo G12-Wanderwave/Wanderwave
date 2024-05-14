@@ -37,6 +37,7 @@ import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
@@ -52,7 +53,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.time.Duration.Companion.seconds
 
 @RunWith(AndroidJUnit4::class)
 class SpotifyControllerTest {
@@ -158,9 +158,7 @@ class SpotifyControllerTest {
 
     var closed = false
     val job = launch {
-      spotifyController.getAlbumImage("albumId").collect {
-        // Flow should not emit anything since accessToken is null
-      }
+      spotifyController.getAlbumImage("albumId").collect {}
       closed = true
     }
     job.join()
