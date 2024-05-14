@@ -12,7 +12,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 class ProfileConnection(
     private val database: FirebaseFirestore,
@@ -81,19 +80,19 @@ class ProfileConnection(
 
         // Use a coroutine to perform asynchronous operations
         coroutineScope.launch {
-          val TopSongsDeferred =
+          val topSongsDeferred =
               topSongRefs?.map { trackRef -> async { trackConnection.fetchTrack(trackRef) } }
           val chosenSongsDeffered =
               chosenSongRefs?.map { trackRef -> async { trackConnection.fetchTrack(trackRef) } }
 
           // Wait for all tracks to be fetched
-          val TopSongs = TopSongsDeferred?.mapNotNull { it?.await() }
-          val ChosenSongs = chosenSongsDeffered?.mapNotNull { it?.await() }
+          val topSongs = topSongsDeferred?.mapNotNull { it.await() }
+          val chosenSongs = chosenSongsDeffered?.mapNotNull { it.await() }
 
           // Update the beacon with the complete list of tracks
           val updatedBeacon =
               profile.copy(
-                  topSongs = TopSongs ?: emptyList(), chosenSongs = ChosenSongs ?: emptyList())
+                  topSongs = topSongs ?: emptyList(), chosenSongs = chosenSongs ?: emptyList())
           dataFlow.value = updatedBeacon
         }
       } else {

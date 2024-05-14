@@ -107,9 +107,7 @@ fun AppScaffold(navController: NavHostController) {
                           when (viewModelType) {
                             "profile" -> profileViewModel
                             "tracklist" -> trackListViewModel
-                            else ->
-                                throw IllegalStateException(
-                                    "Invalid ViewModel type for SelectSongScreen")
+                            else -> error("Invalid ViewModel type for SelectSongScreen")
                           }
 
                       SelectSongScreen(navActions, viewModel)

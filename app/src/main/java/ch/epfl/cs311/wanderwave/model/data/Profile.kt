@@ -42,8 +42,8 @@ data class Profile(
 
   companion object {
     fun from(documentSnapshot: DocumentSnapshot): Profile? {
-      if (documentSnapshot.exists()) {
-        return Profile(
+      return if (documentSnapshot.exists()) {
+        Profile(
             firstName = documentSnapshot.getString("firstName") ?: "",
             lastName = documentSnapshot.getString("lastName") ?: "",
             description = documentSnapshot.getString("description") ?: "",
@@ -55,7 +55,7 @@ data class Profile(
             firebaseUid = documentSnapshot.getString("firebaseUid") ?: "",
         )
       } else {
-        return null
+        null
       }
     }
   }
