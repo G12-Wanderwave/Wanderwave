@@ -16,18 +16,13 @@ import ch.epfl.cs311.wanderwave.model.utils.hasEnoughBeacons
 import ch.epfl.cs311.wanderwave.model.utils.placeBeaconsRandomly
 import ch.epfl.cs311.wanderwave.model.utils.randomLatLongFromPosition
 import ch.epfl.cs311.wanderwave.model.utils.types
-import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.net.PlacesClient
-import com.google.inject.matcher.Matchers.returns
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.mockk.MockKAnnotations
-import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
 import org.junit.Rule
@@ -61,28 +56,10 @@ class BeaconPlacerTest : TestCase() {
         elapsedRealtimeNanos = System.nanoTime()
       }
 
-  @RelaxedMockK lateinit var placesClient: PlacesClient
-
-  @RelaxedMockK lateinit var beaconRepository: BeaconRepository
-
-  private lateinit var nearbyPOIs: MutableStateFlow<List<Location>>
-  private lateinit var nearbyBeacons: MutableStateFlow<List<Beacon>>
-  private lateinit var newBeacons: MutableList<Beacon>
-
-  private val location3 = Location(0.0, 0.0, "Test")
-  private val radius = 1000.0
-
   @Before
   fun setup() {
     MockKAnnotations.init(this)
 
-    nearbyPOIs = MutableStateFlow(emptyList())
-    nearbyBeacons = MutableStateFlow(emptyList())
-    newBeacons = mutableListOf()
-
-    // Initialize Places and mock Places Client
-    Places.initialize(context, "fake-api-key")
-    every { Places.createClient(context) } returns (placesClient)
     try {
       locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true)
       locationManager.setTestProviderLocation(LocationManager.GPS_PROVIDER, location)
