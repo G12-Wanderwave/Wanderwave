@@ -4,18 +4,26 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.protocol.types.Album
+import com.spotify.protocol.types.Artist
 import com.spotify.protocol.types.ListItem
 import com.spotify.protocol.types.PlayerState
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -38,6 +46,8 @@ class PlayerViewModelTest {
   private lateinit var mockSpotifyController: SpotifyController
   @RelaxedMockK
   private lateinit var playerState: PlayerState
+  private lateinit var mockArtist: Artist
+  private lateinit var mockSpotifyTrack: com.spotify.protocol.types.Track
 
   @RelaxedMockK
   private lateinit var repository: TrackRepository
@@ -55,6 +65,8 @@ class PlayerViewModelTest {
     repository = mockk()
 
     track = Track("spotify:track:1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
+    mockArtist = Artist(track.artist, "")
+    mockSpotifyTrack = com.spotify.protocol.types.Track(mockArtist, mockk(), mockk(), 60, track.title, track.id, mockk(), false, false)
 
     val track1 = Track("spotify:track:6ImuyUQYhJKEKFtlrstHCD", "Main Title", "John Williams")
     val track2 =
@@ -90,30 +102,43 @@ class PlayerViewModelTest {
   }
 
   @Test
-  fun songPausesProperly() = run {
-    var playerState = PlayerState(mockk(), false, .1f, 0, mockk(), mockk())
-    every { mockSpotifyController.playerState() } returns flowOf(playerState)
+  fun songPausesProperly() = runTest {
+    val playerStateFlow = MutableStateFlow(PlayerState(mockSpotifyTrack, false, .1f, 0, mockk(), mockk()))
+    every { mockSpotifyController.playerState() } returns playerStateFlow
     every { mockSpotifyController.pauseTrack(any(), any()) } answers {
-       playerState = PlayerState(mockk(), true, .1f, 0, mockk(), mockk())
+      playerStateFlow.value = PlayerState(mockSpotifyTrack, true, .1f, 0, mockk(), mockk())
     }
+    viewModel = PlayerViewModel(mockSpotifyController)
+    backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect() }
+
+    Assert.assertTrue(viewModel.uiState.value.isPlaying)
 
     viewModel.pause()
-    Assert.assertTrue(playerState.isPaused)
+    verify { mockSpotifyController.pauseTrack() }
+
+    advanceUntilIdle()
     Assert.assertFalse(viewModel.uiState.value.isPlaying)
   }
 
-//  @Test
-//  fun songResumesProperly() = run {
-//    viewModel.selectTrack(track)
-//    viewModel.play()
-//    viewModel.pause()
-//    Assert.assertFalse(viewModel.uiState.value.isPlaying)
-//
-//    viewModel.play()
-//    Assert.assertTrue(viewModel.uiState.value.isPlaying)
-//    Assert.assertEquals(track.id, viewModel.uiState.value.selectedTrack?.id)
-//  }
-//
+  @Test
+  fun songResumesProperly() = runTest {
+    val playerStateFlow = MutableStateFlow(PlayerState(mockSpotifyTrack, true, .1f, 0, mockk(), mockk()))
+    every { mockSpotifyController.playerState() } returns playerStateFlow
+    every { mockSpotifyController.resumeTrack(any(), any()) } answers {
+      playerStateFlow.value = PlayerState(mockSpotifyTrack, false, .1f, 0, mockk(), mockk())
+    }
+    viewModel = PlayerViewModel(mockSpotifyController)
+    backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect() }
+
+    Assert.assertFalse(viewModel.uiState.value.isPlaying)
+
+    viewModel.resume()
+    verify { mockSpotifyController.resumeTrack() }
+
+    advanceUntilIdle()
+    Assert.assertTrue(viewModel.uiState.value.isPlaying)
+  }
+
 //  @Test
 //  fun songDoesntPlayWhenNull() = run {
 //    viewModel.play()

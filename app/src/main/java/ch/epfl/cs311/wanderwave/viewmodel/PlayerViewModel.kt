@@ -24,8 +24,6 @@ class PlayerViewModel @Inject constructor(val spotifyController: SpotifyControll
           UiState(expanded = expandedState)
         } else
             UiState(
-                /* TODO: I _think_ that the track uri includes "spotify:track:" at the beginning, so
-                 *   need to remove that. */
                 track = playerState.track?.let { Track(it.uri, it.name, it.artist.name) },
                 isPlaying = !playerState.isPaused,
                 repeatMode = playerState.playbackOptions.repeatMode != LoopMode.NONE.ordinal,
