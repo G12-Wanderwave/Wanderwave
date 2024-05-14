@@ -71,9 +71,8 @@ fun createNearbyBeacons(
     context: Context
 ): List<Beacon> {
   // Initialize the list of new Beacons
-  if (radius <= 0.0) {
-    throw IllegalArgumentException("Radius must be positive")
-  }
+  require(radius > 0.0) { "Radius must be positive" }
+
   val newBeacons = mutableListOf<Beacon>()
 
   // Get the nearby points of interest
