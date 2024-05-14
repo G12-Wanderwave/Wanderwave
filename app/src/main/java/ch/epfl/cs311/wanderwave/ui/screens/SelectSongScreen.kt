@@ -174,10 +174,11 @@ fun handleItemClick(
 ) {
   if (listItem.hasChildren) {
     viewModel.retrieveChild(listItem)
-  } else {
-    viewModel.addTrackToList(
-        if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS,
-        Track(listItem.id, listItem.title, listItem.subtitle))
-    navActions.goBack()
+    return
   }
+
+  viewModel.addTrackToList(
+      if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS,
+      Track(listItem.id, listItem.title, listItem.subtitle))
+  navActions.goBack()
 }
