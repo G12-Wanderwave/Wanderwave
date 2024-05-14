@@ -64,7 +64,8 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
 
       createNearbyBeacons(
           location, _beaconList, 10000.0, context, beaconRepository, viewModelScope) {
-            val updatedBeacons = _beaconList.value
+              newBeacons: List<Beacon> ->
+            val updatedBeacons = _beaconList.value + newBeacons
             // Update _uiState again once data is fetched
             _uiState.value = BeaconListUiState(beacons = updatedBeacons, loading = false)
           }
@@ -106,9 +107,12 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
 
             val location = locationResult.lastLocation
             location?.let {
-              if (_areBeaconsLoaded.value) return
-              retrieveBeacons(Location1(it.latitude, it.longitude), context)
-              _areBeaconsLoaded.value = true
+              if (_areBeaconsLoaded.value) {
+                return
+              } else {
+                retrieveBeacons(Location1(it.latitude, it.longitude), context)
+                _areBeaconsLoaded.value = true
+              }
             }
           }
         }

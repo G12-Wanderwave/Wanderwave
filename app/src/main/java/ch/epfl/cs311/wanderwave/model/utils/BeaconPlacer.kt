@@ -239,22 +239,14 @@ fun createNearbyBeacons(
     context: Context,
     beaconRepository: BeaconRepository,
     scope: CoroutineScope,
-    onComplete: () -> Unit,
+    onComplete: (List<Beacon>) -> Unit,
 ) {
   scope.launch {
-    val newBeacons = mutableListOf<Beacon>()
     val nearbyPOIs = MutableStateFlow<List<Location>>(emptyList())
+    val newBeacons = mutableListOf<Beacon>()
 
     getNearbyPOIs(
-        context,
-        location,
-        radius,
-        nearbyPOIs,
-        nearbyBeacons,
-        newBeacons,
-        beaconRepository,
-        scope,
-        onComplete)
+        context, location, radius, nearbyPOIs, nearbyBeacons, beaconRepository, scope, onComplete)
   }
 }
 
@@ -272,11 +264,12 @@ suspend fun getNearbyPOIs(
     radius: Double,
     nearbyPOIs: MutableStateFlow<List<Location>>,
     nearbyBeacons: MutableStateFlow<List<Beacon>>,
-    newBeacons: MutableList<Beacon>,
     beaconRepository: BeaconRepository,
     scope: CoroutineScope,
-    onComplete: () -> Unit
+    onComplete: (List<Beacon>) -> Unit
 ) {
+
+  val newBeacons = mutableListOf<Beacon>()
   Places.initialize(context, BuildConfig.MAPS_API_KEY)
   val placesClient = Places.createClient(context)
 
@@ -290,7 +283,6 @@ suspend fun getNearbyPOIs(
       listOf(placeFieldID, placeFieldName, placeFieldLatLng, placeFieldTypes, placeFieldRating)
 
   val request = FindCurrentPlaceRequest.newInstance(placeFields)
-
   if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
       PackageManager.PERMISSION_GRANTED) {
     placesClient
@@ -317,19 +309,14 @@ suspend fun getNearbyPOIs(
             }
           }
           nearbyBeacons.value += newBeacons
-          onComplete()
+          onComplete(newBeacons)
         }
         .addOnFailureListener { exception ->
           if (exception is ApiException) {
-            Log.e("PlacesApi", "Place not found: ${exception.statusCode}")
             Log.e("PlacesApi", "Place not found: ${exception.message}")
-            Log.e("PlacesApi", "Place not found: ${exception.localizedMessage}")
-          } else {
-            Log.e("PlacesApi", "Place not found: ${exception.message}")
-            Log.e("PlacesApi", "Place not found: ${exception.localizedMessage}")
           }
 
-          onComplete()
+          onComplete(newBeacons)
         }
   }
 }
