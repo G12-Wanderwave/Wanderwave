@@ -37,7 +37,6 @@ import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
@@ -53,6 +52,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.time.Duration.Companion.seconds
 
 @RunWith(AndroidJUnit4::class)
 class SpotifyControllerTest {
@@ -76,7 +76,6 @@ class SpotifyControllerTest {
     mockkStatic(SpotifyAppRemote::class)
     every { mockAppRemote.playerApi } returns mockPlayerApi
     coEvery { authenticationController.makeApiRequest(any()) } returns "Test"
-    // Additional setup for getAlbumImage test
     httpClient = mockk()
     spotifyController.apply {
       this::class.java.getDeclaredField("httpClient").apply {
@@ -88,11 +87,9 @@ class SpotifyControllerTest {
 
   @Test
   fun testGetAlbumImage_Success() = runBlocking {
-    // Mock the access token
     val accessToken = "test_access_token"
     coEvery { authenticationController.getAccessToken() } returns accessToken
 
-    // Mock the HTTP response
     val imageUrl = "https://example.com/image.jpg"
     val responseBody =
         """
@@ -110,37 +107,29 @@ class SpotifyControllerTest {
         }
     coEvery { httpClient.newCall(any()).execute() } returns mockResponse
 
-    // Invoke the method
     val result = spotifyController.getAlbumImage("albumId").first()
 
-    // Assert the result
     assertEquals(imageUrl, result)
   }
 
   @Test
   fun testGetAlbumImage_Error() = runBlocking {
-    // Mock the access token
     val accessToken = "test_access_token"
     coEvery { authenticationController.getAccessToken() } returns accessToken
 
-    // Mock the HTTP response to simulate an error
     val mockResponse = mockk<Response> { every { isSuccessful } returns false }
     coEvery { httpClient.newCall(any()).execute() } returns mockResponse
 
-    // Invoke the method
     val result = spotifyController.getAlbumImage("albumId").first()
 
-    // Assert the result
     assertNull(result)
   }
 
   @Test
   fun testGetAlbumImage_EmptyResponse() = runBlocking {
-    // Mock the access token
     val accessToken = "test_access_token"
     coEvery { authenticationController.getAccessToken() } returns accessToken
 
-    // Mock the HTTP response
     val responseBody = """{}"""
     val mockResponseBody = mockk<ResponseBody> { every { string() } returns responseBody }
     val mockResponse =
@@ -150,10 +139,8 @@ class SpotifyControllerTest {
         }
     coEvery { httpClient.newCall(any()).execute() } returns mockResponse
 
-    // Invoke the method
     val result = spotifyController.getAlbumImage("albumId").first()
 
-    // Assert the result
     assertNull(result)
   }
 
