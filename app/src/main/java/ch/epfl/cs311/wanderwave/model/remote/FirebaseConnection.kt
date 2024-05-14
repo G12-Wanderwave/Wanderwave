@@ -39,7 +39,6 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
     try {
       val documentReference = db.collection(collectionName).add(itemMap).await()
 
-
       Log.d("Firestore", ADD_SUCCESS_LOG_MESSAGE)
 
       documentId = documentReference.id

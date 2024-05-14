@@ -128,9 +128,7 @@ fun findRandomBeacon(
 ) {
   val randomLocation = randomLatLongFromPosition(location, BEACON_RADIUS)
   val newBeacon =
-      Beacon(
-          id = "",
-          location = Location(randomLocation.latitude, randomLocation.longitude))
+      Beacon(id = "", location = Location(randomLocation.latitude, randomLocation.longitude))
 
   newBeacons.add(newBeacon)
 }
