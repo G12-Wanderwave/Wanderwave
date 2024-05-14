@@ -76,7 +76,9 @@ class SpotifyControllerTest {
     mockkStatic(SpotifyAppRemote::class)
     every { mockAppRemote.playerApi } returns mockPlayerApi
     coEvery { authenticationController.makeApiRequest(any()) } returns "Test"
+
     httpClient = mockk()
+
     spotifyController.apply {
       this::class.java.getDeclaredField("httpClient").apply {
         isAccessible = true
@@ -100,6 +102,7 @@ class SpotifyControllerTest {
         }
         """
     val mockResponseBody = mockk<ResponseBody> { every { string() } returns responseBody }
+
     val mockResponse =
         mockk<Response> {
           every { isSuccessful } returns true
@@ -108,7 +111,6 @@ class SpotifyControllerTest {
     coEvery { httpClient.newCall(any()).execute() } returns mockResponse
 
     val result = spotifyController.getAlbumImage("albumId").first()
-
     assertEquals(imageUrl, result)
   }
 
@@ -116,12 +118,9 @@ class SpotifyControllerTest {
   fun testGetAlbumImage_Error() = runBlocking {
     val accessToken = "test_access_token"
     coEvery { authenticationController.getAccessToken() } returns accessToken
-
     val mockResponse = mockk<Response> { every { isSuccessful } returns false }
     coEvery { httpClient.newCall(any()).execute() } returns mockResponse
-
     val result = spotifyController.getAlbumImage("albumId").first()
-
     assertNull(result)
   }
 
@@ -129,14 +128,17 @@ class SpotifyControllerTest {
   fun testGetAlbumImage_EmptyResponse() = runBlocking {
     val accessToken = "test_access_token"
     coEvery { authenticationController.getAccessToken() } returns accessToken
-    // ktfmt2
+
     val responseBody = """{}"""
+
     val mockResponseBody = mockk<ResponseBody> { every { string() } returns responseBody }
+
     val mockResponse =
         mockk<Response> {
           every { isSuccessful } returns true
           every { body } returns mockResponseBody
         }
+
     coEvery { httpClient.newCall(any()).execute() } returns mockResponse
 
     val result = spotifyController.getAlbumImage("albumId").first()
