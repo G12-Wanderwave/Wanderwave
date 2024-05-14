@@ -60,6 +60,19 @@ class AuthenticationControllerTest {
     coEvery { authenticationController.refreshSpotifyToken() } returns true
   }
 
+  @Test
+  fun getAccessToken_ShouldReturnSpotifyAccessToken() = runBlocking {
+    setupDummyUserSignedIn()
+    val expectedAccessToken = "testtoken-spotify-access"
+    coEvery {
+      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+    } returns expectedAccessToken
+
+    val actualAccessToken = authenticationController.getAccessToken()
+
+    assertEquals(expectedAccessToken, actualAccessToken)
+  }
+
   fun setupDummyUserSignedIn() {
     every { mockFirebaseAuth.currentUser } returns
         mockk {
