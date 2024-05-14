@@ -12,6 +12,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,7 +34,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.time.Duration.Companion.seconds
 
 @RunWith(AndroidJUnit4::class)
 @ExperimentalCoroutinesApi
@@ -134,7 +134,6 @@ class ProfileViewModelTest {
             spotifyUid = spotifyUid,
             firebaseUid = "firebaseUid",
         )
-
     val nonExistingSpotifyUid = "nonExistingSpotifyUid"
     val snackbarHostState = SnackbarHostState()
     val scope = CoroutineScope(testDispatcher)
@@ -150,12 +149,10 @@ class ProfileViewModelTest {
           val callback = arg<(Boolean, Profile?) -> Unit>(1)
           callback(false, null)
         }
-
     assertEquals("My FirstName", viewModel.profile.value.firstName)
 
     viewModel.loadProfile(spotifyUid, snackbarHostState, scope)
     advanceUntilIdle()
-    // ktfmt
 
     assertEquals(expectedProfile, viewModel.profile.value)
 
