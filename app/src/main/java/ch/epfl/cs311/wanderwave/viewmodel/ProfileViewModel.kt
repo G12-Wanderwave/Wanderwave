@@ -1,7 +1,9 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -16,7 +18,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 
 // Define a simple class for a song list
 data class SongList(val name: ListType, val tracks: List<Track> = mutableListOf())
@@ -26,19 +27,20 @@ class ProfileViewModel
 @Inject
 constructor(
     private val repository: ProfileRepository, // TODO revoir
-    private val spotifyController: SpotifyController
+    private val spotifyController: SpotifyController,
+    private val authenticationController: AuthenticationController
 ) : ViewModel(), SpotifySongsActions {
 
   private val _profile =
       MutableStateFlow(
           Profile(
-              firstName = "My FirstName",
-              lastName = "My LastName",
-              description = "My Description",
+              firstName = "...",
+              lastName = "...",
+              description = "...",
               numberOfLikes = 0,
               isPublic = true,
-              spotifyUid = "My Spotify UID",
-              firebaseUid = "My Firebase UID",
+              spotifyUid = "",
+              firebaseUid = "",
               profilePictureUri = null))
   val profile: StateFlow<Profile> = _profile
 
@@ -99,12 +101,25 @@ constructor(
     _isInPublicMode.value = !_isInPublicMode.value
   }
 
-  fun getProfileByID(id: String) {
-    viewModelScope.launch {
-      repository.getItem(id).collect { fetchedProfile ->
+  suspend fun getProfileByID(id: String, create: Boolean) {
+    repository.isUidExisting(id) { exists, fetchedProfile ->
+      if (exists) {
+        _profile.value = fetchedProfile!!
         _uiState.value = UIState(profile = fetchedProfile, isLoading = false)
+      } else if (create) {
+        val newProfile = profile.value.copy(firebaseUid = id)
+        _profile.value = newProfile
+        repository.addItemWithId(newProfile)
+        _uiState.value = UIState(profile = newProfile, isLoading = false)
+      } else {
+        Log.e("ProfileViewModel", "Profile not found")
       }
     }
+  }
+
+  suspend fun getProfileOfCurrentUser(create: Boolean) {
+    val currentUserId = authenticationController.getUserData()!!.id
+    getProfileByID(currentUserId, create)
   }
   /**
    * Get all the element of the main screen and add them to the top list

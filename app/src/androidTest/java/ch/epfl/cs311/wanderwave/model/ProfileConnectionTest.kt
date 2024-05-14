@@ -5,13 +5,13 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
+import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import io.mockk.MockKAnnotations
 import io.mockk.coVerify
@@ -290,10 +290,8 @@ public class ProfileConnectionTest {
         // Pass the mock Firestore instance to your BeaconConnection
 
         val collectionReference = mockk<CollectionReference>()
-        val query = mockk<Query>()
 
-        val mockTask = mockk<Task<QuerySnapshot>>()
-        val mockQuerySnapshot = mockk<QuerySnapshot>()
+        val mockTask = mockk<Task<DocumentSnapshot>>()
         val mockDocumentSnapshot =
             mockk<DocumentSnapshot>() {
               every { exists() } returns true
@@ -306,25 +304,22 @@ public class ProfileConnectionTest {
               every { getBoolean("isPublic") } returns false
               every { getString("profilePictureUri") } returns ""
             }
+        val mockDocumentReference = mockk<DocumentReference>()
+        every { mockDocumentReference.get() } returns mockTask
 
         // Define behavior for the addOnSuccessListener method
-        every { mockTask.addOnSuccessListener(any<OnSuccessListener<QuerySnapshot>>()) } answers
+        every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentSnapshot>>()) } answers
             {
-              val listener = arg<OnSuccessListener<QuerySnapshot>>(0)
+              val listener = arg<OnSuccessListener<DocumentSnapshot>>(0)
               // Define the behavior of the mock DocumentSnapshot here
-              listener.onSuccess(mockQuerySnapshot)
+              listener.onSuccess(mockDocumentSnapshot)
               mockTask
             }
         every { mockTask.addOnFailureListener(any()) } answers { mockTask }
 
         every { firebaseFirestore.collection(profileConnection.collectionName) } returns
             collectionReference
-        every { collectionReference.whereEqualTo("spotifyUid", "testUid") } returns query
-        every { query.get() } returns mockTask
-
-        every { mockQuerySnapshot.isEmpty } returns false
-        every { mockQuerySnapshot.size() } returns 1
-        every { mockQuerySnapshot.documents } returns listOf(mockDocumentSnapshot)
+        every { collectionReference.document("testUid") } returns mockDocumentReference
 
         val callback = mockk<(Boolean, Profile?) -> Unit>(relaxed = true)
 
@@ -333,9 +328,17 @@ public class ProfileConnectionTest {
         verify { callback.invoke(true, any()) }
 
         // same but document size is 0
-        every { mockQuerySnapshot.isEmpty } returns true
-        every { mockQuerySnapshot.size() } returns 0
-        every { mockQuerySnapshot.documents } returns listOf()
+        every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentSnapshot>>()) } answers
+            {
+              mockTask
+            }
+        every { mockTask.addOnFailureListener(any<OnFailureListener>()) } answers
+            {
+              val listener = arg<OnFailureListener>(0)
+              // Define the behavior of the mock DocumentSnapshot here
+              listener.onFailure(Exception("test"))
+              mockTask
+            }
 
         profileConnection.isUidExisting("testUid", callback)
 

@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.ui
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.viewModelScope
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
@@ -51,10 +52,12 @@ class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSup
 
   @RelaxedMockK private lateinit var spotifyController: SpotifyController
 
+  @RelaxedMockK private lateinit var authenticationController: AuthenticationController
+
   @Before
   fun setup() {
     mockDependencies()
-    viewModel = ProfileViewModel(profileRepository, spotifyController)
+    viewModel = ProfileViewModel(profileRepository, spotifyController, authenticationController)
 
     composeTestRule.setContent { ProfileScreen(mockNavigationActions, viewModel) }
   }
@@ -81,6 +84,25 @@ class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSup
     coEvery { profileRepository.addItem(any()) } just Runs
     coEvery { profileRepository.deleteItem(any<String>()) } just Runs
     coEvery { profileRepository.deleteItem(any<Profile>()) } just Runs
+
+    coEvery { profileRepository.isUidExisting(any(), any()) } answers
+        {
+          val callback = arg<(Boolean, Profile?) -> Unit>(1)
+          callback(
+              true,
+              Profile(
+                  "My FirstName",
+                  "My LastName",
+                  "My Description",
+                  0,
+                  true,
+                  null,
+                  "spotifyUid",
+                  "firebaseUid",
+                  listOf(),
+                  listOf(),
+              ))
+        }
 
     // Mocking SpotifyController
     coEvery { spotifyController.getChildren(any()) } returns
