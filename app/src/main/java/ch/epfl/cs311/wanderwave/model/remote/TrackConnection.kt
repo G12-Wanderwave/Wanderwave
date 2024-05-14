@@ -14,8 +14,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-class TrackConnection(private val database: FirebaseFirestore? = null) :
-    FirebaseConnection<Track, Track>(), TrackRepository {
+class TrackConnection(private val database: FirebaseFirestore) :
+    FirebaseConnection<Track, Track>(database), TrackRepository {
 
   // THe goal is to have the Id of the firebase document to match the id of the spotify track
 
@@ -23,7 +23,7 @@ class TrackConnection(private val database: FirebaseFirestore? = null) :
 
   override val getItemId = { track: Track -> track.id }
 
-  override val db = database ?: super.db
+  override val db = database
 
   // Document to Track
   override fun documentToItem(document: DocumentSnapshot): Track? {
@@ -72,14 +72,12 @@ class TrackConnection(private val database: FirebaseFirestore? = null) :
         trackDocument?.let { track = Track.from(it) }
         val profileDocument = profileAndTrackRef["creator"]?.get()?.await()
         profileDocument?.let { profile = Profile.from(it) }
-        if (profile == null || track == null) {
-          Log.e("Firestore", "Error fetching profile or track, firebase format is wrong")
+        if (profile == null) {
+          Log.e("Firestore", "Error fetching the track, firebase format is wrong")
           return@withContext null
         }
 
-        ProfileTrackAssociation(
-            profile = profileDocument?.let { Profile.from(it) }!!,
-            track = trackDocument?.let { Track.from(it) }!!)
+        ProfileTrackAssociation(profile = profile ?: null, track = track!!)
       } catch (e: Exception) {
         // Handle exceptions
         Log.e("Firestore", "Error fetching track:${e.message}")

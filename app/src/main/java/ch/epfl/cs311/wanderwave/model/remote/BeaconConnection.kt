@@ -19,17 +19,17 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 class BeaconConnection(
-    private val database: FirebaseFirestore? = null,
+    private val database: FirebaseFirestore,
     val trackConnection: TrackConnection,
     val profileConnection: ProfileConnection,
     private val ioDispatcher: CoroutineDispatcher
-) : FirebaseConnection<Beacon, Beacon>(), BeaconRepository {
+) : FirebaseConnection<Beacon, Beacon>(database), BeaconRepository {
 
   override val collectionName: String = "beacons"
 
   override val getItemId = { beacon: Beacon -> beacon.id }
 
-  override val db = database ?: super.db
+  override val db = database
 
   // You can create a CoroutineScope instance
   private val coroutineScope = CoroutineScope(Dispatchers.Main)
@@ -42,20 +42,16 @@ class BeaconConnection(
   override fun addItem(item: Beacon) {
     super.addItem(item)
     trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
-    profileConnection.addProfilesIfNotExist(item.profileAndTrack.map { it.profile })
-    Log.d("BeaconConnection", "Beacon added successfully")
   }
 
   override fun addItemWithId(item: Beacon) {
     super.addItemWithId(item)
     trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
-    profileConnection.addProfilesIfNotExist(item.profileAndTrack.map { it.profile })
   }
 
   override fun updateItem(item: Beacon) {
     super.updateItem(item)
     trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
-    profileConnection.addProfilesIfNotExist(item.profileAndTrack.map { it.profile })
   }
 
   override fun documentTransform(document: DocumentSnapshot, dataFlow: MutableStateFlow<Beacon?>) {

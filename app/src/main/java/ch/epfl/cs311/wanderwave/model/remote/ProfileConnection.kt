@@ -15,15 +15,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class ProfileConnection(
-    private val database: FirebaseFirestore? = null,
+    private val database: FirebaseFirestore,
     val trackConnection: TrackConnection
-) : FirebaseConnection<Profile, Profile>(), ProfileRepository {
+) : FirebaseConnection<Profile, Profile>(database), ProfileRepository {
 
   override val collectionName: String = "users"
 
   override val getItemId = { profile: Profile -> profile.firebaseUid }
 
-  override val db = database ?: super.db
+  override val db = database
   private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
   override fun isUidExisting(spotifyUid: String, callback: (Boolean, Profile?) -> Unit) {
@@ -60,21 +60,6 @@ class ProfileConnection(
     super.addItemWithId(item)
     trackConnection.addItemsIfNotExist(item.topSongs)
     trackConnection.addItemsIfNotExist(item.chosenSongs)
-  }
-
-  fun addProfilesIfNotExist(profiles: List<Profile?>) {
-    coroutineScope.launch {
-      profiles.filterNotNull().forEach { profile ->
-        val querySnapshot =
-            db.collection(collectionName)
-                .whereEqualTo("firebaseUid", profile.firebaseUid)
-                .get()
-                .await()
-        if (querySnapshot.isEmpty) {
-          addItemWithId(profile)
-        }
-      }
-    }
   }
 
   override fun documentTransform(document: DocumentSnapshot, dataFlow: MutableStateFlow<Profile?>) {
