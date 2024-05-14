@@ -313,6 +313,7 @@ constructor(
     return answer
   }
 
+
   enum class ConnectResult {
     SUCCESS,
     NOT_LOGGED_IN,
@@ -392,6 +393,26 @@ suspend fun getLikedTracksFromSpotify(
       e.printStackTrace()
     }
   }
+}
+
+suspend fun getTracksFromSpotifyPlaylist(
+    playlistId: String,
+    playlist: MutableStateFlow<List<ListItem>>,
+    spotifyController: SpotifyController,
+    scope: CoroutineScope
+){
+    scope.launch {
+        val url = "https://api.spotify.com/v1/playlists/$playlistId"
+        try {
+            val json = spotifyController.spotifyGetFromURL(url)
+            parseTracks(json, playlist)
+        } catch (e: Exception) {
+            Log.e("SpotifyController", "Failed to get songs from playlist")
+            e.printStackTrace()
+        }
+    }
+
+
 }
 
 /**
