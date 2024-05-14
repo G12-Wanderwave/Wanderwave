@@ -44,8 +44,8 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Singleton
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -77,8 +77,7 @@ class LoginAndUseMediaControllerEndToEndTest :
 
   @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
 
-  @OptIn(ExperimentalCoroutinesApi::class)
-  val dispatcher = UnconfinedTestDispatcher()
+  @OptIn(ExperimentalCoroutinesApi::class) val dispatcher = UnconfinedTestDispatcher()
 
   private val track1 = Track("spotify:track:6ImuyUQYhJKEKFtlrstHCD", "Main Title", "John Williams")
   private val track2 =
@@ -108,6 +107,7 @@ class LoginAndUseMediaControllerEndToEndTest :
         every { AuthorizationClient.createLoginActivityIntent(any(), any()) } returns
             mockk(relaxed = true)
 
+        // Mock the response of the login
         val response = mockk<AuthorizationResponse>(relaxed = true)
         every { response.type } returns AuthorizationResponse.Type.CODE
         every { AuthorizationClient.getResponse(any(), any()) } returns response
