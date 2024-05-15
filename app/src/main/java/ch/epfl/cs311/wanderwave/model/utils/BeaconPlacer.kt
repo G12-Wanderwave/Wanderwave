@@ -9,9 +9,9 @@ import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
+import com.google.android.gms.common.api.ApiException
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.model.PlaceLikelihood
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
 import kotlin.math.*
 import kotlin.random.Random
@@ -293,50 +293,23 @@ fun createNearbyBeacons(
     context: Context,
     beaconRepository: BeaconRepository,
     scope: CoroutineScope,
-    onComplete: (List<Beacon>) -> Unit,
+    onComplete: () -> Unit,
 ) {
   scope.launch {
+    val newBeacons = mutableListOf<Beacon>()
     val nearbyPOIs = MutableStateFlow<List<Location>>(emptyList())
 
+    // Pass the `onComplete` callback to `getNearbyPOIs`
     getNearbyPOIs(
-        context, location, radius, nearbyPOIs, nearbyBeacons, beaconRepository, scope, onComplete)
-  }
-}
-
-private fun filterAndAddPOIs(
-    placeLikelihoods: List<PlaceLikelihood>,
-    location: Location,
-    radius: Double,
-    nearbyPOIs: MutableStateFlow<List<Location>>
-) {
-  for (placeLikelihood in placeLikelihoods) {
-    val place = placeLikelihood.place
-    val placeLoc = Location(place.latLng.latitude, place.latLng.longitude, place.name)
-    if ((location.distanceBetween(placeLoc) <= radius) &&
-        place.placeTypes.any { types.contains(it) }) {
-      nearbyPOIs.value += placeLoc
-    }
-  }
-}
-
-private fun addNewBeacons(
-    scope: CoroutineScope,
-    nearbyPOIs: MutableStateFlow<List<Location>>,
-    nearbyBeacons: MutableStateFlow<List<Beacon>>,
-    newBeacons: MutableList<Beacon>,
-    beaconRepository: BeaconRepository
-) {
-  nearbyPOIs.value.forEach { poi ->
-    if (nearbyBeacons.value.all { it.location.distanceBetween(poi) > MIN_BEACON_DISTANCE } &&
-        newBeacons.all { it.location.distanceBetween(poi) > MIN_BEACON_DISTANCE }) {
-      val beacon = Beacon(poi.name, poi)
-      scope.launch {
-        val id = beaconRepository.addItemAndGetId(beacon)
-        if (id != null) {
-          newBeacons.add(beacon.copy(id = id, location = poi, profileAndTrack = listOf()))
-        }
-      }
-    }
+        context,
+        location,
+        radius,
+        nearbyPOIs,
+        nearbyBeacons,
+        newBeacons,
+        beaconRepository,
+        scope,
+        onComplete)
   }
 }
 
@@ -346,7 +319,14 @@ private fun addNewBeacons(
  * @param context The context of the application.
  * @param location The current location of the user.
  * @param radius The radius in which to search for POIs.
+ * @param nearbyPOIs The list of nearby POIs.
+ * @param nearbyBeacons The list of existing beacons.
+ * @param newBeacons The list of new beacons.
+ * @param beaconRepository The repository for beacons.
+ * @param scope The coroutine scope.
+ * @param onComplete The callback to call when the operation is complete.
  * @return A list of nearby POIs.
+ * @throws ApiException If the Places API call fails.
  */
 suspend fun getNearbyPOIs(
     context: Context,
@@ -354,12 +334,11 @@ suspend fun getNearbyPOIs(
     radius: Double,
     nearbyPOIs: MutableStateFlow<List<Location>>,
     nearbyBeacons: MutableStateFlow<List<Beacon>>,
+    newBeacons: MutableList<Beacon>,
     beaconRepository: BeaconRepository,
     scope: CoroutineScope,
-    onComplete: (List<Beacon>) -> Unit
+    onComplete: () -> Unit
 ) {
-
-  val newBeacons = mutableListOf<Beacon>()
   Places.initialize(context, BuildConfig.MAPS_API_KEY)
   val placesClient = Places.createClient(context)
 
@@ -373,17 +352,42 @@ suspend fun getNearbyPOIs(
       listOf(placeFieldID, placeFieldName, placeFieldLatLng, placeFieldTypes, placeFieldRating)
 
   val request = FindCurrentPlaceRequest.newInstance(placeFields)
+
   if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
       PackageManager.PERMISSION_GRANTED) {
     placesClient
         .findCurrentPlace(request)
         .addOnSuccessListener { response ->
-          filterAndAddPOIs(response.placeLikelihoods, location, radius, nearbyPOIs)
-          addNewBeacons(scope, nearbyPOIs, nearbyBeacons, newBeacons, beaconRepository)
-          onComplete(newBeacons)
+          for (placeLikelihood in response.placeLikelihoods) {
+            val place = placeLikelihood.place
+            val placeLoc = Location(place.latLng.latitude, place.latLng.longitude, place.name)
+            if ((location.distanceBetween(placeLoc) <= radius) &&
+                place.placeTypes.any { types.contains(it) })
+                nearbyPOIs.value += placeLoc
+          }
+          nearbyPOIs.value.forEach { poi ->
+            if (nearbyBeacons.value.all {
+              it.location.distanceBetween(poi) > MIN_BEACON_DISTANCE
+            } && newBeacons.all { it.location.distanceBetween(poi) > MIN_BEACON_DISTANCE }) {
+              val beacon = Beacon(poi.name, poi)
+              newBeacons.add(beacon)
+              scope.launch {
+                val id = beaconRepository.addItemAndGetId(beacon)
+                if (id != null) {
+                  beacon.copy(id = id, location = poi, profileAndTrack = listOf())
+                }
+              }
+            }
+          }
+          nearbyBeacons.value += newBeacons
+          onComplete()
         }
         .addOnFailureListener { exception ->
-          Log.e("PlacesApi", "Place not found: ${exception.message}")
+          if (exception is ApiException) {
+            Log.e("PlacesApi", "Place not found: ${exception.message}")
+          }
+          // Call `onComplete` to ensure failure also triggers it
+          onComplete()
         }
   }
 }
