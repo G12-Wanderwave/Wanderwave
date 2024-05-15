@@ -11,6 +11,7 @@ import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -371,6 +372,8 @@ class TrackListViewModelTest {
 
   @Test
   fun toggleTrackSourceTest() = run {
+    every { mockSpotifyController.recentlyPlayedTracks } returns
+        MutableStateFlow(emptyList<Track>())
     val initial = viewModel.uiState.value.showRecentlyAdded
     viewModel.toggleTrackSource()
     val toggled = viewModel.uiState.value.showRecentlyAdded
