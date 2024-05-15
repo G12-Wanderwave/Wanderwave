@@ -61,43 +61,42 @@ class ProfileConnection(
     trackConnection.addItemsIfNotExist(item.chosenSongs)
   }
 
-  override fun documentTransform(document: DocumentSnapshot, dataFlow: MutableStateFlow<Profile?>) {
-    val profile = dataFlow.value ?: Profile.from(document)
-
-    profile?.let { profile ->
-      val topSongsObject = document["topSongs"]
-      val chosenSongsObject = document["chosenSongs"]
-
-      var topSongRefs: List<DocumentReference>?
-      var chosenSongRefs: List<DocumentReference>?
-
-      if (topSongsObject is List<*> &&
-          topSongsObject.all { it is DocumentReference } &&
-          chosenSongsObject is List<*> &&
-          chosenSongsObject.all { it is DocumentReference }) {
-        topSongRefs = topSongsObject as? List<DocumentReference>
-        chosenSongRefs = chosenSongsObject as? List<DocumentReference>
-
-        // Use a coroutine to perform asynchronous operations
-        coroutineScope.launch {
-          val topSongsDeferred =
-              topSongRefs?.map { trackRef -> async { trackConnection.fetchTrack(trackRef) } }
-          val chosenSongsDeffered =
-              chosenSongRefs?.map { trackRef -> async { trackConnection.fetchTrack(trackRef) } }
-
-          // Wait for all tracks to be fetched
-          val topSongs = topSongsDeferred?.mapNotNull { it.await() }
-          val chosenSongs = chosenSongsDeffered?.mapNotNull { it.await() }
-
-          // Update the beacon with the complete list of tracks
-          val updatedBeacon =
-              profile.copy(
-                  topSongs = topSongs ?: emptyList(), chosenSongs = chosenSongs ?: emptyList())
-          dataFlow.value = updatedBeacon
-        }
-      } else {
-        Log.e("Firestore", "songs lists have a Wrong Firebase Format")
+  override fun documentTransform(document: DocumentSnapshot, dataFlow: MutableStateFlow<Result<Profile>>) {
+      if (document == null || !document.exists()) {
+          dataFlow.value = Result.failure(Exception("Document does not exist"))
+          return
       }
-    }
+
+      val profile: Profile? = if (dataFlow.value.isSuccess) {
+          dataFlow.value.getOrNull()
+      } else {
+          Profile.from(document)
+      }
+
+      profile?.let { profile ->
+          val topSongsObject = document["topSongs"]
+          val chosenSongsObject = document["chosenSongs"]
+
+          if (topSongsObject is List<*> && topSongsObject.all { it is DocumentReference } &&
+              chosenSongsObject is List<*> && chosenSongsObject.all { it is DocumentReference }) {
+              val topSongRefs = topSongsObject as? List<DocumentReference>
+              val chosenSongRefs = chosenSongsObject as? List<DocumentReference>
+
+              coroutineScope.launch {
+                  val topSongsDeferred = topSongRefs?.map { trackRef -> async { trackConnection.fetchTrack(trackRef) } }
+                  val chosenSongsDeffered = chosenSongRefs?.map { trackRef -> async { trackConnection.fetchTrack(trackRef) } }
+
+                  val topSongs = topSongsDeferred?.mapNotNull { it.await() }
+                  val chosenSongs = chosenSongsDeffered?.mapNotNull { it.await() }
+
+                  val updatedProfile = profile.copy(topSongs = topSongs ?: emptyList(), chosenSongs = chosenSongs ?: emptyList())
+                  dataFlow.value = Result.success(updatedProfile)
+              }
+          } else {
+              dataFlow.value = Result.failure(Exception("Songs lists have a Wrong Firebase Format"))
+          }
+      } ?: run {
+          dataFlow.value = Result.failure(Exception("The profile is not in the correct format or could not be fetched"))
+      }
   }
 }

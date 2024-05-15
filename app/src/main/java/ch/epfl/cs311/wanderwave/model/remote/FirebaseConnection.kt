@@ -5,6 +5,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.tasks.await
 
@@ -78,22 +79,28 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
         .addOnSuccessListener { Log.d("Firestore", ADD_SUCCESS_LOG_MESSAGE) }
   }
 
-  open fun getItem(itemId: String): Flow<T> {
-    val dataFlow = MutableStateFlow<T?>(null)
+  open fun getItem(itemId: String): Flow<Result<T>> {
+    val dataFlow = MutableStateFlow<Result<T>>(Result.failure(Exception("No data found")))
+
     db.collection(collectionName)
         .document(itemId)
-        .get()
-        .addOnSuccessListener { document ->
+        .addSnapshotListener { document,error ->
+
+          if (error != null) {
+            Log.e("Firestore", "Error getting document: ", error)
+            // return failure result
+            dataFlow.value = Result.failure(error)
+          }
+
           if (document != null && document.data != null) {
             documentToItem(document)?.let {
-              dataFlow.value = it
+              dataFlow.value = Result.success(it)
               documentTransform(document, dataFlow)
             }
           }
         }
-        .addOnFailureListener { e -> Log.e("Firestore", "Error getting document: ", e) }
 
-    return dataFlow.mapNotNull { it }
+    return dataFlow
   }
 
   /**
@@ -103,6 +110,6 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
    */
   open internal fun documentTransform(
       documentSnapshot: DocumentSnapshot,
-      stateFlow: MutableStateFlow<T?>
+      stateFlow: MutableStateFlow<Result<T>>
   ) {}
 }

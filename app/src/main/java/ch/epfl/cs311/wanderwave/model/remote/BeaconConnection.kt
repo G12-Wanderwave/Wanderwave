@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.model.remote
 
 import android.util.Log
+import androidx.compose.runtime.snapshots.SnapshotApplyResult
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
@@ -60,8 +61,18 @@ class BeaconConnection(
     trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
   }
 
-  override fun documentTransform(document: DocumentSnapshot, dataFlow: MutableStateFlow<Beacon?>) {
-    val beacon: Beacon? = dataFlow.value ?: Beacon.from(document) ?: null
+  override fun documentTransform(document: DocumentSnapshot, dataFlow: MutableStateFlow<Result<Beacon>>) {
+
+    if (document == null || !document.exists()) {
+      dataFlow.value = Result.failure(Exception("Document does not exist"))
+      return
+    }
+
+    val beacon: Beacon? = if (dataFlow.value.isSuccess) {
+      dataFlow.value.getOrNull()
+    } else {
+      Beacon.from(document)
+    }
 
     beacon?.let { beacon ->
       val tracksObject = document["tracks"]
@@ -83,12 +94,14 @@ class BeaconConnection(
 
           // Update the beacon with the complete list of tracks
           val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks ?: emptyList())
-          dataFlow.value = updatedBeacon
+          dataFlow.value = Result.success(updatedBeacon)
         }
       } else {
-        Log.e("Firestore", "tracks has Wrong Firebase Format")
+        dataFlow.value = Result.failure(Exception("Tracks are not in the correct format"))
       }
-    } ?: { Log.e("Firestore", "Error fetching beacon") }
+    } ?: run {
+      dataFlow.value = Result.failure(Exception("The beacon is not in the correct format or could not be fetched"))
+    }
   }
 
   override fun getAll(): Flow<List<Beacon>> {
