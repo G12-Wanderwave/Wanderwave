@@ -34,6 +34,7 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.UninstallModules
 import dagger.hilt.components.SingletonComponent
 import io.github.kakaocup.compose.node.element.ComposeScreen
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -46,6 +47,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -81,6 +83,11 @@ class LoginAndUseMediaControllerEndToEndTest {
       Track("spotify:track:2NZhNbfb1rD1aRj3hZaoqk", "The Imperial Suite", "Michael Giacchino")
   private val track4 = Track("spotify:track:5EWPGh7jbTNO2wakv8LjUI", "Free Bird", "Lynyrd Skynyrd")
   private val track5 = Track("spotify:track:4rTlPsga6T8yiHGOvZAPhJ", "Godzilla", "Eminem")
+
+  @After
+  fun clearMocks() {
+    clearAllMocks() // Clear all MockK mocks
+  }
 
   @Test
   fun endToEndLogidMediaPlayer() =
@@ -183,6 +190,7 @@ class LoginAndUseMediaControllerEndToEndTest {
           loopButton.performClick()
           loopButton.performClick()
         }
+        Intents.release()
       }
 
   @Module
