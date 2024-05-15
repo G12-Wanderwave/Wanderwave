@@ -316,30 +316,29 @@ constructor(
    * @param albumId The Spotify ID of the album.
    * @return A Flow that emits the album image URL as a string.
    */
+  /**
+   * Retrieve the image URL of an album.
+   *
+   * @param albumId The Spotify ID of the album.
+   * @return A Flow that emits the album image URL as a string.
+   */
   fun getAlbumImage(albumId: String): Flow<String?> {
     return callbackFlow {
-      val accessToken = authenticationController.getAccessToken()
-
-      if (accessToken == null) {
-        trySend(null)
-        close()
-        return@callbackFlow
-      }
-
       val urlString = "https://api.spotify.com/v1/albums/$albumId"
-      val response = authenticationController.makeApiRequest(URL(urlString))
+      val response = spotifyGetFromURL(urlString)
 
       withContext(Dispatchers.IO) {
         try {
           if (response != "FAILURE") {
             val jsonObject = JSONObject(response)
             val images = jsonObject.getJSONArray("images")
-            if (images.length() > 0) {
-              val imageUrl = images.getJSONObject(0).getString("url")
-              trySend(imageUrl)
-            } else {
-              trySend(null)
-            }
+            val imageUrl =
+                if (images.length() > 0) {
+                  images.getJSONObject(0).getString("url")
+                } else {
+                  null
+                }
+            trySend(imageUrl)
           } else {
             trySend(null)
           }
@@ -358,9 +357,9 @@ constructor(
    *
    * @param imageUrl The URL of the image.
    * @param imageView The ImageView to display the image in.
+   * @param scope The CoroutineScope to launch the coroutine in.
    */
-  fun downloadAndDisplayImage(imageUrl: String, imageView: ImageView) {
-    val scope = CoroutineScope(Dispatchers.Main)
+  fun downloadAndDisplayImage(imageUrl: String, imageView: ImageView, scope: CoroutineScope) {
     scope.launch {
       val imageData =
           withContext(Dispatchers.IO) {
@@ -380,12 +379,19 @@ constructor(
     }
   }
 
+  /**
+   * Using getAlbumImage in order to download and display image in an ImageView.
+   *
+   * @param albumId The Spotify ID of the album.
+   * @param imageView The ImageView to display the image in.
+   * @param scope The CoroutineScope to launch the coroutine in.
+   */
   // Using getAlbumImage in order to download and display image in an ImageView
   fun displayAlbumImage(albumId: String, imageView: ImageView) {
     val scope = CoroutineScope(Dispatchers.Main)
     scope.launch {
       getAlbumImage(albumId).collect { imageUrl ->
-        imageUrl?.let { downloadAndDisplayImage(it, imageView) }
+        imageUrl?.let { downloadAndDisplayImage(it, imageView, scope) }
             ?: Log.e("SpotifyController", "No image URL found for album $albumId")
       }
     }

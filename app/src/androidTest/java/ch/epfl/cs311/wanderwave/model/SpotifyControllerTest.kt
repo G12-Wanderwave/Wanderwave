@@ -155,20 +155,6 @@ class SpotifyControllerTest {
   }
 
   @Test
-  fun testGetAlbumImage_ClosesFlowOnAccessTokenNull() = runBlocking {
-    coEvery { authenticationController.getAccessToken() } returns null
-
-    var closed = false
-    val job = launch {
-      spotifyController.getAlbumImage("albumId").collect {}
-      closed = true
-    }
-    job.join()
-
-    assertTrue(closed)
-  }
-
-  @Test
   fun testGetAlbumImage_Exception() = runBlocking {
     val accessToken = "test_access_token"
     coEvery { authenticationController.getAccessToken() } returns accessToken
@@ -213,7 +199,7 @@ class SpotifyControllerTest {
 
     spotifyController = SpotifyController(context, authenticationController)
 
-    val job = launch { spotifyController.downloadAndDisplayImage(imageUrl, imageView) }
+    val job = launch { spotifyController.downloadAndDisplayImage(imageUrl, imageView, this) }
     job.join()
 
     verify { imageView.setImageBitmap(mockBitmap) }
