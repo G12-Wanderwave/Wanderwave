@@ -129,6 +129,7 @@ class SpotifyControllerTest {
 
   @Test
   fun testGetAlbumImage_EmptyResponse() = runBlocking {
+    // ktfmt
     val accessToken = "test_access_token"
     coEvery { authenticationController.getAccessToken() } returns accessToken
 
