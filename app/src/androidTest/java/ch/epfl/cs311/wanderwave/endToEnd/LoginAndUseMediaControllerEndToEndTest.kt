@@ -45,7 +45,6 @@ import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import javax.inject.Singleton
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -77,7 +76,7 @@ class LoginAndUseMediaControllerEndToEndTest :
 
   @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
 
-  @OptIn(ExperimentalCoroutinesApi::class) val dispatcher = UnconfinedTestDispatcher()
+  val dispatcher = UnconfinedTestDispatcher()
 
   private val track1 = Track("spotify:track:6ImuyUQYhJKEKFtlrstHCD", "Main Title", "John Williams")
   private val track2 =
