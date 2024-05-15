@@ -351,6 +351,7 @@ fun retrieveChildFromSpotify(
 ) {
   val children = spotifyController.getAllChildren(item)
   checkIfNullAndAddToAList(children, childrenPlaylistTrackList, scope)
+
 }
 
 fun checkIfNullAndAddToAList(
@@ -367,6 +368,7 @@ fun checkIfNullAndAddToAList(
     }
   }
 }
+
 
 /**
  * Get all the liked tracks of the user and add them to the likedSongs list.
