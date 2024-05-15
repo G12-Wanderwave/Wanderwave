@@ -158,8 +158,7 @@ class SpotifyController(private val context: Context) {
       onFailure: (Throwable) -> Unit = {}
   ) {
     val currentTrack = playerState().firstOrNull()?.track
-    val currentIndex =
-        trackList?.indexOfFirst { track -> track.id == currentTrack?.uri } ?: -1
+    val currentIndex = trackList?.indexOfFirst { track -> track.id == currentTrack?.uri } ?: -1
     Log.d("SpotifyController", "Skipping $direction")
     Log.d("SpotifyController", "Track list: $trackList")
     Log.d("SpotifyController", "Current index: $currentIndex")
@@ -362,6 +361,6 @@ fun retrieveChildFromSpotify(
   }
 }
 
-fun com.spotify.protocol.types.Track.toWanderwaveTrack() : Track {
+fun com.spotify.protocol.types.Track.toWanderwaveTrack(): Track {
   return Track(this.uri, this.name, this.artist.name)
 }

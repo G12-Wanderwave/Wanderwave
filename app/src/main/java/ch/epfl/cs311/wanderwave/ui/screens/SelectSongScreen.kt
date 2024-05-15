@@ -31,8 +31,8 @@ import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
-import com.spotify.protocol.types.ListItem
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
+import com.spotify.protocol.types.ListItem
 
 /**
  * Screen to select a song from Spotify
