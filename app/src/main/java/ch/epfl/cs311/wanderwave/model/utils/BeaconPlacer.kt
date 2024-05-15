@@ -51,7 +51,7 @@ fun placeBeaconsRandomly(beacons: List<Beacon>, location: Location): List<Beacon
  * @since 2.0
  * @last update 2.0
  */
-fun computeDistanceBetweenBeacons(newBeacons: MutableList<Beacon>, beacons: List<Beacon>): Double {
+fun computeDistanceBetweenBeacons(newBeacons: List<Beacon>, beacons: List<Beacon>): Double {
   var distance = 0.0
   newBeacons.forEach { beacon ->
     beacons.forEach { existingBeacon ->
