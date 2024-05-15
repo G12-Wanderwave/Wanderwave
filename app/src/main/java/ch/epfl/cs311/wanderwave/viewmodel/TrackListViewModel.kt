@@ -1,5 +1,7 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.ListType
@@ -44,7 +46,7 @@ constructor(
   private fun observeTracks() {
     viewModelScope.launch {
       repository.getAll().collect { tracks ->
-        _uiState.value = UiState(tracks = tracks.filter { matchesSearchQuery(it) }, loading = false)
+        _uiState.value = UiState(tracks = tracks.filter { matchesSearchQuery(it) }, loading = false, progress = spotifyController.trackProgress)
       }
       // deal with the flow
     }
@@ -114,7 +116,7 @@ constructor(
       val tracks: List<Track> = listOf(),
       val loading: Boolean = false,
       val expanded: Boolean = false,
-      val message: String? = null
+      val progress: MutableFloatState = mutableFloatStateOf(0f),
   )
 }
 

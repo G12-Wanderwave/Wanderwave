@@ -17,6 +17,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNotSame
 import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Rule
@@ -94,6 +95,20 @@ class DataClassesTest {
     assertEquals(null, profile.profilePictureUri)
     assertEquals("", profile.spotifyUid)
     assertEquals("", profile.firebaseUid)
+  }
+
+  @Test
+  fun toLocationReturnsCorrectLocation() {
+    val location = Location(45.0, 7.0, "Test Location")
+    val result = location.toLocation()
+    assertEquals(location, result)
+  }
+
+  @Test
+  fun toLocationReturnsNewInstance() {
+    val location = Location(45.0, 7.0, "Test Location")
+    val result = location.toLocation()
+    assertNotSame(location, result)
   }
 
   @Test
