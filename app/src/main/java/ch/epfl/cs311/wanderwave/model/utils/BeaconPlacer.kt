@@ -239,7 +239,7 @@ fun hasEnoughBeacons(userPosition: Location, beacons: List<Beacon>): Boolean {
       nearbyBeacons += it
     }
   }
-  return nearbyBeacons.size == BEACON_COUNT
+  return nearbyBeacons.size >= BEACON_COUNT
 }
 
 /**
