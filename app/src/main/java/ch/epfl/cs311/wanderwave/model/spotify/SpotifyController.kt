@@ -1,7 +1,9 @@
 package ch.epfl.cs311.wanderwave.model.spotify
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.util.Log
+import android.widget.ImageView
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -14,8 +16,6 @@ import com.spotify.protocol.types.ListItem
 import com.spotify.protocol.types.PlayerState
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
-import java.net.URL
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -27,14 +27,16 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.json.JSONObject
+import java.net.URL
+import javax.inject.Inject
 
 class SpotifyController
 @Inject
 constructor(
     private val context: Context,
-    private val authenticationController: AuthenticationController
+    private val authenticationController: AuthenticationController,
+    private val urlProvider: (String) -> URL = { URL(it) }
 ) {
 
   private val CLIENT_ID = BuildConfig.SPOTIFY_CLIENT_ID
@@ -321,26 +323,17 @@ constructor(
         return@callbackFlow
       }
 
-      val request =
-          Request.Builder()
-              .url("https://api.spotify.com/v1/albums/$albumId")
-              .addHeader("Authorization", "Bearer $accessToken")
-              .build()
+      val urlString = "https://api.spotify.com/v1/albums/$albumId"
+      val response = authenticationController.makeApiRequest(URL(urlString))
 
       withContext(Dispatchers.IO) {
         try {
-          val response = httpClient.newCall(request).execute()
-          if (response.isSuccessful) {
-            val responseBody = response.body?.string()
-            if (!responseBody.isNullOrEmpty()) {
-              val jsonObject = JSONObject(responseBody)
-              val images = jsonObject.getJSONArray("images")
-              if (images.length() > 0) {
-                val imageUrl = images.getJSONObject(0).getString("url")
-                trySend(imageUrl)
-              } else {
-                trySend(null)
-              }
+          if (response != "FAILURE") {
+            val jsonObject = JSONObject(response)
+            val images = jsonObject.getJSONArray("images")
+            if (images.length() > 0) {
+              val imageUrl = images.getJSONObject(0).getString("url")
+              trySend(imageUrl)
             } else {
               trySend(null)
             }
@@ -354,6 +347,44 @@ constructor(
       }
 
       awaitClose {}
+    }
+  }
+
+  /**
+   * Download an image from a URL and display it in an ImageView.
+   *
+   * @param imageUrl The URL of the image.
+   * @param imageView The ImageView to display the image in.
+   */
+  fun downloadAndDisplayImage(imageUrl: String, imageView: ImageView) {
+    val scope = CoroutineScope(Dispatchers.Main)
+    scope.launch {
+      val imageData =
+          withContext(Dispatchers.IO) {
+            try {
+              val url = urlProvider(imageUrl)
+              url.readBytes()
+            } catch (e: Exception) {
+              Log.e("SpotifyController", "Error downloading image: ${e.message}")
+              null
+            }
+          }
+
+      imageData?.let {
+        val bitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
+        imageView.setImageBitmap(bitmap)
+      }
+    }
+  }
+
+  // Using getAlbumImage in order to download and display image in an ImageView
+  fun displayAlbumImage(albumId: String, imageView: ImageView) {
+    val scope = CoroutineScope(Dispatchers.Main)
+    scope.launch {
+      getAlbumImage(albumId).collect { imageUrl ->
+        imageUrl?.let { downloadAndDisplayImage(it, imageView) }
+            ?: Log.e("SpotifyController", "No image URL found for album $albumId")
+      }
     }
   }
 

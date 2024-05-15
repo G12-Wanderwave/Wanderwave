@@ -1,7 +1,9 @@
 package ch.epfl.cs311.wanderwave.model
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.util.Log
+import android.widget.ImageView
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.di.ServiceModule.provideLocationSource
@@ -31,13 +33,16 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.unmockkStatic
 import io.mockk.verify
+import java.net.URL
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
@@ -46,6 +51,7 @@ import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import okhttp3.ResponseBody
@@ -96,20 +102,13 @@ class SpotifyControllerTest {
     val imageUrl = "https://example.com/image.jpg"
     val responseBody =
         """
-        {
-            "images": [
-                {"url": "$imageUrl"}
-            ]
-        }
-        """
-    val mockResponseBody = mockk<ResponseBody> { every { string() } returns responseBody }
-
-    val mockResponse =
-        mockk<Response> {
-          every { isSuccessful } returns true
-          every { body } returns mockResponseBody
-        }
-    coEvery { httpClient.newCall(any()).execute() } returns mockResponse
+            {
+                "images": [
+                    {"url": "$imageUrl"}
+                ]
+            }
+            """
+    coEvery { authenticationController.makeApiRequest(any()) } returns responseBody
 
     val result = spotifyController.getAlbumImage("albumId").first()
     assertEquals(imageUrl, result)
@@ -195,6 +194,59 @@ class SpotifyControllerTest {
     val result = spotifyController.getAlbumImage("albumId").firstOrNull()
 
     assertNull(result)
+  }
+
+  @Test
+  fun testDownloadAndDisplayImage() = runBlocking {
+    val imageUrl =
+        "https://images.squarespace-cdn.com/content/v1/60f1a490a90ed8713c41c36c/1629223610791-LCBJG5451DRKX4WOB4SP/37-design-powers-url-structure.jpeg"
+    val imageView = mockk<ImageView>(relaxed = true)
+
+    val imageData = withContext(Dispatchers.IO) { URL(imageUrl).readBytes() }
+
+    val mockBitmap = mockk<android.graphics.Bitmap>()
+    mockkStatic(BitmapFactory::class)
+    every { BitmapFactory.decodeByteArray(imageData, 0, imageData.size) } returns mockBitmap
+
+    spotifyController = SpotifyController(context, authenticationController)
+
+    val job = launch { spotifyController.downloadAndDisplayImage(imageUrl, imageView) }
+    job.join()
+
+    verify { imageView.setImageBitmap(mockBitmap) }
+
+    unmockkStatic(BitmapFactory::class)
+  }
+
+  @Test
+  fun testDisplayAlbumImage() = runBlocking {
+    val albumId = "albumId"
+    val imageUrl =
+        "https://images.squarespace-cdn.com/content/v1/60f1a490a90ed8713c41c36c/1629223610791-LCBJG5451DRKX4WOB4SP/37-design-powers-url-structure.jpeg"
+    val imageView = mockk<ImageView>(relaxed = true)
+    val accessToken = "test_access_token"
+
+    coEvery { authenticationController.getAccessToken() } returns accessToken
+
+    val albumImageJson =
+        """
+            {
+                "images": [
+                    {"url": "$imageUrl"}
+                ]
+            }
+        """
+    coEvery { authenticationController.makeApiRequest(any<URL>()) } returns albumImageJson
+
+    val mockBitmap = mockk<android.graphics.Bitmap>()
+    mockkStatic(BitmapFactory::class)
+    every { BitmapFactory.decodeByteArray(any(), any(), any()) } returns mockBitmap
+
+    spotifyController.displayAlbumImage(albumId, imageView)
+
+    verify { imageView.setImageBitmap(mockBitmap) }
+
+    unmockkStatic(BitmapFactory::class)
   }
 
   @Test

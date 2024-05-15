@@ -151,6 +151,8 @@ dependencies {
     androidTestImplementation(libs.ui.test.junit4)
     androidTestImplementation(platform(libs.androidx.compose.bom))
 
+
+
     androidTestImplementation(libs.kaspresso)
     // Allure support
     androidTestImplementation(libs.kaspresso.allure.support)
