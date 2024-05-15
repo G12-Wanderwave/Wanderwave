@@ -132,30 +132,29 @@ class SpotifyController(private val context: Context) {
     }
   }
 
-    fun startPlaybackTimer(
-        trackDuration: Long,
-        scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    ) {
-        stopPlaybackTimer() // Ensure no previous timers are running
+  fun startPlaybackTimer(
+      trackDuration: Long,
+      scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+  ) {
+    stopPlaybackTimer() // Ensure no previous timers are running
 
-        playbackTimer =
-            scope.launch {
-                val checkInterval = 50L // Check every second
-                var elapsedTime = 0L
-                while (elapsedTime < trackDuration) {
-                    delay(checkInterval)
-                    elapsedTime += checkInterval
-                    trackProgress.value = elapsedTime.toFloat() / trackDuration
-                    appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
-                        if ((trackDuration - playerState.playbackPosition) <= 1000) {
-                            onTrackEndCallback?.invoke()
-                            stopPlaybackTimer()
-                        }
-                    }
-                }
+    playbackTimer =
+        scope.launch {
+          val checkInterval = 50L // Check every second
+          var elapsedTime = 0L
+          while (elapsedTime < trackDuration) {
+            delay(checkInterval)
+            elapsedTime += checkInterval
+            trackProgress.value = elapsedTime.toFloat() / trackDuration
+            appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
+              if ((trackDuration - playerState.playbackPosition) <= 1000) {
+                onTrackEndCallback?.invoke()
+                stopPlaybackTimer()
+              }
             }
-    }
-
+          }
+        }
+  }
 
   fun stopPlaybackTimer() {
     trackProgress.value = 0f
@@ -303,8 +302,7 @@ class SpotifyController(private val context: Context) {
     }
   }
 
-
-    enum class ConnectResult {
+  enum class ConnectResult {
     SUCCESS,
     NOT_LOGGED_IN,
     FAILED

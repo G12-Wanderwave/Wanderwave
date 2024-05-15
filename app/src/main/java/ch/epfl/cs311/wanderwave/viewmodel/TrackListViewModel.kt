@@ -256,18 +256,18 @@ constructor(
   }
 
   data class UiState(
-    val tracks: List<Track> = listOf(),
-    val queue: List<Track> = listOf(),
-    val loading: Boolean = false,
-    val message: String? = null,
-    val selectedTrack: Track? = null,
-    val pausedTrack: Track? = null,
-    val isPlaying: Boolean = false,
-    val currentMillis: Int = 0,
-    val expanded: Boolean = false,
-    val progress: MutableFloatState = mutableFloatStateOf(0f),
-    val isShuffled: Boolean = false,
-    val loopMode: LoopMode = LoopMode.NONE
+      val tracks: List<Track> = listOf(),
+      val queue: List<Track> = listOf(),
+      val loading: Boolean = false,
+      val message: String? = null,
+      val selectedTrack: Track? = null,
+      val pausedTrack: Track? = null,
+      val isPlaying: Boolean = false,
+      val currentMillis: Int = 0,
+      val expanded: Boolean = false,
+      val progress: MutableFloatState = mutableFloatStateOf(0f),
+      val isShuffled: Boolean = false,
+      val loopMode: LoopMode = LoopMode.NONE
   )
 }
 
