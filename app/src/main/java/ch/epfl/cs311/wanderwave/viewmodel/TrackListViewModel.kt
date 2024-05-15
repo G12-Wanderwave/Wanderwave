@@ -46,7 +46,11 @@ constructor(
   private fun observeTracks() {
     viewModelScope.launch {
       repository.getAll().collect { tracks ->
-        _uiState.value = UiState(tracks = tracks.filter { matchesSearchQuery(it) }, loading = false, progress = spotifyController.trackProgress)
+        _uiState.value =
+            UiState(
+                tracks = tracks.filter { matchesSearchQuery(it) },
+                loading = false,
+                progress = spotifyController.trackProgress)
       }
       // deal with the flow
     }

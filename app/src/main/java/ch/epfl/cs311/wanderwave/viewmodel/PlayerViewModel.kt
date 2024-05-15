@@ -7,7 +7,6 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.toWanderwaveTrack
 import dagger.hilt.android.lifecycle.HiltViewModel
-import hilt_aggregated_deps._ch_epfl_cs311_wanderwave_viewmodel_LoginScreenViewModel_HiltModules_BindsModule
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,7 +23,11 @@ class PlayerViewModel @Inject constructor(val spotifyController: SpotifyControll
   private val _expandedState = MutableStateFlow(false)
 
   private var _uiState =
-      combine(_playerState, _expandedState, _looping, _shuffling) { playerState, expandedState, looping, shuffling ->
+      combine(_playerState, _expandedState, _looping, _shuffling) {
+          playerState,
+          expandedState,
+          looping,
+          shuffling ->
         if (playerState == null) {
           UiState(expanded = expandedState)
         } else
