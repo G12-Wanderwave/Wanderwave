@@ -20,10 +20,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.isActive
 import kotlinx.coroutines.launch
 
 class SpotifyController(private val context: Context) {
+  val recentlyPlayedTracks = MutableStateFlow(emptyList<Track>())
 
   private val CLIENT_ID = BuildConfig.SPOTIFY_CLIENT_ID
   private val REDIRECT_URI = "wanderwave-auth://callback"
@@ -116,6 +119,8 @@ class SpotifyController(private val context: Context) {
                 startPlaybackTimer(it.track.duration)
               }
               trySend(true)
+              // prepend to the start of the recently played tracks list
+              recentlyPlayedTracks.value = listOf(track) + recentlyPlayedTracks.value.filterNot { it.id == track.id }
             }
             .setErrorCallback {
               Log.e("SpotifyController", "Failed to play track: ${track.title}")
