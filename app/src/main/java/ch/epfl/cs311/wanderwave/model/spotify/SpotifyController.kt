@@ -2,6 +2,8 @@ package ch.epfl.cs311.wanderwave.model.spotify
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.mutableFloatStateOf
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.spotify.android.appremote.api.ConnectionParams
@@ -45,6 +47,8 @@ class SpotifyController(private val context: Context) {
 
   var appRemote: SpotifyAppRemote? = null
   private var onTrackEndCallback: (() -> Unit)? = null
+
+  val trackProgress: MutableFloatState = mutableFloatStateOf(0f)
 
   fun getAuthorizationRequest(): AuthorizationRequest {
     val builder =
@@ -128,28 +132,33 @@ class SpotifyController(private val context: Context) {
     }
   }
 
-  fun startPlaybackTimer(
-      trackDuration: Long,
-      scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
-  ) {
-    stopPlaybackTimer() // Ensure no previous timers are running
-    playbackTimer =
-        scope.launch {
-          val checkInterval = 1000L // Check every second
-          var elapsedTime = 0L
-          while (elapsedTime < trackDuration) {
-            delay(checkInterval)
-            appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
-              if ((trackDuration - playerState.playbackPosition) <= 1000) {
-                onTrackEndCallback?.invoke()
-                stopPlaybackTimer()
-              }
+    fun startPlaybackTimer(
+        trackDuration: Long,
+        scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    ) {
+        stopPlaybackTimer() // Ensure no previous timers are running
+
+        playbackTimer =
+            scope.launch {
+                val checkInterval = 50L // Check every second
+                var elapsedTime = 0L
+                while (elapsedTime < trackDuration) {
+                    delay(checkInterval)
+                    elapsedTime += checkInterval
+                    trackProgress.value = elapsedTime.toFloat() / trackDuration
+                    appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
+                        if ((trackDuration - playerState.playbackPosition) <= 1000) {
+                            onTrackEndCallback?.invoke()
+                            stopPlaybackTimer()
+                        }
+                    }
+                }
             }
-          }
-        }
-  }
+    }
+
 
   fun stopPlaybackTimer() {
+    trackProgress.value = 0f
     playbackTimer?.cancel()
     playbackTimer = null
   }
@@ -294,7 +303,8 @@ class SpotifyController(private val context: Context) {
     }
   }
 
-  enum class ConnectResult {
+
+    enum class ConnectResult {
     SUCCESS,
     NOT_LOGGED_IN,
     FAILED

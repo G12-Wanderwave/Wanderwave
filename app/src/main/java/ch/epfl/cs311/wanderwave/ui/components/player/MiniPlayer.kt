@@ -16,6 +16,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableFloatState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -58,7 +59,7 @@ fun MiniPlayer(
               onPlayClick = onPlayClick,
               onPauseClick = onPauseClick)
         }
-    ProgressBar(progress = progress)
+    ProgressBar(progress = uiStateFlow.value.progress)
   }
 }
 
@@ -105,9 +106,9 @@ fun PlayPauseButton(
 }
 
 @Composable
-fun ProgressBar(progress: Float) {
+fun ProgressBar(progress: MutableFloatState) {
   Box(modifier = Modifier.fillMaxWidth().height(2.dp), contentAlignment = Alignment.BottomStart) {
     LinearProgressIndicator(
-        progress = progress, modifier = Modifier.fillMaxWidth(), color = Color.White)
+        progress = progress.floatValue, modifier = Modifier.fillMaxWidth(), color = Color.White)
   }
 }
