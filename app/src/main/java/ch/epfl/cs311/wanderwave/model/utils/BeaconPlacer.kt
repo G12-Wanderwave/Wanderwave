@@ -9,9 +9,9 @@ import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
-import com.google.android.gms.common.api.ApiException
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.PlaceLikelihood
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
 import kotlin.math.*
 import kotlin.random.Random
@@ -26,47 +26,101 @@ private const val MIN_BEACON_DISTANCE = 0.1
 
 val types: List<String> =
     listOf(
+        "accounting",
         "airport",
         "amusement_park",
         "aquarium",
         "art_gallery",
-        "spa",
+        "atm",
+        "bakery",
+        "bank",
+        "bar",
+        "beauty_salon",
+        "bicycle_store",
+        "book_store",
         "bowling_alley",
+        "bus_station",
         "cafe",
         "campground",
-        "casino",
+        "car_dealer",
+        "car_rental",
+        "car_repair",
         "car_wash",
+        "casino",
+        "cemetery",
         "church",
         "city_hall",
+        "clothing_store",
+        "convenience_store",
         "courthouse",
+        "dentist",
+        "department_store",
+        "doctor",
         "drugstore",
+        "electrician",
+        "electronics_store",
         "embassy",
-        "establishment",
         "fire_station",
+        "florist",
+        "funeral_home",
+        "furniture_store",
+        "gas_station",
+        "gym",
+        "hair_care",
         "hardware_store",
         "hindu_temple",
+        "home_goods_store",
         "hospital",
+        "insurance_agency",
+        "jewelry_store",
+        "laundry",
+        "lawyer",
         "library",
         "light_rail_station",
+        "liquor_store",
         "local_government_office",
+        "locksmith",
+        "lodging",
+        "meal_delivery",
+        "meal_takeaway",
+        "mosque",
+        "movie_rental",
         "movie_theater",
+        "moving_company",
         "museum",
         "night_club",
+        "painter",
         "park",
+        "parking",
+        "pet_store",
+        "pharmacy",
+        "physiotherapist",
+        "plumber",
+        "police",
         "post_office",
         "primary_school",
+        "real_estate_agency",
+        "restaurant",
+        "roofing_contractor",
+        "rv_park",
         "school",
         "secondary_school",
+        "shoe_store",
+        "shopping_mall",
         "spa",
         "stadium",
+        "storage",
         "store",
         "subway_station",
         "supermarket",
         "synagogue",
+        "taxi_stand",
         "tourist_attraction",
         "train_station",
         "transit_station",
+        "travel_agency",
         "university",
+        "veterinary_care",
         "zoo")
 
 /**
@@ -243,10 +297,46 @@ fun createNearbyBeacons(
 ) {
   scope.launch {
     val nearbyPOIs = MutableStateFlow<List<Location>>(emptyList())
-    val newBeacons = mutableListOf<Beacon>()
 
     getNearbyPOIs(
         context, location, radius, nearbyPOIs, nearbyBeacons, beaconRepository, scope, onComplete)
+  }
+}
+
+private fun filterAndAddPOIs(
+    placeLikelihoods: List<PlaceLikelihood>,
+    location: Location,
+    radius: Double,
+    nearbyPOIs: MutableStateFlow<List<Location>>
+) {
+  for (placeLikelihood in placeLikelihoods) {
+    val place = placeLikelihood.place
+    val placeLoc = Location(place.latLng.latitude, place.latLng.longitude, place.name)
+    if ((location.distanceBetween(placeLoc) <= radius) &&
+        place.placeTypes.any { types.contains(it) }) {
+      nearbyPOIs.value += placeLoc
+    }
+  }
+}
+
+private fun addNewBeacons(
+    scope: CoroutineScope,
+    nearbyPOIs: MutableStateFlow<List<Location>>,
+    nearbyBeacons: MutableStateFlow<List<Beacon>>,
+    newBeacons: MutableList<Beacon>,
+    beaconRepository: BeaconRepository
+) {
+  nearbyPOIs.value.forEach { poi ->
+    if (nearbyBeacons.value.all { it.location.distanceBetween(poi) > MIN_BEACON_DISTANCE } &&
+        newBeacons.all { it.location.distanceBetween(poi) > MIN_BEACON_DISTANCE }) {
+      val beacon = Beacon(poi.name, poi)
+      scope.launch {
+        val id = beaconRepository.addItemAndGetId(beacon)
+        if (id != null) {
+          newBeacons.add(beacon.copy(id = id, location = poi, profileAndTrack = listOf()))
+        }
+      }
+    }
   }
 }
 
@@ -288,35 +378,12 @@ suspend fun getNearbyPOIs(
     placesClient
         .findCurrentPlace(request)
         .addOnSuccessListener { response ->
-          for (placeLikelihood in response.placeLikelihoods) {
-            val place = placeLikelihood.place
-            val placeLoc = Location(place.latLng.latitude, place.latLng.longitude, place.name)
-            if ((location.distanceBetween(placeLoc) <= radius) &&
-                place.placeTypes.any { types.contains(it) })
-                nearbyPOIs.value += placeLoc
-          }
-          nearbyPOIs.value.forEach { poi ->
-            if (nearbyBeacons.value.all {
-              it.location.distanceBetween(poi) > MIN_BEACON_DISTANCE
-            } && newBeacons.all { it.location.distanceBetween(poi) > MIN_BEACON_DISTANCE }) {
-              val beacon = Beacon(poi.name, poi)
-              scope.launch {
-                val id = beaconRepository.addItemAndGetId(beacon)
-                if (id != null) {
-                  newBeacons.add(beacon.copy(id = id, location = poi, profileAndTrack = listOf()))
-                }
-              }
-            }
-          }
-          nearbyBeacons.value += newBeacons
+          filterAndAddPOIs(response.placeLikelihoods, location, radius, nearbyPOIs)
+          addNewBeacons(scope, nearbyPOIs, nearbyBeacons, newBeacons, beaconRepository)
           onComplete(newBeacons)
         }
         .addOnFailureListener { exception ->
-          if (exception is ApiException) {
-            Log.e("PlacesApi", "Place not found: ${exception.message}")
-          }
-
-          onComplete(newBeacons)
+          Log.e("PlacesApi", "Place not found: ${exception.message}")
         }
   }
 }
