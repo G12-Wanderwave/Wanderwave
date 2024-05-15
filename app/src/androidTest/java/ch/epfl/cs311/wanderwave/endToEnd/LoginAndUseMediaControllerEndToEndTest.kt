@@ -24,9 +24,6 @@ import ch.epfl.cs311.wanderwave.ui.screens.LoginScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.screens.components.ExclusivePlayerScreen
 import com.google.android.gms.maps.LocationSource
-import com.kaspersky.components.composesupport.config.withComposeSupport
-import com.kaspersky.kaspresso.kaspresso.Kaspresso
-import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import dagger.Module
@@ -56,8 +53,7 @@ import org.junit.runner.RunWith
 @UninstallModules(RepositoryModule::class, ServiceModule::class)
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
-class LoginAndUseMediaControllerEndToEndTest :
-    TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
+class LoginAndUseMediaControllerEndToEndTest {
 
   @get:Rule val mockkRule = MockKRule(this)
 
