@@ -139,23 +139,6 @@ fun BeaconInformation(location: Location) {
   }
 }
 
-// TODO : @Jonas, pls look at it again
-// @Composable
-// fun SongList(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit) {
-//    TrackList(
-//        beacon.profileAndTrack,
-//        title = stringResource(R.string.beaconTracksTitle),
-//        onAddTrack = {
-//            addTrackToBeacon(beacon.id, it) { success ->
-//                if (success) {
-//                    Log.d("SongList", "Track added successfully.")
-//                } else {
-//                    Log.e("SongList", "Failed to add track.")
-//                }
-//            }
-//        })
-// }
-
 @Composable
 fun SongList(
     beacon: Beacon,

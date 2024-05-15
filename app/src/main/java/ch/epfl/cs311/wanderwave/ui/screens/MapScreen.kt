@@ -71,6 +71,8 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
   } else {
     // if we have location permissions, move the camera to the last known location **once**
     val location = viewModel.getLastKnownLocation(context)
+    viewModel.startLocationUpdates(context)
+
     LaunchedEffect(location != null, mapIsLoaded.value) {
       if (location != null && mapIsLoaded.value) {
         moveCamera(cameraPositionState, location, viewModel.cameraPosition.value)
