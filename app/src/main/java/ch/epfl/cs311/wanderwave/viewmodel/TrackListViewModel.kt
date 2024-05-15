@@ -1,5 +1,7 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.ListType
@@ -50,7 +52,8 @@ constructor(
             UiState(
                 tracks = tracks.filter { matchesSearchQuery(it) },
                 queue = tracks.filter { matchesSearchQuery(it) },
-                loading = false)
+                loading = false,
+                progress = spotifyController.trackProgress)
       }
       // deal with the flow
     }
@@ -262,7 +265,7 @@ constructor(
       val isPlaying: Boolean = false,
       val currentMillis: Int = 0,
       val expanded: Boolean = false,
-      val progress: Float = 0f,
+      val progress: MutableFloatState = mutableFloatStateOf(0f),
       val isShuffled: Boolean = false,
       val loopMode: LoopMode = LoopMode.NONE
   )
