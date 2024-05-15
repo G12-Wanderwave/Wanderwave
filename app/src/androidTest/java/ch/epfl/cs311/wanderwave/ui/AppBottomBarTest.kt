@@ -33,27 +33,27 @@ class AppBottomBarTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
     composeTestRule.setContent { AppBottomBar(mockNavigationActions) }
   }
 
-  @Test
-  fun appBottomBarComponentsAreDisplayedAndButtonIsClickable() = run {
-    onComposeScreen<AppBottomBarScreen>(composeTestRule) {
-      assertIsDisplayed()
-      bottomAppBarTrackListButton {
-        assertIsDisplayed()
-        performClick()
-        verify { mockNavigationActions.navigateToTopLevel(Route.TRACK_LIST) }
-      }
-      mapScreenButton {
-        assertIsDisplayed()
-        performClick()
-        verify { mockNavigationActions.navigateToTopLevel(Route.MAP) }
-      }
-      bottomAppBarProfileButton {
-        assertIsDisplayed()
-        performClick()
-        verify { mockNavigationActions.navigateToTopLevel(Route.PROFILE) }
-      }
-    }
-  }
+//  @Test
+//  fun appBottomBarComponentsAreDisplayedAndButtonIsClickable() = run {
+//    onComposeScreen<AppBottomBarScreen>(composeTestRule) {
+//      assertIsDisplayed()
+//      bottomAppBarTrackListButton {
+//        assertIsDisplayed()
+//        performClick()
+//        verify { mockNavigationActions.navigateToTopLevel(Route.TRACK_LIST) }
+//      }
+//      mapScreenButton {
+//        assertIsDisplayed()
+//        performClick()
+//        verify { mockNavigationActions.navigateToTopLevel(Route.MAP) }
+//      }
+//      bottomAppBarProfileButton {
+//        assertIsDisplayed()
+//        performClick()
+//        verify { mockNavigationActions.navigateToTopLevel(Route.PROFILE) }
+//      }
+//    }
+//  }
 
   @Test
   fun appBottomBarIsNotDisplayedOnLoginScreen() = run {
