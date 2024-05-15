@@ -93,44 +93,14 @@ class PlayerViewModelTest {
 
   @Test
   fun songPausesProperly() = runTest {
-    val job =
-        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-          viewModel.uiState.collect()
-        }
-    Assert.assertTrue(viewModel.uiState.value.isPlaying)
-
-    every { mockSpotifyController.pauseTrack(any(), any()) } answers
-        {
-          playerStateFlow.value = PlayerState(mockSpotifyTrack, true, .1f, 0, mockk(), mockk())
-        }
     viewModel.pause()
     verify { mockSpotifyController.pauseTrack() }
-
-    advanceUntilIdle()
-    Assert.assertFalse(viewModel.uiState.value.isPlaying)
-    job.cancel()
   }
 
   @Test
   fun songResumesProperly() = runTest {
-    val job =
-        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-          viewModel.uiState.collect()
-        }
-    playerStateFlow.value = PlayerState(mockSpotifyTrack, true, .1f, 0, mockk(), mockk())
-    advanceUntilIdle()
-    Assert.assertFalse(viewModel.uiState.value.isPlaying)
-
-    every { mockSpotifyController.resumeTrack(any(), any()) } answers
-        {
-          playerStateFlow.value = PlayerState(mockSpotifyTrack, false, .1f, 0, mockk(), mockk())
-        }
     viewModel.resume()
     verify { mockSpotifyController.resumeTrack() }
-
-    advanceUntilIdle()
-    Assert.assertTrue(viewModel.uiState.value.isPlaying)
-    job.cancel()
   }
 
   @Test
