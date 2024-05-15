@@ -377,7 +377,7 @@ constructor(
     }
   }
 
-  // Using getAlbumImage in order to download and display image in an ImageView
+  // Using getAlbumImage in order to download and display image in an ImageView.
   fun displayAlbumImage(albumId: String, imageView: ImageView) {
     val scope = CoroutineScope(Dispatchers.Main)
     scope.launch {
