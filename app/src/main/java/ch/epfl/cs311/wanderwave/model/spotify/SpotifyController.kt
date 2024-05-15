@@ -321,7 +321,6 @@ constructor(
     return answer
   }
 
-
   enum class ConnectResult {
     SUCCESS,
     NOT_LOGGED_IN,
@@ -359,7 +358,6 @@ fun retrieveChildFromSpotify(
 ) {
   val children = spotifyController.getAllChildren(item)
   checkIfNullAndAddToAList(children, childrenPlaylistTrackList, scope)
-
 }
 
 fun checkIfNullAndAddToAList(
@@ -376,7 +374,6 @@ fun checkIfNullAndAddToAList(
     }
   }
 }
-
 
 /**
  * Get all the liked tracks of the user and add them to the likedSongs list.
@@ -405,24 +402,22 @@ suspend fun getLikedTracksFromSpotify(
   }
 }
 
-suspend fun getTracksFromSpotifyPlaylist(
+fun getTracksFromSpotifyPlaylist(
     playlistId: String,
     playlist: MutableStateFlow<List<ListItem>>,
     spotifyController: SpotifyController,
     scope: CoroutineScope
-){
-    scope.launch {
-        val url = "https://api.spotify.com/v1/playlists/$playlistId"
-        try {
-            val json = spotifyController.spotifyGetFromURL(url)
-            parseTracks(json, playlist)
-        } catch (e: Exception) {
-            Log.e("SpotifyController", "Failed to get songs from playlist")
-            e.printStackTrace()
-        }
+) {
+  scope.launch {
+    val url = "https://api.spotify.com/v1/playlists/$playlistId"
+    try {
+      val json = spotifyController.spotifyGetFromURL(url)
+      parseTracks(json, playlist)
+    } catch (e: Exception) {
+      Log.e("SpotifyController", "Failed to get songs from playlist")
+      e.printStackTrace()
     }
-
-
+  }
 }
 
 /**

@@ -166,8 +166,13 @@ constructor(
     getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
   }
 
-  override suspend fun getTracksFromPlaylist(playlistId: String, playlist: MutableStateFlow<List<ListItem>>) {
+  override fun getTracksFromPlaylist(
+      playlistId: String,
+      playlist: MutableStateFlow<List<ListItem>>
+  ) {
+    viewModelScope.launch {
       getTracksFromSpotifyPlaylist(playlistId, playlist, spotifyController, viewModelScope)
+    }
   }
 
   data class UIState(

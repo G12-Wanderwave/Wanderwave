@@ -52,12 +52,12 @@ interface SpotifySongsActions {
    */
   suspend fun getLikedTracks()
 
-    /**
-     * Get all the tracks from a playlist
-     *
-     * @param playlistId The id of the playlist to get the tracks from.
-     * @since 3.0
-     * @last update 3.0
-     */
-  suspend fun getTracksFromPlaylist(playlistId: String, playlist: MutableStateFlow<List<ListItem>>)
+  /**
+   * Get all the tracks from a playlist
+   *
+   * @param playlistId The id of the playlist to get the tracks from.
+   * @since 3.0
+   * @last update 3.0
+   */
+  fun getTracksFromPlaylist(playlistId: String, playlist: MutableStateFlow<List<ListItem>>)
 }
