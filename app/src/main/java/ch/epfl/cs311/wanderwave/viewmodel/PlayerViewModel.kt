@@ -7,6 +7,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.toWanderwaveTrack
 import dagger.hilt.android.lifecycle.HiltViewModel
+import hilt_aggregated_deps._ch_epfl_cs311_wanderwave_viewmodel_LoginScreenViewModel_HiltModules_BindsModule
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,18 +19,20 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class PlayerViewModel @Inject constructor(val spotifyController: SpotifyController) : ViewModel() {
   private val _playerState = spotifyController.playerState()
+  private val _looping = spotifyController.looping
+  private val _shuffling = spotifyController.shuffling
   private val _expandedState = MutableStateFlow(false)
 
   private var _uiState =
-      combine(_playerState, _expandedState) { playerState, expandedState ->
+      combine(_playerState, _expandedState, _looping, _shuffling) { playerState, expandedState, looping, shuffling ->
         if (playerState == null) {
           UiState(expanded = expandedState)
         } else
             UiState(
                 track = playerState.track?.toWanderwaveTrack(),
                 isPlaying = !playerState.isPaused,
-                repeatMode = playerState.playbackOptions.repeatMode != LoopMode.NONE.ordinal,
-                isShuffling = playerState.playbackOptions.isShuffling,
+                repeatMode = looping,
+                isShuffling = shuffling,
                 expanded = expandedState)
       }
   val uiState: StateFlow<UiState> =
@@ -67,16 +70,11 @@ class PlayerViewModel @Inject constructor(val spotifyController: SpotifyControll
   }
 
   fun toggleShuffle() {
-    //    _uiState.value = _uiState.value.copy(shuffleOn = !_uiState.value.shuffleOn)
+    _shuffling.value = !_shuffling.value
   }
 
   fun toggleRepeat() {
-    //    _uiState.value =
-    //      when (_uiState.value.repeatMode) {
-    //        RepeatMode.NONE -> _uiState.value.copy(repeatMode = RepeatMode.ALL)
-    //        RepeatMode.ALL -> _uiState.value.copy(repeatMode = RepeatMode.ONE)
-    //        else -> _uiState.value.copy(repeatMode = RepeatMode.NONE)
-    //      }
+    _looping.value = !_looping.value
   }
 
   data class UiState(

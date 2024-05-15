@@ -46,7 +46,10 @@ class SpotifyController(private val context: Context) {
 
   val appRemote: MutableStateFlow<SpotifyAppRemote?> = MutableStateFlow(null)
   private var trackList: List<Track>? = null
+  private var trackListShuffled: List<Track>? = null
   private var onTrackEndCallback: (() -> Unit)? = null
+  val shuffling = MutableStateFlow(false)
+  val looping = MutableStateFlow(false)
 
   fun getAuthorizationRequest(): AuthorizationRequest {
     val builder =
@@ -128,6 +131,7 @@ class SpotifyController(private val context: Context) {
           .play(trackToPlay.id)
           .setResultCallback {
             this.trackList = trackList
+            this.trackListShuffled = trackList.shuffled()
             onSuccess()
           }
           .setErrorCallback { error -> onFailure(error) }
@@ -159,11 +163,14 @@ class SpotifyController(private val context: Context) {
   ) {
     val currentTrack = playerState().firstOrNull()?.track
     val currentIndex = trackList?.indexOfFirst { track -> track.id == currentTrack?.uri } ?: -1
-    Log.d("SpotifyController", "Skipping $direction")
-    Log.d("SpotifyController", "Track list: $trackList")
-    Log.d("SpotifyController", "Current index: $currentIndex")
     if (currentIndex != -1) {
-      val nextIndex = (currentIndex + direction) % trackList!!.size
+      var nextIndex = (currentIndex + direction)
+      if (looping.value) {
+        nextIndex %= trackList!!.size
+      } else if (nextIndex < 0 || nextIndex >= trackList!!.size) {
+        onFailure(Throwable("Cannot skip out of bounds"))
+        return
+      }
       val nextTrack = trackList!![nextIndex]
       playTrack(nextTrack, onSuccess, onFailure)
     }
