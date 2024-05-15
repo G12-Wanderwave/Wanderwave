@@ -1,9 +1,11 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.model.spotify.toWanderwaveTrack
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +26,7 @@ class PlayerViewModel @Inject constructor(val spotifyController: SpotifyControll
           UiState(expanded = expandedState)
         } else
             UiState(
-                track = playerState.track?.let { Track(it.uri, it.name, it.artist.name) },
+                track = playerState.track?.toWanderwaveTrack(),
                 isPlaying = !playerState.isPaused,
                 repeatMode = playerState.playbackOptions.repeatMode != LoopMode.NONE.ordinal,
                 isShuffling = playerState.playbackOptions.isShuffling,
@@ -54,7 +56,10 @@ class PlayerViewModel @Inject constructor(val spotifyController: SpotifyControll
   }
 
   fun skipForward() {
-    viewModelScope.launch { spotifyController.skip(1) }
+    viewModelScope.launch {
+      spotifyController.skip(1, {}, {})
+      Log.d("PlayerViewModel", "skipForward")
+    }
   }
 
   fun skipBackward() {

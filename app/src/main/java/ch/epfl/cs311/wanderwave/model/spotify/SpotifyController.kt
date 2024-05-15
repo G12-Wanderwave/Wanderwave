@@ -361,3 +361,7 @@ fun retrieveChildFromSpotify(
     }
   }
 }
+
+fun com.spotify.protocol.types.Track.toWanderwaveTrack() : Track {
+  return Track(this.uri, this.name, this.artist.name)
+}
