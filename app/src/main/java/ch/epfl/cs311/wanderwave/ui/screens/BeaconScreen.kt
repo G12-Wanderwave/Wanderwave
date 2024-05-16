@@ -48,6 +48,7 @@ import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
@@ -89,7 +90,7 @@ fun BeaconScreen(
       horizontalAlignment = Alignment.CenterHorizontally) {
         if (!uiState.isLoading) {
           //   BeaconScreen(beacon = uiState.beacon!!, navigationActions = navigationActions)
-          BeaconScreen(beacon = uiState.beacon!!, viewModel::addTrackToBeacon, navigationActions)
+          BeaconScreen(beacon = uiState.beacon!!, viewModel::addTrackToBeacon, navigationActions, viewModel)
         } else {
           LoadingScreen()
         }
@@ -100,7 +101,8 @@ fun BeaconScreen(
 private fun BeaconScreen(
     beacon: Beacon,
     addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit = { _, _, _ -> },
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    viewModel: BeaconViewModel
 ) {
   Column(
       modifier = Modifier
@@ -109,7 +111,7 @@ private fun BeaconScreen(
           .testTag("beaconScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
-        AddTrack(beacon, addTrackToBeacon)
+        AddTrack(beacon, addTrackToBeacon, navigationActions, viewModel)
         SongList(beacon, addTrackToBeacon, navigationActions)
       }
 }
@@ -148,8 +150,34 @@ fun BeaconInformation(location: Location) {
 }
 
 @Composable
-fun AddTrack(beacon: Beacon, addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit) {
-    Button(onClick = { /*TODO*/ }) {
+fun AddTrack(
+    beacon: Beacon,
+    addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit,
+    navigationActions: NavigationActions,
+    viewModel: BeaconViewModel
+) {
+    Button(onClick = {
+        //Navigate to SelectSongScreen
+        navigationActions.navigateToSelectSongScreen(viewModelType.TRACKLIST)
+        if(viewModel.songLists.value.isNotEmpty()) {
+            viewModel.addTrackToBeacon(
+                beacon.id,
+                viewModel.songLists.value[0].tracks[0]
+            ) { success ->
+                if (success) {
+                    Log.i(
+                        "AddTrack",
+                        "Track ${viewModel.songLists.value[0].tracks[0].title} added successfully"
+                    )
+                } else  {
+                    Log.e(
+                        "AddTrack",
+                        "Failed to add track ${viewModel.songLists.value[0].tracks[0].title}"
+                    )
+                }
+            }
+        }
+    }) {
         Text(text = stringResource(R.string.addTrack))
     }
 }
