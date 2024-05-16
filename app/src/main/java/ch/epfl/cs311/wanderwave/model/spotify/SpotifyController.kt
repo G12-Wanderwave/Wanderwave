@@ -2,6 +2,8 @@ package ch.epfl.cs311.wanderwave.model.spotify
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.mutableFloatStateOf
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -56,6 +58,8 @@ constructor(
 
   var appRemote: SpotifyAppRemote? = null
   private var onTrackEndCallback: (() -> Unit)? = null
+
+  val trackProgress: MutableFloatState = mutableFloatStateOf(0f)
 
   fun getAuthorizationRequest(): AuthorizationRequest {
     val builder =
@@ -144,12 +148,15 @@ constructor(
       scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
   ) {
     stopPlaybackTimer() // Ensure no previous timers are running
+
     playbackTimer =
         scope.launch {
-          val checkInterval = 1000L // Check every second
+          val checkInterval = 50L // Check every second
           var elapsedTime = 0L
           while (elapsedTime < trackDuration) {
             delay(checkInterval)
+            elapsedTime += checkInterval
+            trackProgress.value = elapsedTime.toFloat() / trackDuration
             appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
               if ((trackDuration - playerState.playbackPosition) <= 1000) {
                 onTrackEndCallback?.invoke()
@@ -161,6 +168,7 @@ constructor(
   }
 
   fun stopPlaybackTimer() {
+    trackProgress.value = 0f
     playbackTimer?.cancel()
     playbackTimer = null
   }
@@ -237,7 +245,7 @@ constructor(
     val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
     return callbackFlow {
       val callResult =
-          appRemote?.let { it ->
+          appRemote?.let {
             it.contentApi
                 .getRecommendedContentItems(ContentApi.ContentType.DEFAULT)
                 .setResultCallback {
@@ -263,7 +271,7 @@ constructor(
 
     return callbackFlow {
       val callResult =
-          appRemote?.let { it ->
+          appRemote?.let {
             it.contentApi
                 .getChildrenOfItem(listItem, 50, 0)
                 .setResultCallback {
@@ -292,7 +300,7 @@ constructor(
 
     return callbackFlow {
       val callResult =
-          appRemote?.let { it ->
+          appRemote?.let {
             it.contentApi
                 .getChildrenOfItem(listItem, 50, 0)
                 .setResultCallback {
@@ -389,6 +397,24 @@ suspend fun getLikedTracksFromSpotify(
           spotifyController.spotifyGetFromURL("$url?limit=50") // TODO : revoir la limite
       parseTracks(jsonResponse, likedSongsTrackList)
     } catch (e: Exception) {
+      e.printStackTrace()
+    }
+  }
+}
+
+fun getTracksFromSpotifyPlaylist(
+    playlistId: String,
+    playlist: MutableStateFlow<List<ListItem>>,
+    spotifyController: SpotifyController,
+    scope: CoroutineScope
+) {
+  scope.launch {
+    val url = "https://api.spotify.com/v1/playlists/$playlistId"
+    try {
+      val json = spotifyController.spotifyGetFromURL(url)
+      parseTracks(json, playlist)
+    } catch (e: Exception) {
+      Log.e("SpotifyController", "Failed to get songs from playlist")
       e.printStackTrace()
     }
   }
