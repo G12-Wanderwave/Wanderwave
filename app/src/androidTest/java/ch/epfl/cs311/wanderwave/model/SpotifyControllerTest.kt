@@ -22,6 +22,7 @@ import com.spotify.protocol.types.ListItems
 import com.spotify.protocol.types.PlayerState
 import io.mockk.Awaits
 import io.mockk.Runs
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -43,10 +44,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -183,9 +186,7 @@ class SpotifyControllerTest {
 
   @Test
   fun playTrackListTestWithNoTrackGiven() = runBlocking {
-    val mockPlayerState = mockk<PlayerState>()
     val playerApi = mockk<PlayerApi>(relaxed = true)
-    val subscription = mockk<Subscription<PlayerState>>(relaxed = true)
     every { mockAppRemote.playerApi } returns playerApi
     val track1 = Track("id1", "title1", "artist1")
     val track2 = Track("id2", "title2", "artist2")
@@ -194,6 +195,32 @@ class SpotifyControllerTest {
     spotifyController.playTrackList(trackList)
 
     verify { playerApi.play("id1") }
+  }
+
+  @Test
+  fun playTrackListThrowsWithEmptyList() = runBlocking {
+    val playerApi = mockk<PlayerApi>(relaxed = true)
+    every { mockAppRemote.playerApi } returns playerApi
+    val trackList = emptyList<Track>()
+    var isCalled = false
+    fun onFailure(a: Throwable) { isCalled = true }
+    spotifyController.playTrackList(trackList, null, {}, ::onFailure)
+    assertTrue(isCalled)
+  }
+
+  @Test
+  fun testPlayerState() = runBlockingTest {
+      // Mock PlayerApi and its subscribeToPlayerState() function
+      val mockPlayerApi = mockk<PlayerApi>(relaxed = true)
+      val mockSubscription = mockk<Subscription<PlayerState>>(relaxed = true)
+      every { mockPlayerApi.subscribeToPlayerState() } returns mockSubscription
+
+      // Initialize SpotifyController with mocked PlayerApi
+      every { mockAppRemote.playerApi } returns mockPlayerApi
+      val spotifyController = SpotifyController(context)
+
+      // Call playerState()
+      val playerStateFlow = spotifyController.playerState()
   }
 
   @Test
