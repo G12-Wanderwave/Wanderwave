@@ -22,8 +22,6 @@ import com.spotify.protocol.types.ListItems
 import com.spotify.protocol.types.PlayerState
 import io.mockk.Awaits
 import io.mockk.Runs
-import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
