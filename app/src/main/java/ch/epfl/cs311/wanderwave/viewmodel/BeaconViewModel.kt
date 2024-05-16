@@ -72,7 +72,6 @@ constructor(
 
   fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
     // Call the BeaconConnection's addTrackToBeacon with the provided beaconId and track
-
     beaconRepository.addTrackToBeacon(beaconId, track, onComplete)
   }
 

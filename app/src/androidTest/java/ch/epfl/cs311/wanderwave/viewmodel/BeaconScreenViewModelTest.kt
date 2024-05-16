@@ -3,7 +3,7 @@ package ch.epfl.cs311.wanderwave.viewmodel
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
-import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
+import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.protocol.types.ListItem
 import io.mockk.clearAllMocks
@@ -13,8 +13,8 @@ import io.mockk.junit4.MockKRule
 import io.mockk.verify
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.timeout
@@ -38,16 +38,18 @@ class BeaconScreenViewModelTest {
   @RelaxedMockK private lateinit var beaconConnection: BeaconConnection
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
 
-  lateinit var viewModel: ProfileViewModel
+  lateinit var viewModel: BeaconViewModel
   val testDispatcher = TestCoroutineDispatcher()
-  @RelaxedMockK private lateinit var profileRepository: ProfileConnection
+  @RelaxedMockK private lateinit var beaconRepository: BeaconRepository
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Before
   fun setup() {
     Dispatchers.setMain(testDispatcher)
-    viewModel = ProfileViewModel(profileRepository, mockSpotifyController)
+    viewModel = BeaconViewModel(beaconRepository, mockSpotifyController)
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @After
   fun tearDown() {
     try {
@@ -78,39 +80,14 @@ class BeaconScreenViewModelTest {
     verify { beaconConnection.addTrackToBeacon("beaconId", track, any()) }
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun testAddTrackToList() = runBlockingTest {
-    // Define a new track
     val newTrack = Track("Some Track ID", "Track Title", "Artist Name")
-
-    // Ensure song lists are initially empty
     Assert.assertTrue(viewModel.songLists.value.isEmpty())
-
-    // Call createSpecificSongList to initialize a list
-    viewModel.createSpecificSongList(ListType.TOP_SONGS)
-
-    // Add track to "TOP SONGS"
     viewModel.addTrackToList(ListType.TOP_SONGS, newTrack)
-
-    // Get the updated song list
-    val songLists = viewModel.songLists.value
-    Assert.assertFalse("Song list should not be empty after adding a track", songLists.isEmpty())
-
-    // Check if the track was added correctly
-    val songsInList = songLists.find { it.name == ListType.TOP_SONGS }?.tracks ?: emptyList()
-    Assert.assertTrue(
-        "Song list should contain the newly added track", songsInList.contains(newTrack))
-  }
-
-  @Test
-  fun testGetAllChildrenFlow() = runBlockingTest {
-    val expectedListItem = ListItem("id", "title", null, "subtitle", "", false, true)
-    every { mockSpotifyController.getAllChildren(expectedListItem) } returns
-        flowOf(listOf(expectedListItem))
-
-    val result = mockSpotifyController.getAllChildren(expectedListItem)
-    Assert.assertEquals(
-        expectedListItem, result.first().get(0)) // Check if the first item is as expected
+    Assert.assertEquals(1, viewModel.songLists.value.size)
+    Assert.assertEquals(newTrack, viewModel.songLists.value[0].tracks[0])
   }
 
   @Test
