@@ -62,7 +62,7 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
           Manifest.permission.ACCESS_FINE_LOCATION,
       )
 
-  private val context = InstrumentationRegistry.getInstrumentation().context
+  private val context = InstrumentationRegistry.getInstrumentation().targetContext
 
   private val locationManager =
       context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -102,7 +102,8 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
                                     "Sample Track Title",
                                     "Sample Artist Name"))))))
 
-    mockMapViewModel = MapViewModel(mockLocationSource, mockBeaconConnection)
+    mockMapViewModel =
+        MapViewModel(locationSource = mockLocationSource, beaconRepository = mockBeaconConnection)
     every { mockNavController.navigate(any<String>()) } returns Unit
     mockNavigationActions = NavigationActions(mockNavController)
 

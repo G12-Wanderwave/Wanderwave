@@ -26,14 +26,13 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
 
   open fun addItem(item: T) {
     val itemMap = itemToMap(item)
-    Log.d("Conneciton", "beacon map : ${itemMap}")
     db.collection(collectionName)
         .add(itemMap)
         .addOnFailureListener { e -> Log.e("Firestore", ADD_FAILURE_LOG_MESSAGE, e) }
         .addOnSuccessListener { Log.d("Firestore", ADD_SUCCESS_LOG_MESSAGE) }
   }
 
-  suspend fun addItemAndGetId(item: T): String? {
+  open suspend fun addItemAndGetId(item: T): String? {
     val itemMap = itemToMap(item)
     var documentId: String? = null
 
@@ -41,6 +40,7 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
       val documentReference = db.collection(collectionName).add(itemMap).await()
 
       Log.d("Firestore", ADD_SUCCESS_LOG_MESSAGE)
+
       documentId = documentReference.id
     } catch (e: Exception) {
       Log.e("Firestore", ADD_FAILURE_LOG_MESSAGE, e)

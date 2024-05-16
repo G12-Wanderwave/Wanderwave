@@ -10,4 +10,6 @@ interface BeaconRepository : FirebaseRepository<Beacon> {
   fun getAll(): Flow<List<Beacon>>
 
   fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit)
+
+  suspend fun addItemAndGetId(item: Beacon): String?
 }
