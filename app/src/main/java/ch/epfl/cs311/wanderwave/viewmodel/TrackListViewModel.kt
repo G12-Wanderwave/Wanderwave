@@ -1,11 +1,15 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
+import ch.epfl.cs311.wanderwave.model.spotify.getTracksFromSpotifyPlaylist
 import ch.epfl.cs311.wanderwave.model.spotify.retrieveAndAddSubsectionFromSpotify
 import ch.epfl.cs311.wanderwave.model.spotify.retrieveChildFromSpotify
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
@@ -30,6 +34,9 @@ constructor(
   private val _uiState = MutableStateFlow(UiState(loading = true))
   val uiState: StateFlow<UiState> = _uiState
 
+  private val _isTopSongsListVisible = MutableStateFlow(true)
+  override val isTopSongsListVisible: StateFlow<Boolean> = _isTopSongsListVisible
+
   private var _searchQuery = MutableStateFlow("")
 
   private var _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
@@ -37,6 +44,9 @@ constructor(
 
   private var _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   override val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
+
+  private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
+  override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
 
   init {
     observeTracks()
@@ -50,7 +60,8 @@ constructor(
             UiState(
                 tracks = tracks.filter { matchesSearchQuery(it) },
                 queue = tracks.filter { matchesSearchQuery(it) },
-                loading = false)
+                loading = false,
+                progress = spotifyController.trackProgress)
       }
       // deal with the flow
     }
@@ -76,6 +87,7 @@ constructor(
   override fun addTrackToList(listName: ListType, track: Track) {
     val updatedTracks = _uiState.value.tracks + track
     _uiState.value = _uiState.value.copy(tracks = updatedTracks)
+    _childrenPlaylistTrackList.value = (emptyList())
   }
 
   /**
@@ -252,6 +264,15 @@ constructor(
     _uiState.value = _uiState.value.copy(loopMode = loopMode)
   }
 
+  override suspend fun getLikedTracks() {
+    getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
+  }
+
+  override fun getTracksFromPlaylist(playlistId: String) {
+    getTracksFromSpotifyPlaylist(
+        playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
+  }
+
   data class UiState(
       val tracks: List<Track> = listOf(),
       val queue: List<Track> = listOf(),
@@ -262,7 +283,7 @@ constructor(
       val isPlaying: Boolean = false,
       val currentMillis: Int = 0,
       val expanded: Boolean = false,
-      val progress: Float = 0f,
+      val progress: MutableFloatState = mutableFloatStateOf(0f),
       val isShuffled: Boolean = false,
       val loopMode: LoopMode = LoopMode.NONE
   )

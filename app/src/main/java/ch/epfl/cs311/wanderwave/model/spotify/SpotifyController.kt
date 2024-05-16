@@ -1,18 +1,27 @@
 package ch.epfl.cs311.wanderwave.model.spotify
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.util.Log
+import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.mutableFloatStateOf
 import ch.epfl.cs311.wanderwave.BuildConfig
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.Target
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.ContentApi
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.android.appremote.api.error.NotLoggedInException
+import com.spotify.protocol.types.ImageUri
 import com.spotify.protocol.types.ListItem
 import com.spotify.protocol.types.PlayerState
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
+import java.net.URL
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -24,8 +33,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
 
-class SpotifyController(private val context: Context) {
+class SpotifyController
+@Inject
+constructor(
+    private val context: Context,
+    private val authenticationController: AuthenticationController
+) {
 
   private val CLIENT_ID = BuildConfig.SPOTIFY_CLIENT_ID
   private val REDIRECT_URI = "wanderwave-auth://callback"
@@ -46,11 +62,54 @@ class SpotifyController(private val context: Context) {
   var appRemote: SpotifyAppRemote? = null
   private var onTrackEndCallback: (() -> Unit)? = null
 
+  val trackProgress: MutableFloatState = mutableFloatStateOf(0f)
+
   fun getAuthorizationRequest(): AuthorizationRequest {
     val builder =
         AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
             .setScopes(SCOPES.toTypedArray())
     return builder.build()
+  }
+
+  suspend fun getAlbumImage(albumId: String): Bitmap? {
+    return try {
+      val url = "https://api.spotify.com/v1/albums/$albumId"
+      val jsonResponse = spotifyGetFromURL(url)
+      val imageUrl = extractImageUrlFromJson(jsonResponse)
+      imageUrl?.let { fetchImageFromUrl(context, it) }
+    } catch (e: Exception) {
+      e.printStackTrace()
+      null
+    }
+  }
+
+  // Helper method to extract image URL from JSON response
+  fun extractImageUrlFromJson(jsonResponse: String): String? {
+    val jsonObject = JSONObject(jsonResponse)
+    val images = jsonObject.getJSONArray("images")
+    if (images.length() > 0) {
+      return images.getJSONObject(0).getString("url")
+    }
+    return null
+  }
+
+  // Helper method to fetch image from URL using Glide
+  suspend fun fetchImageFromUrl(context: Context, url: String): Bitmap? {
+    return withContext(Dispatchers.IO) {
+      try {
+        val x =
+            Glide.with(context)
+                .asBitmap()
+                .load(url)
+                .submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+                .get()
+
+        x
+      } catch (e: Exception) {
+        e.printStackTrace()
+        null
+      }
+    }
   }
 
   fun getLogoutRequest(): AuthorizationRequest {
@@ -133,12 +192,15 @@ class SpotifyController(private val context: Context) {
       scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
   ) {
     stopPlaybackTimer() // Ensure no previous timers are running
+
     playbackTimer =
         scope.launch {
-          val checkInterval = 1000L // Check every second
+          val checkInterval = 50L // Check every second
           var elapsedTime = 0L
           while (elapsedTime < trackDuration) {
             delay(checkInterval)
+            elapsedTime += checkInterval
+            trackProgress.value = elapsedTime.toFloat() / trackDuration
             appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
               if ((trackDuration - playerState.playbackPosition) <= 1000) {
                 onTrackEndCallback?.invoke()
@@ -150,6 +212,7 @@ class SpotifyController(private val context: Context) {
   }
 
   fun stopPlaybackTimer() {
+    trackProgress.value = 0f
     playbackTimer?.cancel()
     playbackTimer = null
   }
@@ -294,6 +357,14 @@ class SpotifyController(private val context: Context) {
     }
   }
 
+  // Look at the reference section of the documentation to know how to format the URL
+  // https://developer.spotify.com/documentation/web-api
+  suspend fun spotifyGetFromURL(url: String): String {
+    var answer: String
+    withContext(Dispatchers.IO) { answer = authenticationController.makeApiRequest(URL(url)) }
+    return answer
+  }
+
   enum class ConnectResult {
     SUCCESS,
     NOT_LOGGED_IN,
@@ -312,14 +383,8 @@ fun retrieveAndAddSubsectionFromSpotify(
     spotifyController: SpotifyController,
     scope: CoroutineScope
 ) {
-  scope.launch {
-    val track = spotifyController.getAllElementFromSpotify().firstOrNull()
-    if (track != null) {
-      for (i in track) {
-        spotifySubsectionList.value += i
-      }
-    }
-  }
+  val track = spotifyController.getAllElementFromSpotify()
+  checkIfNullAndAddToAList(track, spotifySubsectionList, scope)
 }
 
 /**
@@ -335,12 +400,93 @@ fun retrieveChildFromSpotify(
     spotifyController: SpotifyController,
     scope: CoroutineScope
 ) {
+  val children = spotifyController.getAllChildren(item)
+  checkIfNullAndAddToAList(children, childrenPlaylistTrackList, scope)
+}
+
+fun checkIfNullAndAddToAList(
+    items: Flow<List<ListItem>>,
+    list: MutableStateFlow<List<ListItem>>,
+    scope: CoroutineScope
+) {
   scope.launch {
-    val children = spotifyController.getAllChildren(item).firstOrNull()
-    if (children != null) {
-      for (child in children) {
-        childrenPlaylistTrackList.value += child
+    val value = items.firstOrNull()
+    if (value != null) {
+      for (child in value) {
+        list.value += child
       }
     }
+  }
+}
+
+/**
+ * Get all the liked tracks of the user and add them to the likedSongs list.
+ *
+ * @param likedSongsTrackList the list of liked songs
+ * @param spotifyController the SpotifyController
+ * @param scope the CoroutineScope
+ * @author Menzo Bouaissi
+ * @since 3.0
+ * @last update 3.0
+ */
+suspend fun getLikedTracksFromSpotify(
+    likedSongsTrackList: MutableStateFlow<List<ListItem>>,
+    spotifyController: SpotifyController,
+    scope: CoroutineScope
+) {
+  scope.launch {
+    val url = "https://api.spotify.com/v1/me/tracks"
+    try {
+      val jsonResponse =
+          spotifyController.spotifyGetFromURL("$url?limit=50") // TODO : revoir la limite
+      parseTracks(jsonResponse, likedSongsTrackList)
+    } catch (e: Exception) {
+      e.printStackTrace()
+    }
+  }
+}
+
+fun getTracksFromSpotifyPlaylist(
+    playlistId: String,
+    playlist: MutableStateFlow<List<ListItem>>,
+    spotifyController: SpotifyController,
+    scope: CoroutineScope
+) {
+  scope.launch {
+    val url = "https://api.spotify.com/v1/playlists/$playlistId/tracks"
+    try {
+      val json = spotifyController.spotifyGetFromURL(url)
+      parseTracks(json, playlist)
+    } catch (e: Exception) {
+      Log.e("SpotifyController", "Failed to get songs from playlist")
+      e.printStackTrace()
+    }
+  }
+}
+
+/**
+ * Parse the JSON response from the Spotify API to get the liked songs of the user.
+ *
+ * @param jsonResponse the JSON response from the Spotify API
+ * @param songsTrackList the list of liked songs
+ * @author Menzo Bouaissi
+ * @since 3.0
+ * @last update 3.0
+ */
+fun parseTracks(
+    jsonResponse: String,
+    songsTrackList: MutableStateFlow<List<ListItem>>,
+) {
+  val jsonObject = JSONObject(jsonResponse)
+  val items = jsonObject.getJSONArray("items")
+  songsTrackList.value = emptyList()
+  for (i in 0 until items.length()) {
+
+    val track = items.getJSONObject(i).getJSONObject("track")
+    val id = track.getString("id")
+    val name = track.getString("name")
+    val artistsArray = track.getJSONArray("artists")
+    val artist = artistsArray.getJSONObject(0).getString("name") // Gets the primary artist
+    songsTrackList.value += ListItem(id, "", ImageUri(""), name, artist, false, false)
   }
 }

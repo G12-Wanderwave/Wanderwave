@@ -1,6 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import androidx.compose.material3.SnackbarHostState
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.ListType
@@ -8,15 +8,17 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
+import ch.epfl.cs311.wanderwave.model.spotify.getTracksFromSpotifyPlaylist
 import ch.epfl.cs311.wanderwave.model.spotify.retrieveAndAddSubsectionFromSpotify
 import ch.epfl.cs311.wanderwave.model.spotify.retrieveChildFromSpotify
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 // Define a simple class for a song list
@@ -26,7 +28,7 @@ data class SongList(val name: ListType, val tracks: List<Track> = mutableListOf(
 class ProfileViewModel
 @Inject
 constructor(
-    private val repository: ProfileRepository,
+    private val repository: ProfileRepository, // TODO revoir
     private val spotifyController: SpotifyController
 ) : ViewModel(), SpotifySongsActions {
 
@@ -42,6 +44,9 @@ constructor(
               firebaseUid = "My Firebase UID",
               profilePictureUri = null))
   val profile: StateFlow<Profile> = _profile
+
+  private val _isTopSongsListVisible = MutableStateFlow(true)
+  override val isTopSongsListVisible: StateFlow<Boolean> = _isTopSongsListVisible
 
   private val _isInEditMode = MutableStateFlow(false)
   val isInEditMode: StateFlow<Boolean> = _isInEditMode
@@ -59,8 +64,11 @@ constructor(
   private var _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   override val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
 
-  private var _uiState = MutableStateFlow(ProfileViewModel.UIState())
-  val uiState: StateFlow<ProfileViewModel.UIState> = _uiState
+  private var _uiState = MutableStateFlow(UIState())
+  val uiState: StateFlow<UIState> = _uiState
+
+  private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
+  override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
 
   fun createSpecificSongList(listType: ListType) {
     val listName = listType // Check if the list already exists
@@ -85,19 +93,24 @@ constructor(
           }
         }
     _songLists.value = updatedLists
+    _childrenPlaylistTrackList.value = (emptyList())
   }
 
   fun updateProfile(updatedProfile: Profile) {
     _profile.value = updatedProfile
-    viewModelScope.launch { repository.updateItem(updatedProfile) }
+    repository.updateItem(updatedProfile)
   }
 
   fun deleteProfile() {
-    viewModelScope.launch { repository.deleteItem(_profile.value) }
+    repository.deleteItem(_profile.value)
   }
 
   fun togglePublicMode() {
     _isInPublicMode.value = !_isInPublicMode.value
+  }
+
+  fun changeChosenSongs() {
+    _isTopSongsListVisible.value = !_isTopSongsListVisible.value
   }
 
   fun getProfileByID(id: String) {
@@ -108,17 +121,13 @@ constructor(
     }
   }
 
-  fun loadProfile(spotifyUid: String, snackbarHostState: SnackbarHostState, scope: CoroutineScope) {
+  override fun getTracksFromPlaylist(playlistId: String) {
+    Log.d("ProfileViewModelbefore", "getTracksFromPlaylist: ${_childrenPlaylistTrackList.value}")
     viewModelScope.launch {
-      repository.isUidExisting(spotifyUid) { exists, profile ->
-        if (exists && profile != null) {
-          _profile.value = profile
-        } else {
-          // Show a snackbar message if the profile does not exist
-          scope.launch { snackbarHostState.showSnackbar("Profile does not exist.") }
-        }
-      }
+      getTracksFromSpotifyPlaylist(
+          playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
     }
+    Log.d("ProfileViewModelAfter", "getTracksFromPlaylist: ${_childrenPlaylistTrackList.value}")
   }
 
   /**
@@ -141,6 +150,17 @@ constructor(
   override fun retrieveChild(item: ListItem) {
     retrieveChildFromSpotify(
         item, this._childrenPlaylistTrackList, spotifyController, viewModelScope)
+  }
+
+  /**
+   * Get all the liked tracks of the user and add them to the likedSongs list.
+   *
+   * @author Menzo Bouaissi
+   * @since 3.0
+   * @last update 3.0
+   */
+  override suspend fun getLikedTracks() {
+    getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
   }
 
   data class UIState(
