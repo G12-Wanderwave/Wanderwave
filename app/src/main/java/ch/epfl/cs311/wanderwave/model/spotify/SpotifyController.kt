@@ -25,7 +25,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMap
+import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class SpotifyController(private val context: Context) {
@@ -130,16 +134,15 @@ class SpotifyController(private val context: Context) {
       return
     }
     val trackToPlay = track ?: trackList[0]
-    appRemote.value?.let {
-      it.playerApi
-          .play(trackToPlay.id)
-          .setResultCallback {
-            this.trackList = trackList
-            this.trackListShuffled = trackList.shuffled()
-            onSuccess()
-          }
-          .setErrorCallback { error -> onFailure(error) }
-    }
+    playTrack(
+      track = trackToPlay,
+      onSuccess = {
+        this.trackList = trackList
+        this.trackListShuffled = trackList.shuffled()
+        onSuccess()
+      },
+      onFailure = onFailure
+    )
   }
 
   fun pauseTrack(onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
@@ -165,7 +168,8 @@ class SpotifyController(private val context: Context) {
       onSuccess: () -> Unit = {},
       onFailure: (Throwable) -> Unit = {}
   ) {
-    val currentTrack = playerState().firstOrNull()?.track
+    val playerState = playerState()
+    val currentTrack = playerState.firstOrNull()?.track
     val currentIndex = trackList?.indexOfFirst { track -> track.id == currentTrack?.uri } ?: -1
     if (currentIndex != -1) {
       var nextIndex = (currentIndex + direction)
@@ -182,7 +186,7 @@ class SpotifyController(private val context: Context) {
 
   @OptIn(ExperimentalCoroutinesApi::class)
   fun playerState(): Flow<PlayerState?> {
-    return appRemote.flatMapLatest { appRemote ->
+    return appRemote.flatMapConcat { appRemote ->
       callbackFlow {
         val callbackResult =
             appRemote
@@ -190,9 +194,10 @@ class SpotifyController(private val context: Context) {
                 ?.subscribeToPlayerState()
                 ?.setEventCallback {
                   trySend(it)
+                  Log.d("SpotifyController", "Player state: $it")
                   startPlaybackTimer(it.track.duration)
                 }
-                ?.setErrorCallback { Log.d("SpotifyController", "Error in player state flow") }
+                ?.setErrorCallback { Log.e("SpotifyController", "Error in player state flow") }
         awaitClose {
           callbackResult?.cancel()
           stopPlaybackTimer()

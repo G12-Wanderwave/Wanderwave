@@ -22,6 +22,7 @@ import com.spotify.protocol.types.ListItems
 import com.spotify.protocol.types.PlayerState
 import io.mockk.Awaits
 import io.mockk.Runs
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -34,6 +35,7 @@ import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.Dispatchers
 import kotlin.Exception
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,6 +46,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -170,14 +173,27 @@ class SpotifyControllerTest {
 
   @Test
   fun playTrackTest() = runBlocking {
-    val callResult = mockk<CallResult<Empty>>(relaxed = true)
     val playerApi = mockk<PlayerApi>(relaxed = true)
     every { mockAppRemote.playerApi } returns playerApi
-    every { playerApi.play(any()) } returns callResult
     val id = "fakeid"
     spotifyController.playTrack(Track(id, "faketitle", "fakeartist"))
 
     verify { playerApi.play(any()) }
+  }
+
+  @Test
+  fun playTrackListTestWithNoTrackGiven() = runBlocking {
+    val mockPlayerState = mockk<PlayerState>()
+    val playerApi = mockk<PlayerApi>(relaxed = true)
+    val subscription = mockk<Subscription<PlayerState>>(relaxed = true)
+    every { mockAppRemote.playerApi } returns playerApi
+    val track1 = Track("id1", "title1", "artist1")
+    val track2 = Track("id2", "title2", "artist2")
+    val track3 = Track("id3", "title3", "artist3")
+    val trackList = listOf(track1, track2, track3)
+    spotifyController.playTrackList(trackList)
+
+    verify { playerApi.play("id1") }
   }
 
   @Test

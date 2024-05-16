@@ -90,7 +90,6 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: SpotifySongsActio
       }
 }
 
-// TODO :Merge with @Joriba stuff if possible
 @Composable
 fun TrackItem(listItem: ListItem, onClick: () -> Unit) {
   Card(
