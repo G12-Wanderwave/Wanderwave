@@ -87,14 +87,6 @@ class TrackListViewModelTest {
     testDispatcher.cleanupTestCoroutines()
   }
 
-  //  @Test
-  //  fun testGetTracksFromPlaylist() = runBlocking {
-  //    val playlistId = "somePlaylistId"
-  //    val playlist = viewModel.spotifySubsectionList as MutableStateFlow<List<ListItem>>
-  //    viewModel.getTracksFromPlaylist(playlistId, playlist)
-  //    assertEquals(playlistId, playlistId)
-  //  }
-
   @Test
   fun trackIsProperlySelected() = run {
     viewModel.selectTrack(track)

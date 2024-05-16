@@ -63,31 +63,6 @@ class ProfileViewModelTest {
     clearAllMocks() // Clear all MockK mocks
   }
 
-  //  @Test
-  //  fun testGetTracksFromPlaylist() = runBlockingTest {
-  //    val playlistId = "playlistId"
-  //    val playlist = MutableStateFlow<List<ListItem>>(emptyList())
-  //
-  //    val mockScope = mockk<CoroutineScope>()
-  //    every { mockScope.coroutineContext } returns Dispatchers.Unconfined
-  //
-  //    // Mock the getTracksFromSpotifyPlaylist function to return Unit when called with specific
-  //    // parameters
-  //    //    every { getTracksFromSpotifyPlaylist(playlistId, playlist, spotifyController,
-  // mockScope) }
-  //    // answers Unit
-  //
-  //    try {
-  //      viewModel.getTracksFromPlaylist(playlistId, playlist)
-  //    } catch (e: Exception) {
-  //      // Handle the exception here
-  //      println("Caught an exception: ${e.message}")
-  //    }
-  //
-  //    val result = playlist.value
-  //    assertTrue("Playlist should be empty", result.isEmpty())
-  //  }
-
   @Test
   fun testAddTrackToList() = runBlockingTest {
     // Define a new track
