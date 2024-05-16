@@ -29,6 +29,10 @@ constructor(
 
   private var _searchQuery = MutableStateFlow("")
 
+  fun recentTracks(): StateFlow<List<Track>> {
+    return spotifyController.recentlyPlayedTracks
+  }
+
   fun toggleTrackSource() {
     _uiState.value = _uiState.value.copy(showRecentlyAdded = !_uiState.value.showRecentlyAdded)
     loadTracksBasedOnSource()
@@ -40,7 +44,7 @@ constructor(
       if (_uiState.value.showRecentlyAdded) {
         loadRecentlyAddedTracks()
       } else {
-        _uiState.value = _uiState.value.copy(tracks = listOf(), loading = false)
+        _uiState.value = _uiState.value.copy(tracks = spotifyController.recentlyPlayedTracks.value)
       }
     }
   }
