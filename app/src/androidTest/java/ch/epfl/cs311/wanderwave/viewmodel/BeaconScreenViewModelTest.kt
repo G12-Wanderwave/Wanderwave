@@ -32,4 +32,13 @@ class BeaconScreenViewModelTest {
 
     verify { beaconConnection.addTrackToBeacon("beaconId", track, any()) }
   }
+
+  @Test
+  fun canSelectTracks() {
+    val viewModel = BeaconViewModel(beaconConnection, mockSpotifyController)
+    val track = Track("trackId", "trackName", "trackArtist")
+    viewModel.selectTrack(track)
+
+    verify { mockSpotifyController.playTrackList(any(), any(), any()) }
+  }
 }
