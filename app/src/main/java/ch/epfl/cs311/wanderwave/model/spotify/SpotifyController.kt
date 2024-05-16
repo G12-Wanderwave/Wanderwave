@@ -114,9 +114,7 @@ class SpotifyController(private val context: Context) {
     appRemote.value?.let {
       it.playerApi
           .play(track.id)
-          .setResultCallback {
-            onSuccess()
-          }
+          .setResultCallback { onSuccess() }
           .setErrorCallback { error -> onFailure(error) }
     }
   }

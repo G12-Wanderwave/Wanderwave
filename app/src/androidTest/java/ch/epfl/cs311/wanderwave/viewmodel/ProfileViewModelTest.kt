@@ -141,9 +141,9 @@ class ProfileViewModelTest {
     val track = Track("id", "title", "artist")
     viewModel.createSpecificSongList(ListType.TOP_SONGS)
     viewModel.selectTrack(track, ListType.TOP_SONGS.name)
-    verify { spotifyController.playTrackList(any(), any(), any(), any())}
+    verify { spotifyController.playTrackList(any(), any(), any(), any()) }
 
     viewModel.selectTrack(track, "fake name")
-    verify { spotifyController.playTrack(track)}
+    verify { spotifyController.playTrack(track) }
   }
 }

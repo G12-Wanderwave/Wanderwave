@@ -908,7 +908,9 @@ class SpotifyControllerTest {
   @Test
   fun testTrackConversion() {
     val fakeArtist = Artist("Rick Astley", "")
-    val spotifyTrack = com.spotify.protocol.types.Track(fakeArtist, mockk(), mockk(), 1, "Never Gonna Give You Up", "id", mockk(), false, false)
+    val spotifyTrack =
+        com.spotify.protocol.types.Track(
+            fakeArtist, mockk(), mockk(), 1, "Never Gonna Give You Up", "id", mockk(), false, false)
     val track = spotifyTrack.toWanderwaveTrack()
     val expected = Track("id", "Never Gonna Give You Up", "Rick Astley")
     assertEquals(track, expected)
