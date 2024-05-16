@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Beacon
@@ -10,6 +11,8 @@ import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
+import ch.epfl.cs311.wanderwave.model.spotify.getTracksFromSpotifyPlaylist
 import ch.epfl.cs311.wanderwave.model.spotify.retrieveAndAddSubsectionFromSpotify
 import ch.epfl.cs311.wanderwave.model.spotify.retrieveChildFromSpotify
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
@@ -83,6 +86,7 @@ constructor(
 
   // Function to add a track to a song list
   override fun addTrackToList(listName: ListType, track: Track) {
+    Log.d("BeaconViewModel", "addTrackToList: $track")
     _songLists.value = listOf(SongList(listName, listOf(track)))
   }
   /**
@@ -93,6 +97,7 @@ constructor(
    * @last update 3.0
    */
   override fun retrieveAndAddSubsection() {
+      Log.d("BeaconViewModel", "retrieveAndAddSubsection: ${_spotifySubsectionList.value}")
     retrieveAndAddSubsectionFromSpotify(_spotifySubsectionList, spotifyController, viewModelScope)
   }
   /**
@@ -103,16 +108,18 @@ constructor(
    * @last update 3.0
    */
   override fun retrieveChild(item: ListItem) {
+    Log.d("BeaconViewModel", "retrieveChild: $item")
     retrieveChildFromSpotify(
         item, this._childrenPlaylistTrackList, spotifyController, viewModelScope)
   }
 
   override suspend fun getLikedTracks() {
-    /*NOT NEEDED FOR BEACON*/
+      getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
   }
 
   override fun getTracksFromPlaylist(playlistId: String) {
-    /*NOT NEEDED FOR BEACON*/
+      getTracksFromSpotifyPlaylist(
+          playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
   }
 
   data class UIState(

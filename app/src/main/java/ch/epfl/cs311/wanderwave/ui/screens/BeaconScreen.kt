@@ -21,12 +21,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -34,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -45,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
+import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -54,6 +59,7 @@ import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
 import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
+import ch.epfl.cs311.wanderwave.ui.components.profile.SongsListDisplay
 import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
 import com.google.android.gms.maps.model.CameraPosition
@@ -151,25 +157,66 @@ fun AddTrack(
     navigationActions: NavigationActions,
     viewModel: BeaconViewModel
 ) {
-  Button(
-      onClick = {
-        // Navigate to SelectSongScreen
-        navigationActions.navigateToSelectSongScreen(viewModelType.TRACKLIST)
-        if (viewModel.songLists.value.isNotEmpty()) {
-          viewModel.addTrackToBeacon(beacon.id, viewModel.songLists.value[0].tracks[0]) { success ->
-            if (success) {
-              Log.i(
-                  "AddTrack",
-                  "Track ${viewModel.songLists.value[0].tracks[0].title} added successfully")
-            } else {
-              Log.e(
-                  "AddTrack", "Failed to add track ${viewModel.songLists.value[0].tracks[0].title}")
+    val songLists by viewModel.songLists.collectAsState()
+//  Button(
+//      onClick = {
+//        // Navigate to SelectSongScreen
+//        navigationActions.navigateToSelectSongScreen(viewModelType.TRACKLIST)
+//        Log.d("AddTrack", "Navigating to SelectSongScreen")
+//        if (viewModel.songLists.value.isNotEmpty()) {
+//          Log.d("AddTrack", "Adding track to beacon")
+//          viewModel.addTrackToBeacon(beacon.id, viewModel.songLists.value[0].tracks[0]) { success ->
+//            if (success) {
+//              Log.i(
+//                  "AddTrack",
+//                  "Track ${viewModel.songLists.value[0].tracks[0].title} added successfully")
+//            } else {
+//              Log.e(
+//                  "AddTrack", "Failed to add track ${viewModel.songLists.value[0].tracks[0].title}")
+//            }
+//          }
+//        }
+//      }) {
+//        Text(text = stringResource(R.string.addTrack))
+//      }
+    IconButton(
+        onClick = {
+            navigationActions.navigateToSelectSongScreen(viewModelType.TRACKLIST)
+        }) { // Toggle dialog visibility
+        Icon(
+            imageVector = Icons.Filled.Add,
+            contentDescription = stringResource(R.string.beaconTitle))
+    }
+
+    SongsListDisplay(
+        navigationActions = navigationActions,
+        songLists = songLists,
+        isTopSongsListVisible = true,
+        onAddTrack = { track ->
+//            viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
+            viewModel.addTrackToList(ListType.TOP_SONGS,track)
+            if (viewModel.songLists.value.isNotEmpty()) {
+                Log.d("AddTrack", "Adding track to beacon")
+                viewModel.addTrackToBeacon(
+                    beacon.id,
+                    viewModel.songLists.value[0].tracks[0]
+                ) { success ->
+                    if (success) {
+                        Log.i(
+                            "AddTrack",
+                            "Track ${viewModel.songLists.value[0].tracks[0].title} added successfully"
+                        )
+                    } else {
+                        Log.e(
+                            "AddTrack",
+                            "Failed to add track ${viewModel.songLists.value[0].tracks[0].title}"
+                        )
+                    }
+                }
             }
-          }
-        }
-      }) {
-        Text(text = stringResource(R.string.addTrack))
-      }
+        },
+        viewModelName = viewModelType.TRACKLIST,
+    )
 }
 
 @Composable
