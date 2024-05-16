@@ -71,6 +71,7 @@ class SpotifyControllerTest {
 
   @RelaxedMockK private lateinit var mockAppRemote: SpotifyAppRemote
   @RelaxedMockK private lateinit var mockPlayerApi: PlayerApi
+  // ktfmt
 
   @RelaxedMockK private lateinit var spotifyController: SpotifyController
   private lateinit var context: Context
