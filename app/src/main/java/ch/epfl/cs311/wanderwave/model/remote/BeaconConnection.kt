@@ -16,7 +16,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 
 class BeaconConnection(
@@ -61,46 +66,48 @@ class BeaconConnection(
     trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
   }
 
-  override fun documentTransform(document: DocumentSnapshot, dataFlow: MutableStateFlow<Result<Beacon>>) {
-
+  override fun documentTransform(document: DocumentSnapshot, item: Beacon?): Flow<Result<Beacon>> = callbackFlow<Result<Beacon>> {
     if (document == null || !document.exists()) {
-      dataFlow.value = Result.failure(Exception("Document does not exist"))
-      return
+      Result.failure<Beacon>(Exception("Document does not exist"))
     }
-
-    val beacon: Beacon? = if (dataFlow.value.isSuccess) {
-      dataFlow.value.getOrNull()
-    } else {
-      Beacon.from(document)
-    }
+    val beacon: Beacon? = item ?: Beacon.from(document)
 
     beacon?.let { beacon ->
       val tracksObject = document["tracks"]
 
-      var profileAndTrackRefs: List<Map<String, DocumentReference>>?
-
       if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
-        profileAndTrackRefs = tracksObject as List<Map<String, DocumentReference>>
-        // Use a coroutine to perform asynchronous operations
-        coroutineScope.launch {
-          // Wait for all tracks to be fetched by generating tasks and computing them
-          // concurrently
-          val profileAndTracks =
-              profileAndTrackRefs
-                  ?.map { profileAndTrackRef ->
-                    async { trackConnection.fetchProfileAndTrack(profileAndTrackRef) }
-                  }
-                  ?.mapNotNull { it.await() }
+        val profileAndTrackRefs = tracksObject as? List<Map<String, DocumentReference>>
 
-          // Update the beacon with the complete list of tracks
-          val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks ?: emptyList())
-          dataFlow.value = Result.success(updatedBeacon)
+        coroutineScope.launch {
+          val profileAndTracks = profileAndTrackRefs
+            ?.mapNotNull { profileAndTrackRef ->  trackConnection.fetchProfileAndTrack(profileAndTrackRef) }
+            ?.mapNotNull { flow ->
+              flow.mapNotNull { result ->
+                result.getOrNull()
+              }
+            }
+            ?.fold(flowOf(Result.success(listOf<ProfileTrackAssociation>()))) { acc, track ->
+              acc.combine(track) { accTracks, track ->
+                accTracks.map { tracks -> tracks + track }
+              }
+            } ?: flowOf(Result.failure(Exception("Could not retrieve chosenSongs")))
+
+
+          profileAndTracks.map { result ->
+            result.onSuccess { profileAndTracks ->
+              val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks)
+              trySend(Result.success(updatedBeacon))
+            }
+            result.onFailure { exception ->
+              trySend(Result.failure(exception))
+            }
+          }
         }
       } else {
-        dataFlow.value = Result.failure(Exception("Tracks are not in the correct format"))
+        Result.failure<Beacon>(Exception("Tracks are not in the correct format"))
       }
     } ?: run {
-      dataFlow.value = Result.failure(Exception("The beacon is not in the correct format or could not be fetched"))
+      Result.failure<Beacon>(Exception("The beacon is not in the correct format or could not be fetched"))
     }
   }
 
