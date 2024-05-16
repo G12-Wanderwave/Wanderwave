@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 
 class SpotifyController(private val context: Context) {
@@ -181,7 +182,7 @@ class SpotifyController(private val context: Context) {
 
   @OptIn(ExperimentalCoroutinesApi::class)
   fun playerState(): Flow<PlayerState?> {
-    return appRemote.flatMapConcat { appRemote ->
+    return appRemote.flatMapLatest { appRemote ->
       callbackFlow {
         val callbackResult =
             appRemote
