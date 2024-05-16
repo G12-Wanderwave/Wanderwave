@@ -23,11 +23,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.R
+import ch.epfl.cs311.wanderwave.model.data.viewModelType
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
 @Composable
 fun TrackListScreen(
+    navActions: NavigationActions,
     showMessage: (String) -> Unit,
     viewModel: TrackListViewModel = hiltViewModel()
 ) {
@@ -60,6 +63,8 @@ fun TrackListScreen(
             if (uiState.showRecentlyAdded) stringResource(R.string.recently_added_tracks)
             else stringResource(R.string.recently_viewed_tracks),
         onAddTrack = {},
-        onSelectTrack = viewModel::selectTrack)
+        onSelectTrack = viewModel::selectTrack,
+        navActions = navActions,
+        viewModelName = viewModelType.TRACKLIST)
   }
 }

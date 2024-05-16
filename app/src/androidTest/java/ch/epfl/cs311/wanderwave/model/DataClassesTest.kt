@@ -9,6 +9,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -16,6 +17,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNotSame
 import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Rule
@@ -96,6 +98,20 @@ class DataClassesTest {
   }
 
   @Test
+  fun toLocationReturnsCorrectLocation() {
+    val location = Location(45.0, 7.0, "Test Location")
+    val result = location.toLocation()
+    assertEquals(location, result)
+  }
+
+  @Test
+  fun toLocationReturnsNewInstance() {
+    val location = Location(45.0, 7.0, "Test Location")
+    val result = location.toLocation()
+    assertNotSame(location, result)
+  }
+
+  @Test
   fun documentSnapshotToBeacon() {
     every { document.exists() } returns true
 
@@ -150,7 +166,9 @@ class DataClassesTest {
             "spotifyUid" to "spotify123",
             "firebaseUid" to "firebase123",
             "isPublic" to true,
-            "profilePictureUri" to "https://example.com/image.jpg")
+            "profilePictureUri" to "https://example.com/image.jpg",
+            "chosenSongs" to listOf<DocumentReference>(),
+            "topSongs" to listOf<DocumentReference>())
 
     assertEquals(expectedMap, profile.toMap())
   }
@@ -220,6 +238,14 @@ class DataClassesTest {
             )
 
     assertEquals(expectedMap, profileTrackAssociation.toMap())
+
+    // test if the profile is null
+    val profileTrackAssociation2 = ProfileTrackAssociation(null, track)
+    val expectedMap2 =
+        hashMapOf(
+            "profile" to null, "track" to track.toMap() // Assuming Track has a toMap function
+            )
+    assertEquals(expectedMap2, profileTrackAssociation2.toMap())
   }
 
   @Test

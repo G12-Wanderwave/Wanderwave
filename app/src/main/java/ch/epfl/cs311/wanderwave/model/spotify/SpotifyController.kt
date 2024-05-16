@@ -2,6 +2,8 @@ package ch.epfl.cs311.wanderwave.model.spotify
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.mutableFloatStateOf
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.spotify.android.appremote.api.ConnectionParams
@@ -22,6 +24,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 class SpotifyController(private val context: Context) {
@@ -46,6 +49,8 @@ class SpotifyController(private val context: Context) {
 
   var appRemote: SpotifyAppRemote? = null
   private var onTrackEndCallback: (() -> Unit)? = null
+
+  val trackProgress: MutableFloatState = mutableFloatStateOf(0f)
 
   fun getAuthorizationRequest(): AuthorizationRequest {
     val builder =
@@ -138,12 +143,15 @@ class SpotifyController(private val context: Context) {
       scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
   ) {
     stopPlaybackTimer() // Ensure no previous timers are running
+
     playbackTimer =
         scope.launch {
-          val checkInterval = 1000L // Check every second
+          val checkInterval = 50L // Check every second
           var elapsedTime = 0L
           while (elapsedTime < trackDuration) {
             delay(checkInterval)
+            elapsedTime += checkInterval
+            trackProgress.value = elapsedTime.toFloat() / trackDuration
             appRemote?.playerApi?.playerState?.setResultCallback { playerState ->
               if ((trackDuration - playerState.playbackPosition) <= 1000) {
                 onTrackEndCallback?.invoke()
@@ -155,6 +163,7 @@ class SpotifyController(private val context: Context) {
   }
 
   fun stopPlaybackTimer() {
+    trackProgress.value = 0f
     playbackTimer?.cancel()
     playbackTimer = null
   }
@@ -231,7 +240,7 @@ class SpotifyController(private val context: Context) {
     val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
     return callbackFlow {
       val callResult =
-          appRemote?.let { it ->
+          appRemote?.let {
             it.contentApi
                 .getRecommendedContentItems(ContentApi.ContentType.DEFAULT)
                 .setResultCallback {
@@ -257,7 +266,7 @@ class SpotifyController(private val context: Context) {
 
     return callbackFlow {
       val callResult =
-          appRemote?.let { it ->
+          appRemote?.let {
             it.contentApi
                 .getChildrenOfItem(listItem, 50, 0)
                 .setResultCallback {
@@ -286,7 +295,7 @@ class SpotifyController(private val context: Context) {
 
     return callbackFlow {
       val callResult =
-          appRemote?.let { it ->
+          appRemote?.let {
             it.contentApi
                 .getChildrenOfItem(listItem, 50, 0)
                 .setResultCallback {
@@ -303,5 +312,49 @@ class SpotifyController(private val context: Context) {
     SUCCESS,
     NOT_LOGGED_IN,
     FAILED
+  }
+}
+/**
+ * Get all the element of the main screen and add them to the top list
+ *
+ * @author Menzo Bouaissi
+ * @since 2.0
+ * @last update 3.0
+ */
+fun retrieveAndAddSubsectionFromSpotify(
+    spotifySubsectionList: MutableStateFlow<List<ListItem>>,
+    spotifyController: SpotifyController,
+    scope: CoroutineScope
+) {
+  scope.launch {
+    val track = spotifyController.getAllElementFromSpotify().firstOrNull()
+    if (track != null) {
+      for (i in track) {
+        spotifySubsectionList.value += i
+      }
+    }
+  }
+}
+
+/**
+ * Get all the element of the main screen and add them to the top list
+ *
+ * @author Menzo Bouaissi
+ * @since 2.0
+ * @last update 3.0
+ */
+fun retrieveChildFromSpotify(
+    item: ListItem,
+    childrenPlaylistTrackList: MutableStateFlow<List<ListItem>>,
+    spotifyController: SpotifyController,
+    scope: CoroutineScope
+) {
+  scope.launch {
+    val children = spotifyController.getAllChildren(item).firstOrNull()
+    if (children != null) {
+      for (child in children) {
+        childrenPlaylistTrackList.value += child
+      }
+    }
   }
 }
