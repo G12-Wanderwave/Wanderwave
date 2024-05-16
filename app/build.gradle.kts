@@ -119,7 +119,9 @@ dependencies {
     kaptAndroidTest(libs.dagger.hilt.android.compiler)
     testImplementation(libs.dagger.hilt.android.testing)
     kaptTest(libs.google.hilt.android.compiler)
-
+    // Glide
+    implementation("com.github.bumptech.glide:glide:4.15.1")
+    kapt("com.github.bumptech.glide:compiler:4.15.1")
     // Room
     implementation(libs.androidx.room.runtime)
     kapt(libs.androidx.room.compiler)
@@ -153,6 +155,7 @@ dependencies {
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.mockk.agent)
+    androidTestImplementation (libs.junit)
 
     // Debugging
     debugImplementation(libs.androidx.ui.tooling)

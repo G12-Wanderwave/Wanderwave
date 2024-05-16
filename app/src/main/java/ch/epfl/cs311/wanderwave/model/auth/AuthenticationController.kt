@@ -1,7 +1,11 @@
 package ch.epfl.cs311.wanderwave.model.auth
 
+import android.util.Log
 import ch.epfl.cs311.wanderwave.model.repository.AuthTokenRepository
 import com.google.firebase.auth.FirebaseAuth
+import java.io.FileNotFoundException
+import java.net.HttpURLConnection
+import java.net.URL
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -11,6 +15,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONException
 import org.json.JSONObject
 
 class AuthenticationController
@@ -74,28 +79,38 @@ constructor(
   }
 
   private suspend fun storeAndUseNewTokens(responseJson: String): Boolean {
-    val response = JSONObject(responseJson)
-    val firebaseToken = response.getString("firebase_token")
-    val spotifyAccessToken = response.getString("access_token")
-    val spotifyRefreshToken = response.getString("refresh_token")
+    if (responseJson.isEmpty()) {
+      Log.e("AuthenticationController", "Received empty JSON response")
+      return false
+    }
 
-    tokenRepository.setAuthToken(
-        AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN,
-        spotifyAccessToken,
-        System.currentTimeMillis() / 1000L + 3600)
-    tokenRepository.setAuthToken(
-        AuthTokenRepository.AuthTokenType.SPOTIFY_REFRESH_TOKEN,
-        spotifyRefreshToken,
-        System.currentTimeMillis() / 1000L + 3600 * 100000)
-    tokenRepository.setAuthToken(
-        AuthTokenRepository.AuthTokenType.FIREBASE_TOKEN,
-        firebaseToken,
-        System.currentTimeMillis() / 1000L + 3600)
+    return try {
+      val response = JSONObject(responseJson)
+      val firebaseToken = response.getString("firebase_token")
+      val spotifyAccessToken = response.getString("access_token")
+      val spotifyRefreshToken = response.getString("refresh_token")
 
-    return signInWithCustomToken()
+      tokenRepository.setAuthToken(
+          AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN,
+          spotifyAccessToken,
+          System.currentTimeMillis() / 1000L + 3600)
+      tokenRepository.setAuthToken(
+          AuthTokenRepository.AuthTokenType.SPOTIFY_REFRESH_TOKEN,
+          spotifyRefreshToken,
+          System.currentTimeMillis() / 1000L + 3600 * 100000)
+      tokenRepository.setAuthToken(
+          AuthTokenRepository.AuthTokenType.FIREBASE_TOKEN,
+          firebaseToken,
+          System.currentTimeMillis() / 1000L + 3600)
+
+      signInWithCustomToken()
+    } catch (e: JSONException) {
+      Log.e("AuthenticationController", "Error parsing JSON: ${e.message}")
+      false
+    }
   }
 
-  private suspend fun refreshSpotifyToken(): Boolean {
+  suspend fun refreshSpotifyToken(): Boolean {
     val refreshToken =
         tokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_REFRESH_TOKEN)
             ?: return false
@@ -123,5 +138,31 @@ constructor(
 
   fun deauthenticate() {
     auth.signOut()
+  }
+
+  suspend fun makeApiRequest(url: URL): String {
+
+    // refresh the access token if necessary
+    if (!refreshSpotifyToken()) {
+      Log.e("AuthenticationController", "Failed to refresh Spotify token")
+      return "FAILURE"
+    }
+    // Get the access token from the AuthTokenRepository
+    val accessToken =
+        tokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+
+    Log.i("AuthenticationController", "Access token available: ${accessToken != null}")
+    return try {
+      (withContext(ioDispatcher) { url.openConnection() } as HttpURLConnection).run {
+        requestMethod = "GET"
+        setRequestProperty("Authorization", "Bearer $accessToken")
+        inputStream.bufferedReader().use {
+          return it.readText()
+        }
+      }
+    } catch (e: FileNotFoundException) {
+      Log.e("AuthenticationController", "Failed to make API request: ${e.message}")
+      "FAILURE"
+    }
   }
 }

@@ -31,7 +31,7 @@ val mockSongLists =
             ListType.TOP_SONGS,
             listOf(Track("1", "Track 1", "Artist 1"), Track("2", "Track 2", "Artist 2"))),
         SongList(
-            ListType.CHOSEN_SONGS,
+            ListType.LIKED_SONGS,
             listOf(Track("3", "Track 3", "Artist 3"), Track("4", "Track 4", "Artist 4"))))
 // TODO: modify this, because the profile.songLists is not available yet
 

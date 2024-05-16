@@ -1,13 +1,22 @@
 package ch.epfl.cs311.wanderwave.model
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.di.ServiceModule.provideLocationSource
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
+import ch.epfl.cs311.wanderwave.model.spotify.getTracksFromSpotifyPlaylist
+import ch.epfl.cs311.wanderwave.model.spotify.parseTracks
+import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.RequestManager
+import com.bumptech.glide.request.FutureTarget
 import com.spotify.android.appremote.api.Connector.ConnectionListener
 import com.spotify.android.appremote.api.ContentApi
 import com.spotify.android.appremote.api.PlayerApi
@@ -17,11 +26,13 @@ import com.spotify.protocol.client.CallResult
 import com.spotify.protocol.client.ErrorCallback
 import com.spotify.protocol.client.Subscription
 import com.spotify.protocol.types.Empty
+import com.spotify.protocol.types.ImageUri
 import com.spotify.protocol.types.ListItem
 import com.spotify.protocol.types.ListItems
 import com.spotify.protocol.types.PlayerState
 import io.mockk.Awaits
 import io.mockk.Runs
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -30,13 +41,17 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
+import java.net.URL
+import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
-import kotlin.Exception
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -56,17 +71,195 @@ class SpotifyControllerTest {
 
   @RelaxedMockK private lateinit var mockAppRemote: SpotifyAppRemote
   @RelaxedMockK private lateinit var mockPlayerApi: PlayerApi
+  // ktfmt
 
-  private lateinit var spotifyController: SpotifyController
+  @RelaxedMockK private lateinit var spotifyController: SpotifyController
   private lateinit var context: Context
+  private lateinit var authenticationController: AuthenticationController
+
+  @RelaxedMockK private lateinit var mockScope: CoroutineScope
+
+  private lateinit var requestManager: RequestManager
+  private lateinit var requestBuilder: RequestBuilder<Bitmap>
+  private lateinit var futureTarget: FutureTarget<Bitmap>
 
   @Before
   fun setup() {
+    // Initialize MockK
+    mockkStatic(SpotifyAppRemote::class)
+
+    // Initialize context and controller
     context = ApplicationProvider.getApplicationContext()
-    spotifyController = SpotifyController(context)
+    authenticationController = mockk(relaxed = true)
+    requestBuilder = mockk(relaxed = true)
+    futureTarget = mockk(relaxed = true)
+
+    spotifyController = SpotifyController(context, authenticationController)
+    spotifyController.appRemote = mockAppRemote
+
+    // Mock PlayerApi
+    every { mockAppRemote.playerApi } returns mockPlayerApi
+    mockkStatic(Glide::class)
+
+    // Stub the makeApiRequest method
+
+    // Initialize Mockito annotations
+
+    // Mocking Glide components
+    context = ApplicationProvider.getApplicationContext()
+    spotifyController = SpotifyController(context, authenticationController)
+    mockkStatic(Glide::class)
+
+    // Mocking Glide components
+    requestManager = mockk(relaxed = true)
+    requestBuilder = mockk(relaxed = true)
+    futureTarget = mockk(relaxed = true)
+
+    every { Glide.with(any<Context>()) } returns requestManager
+    every { requestManager.asBitmap() } returns requestBuilder
+    every { requestBuilder.load(any<String>()) } returns requestBuilder
+    every { requestBuilder.submit(any(), any()) } returns futureTarget
+    every { futureTarget.get() } returns mockk<Bitmap>(relaxed = true)
+
+    spotifyController = mockk(relaxed = true)
+    context = ApplicationProvider.getApplicationContext()
+    authenticationController = mockk<AuthenticationController>()
+    spotifyController = SpotifyController(context, authenticationController)
     spotifyController.appRemote = mockAppRemote
     mockkStatic(SpotifyAppRemote::class)
     every { mockAppRemote.playerApi } returns mockPlayerApi
+    coEvery { authenticationController.makeApiRequest(any()) } returns "Test"
+
+    mockScope = mockk<CoroutineScope>()
+  }
+
+  @Test
+  fun testExtractImageUrlFromJson() {
+    val json =
+        """
+            {
+                "images": [
+                    {"url": "https://example.com/image1.jpg"},
+                    {"url": "https://example.com/image2.jpg"}
+                ]
+            }
+        """
+    val expectedUrl = "https://example.com/image1.jpg"
+    val actualUrl = spotifyController.extractImageUrlFromJson(json)
+    assertEquals(expectedUrl, actualUrl)
+  }
+
+  @Test
+  fun testExtractImageUrlFromJson_noImages() {
+    val json = """
+            {
+                "images": []
+            }
+        """
+    val actualUrl = spotifyController.extractImageUrlFromJson(json)
+    assertNull(actualUrl)
+  }
+
+  @Test
+  fun testFetchImageFromUrl() = runBlocking {
+    val url =
+        "https://fr.wikipedia.org/wiki/%C3%89cole_polytechnique_f%C3%A9d%C3%A9rale_de_Lausanne#/media/Fichier:EPFL_campus_2017.jpg"
+    val result = spotifyController.fetchImageFromUrl(context, url)
+    assertNotNull(result)
+  }
+
+  @Test
+  fun testGetAlbumImage() = runBlocking {
+    val albumId = "testAlbumId"
+    val json =
+        """
+            {
+                "images": [
+                    {"url": "https://example.com/image1.jpg"},
+                    {"url": "https://example.com/image2.jpg"}
+                ]
+            }
+        """
+    val bitmap: Bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+    coEvery {
+      authenticationController.makeApiRequest(URL("https://api.spotify.com/v1/albums/$albumId"))
+    } returns json
+    every { futureTarget.get() } returns bitmap
+
+    val result = spotifyController.getAlbumImage(albumId)
+    assertNotNull(result)
+  }
+
+  @Test
+  fun testGetTracksFromSpotifyPlaylist() = runBlocking {
+    // Mock the PlayerApi and Subscription objects
+    val playerApi = mockk<PlayerApi>(relaxed = true)
+    val subscription = mockk<Subscription<PlayerState>>(relaxed = true)
+    val playerState = mockk<PlayerState>(relaxed = true)
+
+    every { mockScope.coroutineContext } returns Dispatchers.Unconfined
+    // When playerApi.subscribeToPlayerState() is called, return the mocked subscription
+    every { playerApi.subscribeToPlayerState() } returns subscription
+
+    // When subscription.setEventCallback(any()) is called, invoke the callback with the test
+    // PlayerState
+    every { subscription.setEventCallback(any()) } answers { subscription }
+
+    // When subscription.setErrorCallback(any()) is called, do nothing
+    every { subscription.setErrorCallback(any()) } just Awaits
+
+    // Set the playerApi in the SpotifyController
+    every { mockAppRemote.playerApi } returns playerApi
+
+    val callResult = mockk<CallResult<PlayerState>>(relaxed = true)
+    every { callResult.setResultCallback(any()) } answers
+        {
+          val callback = firstArg<CallResult.ResultCallback<PlayerState>>()
+          callback.onResult(playerState)
+          callResult
+        }
+    every { mockAppRemote.playerApi.playerState } returns callResult
+
+    val playlist: MutableStateFlow<List<ListItem>> = MutableStateFlow(listOf())
+
+    // Call the method to be tested
+    getTracksFromSpotifyPlaylist("37i9dQZF1DXcBWIGoYBM5M", playlist, spotifyController, mockScope)
+  }
+
+  @Test
+  fun testGetLikedTracks() = runBlocking {
+    // Mock the PlayerApi and Subscription objects
+    val playerApi = mockk<PlayerApi>(relaxed = true)
+    val subscription = mockk<Subscription<PlayerState>>(relaxed = true)
+    val playerState = mockk<PlayerState>(relaxed = true)
+
+    every { mockScope.coroutineContext } returns Dispatchers.Unconfined
+    // When playerApi.subscribeToPlayerState() is called, return the mocked subscription
+    every { playerApi.subscribeToPlayerState() } returns subscription
+
+    // When subscription.setEventCallback(any()) is called, invoke the callback with the test
+    // PlayerState
+    every { subscription.setEventCallback(any()) } answers { subscription }
+
+    // When subscription.setErrorCallback(any()) is called, do nothing
+    every { subscription.setErrorCallback(any()) } just Awaits
+
+    // Set the playerApi in the SpotifyController
+    every { mockAppRemote.playerApi } returns playerApi
+
+    val callResult = mockk<CallResult<PlayerState>>(relaxed = true)
+    every { callResult.setResultCallback(any()) } answers
+        {
+          val callback = firstArg<CallResult.ResultCallback<PlayerState>>()
+          callback.onResult(playerState)
+          callResult
+        }
+    every { mockAppRemote.playerApi.playerState } returns callResult
+
+    val playlist: MutableStateFlow<List<ListItem>> = MutableStateFlow(listOf())
+
+    // Call the method to be tested
+    getLikedTracksFromSpotify(playlist, spotifyController, mockScope)
   }
 
   @Test
@@ -695,15 +888,6 @@ class SpotifyControllerTest {
 
     assertFalse(result)
   }
-  //    @Test
-  //    fun playTrackTest() = runBlocking {
-  //        val callResult = mockk<CallResult<Empty>>(relaxed = true)
-  //        val playerApi = mockk<PlayerApi>(relaxed = true)
-  //        every { mockAppRemote.playerApi } returns playerApi
-  //        every { playerApi.play(any()) } returns callResult
-  //        val id = "fakeid"
-  //        spotifyController.playTrack(Track(id, "faketitle", "fakeartist"))
-  //    }
 
   @ExperimentalCoroutinesApi
   @Test
@@ -883,4 +1067,83 @@ class SpotifyControllerTest {
     // Verify the returned LocationSource is an instance of FastLocationSource
     assertTrue(locationSource is FastLocationSource)
   }
+
+  @Test
+  fun spotifyGetFromURLTest() = runBlocking {
+    val callResult = mockk<CallResult<ListItems>>(relaxed = true)
+    val contentApi = mockk<ContentApi>(relaxed = true)
+    every { mockAppRemote.contentApi } returns contentApi
+    every { contentApi.getRecommendedContentItems(any()) } returns callResult
+
+    val matchingAlbum = ListItem("id:album1", "uri1", null, "Album Title", "album", true, false)
+    val matchingPlaylist =
+        ListItem("id:playlist1", "uri2", null, "Playlist Title", "playlist", true, false)
+    val nonMatchingItem = ListItem("id:track1", "uri3", null, "Track Title", "track", true, false)
+    val items = listOf(matchingAlbum, matchingPlaylist, nonMatchingItem)
+    val itemsArray = items.toTypedArray()
+
+    every { callResult.setResultCallback(any()) } answers
+        {
+          val callback = firstArg<CallResult.ResultCallback<ListItems>>()
+          callback.onResult(ListItems(0, 0, 0, itemsArray))
+          callResult
+        }
+
+    val result = spotifyController.spotifyGetFromURL("https://test.api/endpoint")
+  }
+
+  @Test
+  fun parseTracksSuccessfullyParsesTracks() {
+    val jsonResponse =
+        """
+    {
+        "items": [
+            {
+                "track": {
+                    "id": "1",
+                    "name": "Track 1",
+                    "artists": [
+                        {
+                            "name": "Artist 1"
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+"""
+            .trimIndent()
+
+    val likedSongsTrackList: MutableStateFlow<List<ListItem>> =
+        MutableStateFlow<List<ListItem>>(emptyList())
+
+    parseTracks(jsonResponse, likedSongsTrackList)
+    assertEquals(likedSongsTrackList.value.size, 1)
+    junit.framework.TestCase.assertEquals(
+        likedSongsTrackList.value[0],
+        ListItem("1", "", ImageUri(""), "Track 1", "Artist 1", false, false))
+  }
+
+  @Test
+  fun parseTracksHandlesEmptyResponse() {
+    val likedSongsTrackList: MutableStateFlow<List<ListItem>> =
+        MutableStateFlow<List<ListItem>>(emptyList())
+    val jsonResponse =
+        """
+    {
+        "items": []
+    }
+"""
+            .trimIndent()
+    parseTracks(jsonResponse, likedSongsTrackList)
+    assertEquals(likedSongsTrackList.value.size, 0)
+  }
+}
+
+interface UrlFactory {
+  fun create(urlString: String): URL
+}
+
+class SimpleUrlFactory : UrlFactory {
+  override fun create(urlString: String): URL = URL(urlString)
 }
