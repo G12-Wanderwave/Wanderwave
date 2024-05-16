@@ -2,6 +2,7 @@ package ch.epfl.cs311.wanderwave.model
 
 import android.content.Context
 import android.util.Log
+import android.widget.ImageView
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.di.ServiceModule.provideLocationSource
@@ -10,6 +11,9 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.parseTracks
+import com.kaspersky.components.composesupport.config.withComposeSupport
+import com.kaspersky.kaspresso.kaspresso.Kaspresso
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.spotify.android.appremote.api.Connector.ConnectionListener
 import com.spotify.android.appremote.api.ContentApi
 import com.spotify.android.appremote.api.PlayerApi
@@ -25,7 +29,9 @@ import com.spotify.protocol.types.ListItems
 import com.spotify.protocol.types.PlayerState
 import io.mockk.Awaits
 import io.mockk.Runs
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -33,14 +39,13 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.unmockkAll
 import io.mockk.verify
-import java.net.URL
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,39 +55,41 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import okhttp3.ResponseBody
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.net.URL
+import kotlin.time.Duration.Companion.seconds
 
 @RunWith(AndroidJUnit4::class)
-class SpotifyControllerTest {
+class SpotifyControllerTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()){
 
   @get:Rule val mockkRule = MockKRule(this)
 
   @RelaxedMockK private lateinit var mockAppRemote: SpotifyAppRemote
   @RelaxedMockK private lateinit var mockPlayerApi: PlayerApi
+    private lateinit var imageView: ImageView
 
   @RelaxedMockK private lateinit var spotifyController: SpotifyController
-  private lateinit var context: Context
-  private lateinit var authenticationController: AuthenticationController
-  private lateinit var httpClient: OkHttpClient
+    @RelaxedMockK private lateinit var context: Context
+    @RelaxedMockK private lateinit var authenticationController: AuthenticationController
+    @RelaxedMockK private lateinit var httpClient: OkHttpClient
 
   @RelaxedMockK private lateinit var mockScope: CoroutineScope
-
-  val dispatcher = UnconfinedTestDispatcher()
 
   @Before
   fun setup() {
     mockkStatic(SpotifyAppRemote::class)
 
     spotifyController = mockk(relaxed = true)
-    context = ApplicationProvider.getApplicationContext()
+      context = ApplicationProvider.getApplicationContext()
+      imageView = ImageView(context)
     authenticationController = mockk<AuthenticationController>()
     spotifyController = SpotifyController(context, authenticationController)
     spotifyController.appRemote = mockAppRemote
@@ -92,8 +99,13 @@ class SpotifyControllerTest {
     httpClient = mockk()
 
     mockScope = mockk<CoroutineScope>()
-  }
 
+  }
+    @After
+    fun clearMocks() {
+        clearAllMocks() // Clear all MockK mocks
+        unmockkAll()
+    }
   @Test
   fun testGetAlbumImage_Success() = runBlocking {
     val accessToken = "test_access_token"
@@ -183,7 +195,58 @@ class SpotifyControllerTest {
     assertNull(result)
   }
 
-  @Test
+   // @Test
+    //fun testDownloadAndDisplayImage() = runBlocking {
+       // val imageUrl =
+         //   "https://images.squarespace-cdn.com/content/v1/60f1a490a90ed8713c41c36c/1629223610791-LCBJG5451DRKX4WOB4SP/37-design-powers-url-structure.jpeg"
+        //val imageView = mockk<ImageView>(relaxed = true)
+
+      //  spotifyController = SpotifyController(context, authenticationController)
+
+        //spotifyController.downloadAndDisplayImage(imageUrl, imageView)
+
+     //   coVerify { imageView.setImageBitmap(any()) }
+
+   // }
+
+    @Test
+    fun testDisplayAlbumImage() = runTest {
+        val albumId = "albumId"
+        val imageUrl =
+            "https://images.squarespace-cdn.com/content/v1/60f1a490a90ed8713c41c36c/1629223610791-LCBJG5451DRKX4WOB4SP/37-design-powers-url-structure.jpeg"
+        val accessToken = "test_access_token"
+
+        // Initialize the ImageView mock
+        //val imageView: ImageView = mockk(relaxed = true)
+
+        // Mocking authenticationController and spotifyController
+        coEvery { authenticationController.getAccessToken() } returns accessToken
+        val albumImageJson =
+            """
+          {
+              "images": [
+                  {"url": "$imageUrl"}
+              ]
+          }
+      """
+        coEvery { authenticationController.makeApiRequest(any<URL>()) } returns albumImageJson
+
+        // Assuming spotifyController is a mock, you can set up the displayAlbumImage call
+        coEvery { spotifyController.displayAlbumImage(albumId, imageView) } just Runs
+
+        // Invoke the method to be tested
+        spotifyController.displayAlbumImage(albumId, imageView)
+
+        // Verify that setImageBitmap was called on imageView
+        coVerify { imageView.setImageBitmap(any()) }
+    }
+
+
+
+
+
+
+    @Test
   fun testStartPlayBackTimerResultCallback() = runBlocking {
     // Mock the PlayerApi and Subscription objects
     val playerApi = mockk<PlayerApi>(relaxed = true)
