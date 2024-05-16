@@ -155,11 +155,7 @@ dependencies {
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.mockk.agent)
-    androidTestImplementation ("junit:junit:4.13.2")
-    androidTestImplementation("org.mockito:mockito-android:3.11.2")
-
-
-    androidTestImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.1")
+    androidTestImplementation (libs.junit)
 
     // Debugging
     debugImplementation(libs.androidx.ui.tooling)
