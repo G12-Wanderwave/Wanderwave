@@ -176,18 +176,27 @@ fun handleItemClick(
     viewModel: SpotifySongsActions,
     isTopSongsListVisible: Boolean
 ) {
+    Log.d("SelectSongScreen", "Selected item: $listItem")
+    if(listItem.id.contains("spotify:track:")) {
+        Log.d("SelectSongScreen", "Selected song: ${listItem.title}")
+        viewModel.addTrackToList(
+            if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS,
+            Track(listItem.id, listItem.title, listItem.subtitle))
+        navActions.goBack()
+        return
+    }
+
+    val playlistHeader = "spotify:playlist:"
+    if (listItem.id.contains(playlistHeader)) {
+        Log.d("SelectSongScreen", "Selected playlist: ${listItem.title}")
+        viewModel.getTracksFromPlaylist(
+            listItem.id.substring(playlistHeader.length), viewModel.childrenPlaylistTrackList as MutableStateFlow<List<ListItem>>)
+        return
+    }
 
   if (listItem.hasChildren) {
+    Log.d("SelectSongScreen", "Selected subsection: ${listItem.title}")
     viewModel.retrieveChild(listItem)
     return
   }
-  if (listItem.id.contains("playlist")) {
-    viewModel.getTracksFromPlaylist(
-        listItem.id, viewModel.childrenPlaylistTrackList as MutableStateFlow<List<ListItem>>)
-    return
-  }
-  viewModel.addTrackToList(
-      if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS,
-      Track(listItem.id, listItem.title, listItem.subtitle))
-  navActions.goBack()
 }
