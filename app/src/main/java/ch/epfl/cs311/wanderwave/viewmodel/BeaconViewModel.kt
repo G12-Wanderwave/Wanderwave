@@ -76,31 +76,31 @@ constructor(
     beaconRepository.addTrackToBeacon(beaconId, track, onComplete)
   }
 
-    // Function to add a track to a song list
-    override fun addTrackToList(listName: ListType, track: Track) {
-        _songLists.value = listOf(SongList(listName,listOf(track)))
-    }
-    /**
-     * Get all the element of the main screen and add them to the top list
-     *
-     * @author Menzo Bouaissi
-     * @since 2.0
-     * @last update 3.0
-     */
-    override fun retrieveAndAddSubsection() {
-        retrieveAndAddSubsectionFromSpotify(_spotifySubsectionList, spotifyController, viewModelScope)
-    }
-    /**
-     * Get all the element of the main screen and add them to the top list
-     *
-     * @author Menzo Bouaissi
-     * @since 2.0
-     * @last update 3.0
-     */
-    override fun retrieveChild(item: ListItem) {
-        retrieveChildFromSpotify(
-            item, this._childrenPlaylistTrackList, spotifyController, viewModelScope)
-    }
+  // Function to add a track to a song list
+  override fun addTrackToList(listName: ListType, track: Track) {
+    _songLists.value = listOf(SongList(listName, listOf(track)))
+  }
+  /**
+   * Get all the element of the main screen and add them to the top list
+   *
+   * @author Menzo Bouaissi
+   * @since 2.0
+   * @last update 3.0
+   */
+  override fun retrieveAndAddSubsection() {
+    retrieveAndAddSubsectionFromSpotify(_spotifySubsectionList, spotifyController, viewModelScope)
+  }
+  /**
+   * Get all the element of the main screen and add them to the top list
+   *
+   * @author Menzo Bouaissi
+   * @since 2.0
+   * @last update 3.0
+   */
+  override fun retrieveChild(item: ListItem) {
+    retrieveChildFromSpotify(
+        item, this._childrenPlaylistTrackList, spotifyController, viewModelScope)
+  }
 
   data class UIState(
       val beacon: Beacon? = null,
