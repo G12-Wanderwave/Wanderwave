@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.model
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -12,7 +13,10 @@ import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
 import ch.epfl.cs311.wanderwave.model.spotify.getTracksFromSpotifyPlaylist
 import ch.epfl.cs311.wanderwave.model.spotify.parseTracks
-import com.google.common.base.CharMatcher.any
+import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.RequestManager
+import com.bumptech.glide.request.FutureTarget
 import com.spotify.android.appremote.api.Connector.ConnectionListener
 import com.spotify.android.appremote.api.ContentApi
 import com.spotify.android.appremote.api.PlayerApi
@@ -43,7 +47,6 @@ import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
-import kotlin.Exception
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -55,7 +58,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -76,11 +78,47 @@ class SpotifyControllerTest {
 
   @RelaxedMockK private lateinit var mockScope: CoroutineScope
 
-  val dispatcher = UnconfinedTestDispatcher()
+  private lateinit var requestManager: RequestManager
+  private lateinit var requestBuilder: RequestBuilder<Bitmap>
+  private lateinit var futureTarget: FutureTarget<Bitmap>
 
   @Before
   fun setup() {
+    // Initialize MockK
     mockkStatic(SpotifyAppRemote::class)
+
+    // Initialize context and controller
+    context = ApplicationProvider.getApplicationContext()
+    authenticationController = mockk(relaxed = true)
+    requestBuilder = mockk(relaxed = true)
+    futureTarget = mockk(relaxed = true)
+
+    spotifyController = SpotifyController(context, authenticationController)
+    spotifyController.appRemote = mockAppRemote
+
+    // Mock PlayerApi
+    every { mockAppRemote.playerApi } returns mockPlayerApi
+    mockkStatic(Glide::class)
+
+    // Stub the makeApiRequest method
+
+    // Initialize Mockito annotations
+
+    // Mocking Glide components
+    context = ApplicationProvider.getApplicationContext()
+    spotifyController = SpotifyController(context, authenticationController)
+    mockkStatic(Glide::class)
+
+    // Mocking Glide components
+    requestManager = mockk(relaxed = true)
+    requestBuilder = mockk(relaxed = true)
+    futureTarget = mockk(relaxed = true)
+
+    every { Glide.with(any<Context>()) } returns requestManager
+    every { requestManager.asBitmap() } returns requestBuilder
+    every { requestBuilder.load(any<String>()) } returns requestBuilder
+    every { requestBuilder.submit(any(), any()) } returns futureTarget
+    every { futureTarget.get() } returns mockk<Bitmap>(relaxed = true)
 
     spotifyController = mockk(relaxed = true)
     context = ApplicationProvider.getApplicationContext()
@@ -92,6 +130,63 @@ class SpotifyControllerTest {
     coEvery { authenticationController.makeApiRequest(any()) } returns "Test"
 
     mockScope = mockk<CoroutineScope>()
+  }
+
+  @Test
+  fun testExtractImageUrlFromJson() {
+    val json =
+        """
+            {
+                "images": [
+                    {"url": "https://example.com/image1.jpg"},
+                    {"url": "https://example.com/image2.jpg"}
+                ]
+            }
+        """
+    val expectedUrl = "https://example.com/image1.jpg"
+    val actualUrl = spotifyController.extractImageUrlFromJson(json)
+    assertEquals(expectedUrl, actualUrl)
+  }
+
+  @Test
+  fun testExtractImageUrlFromJson_noImages() {
+    val json = """
+            {
+                "images": []
+            }
+        """
+    val actualUrl = spotifyController.extractImageUrlFromJson(json)
+    assertNull(actualUrl)
+  }
+
+  @Test
+  fun testFetchImageFromUrl() = runBlocking {
+    val url =
+        "https://fr.wikipedia.org/wiki/%C3%89cole_polytechnique_f%C3%A9d%C3%A9rale_de_Lausanne#/media/Fichier:EPFL_campus_2017.jpg"
+    val result = spotifyController.fetchImageFromUrl(context, url)
+    assertNotNull(result)
+  }
+
+  @Test
+  fun testGetAlbumImage() = runBlocking {
+    val albumId = "testAlbumId"
+    val json =
+        """
+            {
+                "images": [
+                    {"url": "https://example.com/image1.jpg"},
+                    {"url": "https://example.com/image2.jpg"}
+                ]
+            }
+        """
+    val bitmap: Bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+    coEvery {
+      authenticationController.makeApiRequest(URL("https://api.spotify.com/v1/albums/$albumId"))
+    } returns json
+    every { futureTarget.get() } returns bitmap
+
+    val result = spotifyController.getAlbumImage(albumId)
+    assertNotNull(result)
   }
 
   @Test
@@ -1023,7 +1118,7 @@ class SpotifyControllerTest {
 
     parseTracks(jsonResponse, likedSongsTrackList)
     assertEquals(likedSongsTrackList.value.size, 1)
-    assertEquals(
+    junit.framework.TestCase.assertEquals(
         likedSongsTrackList.value[0],
         ListItem("1", "", ImageUri(""), "Track 1", "Artist 1", false, false))
   }
