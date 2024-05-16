@@ -44,6 +44,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -257,6 +258,37 @@ class SpotifyControllerTest {
 
     // Assert that the result is the mocked PlayerState
     assertEquals(mockPlayerState, result)
+  }
+
+  @Test
+  fun testSkip() = runTest {
+    // Mock the PlayerApi and its subscribeToPlayerState() function
+    val mockPlayerApi = mockk<PlayerApi>(relaxed = true)
+    val mockSubscription = mockk<Subscription<PlayerState>>(relaxed = true)
+    every { mockPlayerApi.subscribeToPlayerState() } returns mockSubscription
+
+    // Initialize SpotifyController with mocked PlayerApi
+    every { mockAppRemote.playerApi } returns mockPlayerApi
+    val spotifyController = SpotifyController(context)
+    spotifyController.appRemote.value = mockAppRemote
+
+    // Mock a PlayerState
+    val mockTrack =
+      com.spotify.protocol.types.Track(
+        mockk(), mockk(), mockk(), 1L, "title", "uri", mockk(), false, false)
+    val mockPlayerState = PlayerState(mockTrack, false, 1f, 0, mockk(), mockk())
+
+    // Use the mocked PlayerState as the result for the subscription's setEventCallback
+    every { mockSubscription.setEventCallback(any()) } answers
+        {
+          val callback = firstArg<Subscription.EventCallback<PlayerState>>()
+          callback.onEvent(mockPlayerState)
+          mockSubscription
+        }
+
+    advanceUntilIdle()
+
+    spotifyController.skip(1)
   }
 
   @Test
