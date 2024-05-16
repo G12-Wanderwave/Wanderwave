@@ -27,7 +27,6 @@ import com.spotify.protocol.types.ListItems
 import com.spotify.protocol.types.PlayerState
 import io.mockk.Awaits
 import io.mockk.Runs
-import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -56,9 +55,7 @@ import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -96,15 +93,15 @@ class SpotifyControllerTest {
     mockScope = mockk<CoroutineScope>()
   }
 
-  @After
-  fun tearDown() {
-    Dispatchers.resetMain() // Always reset the dispatcher
-  }
-
-  @After
-  fun clearMocks() {
-    clearAllMocks() // Clear all MockK mocks
-  }
+  //  @After
+  //  fun tearDown() {
+  //    Dispatchers.resetMain() // Always reset the dispatcher
+  //  }
+  //
+  //  @After
+  //  fun clearMocks() {
+  //    clearAllMocks() // Clear all MockK mocks
+  //  }
 
   @Test
   fun testGetTracksFromSpotifyPlaylist() = runBlocking {
