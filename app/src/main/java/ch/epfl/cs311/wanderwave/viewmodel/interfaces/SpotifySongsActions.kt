@@ -59,5 +59,5 @@ interface SpotifySongsActions {
    * @since 3.0
    * @last update 3.0
    */
-  fun getTracksFromPlaylist(playlistId: String, playlist: MutableStateFlow<List<ListItem>>)
+  fun getTracksFromPlaylist(playlistId: String)
 }

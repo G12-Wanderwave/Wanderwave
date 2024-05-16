@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.ListType
@@ -119,6 +120,16 @@ constructor(
       }
     }
   }
+    override fun getTracksFromPlaylist(
+        playlistId: String
+    ) {
+        Log.d("ProfileViewModelbefore", "getTracksFromPlaylist: ${_childrenPlaylistTrackList.value}")
+        viewModelScope.launch {
+            getTracksFromSpotifyPlaylist(playlistId,_childrenPlaylistTrackList, spotifyController, viewModelScope)
+        }
+        Log.d("ProfileViewModelAfter", "getTracksFromPlaylist: ${_childrenPlaylistTrackList.value}")
+    }
+
   /**
    * Get all the element of the main screen and add them to the top list
    *
@@ -152,14 +163,7 @@ constructor(
     getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
   }
 
-  override fun getTracksFromPlaylist(
-      playlistId: String,
-      playlist: MutableStateFlow<List<ListItem>>
-  ) {
-    viewModelScope.launch {
-      getTracksFromSpotifyPlaylist(playlistId, playlist, spotifyController, viewModelScope)
-    }
-  }
+
 
   data class UIState(
       val profile: Profile? = null,

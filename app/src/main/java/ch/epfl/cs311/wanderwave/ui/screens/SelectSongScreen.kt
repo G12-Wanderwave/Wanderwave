@@ -151,8 +151,6 @@ fun SongList(
 ) {
   LazyColumn(contentPadding = paddingValues, modifier = Modifier.padding(all = 16.dp)) {
     items(items, key = { it.id }) { item ->
-      Log.d("SelectSongScreen", "Selected song: ${item}")
-
       TrackItem(
           item, onClick = { handleItemClick(item, navActions, viewModel, isTopSongsListVisible) })
     }
@@ -176,9 +174,7 @@ fun handleItemClick(
     viewModel: SpotifySongsActions,
     isTopSongsListVisible: Boolean
 ) {
-    Log.d("SelectSongScreen", "Selected item: $listItem")
     if(listItem.id.contains("spotify:track:")) {
-        Log.d("SelectSongScreen", "Selected song: ${listItem.title}")
         viewModel.addTrackToList(
             if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS,
             Track(listItem.id, listItem.title, listItem.subtitle))
@@ -188,15 +184,18 @@ fun handleItemClick(
 
     val playlistHeader = "spotify:playlist:"
     if (listItem.id.contains(playlistHeader)) {
-        Log.d("SelectSongScreen", "Selected playlist: ${listItem.title}")
         viewModel.getTracksFromPlaylist(
-            listItem.id.substring(playlistHeader.length), viewModel.childrenPlaylistTrackList as MutableStateFlow<List<ListItem>>)
+            listItem.id.substring(playlistHeader.length))
         return
     }
 
   if (listItem.hasChildren) {
-    Log.d("SelectSongScreen", "Selected subsection: ${listItem.title}")
     viewModel.retrieveChild(listItem)
     return
   }
+
+    viewModel.addTrackToList(
+        if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS,
+        Track(listItem.id, listItem.title, listItem.subtitle))
+    navActions.goBack()
 }

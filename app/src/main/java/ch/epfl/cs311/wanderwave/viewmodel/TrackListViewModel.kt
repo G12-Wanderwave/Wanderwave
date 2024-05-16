@@ -269,10 +269,9 @@ constructor(
   }
 
   override fun getTracksFromPlaylist(
-      playlistId: String,
-      playlist: MutableStateFlow<List<ListItem>>
+      playlistId: String
   ) {
-    getTracksFromSpotifyPlaylist(playlistId, playlist, spotifyController, viewModelScope)
+    getTracksFromSpotifyPlaylist(playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
   }
 
   data class UiState(

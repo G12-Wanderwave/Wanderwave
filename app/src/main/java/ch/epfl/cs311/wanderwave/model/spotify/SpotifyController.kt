@@ -409,7 +409,7 @@ fun getTracksFromSpotifyPlaylist(
     scope: CoroutineScope
 ) {
   scope.launch {
-    val url = "https://api.spotify.com/v1/playlists/$playlistId"
+      val url = "https://api.spotify.com/v1/playlists/$playlistId/tracks"
     try {
       val json = spotifyController.spotifyGetFromURL(url)
       parseTracks(json, playlist)
@@ -424,24 +424,25 @@ fun getTracksFromSpotifyPlaylist(
  * Parse the JSON response from the Spotify API to get the liked songs of the user.
  *
  * @param jsonResponse the JSON response from the Spotify API
- * @param likedSongsTrackList the list of liked songs
+ * @param songsTrackList the list of liked songs
  * @author Menzo Bouaissi
  * @since 3.0
  * @last update 3.0
  */
 fun parseTracks(
     jsonResponse: String,
-    likedSongsTrackList: MutableStateFlow<List<ListItem>>,
+    songsTrackList: MutableStateFlow<List<ListItem>>,
 ) {
   val jsonObject = JSONObject(jsonResponse)
   val items = jsonObject.getJSONArray("items")
-  likedSongsTrackList.value = emptyList()
+    songsTrackList.value = emptyList()
   for (i in 0 until items.length()) {
+
     val track = items.getJSONObject(i).getJSONObject("track")
-    val id = track.getString("id")
+      val id = track.getString("id")
     val name = track.getString("name")
     val artistsArray = track.getJSONArray("artists")
     val artist = artistsArray.getJSONObject(0).getString("name") // Gets the primary artist
-    likedSongsTrackList.value += ListItem(id, "", ImageUri(""), name, artist, false, false)
+      songsTrackList.value += ListItem(id, "", ImageUri(""), name, artist, false, false)
   }
 }
