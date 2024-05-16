@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -27,6 +28,7 @@ class PlayerViewModel @Inject constructor(val spotifyController: SpotifyControll
           expandedState,
           looping,
           shuffling ->
+        Log.d("PlayerViewModel", "playerState: $playerState, expandedState: $expandedState")
         if (playerState == null) {
           UiState(expanded = expandedState)
         } else

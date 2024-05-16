@@ -140,4 +140,17 @@ class PlayerViewModelTest {
     viewModel.collapse()
     Assert.assertFalse(viewModel.uiState.value.expanded)
   }
+
+  @Test
+  fun testExpand() = runTest {
+    every { mockSpotifyController.looping } returns MutableStateFlow(false)
+    every { mockSpotifyController.shuffling } returns MutableStateFlow(false)
+    every { mockSpotifyController.playerState() } returns
+        flowOf(PlayerState(mockSpotifyTrack, false, .1f, 0, mockk(), mockk()))
+    viewModel = PlayerViewModel(mockSpotifyController)
+    viewModel.expand()
+    backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect() }
+    advanceUntilIdle()
+    Assert.assertTrue(viewModel.uiState.value.expanded)
+  }
 }
