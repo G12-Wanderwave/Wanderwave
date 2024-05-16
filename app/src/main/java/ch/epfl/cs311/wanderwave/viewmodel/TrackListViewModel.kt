@@ -268,10 +268,9 @@ constructor(
     getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
   }
 
-  override fun getTracksFromPlaylist(
-      playlistId: String
-  ) {
-    getTracksFromSpotifyPlaylist(playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
+  override fun getTracksFromPlaylist(playlistId: String) {
+    getTracksFromSpotifyPlaylist(
+        playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
   }
 
   data class UiState(

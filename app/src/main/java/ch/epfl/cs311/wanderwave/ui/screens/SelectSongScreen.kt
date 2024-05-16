@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,7 +25,6 @@ import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.profile.TrackItem
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 import com.spotify.protocol.types.ListItem
-import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * Screen to select a song from Spotify
@@ -174,28 +172,27 @@ fun handleItemClick(
     viewModel: SpotifySongsActions,
     isTopSongsListVisible: Boolean
 ) {
-    if(listItem.id.contains("spotify:track:")) {
-        viewModel.addTrackToList(
-            if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS,
-            Track(listItem.id, listItem.title, listItem.subtitle))
-        navActions.goBack()
-        return
-    }
+  if (listItem.id.contains("spotify:track:")) {
+    viewModel.addTrackToList(
+        if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS,
+        Track(listItem.id, listItem.title, listItem.subtitle))
+    navActions.goBack()
+    return
+  }
 
-    val playlistHeader = "spotify:playlist:"
-    if (listItem.id.contains(playlistHeader)) {
-        viewModel.getTracksFromPlaylist(
-            listItem.id.substring(playlistHeader.length))
-        return
-    }
+  val playlistHeader = "spotify:playlist:"
+  if (listItem.id.contains(playlistHeader)) {
+    viewModel.getTracksFromPlaylist(listItem.id.substring(playlistHeader.length))
+    return
+  }
 
   if (listItem.hasChildren) {
     viewModel.retrieveChild(listItem)
     return
   }
 
-    viewModel.addTrackToList(
-        if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS,
-        Track(listItem.id, listItem.title, listItem.subtitle))
-    navActions.goBack()
+  viewModel.addTrackToList(
+      if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS,
+      Track(listItem.id, listItem.title, listItem.subtitle))
+  navActions.goBack()
 }

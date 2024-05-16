@@ -409,7 +409,7 @@ fun getTracksFromSpotifyPlaylist(
     scope: CoroutineScope
 ) {
   scope.launch {
-      val url = "https://api.spotify.com/v1/playlists/$playlistId/tracks"
+    val url = "https://api.spotify.com/v1/playlists/$playlistId/tracks"
     try {
       val json = spotifyController.spotifyGetFromURL(url)
       parseTracks(json, playlist)
@@ -435,14 +435,14 @@ fun parseTracks(
 ) {
   val jsonObject = JSONObject(jsonResponse)
   val items = jsonObject.getJSONArray("items")
-    songsTrackList.value = emptyList()
+  songsTrackList.value = emptyList()
   for (i in 0 until items.length()) {
 
     val track = items.getJSONObject(i).getJSONObject("track")
-      val id = track.getString("id")
+    val id = track.getString("id")
     val name = track.getString("name")
     val artistsArray = track.getJSONArray("artists")
     val artist = artistsArray.getJSONObject(0).getString("name") // Gets the primary artist
-      songsTrackList.value += ListItem(id, "", ImageUri(""), name, artist, false, false)
+    songsTrackList.value += ListItem(id, "", ImageUri(""), name, artist, false, false)
   }
 }

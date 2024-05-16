@@ -120,15 +120,15 @@ constructor(
       }
     }
   }
-    override fun getTracksFromPlaylist(
-        playlistId: String
-    ) {
-        Log.d("ProfileViewModelbefore", "getTracksFromPlaylist: ${_childrenPlaylistTrackList.value}")
-        viewModelScope.launch {
-            getTracksFromSpotifyPlaylist(playlistId,_childrenPlaylistTrackList, spotifyController, viewModelScope)
-        }
-        Log.d("ProfileViewModelAfter", "getTracksFromPlaylist: ${_childrenPlaylistTrackList.value}")
+
+  override fun getTracksFromPlaylist(playlistId: String) {
+    Log.d("ProfileViewModelbefore", "getTracksFromPlaylist: ${_childrenPlaylistTrackList.value}")
+    viewModelScope.launch {
+      getTracksFromSpotifyPlaylist(
+          playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
     }
+    Log.d("ProfileViewModelAfter", "getTracksFromPlaylist: ${_childrenPlaylistTrackList.value}")
+  }
 
   /**
    * Get all the element of the main screen and add them to the top list
@@ -162,8 +162,6 @@ constructor(
   override suspend fun getLikedTracks() {
     getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
   }
-
-
 
   data class UIState(
       val profile: Profile? = null,

@@ -3,7 +3,6 @@ package ch.epfl.cs311.wanderwave.viewmodel.interfaces
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.spotify.protocol.types.ListItem
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 interface SpotifySongsActions {
