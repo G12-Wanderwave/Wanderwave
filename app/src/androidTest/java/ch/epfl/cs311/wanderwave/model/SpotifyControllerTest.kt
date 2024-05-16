@@ -9,6 +9,7 @@ import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.model.spotify.getTracksFromSpotifyPlaylist
 import ch.epfl.cs311.wanderwave.model.spotify.parseTracks
 import com.google.common.base.CharMatcher.any
 import com.spotify.android.appremote.api.Connector.ConnectionListener
@@ -44,6 +45,7 @@ import junit.framework.TestCase.assertTrue
 import kotlin.Exception
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -89,6 +91,42 @@ class SpotifyControllerTest {
     coEvery { authenticationController.makeApiRequest(any()) } returns "Test"
 
     mockScope = mockk<CoroutineScope>()
+  }
+
+  @Test
+  fun testGetTracksFromSpotifyPlaylist() = runBlocking {
+    // Mock the PlayerApi and Subscription objects
+    val playerApi = mockk<PlayerApi>(relaxed = true)
+    val subscription = mockk<Subscription<PlayerState>>(relaxed = true)
+    val playerState = mockk<PlayerState>(relaxed = true)
+
+    every { mockScope.coroutineContext } returns Dispatchers.Unconfined
+    // When playerApi.subscribeToPlayerState() is called, return the mocked subscription
+    every { playerApi.subscribeToPlayerState() } returns subscription
+
+    // When subscription.setEventCallback(any()) is called, invoke the callback with the test
+    // PlayerState
+    every { subscription.setEventCallback(any()) } answers { subscription }
+
+    // When subscription.setErrorCallback(any()) is called, do nothing
+    every { subscription.setErrorCallback(any()) } just Awaits
+
+    // Set the playerApi in the SpotifyController
+    every { mockAppRemote.playerApi } returns playerApi
+
+    val callResult = mockk<CallResult<PlayerState>>(relaxed = true)
+    every { callResult.setResultCallback(any()) } answers
+        {
+          val callback = firstArg<CallResult.ResultCallback<PlayerState>>()
+          callback.onResult(playerState)
+          callResult
+        }
+    every { mockAppRemote.playerApi.playerState } returns callResult
+
+    val playlist: MutableStateFlow<List<ListItem>> = MutableStateFlow(listOf())
+
+    // Call the method to be tested
+    getTracksFromSpotifyPlaylist("37i9dQZF1DXcBWIGoYBM5M",playlist, spotifyController,mockScope)
   }
 
   @Test
