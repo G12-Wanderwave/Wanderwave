@@ -1,7 +1,9 @@
 package ch.epfl.cs311.wanderwave.model.remote
 
 import android.util.Log
+import androidx.compose.runtime.collectAsState
 import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -10,7 +12,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 
 class ProfileConnection(
@@ -61,17 +69,11 @@ class ProfileConnection(
     trackConnection.addItemsIfNotExist(item.chosenSongs)
   }
 
-  override fun documentTransform(document: DocumentSnapshot, dataFlow: MutableStateFlow<Result<Profile>>) {
+  override fun documentTransform(document: DocumentSnapshot,item: Profile?): Flow<Result<Profile>> = callbackFlow<Result<Profile>>{
       if (document == null || !document.exists()) {
-          dataFlow.value = Result.failure(Exception("Document does not exist"))
-          return
+          Result.failure<Profile>(Exception("Document does not exist"))
       }
-
-      val profile: Profile? = if (dataFlow.value.isSuccess) {
-          dataFlow.value.getOrNull()
-      } else {
-          Profile.from(document)
-      }
+      val profile: Profile? = item ?: Profile.from(document)
 
       profile?.let { profile ->
           val topSongsObject = document["topSongs"]
@@ -83,20 +85,52 @@ class ProfileConnection(
               val chosenSongRefs = chosenSongsObject as? List<DocumentReference>
 
               coroutineScope.launch {
-                  val topSongsDeferred = topSongRefs?.map { trackRef -> async { trackConnection.fetchTrack(trackRef) } }
-                  val chosenSongsDeffered = chosenSongRefs?.map { trackRef -> async { trackConnection.fetchTrack(trackRef) } }
 
-                  val topSongs = topSongsDeferred?.mapNotNull { it.await() }
-                  val chosenSongs = chosenSongsDeffered?.mapNotNull { it.await() }
+                // The goal is to : map the references to the actual tracks by fetching, this gives a list of flow,
+                // then reduce the list of flow to a single flow that contains the list of tracks
+                // and then combine the two lists of tracks to update the profile
 
-                  val updatedProfile = profile.copy(topSongs = topSongs ?: emptyList(), chosenSongs = chosenSongs ?: emptyList())
-                  dataFlow.value = Result.success(updatedProfile)
+                  val chosenSongs = chosenSongRefs
+                    ?.map { trackRef -> trackConnection.fetchTrack(trackRef) }
+                    ?.map { flow ->
+                      flow.mapNotNull { result ->
+                        result.getOrNull()
+                      }
+                    }
+                    ?.fold(flowOf(Result.success(listOf<Track>()))) { acc, track ->
+                      acc.combine(track) { accTracks, track ->
+                        accTracks.map { tracks -> tracks + track }
+                      }
+                    } ?: flowOf(Result.failure(Exception("Could not retrieve chosenSongs")))
+
+                  val topSongs = topSongRefs
+                    ?.map { trackRef -> trackConnection.fetchTrack(trackRef) } // map to a list of flow
+                    ?.map { flow ->
+                      flow.mapNotNull { result ->
+                        result.getOrNull() // Extract the track from Result or return null if it's a failure
+                      }
+                    } // map to a list of track
+                    ?.fold(flowOf(Result.success(listOf<Track>()))) { acc, track ->
+                      acc.combine(track) { accTracks, track ->
+                        accTracks.map { tracks -> tracks + track }
+                      }
+                    } ?: flowOf(Result.failure(Exception("Could not retrieve topSongs")))// reduce the list of flow to a single flow that contains the list of tracks
+
+                  val updatedProfile = topSongs.combine(chosenSongs) { topSongs, chosenSongs ->
+                    // if one of the two or the two have a success value, we update the profile, else we return the profile as is
+                      if (topSongs.isSuccess || chosenSongs.isSuccess) {
+                        profile.copy(topSongs = topSongs.getOrNull() ?: profile.topSongs, chosenSongs = chosenSongs.getOrNull() ?: profile.chosenSongs)
+                      } else {
+                        profile
+                      }
+                  }
+                  updatedProfile.map { Result.success(it) }
               }
           } else {
-              dataFlow.value = Result.failure(Exception("Songs lists have a Wrong Firebase Format"))
+              Result.failure<Profile>(Exception("Songs lists have a Wrong Firebase Format"))
           }
       } ?: run {
-          dataFlow.value = Result.failure(Exception("The profile is not in the correct format or could not be fetched"))
+          Result.failure<Profile>(Exception("The profile is not in the correct format or could not be fetched"))
       }
   }
 }

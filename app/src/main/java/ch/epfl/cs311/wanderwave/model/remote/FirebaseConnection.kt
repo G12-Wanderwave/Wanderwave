@@ -95,7 +95,7 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
           if (document != null && document.data != null) {
             documentToItem(document)?.let {
               dataFlow.value = Result.success(it)
-              documentTransform(document, dataFlow)
+              documentTransform(document, it)
             }
           }
         }
@@ -109,7 +109,10 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
    * overridden, it defaults to a no-op (no operation).
    */
   open internal fun documentTransform(
-      documentSnapshot: DocumentSnapshot,
-      stateFlow: MutableStateFlow<Result<T>>
-  ) {}
+    documentSnapshot: DocumentSnapshot,
+    item: T?): Flow<Result<T>> = if (item != null) {
+      flowOf(Result.success(item))
+    } else {
+      flowOf(Result.failure(Exception("Document does not exist")))
+    }
 }
