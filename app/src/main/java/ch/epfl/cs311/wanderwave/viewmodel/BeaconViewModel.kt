@@ -40,6 +40,12 @@ constructor(
   private val _songLists = MutableStateFlow<List<SongList>>(emptyList())
   val songLists: StateFlow<List<SongList>> = _songLists
 
+  private val _isTopSongsListVisible = MutableStateFlow(false)
+  override val isTopSongsListVisible: StateFlow<Boolean> = _isTopSongsListVisible
+
+  private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
+  override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
+
   init {
     val sampleBeacon =
         Beacon(
@@ -99,6 +105,14 @@ constructor(
   override fun retrieveChild(item: ListItem) {
     retrieveChildFromSpotify(
         item, this._childrenPlaylistTrackList, spotifyController, viewModelScope)
+  }
+
+  override suspend fun getLikedTracks() {
+    /*NOT NEEDED FOR BEACON*/
+  }
+
+  override fun getTracksFromPlaylist(playlistId: String) {
+    /*NOT NEEDED FOR BEACON*/
   }
 
   data class UIState(

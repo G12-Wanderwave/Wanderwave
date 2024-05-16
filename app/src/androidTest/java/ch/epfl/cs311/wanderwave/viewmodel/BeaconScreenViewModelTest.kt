@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.timeout
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -112,4 +113,9 @@ class BeaconScreenViewModelTest {
     Assert.assertEquals(expectedListItem, result?.get(0))
     Assert.assertEquals(expectedListItem, result2?.get(0))
   }
+
+  @Test fun testGetLikedTracks() = runBlocking { viewModel.getLikedTracks() }
+
+  @Test
+  fun testGetTracksFromPlaylist() = runBlocking { viewModel.getTracksFromPlaylist("playlistId") }
 }
