@@ -25,11 +25,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flatMap
 import kotlinx.coroutines.flow.flatMapConcat
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class SpotifyController(private val context: Context) {
@@ -135,14 +131,13 @@ class SpotifyController(private val context: Context) {
     }
     val trackToPlay = track ?: trackList[0]
     playTrack(
-      track = trackToPlay,
-      onSuccess = {
-        this.trackList = trackList
-        this.trackListShuffled = trackList.shuffled()
-        onSuccess()
-      },
-      onFailure = onFailure
-    )
+        track = trackToPlay,
+        onSuccess = {
+          this.trackList = trackList
+          this.trackListShuffled = trackList.shuffled()
+          onSuccess()
+        },
+        onFailure = onFailure)
   }
 
   fun pauseTrack(onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
