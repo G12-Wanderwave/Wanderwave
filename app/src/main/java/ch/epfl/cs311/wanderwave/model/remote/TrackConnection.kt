@@ -8,13 +8,9 @@ import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 
 class TrackConnection(private val database: FirebaseFirestore) :
     FirebaseConnection<Track, Track>(database), TrackRepository {
@@ -61,7 +57,9 @@ class TrackConnection(private val database: FirebaseFirestore) :
     return stateFlow
   }
 
-  fun fetchProfileAndTrack(profileAndTrackRef: Map<String, DocumentReference>?): Flow<Result<ProfileTrackAssociation>> = callbackFlow {
+  fun fetchProfileAndTrack(
+      profileAndTrackRef: Map<String, DocumentReference>?
+  ): Flow<Result<ProfileTrackAssociation>> = callbackFlow {
     if (profileAndTrackRef == null) {
       trySend(Result.failure(Exception("Profile and Track reference is null")))
     } else {
@@ -71,7 +69,8 @@ class TrackConnection(private val database: FirebaseFirestore) :
           profileAndTrackRef["creator"]?.addSnapshotListener { profileDocument, error ->
             val profile = profileDocument?.let { Profile.from(it) }
             if (track == null) {
-              trySend(Result.failure(Exception("Error fetching the track, firebase format is wrong")))
+              trySend(
+                  Result.failure(Exception("Error fetching the track, firebase format is wrong")))
             } else {
               trySend(Result.success(ProfileTrackAssociation(profile = profile, track = track)))
             }

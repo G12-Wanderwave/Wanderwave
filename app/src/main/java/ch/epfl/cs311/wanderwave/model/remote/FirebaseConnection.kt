@@ -6,7 +6,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.tasks.await
 
 abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
@@ -82,23 +81,22 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
   open fun getItem(itemId: String): Flow<Result<T>> {
     val dataFlow = MutableStateFlow<Result<T>>(Result.failure(Exception("No data found")))
 
-    db.collection(collectionName)
-        .document(itemId)
-        .addSnapshotListener { document,error ->
+    db.collection(collectionName).document(itemId).addSnapshotListener { document, error ->
+      if (error != null) {
+        Log.e("Firestore", "Error getting document: ", error)
+        // return failure result
+        dataFlow.value = Result.failure(error)
+      }
 
-          if (error != null) {
-            Log.e("Firestore", "Error getting document: ", error)
-            // return failure result
-            dataFlow.value = Result.failure(error)
-          }
-
-          if (document != null && document.data != null) {
-            documentToItem(document)?.let {
-              dataFlow.value = Result.success(it)
-              documentTransform(document, it)
-            }
-          }
+      if (document != null && document.data != null) {
+        documentToItem(document)?.let {
+          dataFlow.value = Result.success(it)
+          // The document transform function is used when references are inside and need to be
+          // fetched
+          documentTransform(document, it)
         }
+      }
+    }
 
     return dataFlow
   }
@@ -109,10 +107,12 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
    * overridden, it defaults to a no-op (no operation).
    */
   open internal fun documentTransform(
-    documentSnapshot: DocumentSnapshot,
-    item: T?): Flow<Result<T>> = if (item != null) {
-      flowOf(Result.success(item))
-    } else {
-      flowOf(Result.failure(Exception("Document does not exist")))
-    }
+      documentSnapshot: DocumentSnapshot,
+      item: T?
+  ): Flow<Result<T>> =
+      if (item != null) {
+        flowOf(Result.success(item))
+      } else {
+        flowOf(Result.failure(Exception("Document does not exist")))
+      }
 }

@@ -1,7 +1,6 @@
 package ch.epfl.cs311.wanderwave.model.remote
 
 import android.util.Log
-import androidx.compose.runtime.snapshots.SnapshotApplyResult
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
@@ -13,7 +12,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
@@ -66,50 +64,56 @@ class BeaconConnection(
     trackConnection.addItemsIfNotExist(item.profileAndTrack.map { it.track })
   }
 
-  override fun documentTransform(document: DocumentSnapshot, item: Beacon?): Flow<Result<Beacon>> = callbackFlow<Result<Beacon>> {
-    if (document == null || !document.exists()) {
-      Result.failure<Beacon>(Exception("Document does not exist"))
-    }
-    val beacon: Beacon? = item ?: Beacon.from(document)
+  override fun documentTransform(document: DocumentSnapshot, item: Beacon?): Flow<Result<Beacon>> =
+      callbackFlow<Result<Beacon>> {
+        if (document == null || !document.exists()) {
+          Result.failure<Beacon>(Exception("Document does not exist"))
+        }
+        val beacon: Beacon? = item ?: Beacon.from(document)
 
-    beacon?.let { beacon ->
-      val tracksObject = document["tracks"]
+        beacon?.let { beacon ->
+          val tracksObject = document["tracks"]
 
-      if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
-        val profileAndTrackRefs = tracksObject as? List<Map<String, DocumentReference>>
+          if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
+            val profileAndTrackRefs = tracksObject as? List<Map<String, DocumentReference>>
 
-        coroutineScope.launch {
-          val profileAndTracks = profileAndTrackRefs
-            ?.mapNotNull { profileAndTrackRef ->  trackConnection.fetchProfileAndTrack(profileAndTrackRef) }
-            ?.mapNotNull { flow ->
-              flow.mapNotNull { result ->
-                result.getOrNull()
+            coroutineScope.launch {
+              val profileAndTracks =
+                  profileAndTrackRefs
+                      // Fetch the profile and track from the references
+                      ?.mapNotNull { profileAndTrackRef ->
+                        trackConnection.fetchProfileAndTrack(profileAndTrackRef)
+                      }
+                      // map the list of flow of Result<ProfileTrackAssociation> to a flow of
+                      // Result<List<ProfileTrackAssociation>>
+                      ?.mapNotNull { flow -> flow.mapNotNull { result -> result.getOrNull() } }
+                      // reduce the list of flow to a single flow that contains the list of
+                      // ProfileTrackAssociation
+                      ?.fold(flowOf(Result.success(listOf<ProfileTrackAssociation>()))) { acc, track
+                        ->
+                        acc.combine(track) { accTracks, track ->
+                          accTracks.map { tracks -> tracks + track }
+                        }
+                      } ?: flowOf(Result.failure(Exception("Could not retrieve chosenSongs")))
+
+              // Update the beacon with the profile and track
+              profileAndTracks.map { result ->
+                result.onSuccess { profileAndTracks ->
+                  val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks)
+                  trySend(Result.success(updatedBeacon))
+                }
+                result.onFailure { exception -> trySend(Result.failure(exception)) }
               }
             }
-            ?.fold(flowOf(Result.success(listOf<ProfileTrackAssociation>()))) { acc, track ->
-              acc.combine(track) { accTracks, track ->
-                accTracks.map { tracks -> tracks + track }
-              }
-            } ?: flowOf(Result.failure(Exception("Could not retrieve chosenSongs")))
-
-
-          profileAndTracks.map { result ->
-            result.onSuccess { profileAndTracks ->
-              val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks)
-              trySend(Result.success(updatedBeacon))
-            }
-            result.onFailure { exception ->
-              trySend(Result.failure(exception))
-            }
+          } else {
+            Result.failure<Beacon>(Exception("Tracks are not in the correct format"))
           }
         }
-      } else {
-        Result.failure<Beacon>(Exception("Tracks are not in the correct format"))
+            ?: run {
+              Result.failure<Beacon>(
+                  Exception("The beacon is not in the correct format or could not be fetched"))
+            }
       }
-    } ?: run {
-      Result.failure<Beacon>(Exception("The beacon is not in the correct format or could not be fetched"))
-    }
-  }
 
   override fun getAll(): Flow<List<Beacon>> {
     val dataFlow = MutableStateFlow<List<Beacon>?>(null)
