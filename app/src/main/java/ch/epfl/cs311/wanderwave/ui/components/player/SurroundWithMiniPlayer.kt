@@ -56,7 +56,7 @@ fun SurroundWithMiniPlayer(
               onTitleClick = { viewModel.expand() },
               onPlayClick = { viewModel.resume() },
               onPauseClick = { viewModel.pause() },
-              progress = progress.floatValue)
+              progress = progress)
         } else {
           ExclusivePlayer(
               checked = checked,

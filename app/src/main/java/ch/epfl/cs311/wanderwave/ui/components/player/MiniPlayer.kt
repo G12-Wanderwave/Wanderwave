@@ -36,7 +36,7 @@ fun MiniPlayer(
     onTitleClick: () -> Unit,
     onPlayClick: () -> Unit,
     onPauseClick: () -> Unit,
-    progress: Float
+    progress: MutableFloatState
 ) {
   Log.d("MiniPlayer", "MiniPlayer: ${uiState.track}")
   Column(modifier = Modifier.testTag("miniPlayer")) {
@@ -58,7 +58,7 @@ fun MiniPlayer(
               onPlayClick = onPlayClick,
               onPauseClick = onPauseClick)
         }
-    ProgressBar(progress = uiStateFlow.value.progress)
+    ProgressBar(progress = progress)
   }
 }
 

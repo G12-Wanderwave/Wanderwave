@@ -48,7 +48,7 @@ fun ExclusivePlayer(
         PlayerIconButtonRowComponent()
         VotingButtonsComponent(selectedVote)
         TrackInfoComponent(uiState)
-        SliderComponent(uiState.progress)
+        SliderComponent(progress)
         PlayerControlRowComponent(viewModel, uiState)
       }
 }
