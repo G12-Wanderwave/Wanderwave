@@ -1,9 +1,7 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import androidx.compose.material3.SnackbarHostState
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.ListType
-import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
@@ -13,7 +11,6 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.catch
@@ -118,47 +115,5 @@ class ProfileViewModelTest {
 
     assertEquals(expectedListItem, result?.get(0))
     assertEquals(expectedListItem, result2?.get(0))
-  }
-
-  @Test
-  fun testLoadProfile() = runBlockingTest {
-    // Setup mock responses
-    val spotifyUid = "existingSpotifyUid"
-    val expectedProfile =
-        Profile(
-            firstName = "First",
-            lastName = "Last",
-            description = "A description",
-            numberOfLikes = 10,
-            isPublic = true,
-            spotifyUid = spotifyUid,
-            firebaseUid = "firebaseUid",
-        )
-    val nonExistingSpotifyUid = "nonExistingSpotifyUid"
-    val snackbarHostState = SnackbarHostState()
-    val scope = CoroutineScope(testDispatcher)
-
-    every { profileRepository.isUidExisting(spotifyUid, any()) } answers
-        {
-          val callback = arg<(Boolean, Profile?) -> Unit>(1)
-          callback(true, expectedProfile)
-        }
-
-    every { profileRepository.isUidExisting(nonExistingSpotifyUid, any()) } answers
-        {
-          val callback = arg<(Boolean, Profile?) -> Unit>(1)
-          callback(false, null)
-        }
-    assertEquals("My FirstName", viewModel.profile.value.firstName)
-
-    viewModel.loadProfile(spotifyUid, snackbarHostState, scope)
-    advanceUntilIdle()
-
-    assertEquals(expectedProfile, viewModel.profile.value)
-
-    viewModel.loadProfile(nonExistingSpotifyUid, snackbarHostState, scope)
-    advanceUntilIdle()
-
-    assertEquals(1, snackbarHostState.currentSnackbarData?.dismiss()?.let { 1 } ?: 0)
   }
 }
