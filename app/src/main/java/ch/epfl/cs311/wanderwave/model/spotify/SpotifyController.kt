@@ -1,12 +1,15 @@
 package ch.epfl.cs311.wanderwave.model.spotify
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.mutableFloatStateOf
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.Target
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.ContentApi
@@ -66,6 +69,47 @@ constructor(
         AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
             .setScopes(SCOPES.toTypedArray())
     return builder.build()
+  }
+
+  suspend fun getAlbumImage(albumId: String): Bitmap? {
+    return try {
+      val url = "https://api.spotify.com/v1/albums/$albumId"
+      val jsonResponse = spotifyGetFromURL(url)
+      val imageUrl = extractImageUrlFromJson(jsonResponse)
+      imageUrl?.let { fetchImageFromUrl(context, it) }
+    } catch (e: Exception) {
+      e.printStackTrace()
+      null
+    }
+  }
+
+  // Helper method to extract image URL from JSON response
+  fun extractImageUrlFromJson(jsonResponse: String): String? {
+    val jsonObject = JSONObject(jsonResponse)
+    val images = jsonObject.getJSONArray("images")
+    if (images.length() > 0) {
+      return images.getJSONObject(0).getString("url")
+    }
+    return null
+  }
+
+  // Helper method to fetch image from URL using Glide
+  suspend fun fetchImageFromUrl(context: Context, url: String): Bitmap? {
+    return withContext(Dispatchers.IO) {
+      try {
+        val x =
+            Glide.with(context)
+                .asBitmap()
+                .load(url)
+                .submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+                .get()
+
+        x
+      } catch (e: Exception) {
+        e.printStackTrace()
+        null
+      }
+    }
   }
 
   fun getLogoutRequest(): AuthorizationRequest {
