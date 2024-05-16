@@ -12,6 +12,7 @@
     <string name="map">Map</string>
     <string name="profile">Profile</string>
     <string name="trackList">Track List</string>
+    <string name="addTrack">Add track to Beacon</string>
 
 
     <string name="hexagon">Hexagon</string>
