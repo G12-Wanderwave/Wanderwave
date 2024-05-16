@@ -126,7 +126,7 @@ class SpotifyControllerTest {
     val playlist: MutableStateFlow<List<ListItem>> = MutableStateFlow(listOf())
 
     // Call the method to be tested
-    getTracksFromSpotifyPlaylist("37i9dQZF1DXcBWIGoYBM5M",playlist, spotifyController,mockScope)
+    getTracksFromSpotifyPlaylist("37i9dQZF1DXcBWIGoYBM5M", playlist, spotifyController, mockScope)
   }
 
   @Test

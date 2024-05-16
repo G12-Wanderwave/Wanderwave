@@ -67,6 +67,29 @@ class ProfileViewModelTest {
   }
 
   @Test
+  fun testGetTracksFromPlaylist() = runBlockingTest {
+    // Define a new track
+    val newTrack = Track("Some Track ID", "Track Title", "Artist Name")
+
+    // Ensure song lists are initially empty
+    assertTrue(viewModel.songLists.value.isEmpty())
+
+    // Call createSpecificSongList to initialize a list
+    viewModel.createSpecificSongList(ListType.TOP_SONGS)
+
+    // Add track to "TOP SONGS"
+    viewModel.addTrackToList(ListType.TOP_SONGS, newTrack)
+
+    // Get the updated song list
+    val songLists = viewModel.songLists.value
+    assertFalse("Song list should not be empty after adding a track", songLists.isEmpty())
+
+    // Check if the track was added correctly
+    val songsInList = songLists.find { it.name == ListType.TOP_SONGS }?.tracks ?: emptyList()
+    assertTrue("Song list should contain the newly added track", songsInList.contains(newTrack))
+  }
+
+  @Test
   fun testAddTrackToList() = runBlockingTest {
     // Define a new track
     val newTrack = Track("Some Track ID", "Track Title", "Artist Name")
