@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.ListType
@@ -16,9 +15,9 @@ import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 // Define a simple class for a song list
@@ -28,7 +27,7 @@ data class SongList(val name: ListType, val tracks: List<Track> = mutableListOf(
 class ProfileViewModel
 @Inject
 constructor(
-    private val repository: ProfileRepository,
+    private val repository: ProfileRepository, // TODO revoir
     private val spotifyController: SpotifyController
 ) : ViewModel(), SpotifySongsActions {
 
@@ -98,11 +97,11 @@ constructor(
 
   fun updateProfile(updatedProfile: Profile) {
     _profile.value = updatedProfile
-    viewModelScope.launch { repository.updateItem(updatedProfile) }
+    repository.updateItem(updatedProfile)
   }
 
   fun deleteProfile() {
-    viewModelScope.launch { repository.deleteItem(_profile.value) }
+    repository.deleteItem(_profile.value)
   }
 
   fun togglePublicMode() {
@@ -120,20 +119,6 @@ constructor(
       }
     }
   }
-
-  fun loadProfile(spotifyUid: String, snackbarHostState: SnackbarHostState, scope: CoroutineScope) {
-    viewModelScope.launch {
-      repository.isUidExisting(spotifyUid) { exists, profile ->
-        if (exists && profile != null) {
-          _profile.value = profile
-        } else {
-          // Show a snackbar message if the profile does not exist
-          scope.launch { snackbarHostState.showSnackbar("Profile does not exist.") }
-        }
-      }
-    }
-  }
-
   /**
    * Get all the element of the main screen and add them to the top list
    *
