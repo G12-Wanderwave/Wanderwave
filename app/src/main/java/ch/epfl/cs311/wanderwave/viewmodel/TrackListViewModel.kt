@@ -83,6 +83,7 @@ constructor(
   override fun addTrackToList(listName: ListType, track: Track) {
     val updatedTracks = _uiState.value.tracks + track
     _uiState.value = _uiState.value.copy(tracks = updatedTracks)
+    _childrenPlaylistTrackList.value = (emptyList())
   }
 
   /**

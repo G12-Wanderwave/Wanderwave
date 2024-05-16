@@ -93,6 +93,7 @@ constructor(
           }
         }
     _songLists.value = updatedLists
+    _childrenPlaylistTrackList.value = (emptyList())
   }
 
   fun updateProfile(updatedProfile: Profile) {
