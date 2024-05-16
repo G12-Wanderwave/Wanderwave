@@ -10,6 +10,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.verify
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -23,6 +24,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -132,5 +134,16 @@ class ProfileViewModelTest {
     val result = flow.timeout(2.seconds).catch {}.firstOrNull()
 
     assertEquals(expectedListItem.id, result?.get(0)?.tracks?.get(0)?.id)
+  }
+
+  @Test
+  fun testSelectTrack() = runTest {
+    val track = Track("id", "title", "artist")
+    viewModel.createSpecificSongList(ListType.TOP_SONGS)
+    viewModel.selectTrack(track, ListType.TOP_SONGS.name)
+    verify { spotifyController.playTrackList(any(), any(), any(), any())}
+
+    viewModel.selectTrack(track, "fake name")
+    verify { spotifyController.playTrack(track)}
   }
 }

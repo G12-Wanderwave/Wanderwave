@@ -8,6 +8,7 @@ import ch.epfl.cs311.wanderwave.di.ServiceModule.provideLocationSource
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.model.spotify.toWanderwaveTrack
 import com.spotify.android.appremote.api.Connector.ConnectionListener
 import com.spotify.android.appremote.api.ContentApi
 import com.spotify.android.appremote.api.PlayerApi
@@ -16,6 +17,7 @@ import com.spotify.android.appremote.api.error.NotLoggedInException
 import com.spotify.protocol.client.CallResult
 import com.spotify.protocol.client.ErrorCallback
 import com.spotify.protocol.client.Subscription
+import com.spotify.protocol.types.Artist
 import com.spotify.protocol.types.Empty
 import com.spotify.protocol.types.ListItem
 import com.spotify.protocol.types.ListItems
@@ -30,6 +32,7 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
+import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
@@ -900,5 +903,14 @@ class SpotifyControllerTest {
 
     // Verify the returned LocationSource is an instance of FastLocationSource
     assertTrue(locationSource is FastLocationSource)
+  }
+
+  @Test
+  fun testTrackConversion() {
+    val fakeArtist = Artist("Rick Astley", "")
+    val spotifyTrack = com.spotify.protocol.types.Track(fakeArtist, mockk(), mockk(), 1, "Never Gonna Give You Up", "id", mockk(), false, false)
+    val track = spotifyTrack.toWanderwaveTrack()
+    val expected = Track("id", "Never Gonna Give You Up", "Rick Astley")
+    assertEquals(track, expected)
   }
 }
