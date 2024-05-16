@@ -409,9 +409,10 @@ fun getTracksFromSpotifyPlaylist(
     scope: CoroutineScope
 ) {
   scope.launch {
-    val url = "https://api.spotify.com/v1/playlists/$playlistId"
+    val url = "https://api.spotify.com/v1/playlists/$playlistId/tracks"
     try {
       val json = spotifyController.spotifyGetFromURL(url)
+      Log.d("SpotifyController", "Got songs from playlist: $json")
       parseTracks(json, playlist)
     } catch (e: Exception) {
       Log.e("SpotifyController", "Failed to get songs from playlist")
