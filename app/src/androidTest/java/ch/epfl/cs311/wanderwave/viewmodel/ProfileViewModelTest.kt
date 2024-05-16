@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.timeout
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -115,5 +116,21 @@ class ProfileViewModelTest {
 
     assertEquals(expectedListItem, result?.get(0))
     assertEquals(expectedListItem, result2?.get(0))
+  }
+
+  @Test
+  fun testRetrieveTracksFromSpotify() = runBlocking {
+    val expectedListItem = ListItem("id", "title", null, "subtitle", "", false, true)
+    every { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(expectedListItem))
+    every {
+      spotifyController.getAllChildren(ListItem("id", "title", null, "subtitle", "", false, true))
+    } returns flowOf(listOf(expectedListItem))
+    viewModel.createSpecificSongList(ListType.TOP_SONGS)
+    viewModel.retrieveTracksFromSpotify()
+
+    val flow = viewModel.songLists
+    val result = flow.timeout(2.seconds).catch {}.firstOrNull()
+
+    assertEquals(expectedListItem.id, result?.get(0)?.tracks?.get(0)?.id)
   }
 }
