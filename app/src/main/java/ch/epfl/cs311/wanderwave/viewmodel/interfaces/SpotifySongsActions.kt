@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.viewmodel.interfaces
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.spotify.protocol.types.ListItem
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 interface SpotifySongsActions {
@@ -50,4 +51,13 @@ interface SpotifySongsActions {
    * @last update 3.0
    */
   suspend fun getLikedTracks()
+
+  /**
+   * Get all the tracks from a playlist
+   *
+   * @param playlistId The id of the playlist to get the tracks from.
+   * @since 3.0
+   * @last update 3.0
+   */
+  fun getTracksFromPlaylist(playlistId: String, playlist: MutableStateFlow<List<ListItem>>)
 }

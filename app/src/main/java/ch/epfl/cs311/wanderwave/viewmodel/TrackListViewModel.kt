@@ -1,5 +1,7 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.ListType
@@ -7,6 +9,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
+import ch.epfl.cs311.wanderwave.model.spotify.getTracksFromSpotifyPlaylist
 import ch.epfl.cs311.wanderwave.model.spotify.retrieveAndAddSubsectionFromSpotify
 import ch.epfl.cs311.wanderwave.model.spotify.retrieveChildFromSpotify
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
@@ -57,7 +60,8 @@ constructor(
             UiState(
                 tracks = tracks.filter { matchesSearchQuery(it) },
                 queue = tracks.filter { matchesSearchQuery(it) },
-                loading = false)
+                loading = false,
+                progress = spotifyController.trackProgress)
       }
       // deal with the flow
     }
@@ -264,6 +268,13 @@ constructor(
     getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
   }
 
+  override fun getTracksFromPlaylist(
+      playlistId: String,
+      playlist: MutableStateFlow<List<ListItem>>
+  ) {
+    getTracksFromSpotifyPlaylist(playlistId, playlist, spotifyController, viewModelScope)
+  }
+
   data class UiState(
       val tracks: List<Track> = listOf(),
       val queue: List<Track> = listOf(),
@@ -274,7 +285,7 @@ constructor(
       val isPlaying: Boolean = false,
       val currentMillis: Int = 0,
       val expanded: Boolean = false,
-      val progress: Float = 0f,
+      val progress: MutableFloatState = mutableFloatStateOf(0f),
       val isShuffled: Boolean = false,
       val loopMode: LoopMode = LoopMode.NONE
   )

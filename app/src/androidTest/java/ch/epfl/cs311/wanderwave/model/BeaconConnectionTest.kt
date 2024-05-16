@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
@@ -346,6 +347,39 @@ public class BeaconConnectionTest {
   }
 
   @Test
+  fun testAddItemAndGetId() {
+    runTest {
+      // Call the function under test
+      every { documentReference.id } returns beacon.id
+      val mockTask: Task<DocumentReference> = mockk {
+        every { isComplete } returns true
+        every { isSuccessful } returns true
+        every { result } returns documentReference
+        every { exception } returns null
+        every { isCanceled } returns false
+      }
+      coEvery { collectionReference.add(any()) } coAnswers { mockTask }
+      val id = beaconConnection.addItemAndGetId(beacon)
+
+      assertEquals(beacon.id, id)
+
+      // now test with null id by have unsuccessful task
+      val mockTask2: Task<DocumentReference> = mockk {
+        every { isComplete } returns true
+        every { isSuccessful } returns false
+        every { result } returns null
+        every { exception } returns null
+        every { isCanceled } returns false
+      }
+
+      coEvery { collectionReference.add(any()) } coAnswers { mockTask2 }
+      val id2 = beaconConnection.addItemAndGetId(beacon)
+
+      assertEquals(null, id2)
+    }
+  }
+
+  @Test
   fun testAddTrackToBeacon() {
     // Mock data
     val track = Track("testTrackId", "Test Title", "Test Artist")
@@ -496,10 +530,12 @@ public class BeaconConnectionTest {
   fun provideBeaconRepository_returnsBeaconConnection() {
     // delete as soon as possible
     val context = ApplicationProvider.getApplicationContext<Context>()
+    val firestore = mockk<FirebaseFirestore>()
     val trackRepository = mockk<TrackConnection>(relaxed = true)
     val profileRepository = mockk<ProfileConnection>(relaxed = true)
     val beaconRepository =
-        RepositoryModule.provideBeaconRepository(context, trackRepository, profileRepository)
+        RepositoryModule.provideBeaconRepository(
+            context, firestore, trackRepository, profileRepository)
     assertEquals(BeaconConnection::class.java, beaconRepository::class.java)
   }
 

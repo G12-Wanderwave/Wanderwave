@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,6 +26,7 @@ import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.profile.TrackItem
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 import com.spotify.protocol.types.ListItem
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * Screen to select a song from Spotify
@@ -149,6 +151,8 @@ fun SongList(
 ) {
   LazyColumn(contentPadding = paddingValues, modifier = Modifier.padding(all = 16.dp)) {
     items(items, key = { it.id }) { item ->
+      Log.d("SelectSongScreen", "Selected song: ${item}")
+
       TrackItem(
           item, onClick = { handleItemClick(item, navActions, viewModel, isTopSongsListVisible) })
     }
@@ -172,11 +176,16 @@ fun handleItemClick(
     viewModel: SpotifySongsActions,
     isTopSongsListVisible: Boolean
 ) {
+
   if (listItem.hasChildren) {
     viewModel.retrieveChild(listItem)
     return
   }
-
+  if (listItem.id.contains("playlist")) {
+    viewModel.getTracksFromPlaylist(
+        listItem.id, viewModel.childrenPlaylistTrackList as MutableStateFlow<List<ListItem>>)
+    return
+  }
   viewModel.addTrackToList(
       if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS,
       Track(listItem.id, listItem.title, listItem.subtitle))
