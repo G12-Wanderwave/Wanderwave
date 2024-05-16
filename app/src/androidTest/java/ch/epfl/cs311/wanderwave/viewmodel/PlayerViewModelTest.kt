@@ -5,6 +5,7 @@ import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.protocol.types.Artist
 import com.spotify.protocol.types.PlayerState
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -118,5 +119,25 @@ class PlayerViewModelTest {
     advanceUntilIdle()
     Assert.assertFalse(viewModel.uiState.value.isPlaying)
     job.cancel()
+  }
+
+  @Test
+  fun testSkipForward() = runTest {
+    viewModel.skipForward()
+    advanceUntilIdle()
+    coVerify { mockSpotifyController.skip(1, any(), any()) }
+  }
+
+  @Test
+  fun testSkipBackward() = runTest {
+    viewModel.skipBackward()
+    advanceUntilIdle()
+    coVerify { mockSpotifyController.skip(-1, any(), any()) }
+  }
+
+  @Test
+  fun testCollapse() = runTest {
+    viewModel.collapse()
+    Assert.assertFalse(viewModel.uiState.value.expanded)
   }
 }

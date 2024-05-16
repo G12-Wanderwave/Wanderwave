@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -62,10 +61,7 @@ class PlayerViewModel @Inject constructor(val spotifyController: SpotifyControll
   }
 
   fun skipForward() {
-    viewModelScope.launch {
-      spotifyController.skip(1, {}, {})
-      Log.d("PlayerViewModel", "skipForward")
-    }
+    viewModelScope.launch { spotifyController.skip(1, {}, {}) }
   }
 
   fun skipBackward() {
