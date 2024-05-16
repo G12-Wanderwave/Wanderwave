@@ -13,6 +13,7 @@ import io.mockk.junit4.MockKRule
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -61,6 +62,36 @@ class ProfileViewModelTest {
   @After
   fun clearMocks() {
     clearAllMocks() // Clear all MockK mocks
+  }
+
+  //  override fun getTracksFromPlaylist(
+  //    playlistId: String,
+  //    playlist: MutableStateFlow<List<ListItem>>
+  //  ) {
+  //    viewModelScope.launch {
+  //      getTracksFromSpotifyPlaylist(playlistId, playlist, spotifyController, viewModelScope)
+  //    }
+  //  }
+
+  @Test
+  fun testGetTracksFromPlaylist() = runBlockingTest {
+    val playlistId = "Some Playlist ID"
+    val playlist = MutableStateFlow<List<ListItem>>(emptyList())
+
+    // Call getTracksFromPlaylist to initialize the playlist
+    viewModel.getTracksFromPlaylist(playlistId, playlist)
+  }
+
+  @Test
+  fun testChangeChosenSongs() = runBlockingTest {
+    // Ensure the initial value is true
+    assertTrue(viewModel.isTopSongsListVisible.value)
+
+    // Change the value
+    viewModel.changeChosenSongs()
+
+    // Ensure the value is now false
+    assertFalse(viewModel.isTopSongsListVisible.value)
   }
 
   @Test
