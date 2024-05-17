@@ -169,6 +169,7 @@ class TrackConnectionTest {
     val resultTrackError = stateFlowError.first()
     assertNull(resultTrackError)
   }
+
   @Test
   fun testFetchProfileAndTrack() = runBlocking {
     // Mock the DocumentReference

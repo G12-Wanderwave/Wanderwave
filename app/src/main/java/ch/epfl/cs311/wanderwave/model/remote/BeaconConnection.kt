@@ -162,12 +162,12 @@ class BeaconConnection(
             // After updating Firestore, save the track addition locally
             coroutineScope.launch {
               appDatabase
-                .trackRecordDao()
-                .insertTrackRecord(
-                  TrackRecord(
-                    beaconId = beaconId,
-                    trackId = track.id,
-                    timestamp = System.currentTimeMillis()))
+                  .trackRecordDao()
+                  .insertTrackRecord(
+                      TrackRecord(
+                          beaconId = beaconId,
+                          trackId = track.id,
+                          timestamp = System.currentTimeMillis()))
             }
           } ?: throw Exception("Beacon not found")
         }

@@ -71,6 +71,7 @@ constructor(
       _uiState.value = _uiState.value.copy(tracks = trackDetails, loading = false)
     }
   }
+
   private var _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
   override val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
 
