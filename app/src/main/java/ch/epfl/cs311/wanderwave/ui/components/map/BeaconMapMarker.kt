@@ -37,11 +37,11 @@ fun BeaconMapMarker(
         onClick()
         true
       },
-//      icon =
-//          BitmapDescriptorFactory.fromBitmap(
-//              resizeBitmap(
-//                  bitmapFromResource(R.drawable.beaconlogo, context = LocalContext.current),
-//                  100,
-//                  100)))
+      //      icon =
+      //          BitmapDescriptorFactory.fromBitmap(
+      //              resizeBitmap(
+      //                  bitmapFromResource(R.drawable.beaconlogo, context = LocalContext.current),
+      //                  100,
+      //                  100))
   )
 }

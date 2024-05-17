@@ -84,13 +84,13 @@ constructor(
 
   override fun addTrackToList(listName: ListType, track: Track) {
     Log.d("ProfileViewModel", "addTrackToList $track")
-    val newTrack = if (!track.id.contains("spotify:track:")) {
-      Track("spotify:track:"+track.id, track.title, track.artist)
-    } else {
-      track
-    }
+    val newTrack =
+        if (!track.id.contains("spotify:track:")) {
+          Track("spotify:track:" + track.id, track.title, track.artist)
+        } else {
+          track
+        }
     Log.d("ProfileViewModel", "addTrackToListnewTrack $newTrack")
-
 
     val updatedTracks = _uiState.value.tracks + newTrack
     _uiState.value = _uiState.value.copy(tracks = updatedTracks)
