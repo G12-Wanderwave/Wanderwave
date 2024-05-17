@@ -249,7 +249,6 @@ class AuthenticationControllerTest {
             .trimIndent()
 
     val result = authenticationController.makeApiRequest(testUrl)
-
   }
 
   @Test

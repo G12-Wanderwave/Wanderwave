@@ -72,6 +72,7 @@ fun ProfileViewOnlyScreen(
               mockSongLists,
               isTopSongsListVisible = true,
               {},
+              onSelectTrack = { viewModel.selectTrack(it, ListType.TOP_SONGS.name) },
               canAddSong = false,
           )
         }

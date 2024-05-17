@@ -75,19 +75,29 @@ constructor(
     val existingList = _songLists.value.firstOrNull { it.name == listName }
     if (existingList == null) {
       // Add new list if it doesn't exist
-      _songLists.value = _songLists.value + SongList(listName)
+      _songLists.value += SongList(listName)
     }
     // Do nothing if the list already exists
   }
 
   // Function to add a track to a song list
   override fun addTrackToList(listName: ListType, track: Track) {
+    Log.d("ProfileViewModel", "addTrackToList $track")
+    val newTrack =
+        if (!track.id.contains("spotify:track:")) {
+          Track("spotify:track:" + track.id, track.title, track.artist)
+        } else {
+          track
+        }
+    Log.d("ProfileViewModel", "addTrackToListnewTrack $newTrack")
+
     val updatedLists =
         _songLists.value.map { list ->
           if (list.name == listName) {
-            if (list.tracks.contains(track)) return@map list
 
-            list.copy(tracks = ArrayList(list.tracks).apply { add(track) })
+            if (list.tracks.contains(newTrack)) return@map list
+
+            list.copy(tracks = ArrayList(list.tracks).apply { add(newTrack) })
           } else {
             list
           }
@@ -109,6 +119,40 @@ constructor(
     _isInPublicMode.value = !_isInPublicMode.value
   }
 
+  /**
+   * Get all the element of the main screen and add them to the top list
+   *
+   * @author Menzo Bouaissi
+   * @since 2.0
+   * @last update 2.0
+   */
+  fun retrieveTracksFromSpotify() {
+    viewModelScope.launch {
+      val track = spotifyController.getAllElementFromSpotify().firstOrNull()
+      if (track != null) {
+        for (i in track) {
+          if (i.hasChildren) {
+            val children = spotifyController.getAllChildren(i).firstOrNull()
+            if (children != null) {
+              for (child in children) {
+                addTrackToList(ListType.TOP_SONGS, Track(child.id, child.title, child.subtitle))
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  fun selectTrack(track: Track, listName: String) {
+    val trackList = _songLists.value.firstOrNull { it.name.name == listName }
+    if (trackList != null) {
+      spotifyController.playTrackList(trackList = trackList.tracks, track)
+    } else {
+      spotifyController.playTrack(track)
+    }
+  }
+
   fun changeChosenSongs() {
     _isTopSongsListVisible.value = !_isTopSongsListVisible.value
   }
@@ -122,12 +166,10 @@ constructor(
   }
 
   override fun getTracksFromPlaylist(playlistId: String) {
-    Log.d("ProfileViewModelbefore", "getTracksFromPlaylist: ${_childrenPlaylistTrackList.value}")
     viewModelScope.launch {
       getTracksFromSpotifyPlaylist(
           playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
     }
-    Log.d("ProfileViewModelAfter", "getTracksFromPlaylist: ${_childrenPlaylistTrackList.value}")
   }
 
   /**
@@ -138,6 +180,7 @@ constructor(
    * @last update 3.0
    */
   override fun retrieveAndAddSubsection() {
+    _spotifySubsectionList.value = emptyList()
     retrieveAndAddSubsectionFromSpotify(_spotifySubsectionList, spotifyController, viewModelScope)
   }
   /**
@@ -148,8 +191,8 @@ constructor(
    * @last update 3.0
    */
   override fun retrieveChild(item: ListItem) {
-    retrieveChildFromSpotify(
-        item, this._childrenPlaylistTrackList, spotifyController, viewModelScope)
+    _childrenPlaylistTrackList.value = emptyList()
+    retrieveChildFromSpotify(item, _childrenPlaylistTrackList, spotifyController, viewModelScope)
   }
 
   /**

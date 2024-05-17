@@ -9,6 +9,8 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
+import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.screens.BeaconScreen
@@ -36,7 +38,9 @@ class BeaconScreenTest {
 
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
   @RelaxedMockK private lateinit var beaconConnection: BeaconConnection
+  @RelaxedMockK private lateinit var trackRepository: TrackRepository
   @RelaxedMockK private lateinit var mockNavController: NavHostController
+  @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
 
   @Before
   fun setup() {
@@ -64,7 +68,10 @@ class BeaconScreenTest {
 
     coEvery { beaconConnection.getItem(any<String>()) } returns beaconFlow
 
-    val viewModel = BeaconViewModel(beaconConnection)
+    val connectResult = SpotifyController.ConnectResult.SUCCESS
+    every { mockSpotifyController.connectRemote() } returns flowOf(connectResult)
+
+    val viewModel = BeaconViewModel(trackRepository, beaconConnection, mockSpotifyController)
 
     composeTestRule.setContent { BeaconScreen(beaconId, mockNavigationActions, viewModel) }
 

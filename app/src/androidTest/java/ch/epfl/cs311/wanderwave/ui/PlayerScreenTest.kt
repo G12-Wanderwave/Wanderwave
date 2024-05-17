@@ -11,7 +11,7 @@ import ch.epfl.cs311.wanderwave.ui.components.player.ExclusivePlayer
 import ch.epfl.cs311.wanderwave.ui.components.player.MiniPlayer
 import ch.epfl.cs311.wanderwave.ui.screens.components.ExclusivePlayerScreen
 import ch.epfl.cs311.wanderwave.ui.screens.components.MiniPlayerScreen
-import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.PlayerViewModel
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -32,14 +32,13 @@ class PlayerScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
 
   @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
 
+  private lateinit var viewModel: PlayerViewModel
   @get:Rule val hiltRule = HiltAndroidRule(this)
-
-  private lateinit var viewModel: TrackListViewModel
 
   @Before
   fun setup() {
-    viewModel = mockk<TrackListViewModel>(relaxed = true)
-    every { viewModel.uiState } returns MutableStateFlow(TrackListViewModel.UiState())
+    viewModel = mockk<PlayerViewModel>(relaxed = true)
+    every { viewModel.uiState } returns MutableStateFlow(PlayerViewModel.UiState())
   }
 
   @Test
@@ -76,11 +75,11 @@ class PlayerScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
     composeTestRule.setContent {
       val progress = remember { mutableFloatStateOf(0f) }
       MiniPlayer(
-          uiStateFlow = viewModel.uiState,
+          uiState = viewModel.uiState.collectAsState().value,
           onTitleClick = { viewModel.expand() },
-          onPlayClick = { viewModel.play() },
+          onPlayClick = { viewModel.resume() },
           onPauseClick = { viewModel.pause() },
-          progress = progress.floatValue)
+          progress = progress)
     }
 
     onComposeScreen<MiniPlayerScreen>(composeTestRule) {

@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
-import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.PlayerViewModel
 import javax.inject.Singleton
 import kotlinx.coroutines.delay
 
@@ -36,7 +36,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun SurroundWithMiniPlayer(
     displayPlayer: Boolean,
-    viewModel: TrackListViewModel = hiltViewModel(),
+    viewModel: PlayerViewModel = hiltViewModel(),
     screen: @Composable () -> Unit
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -44,19 +44,19 @@ fun SurroundWithMiniPlayer(
   val progress = remember { mutableFloatStateOf(0f) }
   val selectedVote = remember { mutableIntStateOf(0) }
   val checked = remember { mutableStateOf(false) }
-  HandleSheetStateChanges(sheetState = sheetState, uiState = uiState, viewModel = viewModel)
 
+  HandleSheetStateChanges(sheetState = sheetState, uiState = uiState, viewModel = viewModel)
   HandleProgressChanges(uiState = uiState, progress = progress)
 
   BottomSheetScaffold(
       sheetContent = {
         if (!uiState.expanded && sheetState.hasPartiallyExpandedState && displayPlayer) {
           MiniPlayer(
-              uiStateFlow = viewModel.uiState,
+              uiState = uiState,
               onTitleClick = { viewModel.expand() },
-              onPlayClick = { viewModel.play() },
+              onPlayClick = { viewModel.resume() },
               onPauseClick = { viewModel.pause() },
-              progress = progress.floatValue)
+              progress = progress)
         } else {
           ExclusivePlayer(
               checked = checked,
@@ -91,8 +91,8 @@ fun SurroundWithMiniPlayer(
 @Composable
 private fun HandleSheetStateChanges(
     sheetState: SheetState,
-    uiState: TrackListViewModel.UiState,
-    viewModel: TrackListViewModel
+    uiState: PlayerViewModel.UiState,
+    viewModel: PlayerViewModel
 ) {
   LaunchedEffect(uiState.expanded) {
     if (uiState.expanded) {
@@ -115,7 +115,7 @@ private fun HandleSheetStateChanges(
 
 // A placeholder
 @Composable
-fun HandleProgressChanges(uiState: TrackListViewModel.UiState, progress: MutableFloatState) {
+fun HandleProgressChanges(uiState: PlayerViewModel.UiState, progress: MutableFloatState) {
   LaunchedEffect(uiState.isPlaying) {
     if (uiState.isPlaying) {
       while (true) {

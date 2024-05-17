@@ -369,7 +369,7 @@ class TrackConnectionTest {
     trackConnection.addItemsIfNotExist(listOf(track))
 
     // Verify that the get function is called on the document with the correct id
-    coVerify { collectionReference.whereEqualTo("id", track.id) }
-    coVerify { collectionReference.get() }
+    coVerify { collectionReference.whereEqualTo("id", "spotify:track:" + track.id) }
+    coVerify { collectionReference.whereEqualTo("id", "spotify:track:" + track.id).get() }
   }
 }
