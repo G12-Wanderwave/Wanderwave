@@ -66,6 +66,35 @@ class ProfileViewModelTest {
     clearAllMocks() // Clear all MockK mocks
   }
 
+  //  override fun getTracksFromPlaylist(
+  //    playlistId: String,
+  //    playlist: MutableStateFlow<List<ListItem>>
+  //  ) {
+  //    viewModelScope.launch {
+  //      getTracksFromSpotifyPlaylist(playlistId, playlist, spotifyController, viewModelScope)
+  //    }
+  //  }
+
+  @Test
+  fun testGetTracksFromPlaylist() = runBlockingTest {
+    val playlistId = "Some Playlist ID"
+
+    // Call getTracksFromPlaylist to initialize the playlist
+    viewModel.getTracksFromPlaylist(playlistId)
+  }
+
+  @Test
+  fun testChangeChosenSongs() = runBlockingTest {
+    // Ensure the initial value is true
+    assertTrue(viewModel.isTopSongsListVisible.value)
+
+    // Change the value
+    viewModel.changeChosenSongs()
+
+    // Ensure the value is now false
+    assertFalse(viewModel.isTopSongsListVisible.value)
+  }
+
   @Test
   fun testAddTrackToList() = runBlockingTest {
     // Define a new track

@@ -198,10 +198,13 @@ internal fun TrackListItemCard(onClick: () -> Unit, selected: Boolean, content: 
       else MaterialTheme.colorScheme.surfaceContainerHigh,
       CardDefaults.cardColors().contentColor,
       CardDefaults.cardColors().disabledContainerColor,
-      CardDefaults.cardColors().disabledContentColor),
+      CardDefaults.cardColors().disabledContentColor
+    ),
     modifier = Modifier
       .height(80.dp)
       .fillMaxWidth()
       .padding(4.dp)
-      .testTag("trackItem")) {
+      .testTag("trackItem")
+  ) {
+  }
 }

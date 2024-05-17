@@ -8,6 +8,8 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
+import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
+import ch.epfl.cs311.wanderwave.model.spotify.getTracksFromSpotifyPlaylist
 import ch.epfl.cs311.wanderwave.model.spotify.retrieveAndAddSubsectionFromSpotify
 import ch.epfl.cs311.wanderwave.model.spotify.retrieveChildFromSpotify
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
@@ -43,6 +45,9 @@ constructor(
               profilePictureUri = null))
   val profile: StateFlow<Profile> = _profile
 
+  private val _isTopSongsListVisible = MutableStateFlow(true)
+  override val isTopSongsListVisible: StateFlow<Boolean> = _isTopSongsListVisible
+
   private val _isInEditMode = MutableStateFlow(false)
   val isInEditMode: StateFlow<Boolean> = _isInEditMode
 
@@ -59,8 +64,11 @@ constructor(
   private var _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   override val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
 
-  private var _uiState = MutableStateFlow(ProfileViewModel.UIState())
-  val uiState: StateFlow<ProfileViewModel.UIState> = _uiState
+  private var _uiState = MutableStateFlow(UIState())
+  val uiState: StateFlow<UIState> = _uiState
+
+  private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
+  override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
 
   fun createSpecificSongList(listType: ListType) {
     val listName = listType // Check if the list already exists
@@ -85,6 +93,7 @@ constructor(
           }
         }
     _songLists.value = updatedLists
+    _childrenPlaylistTrackList.value = (emptyList())
   }
 
   fun updateProfile(updatedProfile: Profile) {
@@ -137,6 +146,10 @@ constructor(
     }
   }
 
+  fun changeChosenSongs() {
+    _isTopSongsListVisible.value = !_isTopSongsListVisible.value
+  }
+
   fun getProfileByID(id: String) {
     viewModelScope.launch {
       repository.getItem(id).collect { fetchedProfile ->
@@ -144,6 +157,16 @@ constructor(
       }
     }
   }
+
+  override fun getTracksFromPlaylist(playlistId: String) {
+    Log.d("ProfileViewModelbefore", "getTracksFromPlaylist: ${_childrenPlaylistTrackList.value}")
+    viewModelScope.launch {
+      getTracksFromSpotifyPlaylist(
+          playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
+    }
+    Log.d("ProfileViewModelAfter", "getTracksFromPlaylist: ${_childrenPlaylistTrackList.value}")
+  }
+
   /**
    * Get all the element of the main screen and add them to the top list
    *
@@ -164,6 +187,17 @@ constructor(
   override fun retrieveChild(item: ListItem) {
     retrieveChildFromSpotify(
         item, this._childrenPlaylistTrackList, spotifyController, viewModelScope)
+  }
+
+  /**
+   * Get all the liked tracks of the user and add them to the likedSongs list.
+   *
+   * @author Menzo Bouaissi
+   * @since 3.0
+   * @last update 3.0
+   */
+  override suspend fun getLikedTracks() {
+    getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
   }
 
   data class UIState(

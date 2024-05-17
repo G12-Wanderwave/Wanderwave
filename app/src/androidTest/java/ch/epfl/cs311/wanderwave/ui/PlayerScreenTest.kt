@@ -8,8 +8,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.ui.components.player.ExclusivePlayer
+import ch.epfl.cs311.wanderwave.ui.components.player.MiniPlayer
 import ch.epfl.cs311.wanderwave.ui.screens.components.ExclusivePlayerScreen
 import ch.epfl.cs311.wanderwave.viewmodel.PlayerViewModel
+import ch.epfl.cs311.wanderwave.ui.screens.components.MiniPlayerScreen
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -40,7 +42,7 @@ class PlayerScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
   }
 
   @Test
-  fun exclusivePlayerScreenInteractions() = run {
+  fun exclusivePlayerScreenInteractionsAndComponentsDisplayed() = run {
     composeTestRule.setContent {
       val checked = remember { mutableStateOf(false) }
       val selectedVote = remember { mutableIntStateOf(0) }
@@ -54,6 +56,8 @@ class PlayerScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
 
     onComposeScreen<ExclusivePlayerScreen>(composeTestRule) {
       assertIsDisplayed()
+      playerDragHandle.assertIsDisplayed()
+      votingButtons.assertIsDisplayed()
       toggleShuffle.performClick()
       toggleShuffle.performClick()
       toggleRepeat.performClick()
@@ -65,5 +69,26 @@ class PlayerScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
       playlistButton.performClick()
       ignoreButton.performClick()
     }
+  }
+
+  fun miniPlayerScreenInteractionsAndComponentsDisplayed() = run {
+    composeTestRule.setContent {
+      val progress = remember { mutableFloatStateOf(0f) }
+      MiniPlayer(
+          uiState = viewModel.uiState.collectAsState().value,
+          onTitleClick = { viewModel.expand() },
+          onPlayClick = { viewModel.resume() },
+          onPauseClick = { viewModel.pause() },
+          progress = progress)
+    }
+
+    onComposeScreen<MiniPlayerScreen>(composeTestRule) {
+      assertIsDisplayed()
+      miniPlayerTitleButton.assertIsDisplayed()
+      playPauseButton.performClick()
+      playPauseButton.performClick()
+      miniPlayerTitleButton.performClick()
+    }
+    onComposeScreen<ExclusivePlayerScreen>(composeTestRule) { assertIsDisplayed() }
   }
 }

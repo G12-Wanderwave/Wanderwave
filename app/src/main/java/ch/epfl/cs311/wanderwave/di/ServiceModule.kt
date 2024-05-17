@@ -35,8 +35,11 @@ object ServiceModule {
 
   @Provides
   @Singleton
-  fun provideSpotifyController(@ApplicationContext context: Context): SpotifyController {
-    return SpotifyController(context)
+  fun provideSpotifyController(
+      @ApplicationContext context: Context,
+      authenticationController: AuthenticationController
+  ): SpotifyController {
+    return SpotifyController(context, authenticationController)
   }
 
   @Provides
