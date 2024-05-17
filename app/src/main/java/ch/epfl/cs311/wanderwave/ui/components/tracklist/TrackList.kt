@@ -22,13 +22,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
 
 @Composable
 fun TrackList(
@@ -76,21 +74,6 @@ fun TrackList(
               onSelectTrack(track)
             })
       }
-    }
-    if (showDialog) {
-      AddTrackDialog(
-          onAddTrack = {
-            onAddTrack(it)
-            showDialog = false
-          },
-          onDismiss = {
-            showDialog = false // Close dialog on dismiss
-          },
-          initialTrackId = "",
-          initialTrackTitle = "",
-          initialTrackArtist = "",
-          dialogTestTag = "addTrackDialog" // For testing purposes
-          )
     }
   }
 }
