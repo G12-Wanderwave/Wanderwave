@@ -7,11 +7,24 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,6 +36,7 @@ import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
@@ -59,11 +73,9 @@ fun BeaconScreen(
       modifier = Modifier.fillMaxSize().padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         if (!uiState.isLoading) {
+          //   BeaconScreen(beacon = uiState.beacon!!, navigationActions = navigationActions)
           BeaconScreen(
-              beacon = uiState.beacon!!,
-              viewModel::addTrackToBeacon,
-              viewModel::selectTrack,
-              navigationActions)
+              beacon = uiState.beacon!!, viewModel::addTrackToBeacon, viewModel::selectTrack, navigationActions, viewModel)
         } else {
           LoadingScreen()
         }
@@ -75,12 +87,14 @@ private fun BeaconScreen(
     beacon: Beacon,
     addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit = { _, _, _ -> },
     onSelectTrack: (Track) -> Unit = {},
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    viewModel: BeaconViewModel
 ) {
   Column(
       modifier = Modifier.fillMaxSize().padding(8.dp).testTag("beaconScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
+        AddTrack(beacon, navigationActions, viewModel)
         SongList(beacon, addTrackToBeacon, onSelectTrack, navigationActions)
       }
 }
@@ -115,6 +129,24 @@ fun BeaconInformation(location: Location) {
       BeaconMapMarker(location.toLatLng(), location.name)
     }
   }
+}
+
+@Composable
+fun AddTrack(beacon: Beacon, navigationActions: NavigationActions, viewModel: BeaconViewModel) {
+  val songLists by viewModel.songLists.collectAsState()
+  viewModel.beaconId = beacon.id
+  Log.d("AddTrack", "Adding track to beacon ${beacon.id}")
+  Button(onClick = { viewModel.changeChosenSongs() }) { Text(text = "Changes the list") }
+  IconButton(
+      onClick = {
+        Log.d("AddTrack", "Adding track to beacon ${viewModel.beaconId}")
+        navigationActions.navigateToSelectSongScreen(viewModelType.BEACON)
+        Log.d("AddTrack", "Adding track to beacon ${songLists}")
+      }) { // Toggle dialog visibility
+        Icon(
+            imageVector = Icons.Filled.Add,
+            contentDescription = stringResource(R.string.beaconTitle))
+      }
 }
 
 @Composable

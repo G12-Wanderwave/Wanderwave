@@ -22,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
@@ -48,7 +47,7 @@ fun TrackList(
         horizontalArrangement = Arrangement.SpaceBetween) {
           if (title != null) {
             Text(
-                text = title.toLowerCase().replace("_", " "),
+                text = title.lowercase().replace("_", " "),
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.testTag("trackListTitle"))
           }
