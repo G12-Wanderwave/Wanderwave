@@ -60,9 +60,11 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -378,21 +380,6 @@ class SpotifyControllerTest {
   }
 
   @Test
-  fun testPlayerState() = runBlockingTest {
-    // Mock PlayerApi and its subscribeToPlayerState() function
-    val mockPlayerApi = mockk<PlayerApi>(relaxed = true)
-    val mockSubscription = mockk<Subscription<PlayerState>>(relaxed = true)
-    every { mockPlayerApi.subscribeToPlayerState() } returns mockSubscription
-
-    // Initialize SpotifyController with mocked PlayerApi
-    every { mockAppRemote.playerApi } returns mockPlayerApi
-    val spotifyController = SpotifyController(context, authenticationController)
-
-    // Call playerState()
-    val playerStateFlow = spotifyController.playerState()
-  }
-
-  @Test
   fun testPlayerStateFlow() = runTest {
     // Mock the PlayerApi and its subscribeToPlayerState() function
     val mockPlayerApi = mockk<PlayerApi>(relaxed = true)
@@ -437,9 +424,6 @@ class SpotifyControllerTest {
 
     // Initialize SpotifyController with mocked PlayerApi
     every { mockAppRemote.playerApi } returns mockPlayerApi
-    val spotifyController = SpotifyController(context, authenticationController)
-    spotifyController.appRemote.value = mockAppRemote
-
     val mockArtist = Artist("artist", "uri")
     // Mock a PlayerState
     val mockSpotifyTrack1 =
@@ -461,8 +445,10 @@ class SpotifyControllerTest {
         }
 
     spotifyController.playTrackList(listOf(mockTrack1, mockTrack2))
-
-    advanceUntilIdle()
+    val spotifyController = SpotifyController(context, authenticationController)
+    spotifyController.appRemote.value = mockAppRemote
+    // Call playerState()
+    val playerStateFlow = spotifyController.playerState()
 
     spotifyController.skip(1)
   }
