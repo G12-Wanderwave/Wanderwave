@@ -27,6 +27,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert
+import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -92,6 +93,16 @@ class BeaconScreenViewModelTest {
     Assert.assertEquals(0, viewModel.songLists.value.size)
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun testAddTrackToListSuccess() = runBlockingTest {
+    every {}
+    val newTrack = Track("Some Track ID", "Track Title", "Artist Name")
+    Assert.assertTrue(viewModel.songLists.value.isEmpty())
+    viewModel.addTrackToList(ListType.TOP_SONGS, newTrack)
+    Assert.assertEquals(0, viewModel.songLists.value.size)
+  }
+
   @Test
   fun testRetrieveSubsectionAndChildrenFlow() = runBlockingTest {
     val expectedListItem = ListItem("id", "title", null, "subtitle", "", false, true)
@@ -119,4 +130,11 @@ class BeaconScreenViewModelTest {
 
   @Test
   fun testGetTracksFromPlaylist() = runBlocking { viewModel.getTracksFromPlaylist("playlistId") }
+
+  @Test
+  fun testChangeChosenSongs() = runBlocking {
+    val t = viewModel.isTopSongsListVisible.value
+    viewModel.changeChosenSongs()
+    assertNotEquals(t, viewModel.isTopSongsListVisible.value)
+  }
 }
