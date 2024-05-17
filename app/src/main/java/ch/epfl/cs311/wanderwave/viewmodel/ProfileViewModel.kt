@@ -105,6 +105,10 @@ constructor(
     _childrenPlaylistTrackList.value = (emptyList())
   }
 
+  override fun emptyChildrenList(){
+    _songLists.value = _songLists.value
+    _childrenPlaylistTrackList.value = (emptyList())
+  }
   fun updateProfile(updatedProfile: Profile) {
     _profile.value = updatedProfile
     repository.updateItem(updatedProfile)

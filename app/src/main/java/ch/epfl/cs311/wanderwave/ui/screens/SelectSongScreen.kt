@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -199,6 +200,9 @@ fun handleItemClick(
     viewModel: SpotifySongsActions,
     isTopSongsListVisible: Boolean
 ) {
+    Log.d("SelectSongScreen", "Adding track to list${viewModel.childrenPlaylistTrackList.value}")
+
+
   if (listItem.id.contains("spotify:track:")) {
     viewModel.addTrackToList(
         if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS,
@@ -216,7 +220,13 @@ fun handleItemClick(
   if (listItem.hasChildren) {
     viewModel.retrieveChild(listItem)
     return
-  }
+  }    
+    if (listItem.id.contains("spotify:") ||
+        listItem.id.isBlank()) {//TODO: create an issue for handling this
+        viewModel.emptyChildrenList()
+        navActions.goBack()
+        return
+    }
 
   viewModel.addTrackToList(
       if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS,
