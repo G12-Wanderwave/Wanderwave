@@ -75,13 +75,15 @@ class PlayerViewModel @Inject constructor(val spotifyController: SpotifyControll
   }
 
   fun toggleRepeat() {
-    _looping.value = !_looping.value
+    _looping.value =
+        SpotifyController.RepeatMode.entries[
+                (_looping.value.ordinal + 1) % SpotifyController.RepeatMode.entries.size]
   }
 
   data class UiState(
       val track: Track? = null,
       val isPlaying: Boolean = false,
-      val repeatMode: Boolean = false,
+      val repeatMode: SpotifyController.RepeatMode = SpotifyController.RepeatMode.OFF,
       val isShuffling: Boolean = false,
       val expanded: Boolean = false
   )

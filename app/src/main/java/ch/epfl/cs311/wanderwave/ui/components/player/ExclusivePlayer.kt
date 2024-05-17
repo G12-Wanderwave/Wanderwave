@@ -28,6 +28,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
+import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.ui.theme.orange
 import ch.epfl.cs311.wanderwave.ui.theme.pink
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
@@ -230,19 +231,19 @@ fun PlayPauseButton(viewModel: PlayerViewModel, uiState: PlayerViewModel.UiState
 fun RepeatButton(viewModel: PlayerViewModel, uiState: PlayerViewModel.UiState) {
   IconButton(onClick = { viewModel.toggleRepeat() }, modifier = Modifier.testTag("toggleRepeat")) {
     when (uiState.repeatMode) {
-      false ->
+      SpotifyController.RepeatMode.OFF ->
           Icon(
               painter = painterResource(id = R.drawable.repeat_icon),
               contentDescription = "",
               tint = MaterialTheme.colorScheme.onSurface,
               modifier = Modifier.size(30.dp))
-      true ->
+      SpotifyController.RepeatMode.ALL ->
           Icon(
               painter = painterResource(id = R.drawable.repeat_icon),
               contentDescription = "",
               tint = spotify_green,
               modifier = Modifier.size(30.dp))
-      else ->
+      SpotifyController.RepeatMode.ONE ->
           Icon(
               painter = painterResource(id = R.drawable.repeat_one_icon),
               contentDescription = "",

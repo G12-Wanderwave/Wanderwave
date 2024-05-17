@@ -65,7 +65,7 @@ constructor(
   private var trackListShuffled: List<Track>? = null
   private var onTrackEndCallback: (() -> Unit)? = null
   val shuffling = MutableStateFlow(false)
-  val looping = MutableStateFlow(false)
+  val looping = MutableStateFlow(RepeatMode.OFF)
 
   val trackProgress: MutableFloatState = mutableFloatStateOf(0f)
 
@@ -223,7 +223,9 @@ constructor(
     val currentIndex = trackList?.indexOfFirst { track -> track.id == currentTrack?.uri } ?: -1
     if (currentIndex != -1) {
       var nextIndex = (currentIndex + direction)
-      if (looping.value) {
+      if (looping.value == RepeatMode.ONE) {
+        nextIndex = currentIndex
+      } else if (looping.value == RepeatMode.ALL) {
         nextIndex %= trackList!!.size
       } else if (nextIndex < 0 || nextIndex >= trackList!!.size) {
         onFailure(Throwable("Cannot skip out of bounds"))
@@ -392,6 +394,12 @@ constructor(
     SUCCESS,
     NOT_LOGGED_IN,
     FAILED
+  }
+
+  enum class RepeatMode {
+    OFF,
+    ALL,
+    ONE
   }
 }
 /**
