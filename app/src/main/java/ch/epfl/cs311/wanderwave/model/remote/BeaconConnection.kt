@@ -125,8 +125,8 @@ class BeaconConnection(
   }
 
   override fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
-      val beaconRef = db.collection("beacons").document(beaconId)
-      val profileRef = db.collection("users").document("My Firebase UID")
+    val beaconRef = db.collection("beacons").document(beaconId)
+    val profileRef = db.collection("users").document("My Firebase UID")
     db.runTransaction { transaction ->
           val snapshot = transaction[beaconRef]
           val beacon = Beacon.from(snapshot)
@@ -152,8 +152,8 @@ class BeaconConnection(
                 newTracks.map { profileAndTrack ->
                   hashMapOf(
                       "creator" to
-                              db.collection("users")
-                              .document(profileAndTrack.profile?.firebaseUid ?: profileRef.id)                      ,
+                          db.collection("users")
+                              .document(profileAndTrack.profile?.firebaseUid ?: profileRef.id),
                       "track" to db.collection("tracks").document(profileAndTrack.track.id))
                 })
           } ?: throw Exception("Beacon not found")

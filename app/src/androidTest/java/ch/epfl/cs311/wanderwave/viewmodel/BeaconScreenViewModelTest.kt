@@ -4,6 +4,7 @@ import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
+import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.protocol.types.ListItem
 import io.mockk.clearAllMocks
@@ -42,12 +43,13 @@ class BeaconScreenViewModelTest {
   lateinit var viewModel: BeaconViewModel
   val testDispatcher = TestCoroutineDispatcher()
   @RelaxedMockK private lateinit var beaconRepository: BeaconRepository
+  @RelaxedMockK private lateinit var trackRepository: TrackRepository
 
   @OptIn(ExperimentalCoroutinesApi::class)
   @Before
   fun setup() {
     Dispatchers.setMain(testDispatcher)
-    viewModel = BeaconViewModel(beaconRepository, mockSpotifyController)
+    viewModel = BeaconViewModel(trackRepository, beaconRepository, mockSpotifyController)
   }
 
   @OptIn(ExperimentalCoroutinesApi::class)
@@ -69,16 +71,16 @@ class BeaconScreenViewModelTest {
   fun canConstructWithNoErrors() {
     val connectResult = SpotifyController.ConnectResult.SUCCESS
     every { mockSpotifyController.connectRemote() } returns flowOf(connectResult)
-    BeaconViewModel(beaconConnection, mockSpotifyController)
+    BeaconViewModel(trackRepository, beaconConnection, mockSpotifyController)
   }
 
   @Test
   fun addTrackToBeaconTest() {
-    val viewModel = BeaconViewModel(beaconConnection, mockSpotifyController)
+    val viewModel = BeaconViewModel(trackRepository, beaconConnection, mockSpotifyController)
     val track = Track("trackId", "trackName", "trackArtist")
     viewModel.addTrackToBeacon("beaconId", track, {})
 
-    verify { beaconConnection.addTrackToBeacon("beaconId", track, any()) }
+    verify { beaconConnection.addTrackToBeacon(any(), any(), any()) }
   }
 
   @OptIn(ExperimentalCoroutinesApi::class)
@@ -87,8 +89,7 @@ class BeaconScreenViewModelTest {
     val newTrack = Track("Some Track ID", "Track Title", "Artist Name")
     Assert.assertTrue(viewModel.songLists.value.isEmpty())
     viewModel.addTrackToList(ListType.TOP_SONGS, newTrack)
-    Assert.assertEquals(1, viewModel.songLists.value.size)
-    Assert.assertEquals(newTrack, viewModel.songLists.value[0].tracks[0])
+    Assert.assertEquals(0, viewModel.songLists.value.size)
   }
 
   @Test

@@ -85,21 +85,24 @@ constructor(
 
   fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
     // Call the BeaconConnection's addTrackToBeacon with the provided beaconId and track
-      val correctTrack = track.copy(id = "spotify:track:" + track.id)
-    trackRepository.addItemsIfNotExist(listOf(correctTrack)  )
+    val correctTrack = track.copy(id = "spotify:track:" + track.id)
+    trackRepository.addItemsIfNotExist(listOf(correctTrack))
     beaconRepository.addTrackToBeacon(beaconId, correctTrack, onComplete)
   }
 
   // Function to add a track to a song list
   override fun addTrackToList(listName: ListType, track: Track) {
-    addTrackToBeacon(beaconId, track, { success ->
-      if (success) {
-        getBeaconById(beaconId)
-        Log.i("BeaconViewModel", "Track added to beacon")
-      } else {
-        Log.e("BeaconViewModel", "Failed to add track to beacon")
-      }
-    })
+    addTrackToBeacon(
+        beaconId,
+        track,
+        { success ->
+          if (success) {
+            getBeaconById(beaconId)
+            Log.i("BeaconViewModel", "Track added to beacon")
+          } else {
+            Log.e("BeaconViewModel", "Failed to add track to beacon")
+          }
+        })
   }
   /**
    * Get all the element of the main screen and add them to the top list
@@ -125,17 +128,17 @@ constructor(
   }
 
   override suspend fun getLikedTracks() {
-      getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
+    getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
   }
 
   override fun getTracksFromPlaylist(playlistId: String) {
-      getTracksFromSpotifyPlaylist(
-          playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
+    getTracksFromSpotifyPlaylist(
+        playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
   }
 
-    fun changeChosenSongs() {
-        _isTopSongsListVisible.value = !_isTopSongsListVisible.value
-    }
+  fun changeChosenSongs() {
+    _isTopSongsListVisible.value = !_isTopSongsListVisible.value
+  }
 
   data class UIState(
       val beacon: Beacon? = null,
