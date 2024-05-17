@@ -143,7 +143,8 @@ class PlayerViewModelTest {
 
   @Test
   fun testExpand() = runTest {
-    every { mockSpotifyController.looping } returns MutableStateFlow(SpotifyController.RepeatMode.OFF)
+    every { mockSpotifyController.looping } returns
+        MutableStateFlow(SpotifyController.RepeatMode.OFF)
     every { mockSpotifyController.shuffling } returns MutableStateFlow(false)
     every { mockSpotifyController.playerState() } returns
         flowOf(PlayerState(mockSpotifyTrack, false, .1f, 0, mockk(), mockk()))
