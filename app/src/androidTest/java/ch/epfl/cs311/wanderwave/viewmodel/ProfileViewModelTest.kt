@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
@@ -9,20 +10,21 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.verify
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.timeout
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -64,63 +66,58 @@ class ProfileViewModelTest {
     clearAllMocks() // Clear all MockK mocks
   }
 
+  //  override fun getTracksFromPlaylist(
+  //    playlistId: String,
+  //    playlist: MutableStateFlow<List<ListItem>>
+  //  ) {
+  //    viewModelScope.launch {
+  //      getTracksFromSpotifyPlaylist(playlistId, playlist, spotifyController, viewModelScope)
+  //    }
+  //  }
+
+  @Test
+  fun testGetTracksFromPlaylist() = runBlockingTest {
+    val playlistId = "Some Playlist ID"
+
+    // Call getTracksFromPlaylist to initialize the playlist
+    viewModel.getTracksFromPlaylist(playlistId)
+  }
+
+  @Test
+  fun testChangeChosenSongs() = runBlockingTest {
+    // Ensure the initial value is true
+    assertTrue(viewModel.isTopSongsListVisible.value)
+
+    // Change the value
+    viewModel.changeChosenSongs()
+
+    // Ensure the value is now false
+    assertFalse(viewModel.isTopSongsListVisible.value)
+  }
+
   @Test
   fun testAddTrackToList() = runBlockingTest {
     // Define a new track
     val newTrack = Track("Some Track ID", "Track Title", "Artist Name")
+    val expectedTrack = Track("spotify:track:Some Track ID", "Track Title", "Artist Name")
 
     // Ensure song lists are initially empty
     assertTrue(viewModel.songLists.value.isEmpty())
 
     // Call createSpecificSongList to initialize a list
-    viewModel.createSpecificSongList("TOP_SONGS")
+    viewModel.createSpecificSongList(ListType.TOP_SONGS)
 
     // Add track to "TOP SONGS"
-    viewModel.addTrackToList("TOP SONGS", newTrack)
+    viewModel.addTrackToList(ListType.TOP_SONGS, newTrack)
 
     // Get the updated song list
     val songLists = viewModel.songLists.value
     assertFalse("Song list should not be empty after adding a track", songLists.isEmpty())
 
     // Check if the track was added correctly
-    val songsInList = songLists.find { it.name == "TOP SONGS" }?.tracks ?: emptyList()
-    assertTrue("Song list should contain the newly added track", songsInList.contains(newTrack))
-  }
-
-  @Test
-  fun retrieveTrackTest() = runBlockingTest {
-    val track = ListItem("bbbb", "bbbb", null, "bbbb", "bbbb", false, true)
-    val track2 = ListItem("aaaa", "aaaaa", null, "aaaaa", "aaaaa", false, true)
-
-    // Mocking responses for your spotifyController
-    every { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(track))
-    every { spotifyController.getAllChildren(track) } returns flowOf(listOf(track2))
-
-    viewModel.createSpecificSongList("TOP_SONGS")
-    // Start observing the Flow before triggering actions that modify it
-    val job = launch {
-      viewModel.songLists.collect { songLists ->
-        if (songLists.isNotEmpty()) {
-          cancel() // Stop collecting once we have our expected result
-        }
-      }
-    }
-
-    // Trigger the operations that will cause the song lists to be populated
-    viewModel.retrieveTracks()
-    // Wait for the job to complete which includes Flow collection
-    job.join()
-
-    // Since Flow collection is asynchronous, ensure the Flow has time to collect
-    advanceUntilIdle()
-
-    // Optionally check additional conditions after ensuring Flow had time to collect
-
-    assertFalse(
-        "Song list should not be empty after adding a track", viewModel.songLists.value.isEmpty())
-    assertEquals(
-        Track(track2.id, track2.title, track2.subtitle),
-        viewModel.songLists.value.first().tracks.get(0))
+    val songsInList = songLists.find { it.name == ListType.TOP_SONGS }?.tracks ?: emptyList()
+    assertTrue(
+        "Song list should contain the newly added track", songsInList.contains(expectedTrack))
   }
 
   @Test
@@ -152,5 +149,33 @@ class ProfileViewModelTest {
 
     assertEquals(expectedListItem, result?.get(0))
     assertEquals(expectedListItem, result2?.get(0))
+  }
+
+  @Test
+  fun testRetrieveTracksFromSpotify() = runBlocking {
+    val listItem = ListItem("id", "title", null, "subtitle", "", false, true)
+    val expectedListItem = ListItem("spotify:track:id", "title", null, "subtitle", "", false, true)
+    every { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(listItem))
+    every {
+      spotifyController.getAllChildren(ListItem("id", "title", null, "subtitle", "", false, true))
+    } returns flowOf(listOf(listItem))
+    viewModel.createSpecificSongList(ListType.TOP_SONGS)
+    viewModel.retrieveTracksFromSpotify()
+
+    val flow = viewModel.songLists
+    val result = flow.timeout(2.seconds).catch {}.firstOrNull()
+
+    assertEquals(expectedListItem.id, result?.get(0)?.tracks?.get(0)?.id)
+  }
+
+  @Test
+  fun testSelectTrack() = runTest {
+    val track = Track("id", "title", "artist")
+    viewModel.createSpecificSongList(ListType.TOP_SONGS)
+    viewModel.selectTrack(track, ListType.TOP_SONGS.name)
+    verify { spotifyController.playTrackList(any(), any(), any(), any()) }
+
+    viewModel.selectTrack(track, "fake name")
+    verify { spotifyController.playTrack(track) }
   }
 }

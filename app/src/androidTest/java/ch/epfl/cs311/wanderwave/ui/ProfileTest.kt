@@ -14,6 +14,8 @@ import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.spotify.protocol.types.ListItem
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
 import io.mockk.Runs
 import io.mockk.coEvery
@@ -33,11 +35,14 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
 
   @get:Rule val composeTestRule = createAndroidComposeRule<TestActivity>()
 
   @get:Rule val mockkRule = MockKRule(this)
+
+  @get:Rule val hiltRule = HiltAndroidRule(this)
 
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
   lateinit var viewModel: ProfileViewModel

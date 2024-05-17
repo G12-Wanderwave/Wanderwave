@@ -10,7 +10,6 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,18 +22,19 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.R
+import ch.epfl.cs311.wanderwave.model.data.viewModelType
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
 @Composable
 fun TrackListScreen(
+    navActions: NavigationActions,
     showMessage: (String) -> Unit,
     viewModel: TrackListViewModel = hiltViewModel()
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   var searchQuery by remember { mutableStateOf("") }
-
-  LaunchedEffect(uiState.message) { uiState.message?.let { message -> showMessage(message) } }
 
   Column(modifier = Modifier.testTag("trackListScreen")) {
     TextField(
@@ -60,6 +60,8 @@ fun TrackListScreen(
             if (uiState.showRecentlyAdded) stringResource(R.string.recently_added_tracks)
             else stringResource(R.string.recently_viewed_tracks),
         onAddTrack = {},
-        onSelectTrack = viewModel::selectTrack)
+        onSelectTrack = viewModel::playTrack,
+        navActions = navActions,
+        viewModelName = viewModelType.TRACKLIST)
   }
 }
