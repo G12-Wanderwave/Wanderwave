@@ -80,7 +80,7 @@ fun AppBottomBar(navActions: NavigationActions) {
               Image(
                   modifier = Modifier.weight(4f).padding(top = 5.dp, bottom = 5.dp),
                   painter = painterResource(id = R.drawable.beaconlogo),
-                  contentDescription = "beacon icon",
+                  contentDescription = "Beacon icon",
               )
             }
 
