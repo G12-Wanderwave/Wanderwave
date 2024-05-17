@@ -82,12 +82,13 @@ constructor(
 
   // Function to add a track to a song list
   override fun addTrackToList(listName: ListType, track: Track) {
-  Log.d("ProfileViewModel", "addTrackToList $track")
-    val newTrack = if (!track.id.contains("spotify:track:")) {
-      Track("spotify:track:"+track.id, track.title, track.artist)
-    } else {
-      track
-    }
+    Log.d("ProfileViewModel", "addTrackToList $track")
+    val newTrack =
+        if (!track.id.contains("spotify:track:")) {
+          Track("spotify:track:" + track.id, track.title, track.artist)
+        } else {
+          track
+        }
     Log.d("ProfileViewModel", "addTrackToListnewTrack $newTrack")
 
     val updatedLists =
@@ -191,8 +192,7 @@ constructor(
    */
   override fun retrieveChild(item: ListItem) {
     _childrenPlaylistTrackList.value = emptyList()
-    retrieveChildFromSpotify(
-        item, _childrenPlaylistTrackList, spotifyController, viewModelScope)
+    retrieveChildFromSpotify(item, _childrenPlaylistTrackList, spotifyController, viewModelScope)
   }
 
   /**
