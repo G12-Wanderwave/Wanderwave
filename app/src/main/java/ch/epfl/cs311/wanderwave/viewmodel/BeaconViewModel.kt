@@ -10,6 +10,7 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
+import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
 import ch.epfl.cs311.wanderwave.model.spotify.getTracksFromSpotifyPlaylist
@@ -27,6 +28,7 @@ import kotlinx.coroutines.launch
 class BeaconViewModel
 @Inject
 constructor(
+    private val trackRepository: TrackRepository,
     private val beaconRepository: BeaconRepository,
     private val spotifyController: SpotifyController
 ) : ViewModel(), SpotifySongsActions {
@@ -48,6 +50,8 @@ constructor(
 
   private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
+
+  var beaconId: String = ""
 
   init {
     val sampleBeacon =
@@ -81,13 +85,21 @@ constructor(
 
   fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
     // Call the BeaconConnection's addTrackToBeacon with the provided beaconId and track
-    beaconRepository.addTrackToBeacon(beaconId, track, onComplete)
+      val correctTrack = track.copy(id = "spotify:track:" + track.id)
+    trackRepository.addItemsIfNotExist(listOf(correctTrack)  )
+    beaconRepository.addTrackToBeacon(beaconId, correctTrack, onComplete)
   }
 
   // Function to add a track to a song list
   override fun addTrackToList(listName: ListType, track: Track) {
-    Log.d("BeaconViewModel", "addTrackToList: $track")
-    _songLists.value = listOf(SongList(listName, listOf(track)))
+    addTrackToBeacon(beaconId, track, { success ->
+      if (success) {
+        getBeaconById(beaconId)
+        Log.i("BeaconViewModel", "Track added to beacon")
+      } else {
+        Log.e("BeaconViewModel", "Failed to add track to beacon")
+      }
+    })
   }
   /**
    * Get all the element of the main screen and add them to the top list
@@ -97,7 +109,6 @@ constructor(
    * @last update 3.0
    */
   override fun retrieveAndAddSubsection() {
-      Log.d("BeaconViewModel", "retrieveAndAddSubsection: ${_spotifySubsectionList.value}")
     retrieveAndAddSubsectionFromSpotify(_spotifySubsectionList, spotifyController, viewModelScope)
   }
   /**
@@ -121,6 +132,10 @@ constructor(
       getTracksFromSpotifyPlaylist(
           playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
   }
+
+    fun changeChosenSongs() {
+        _isTopSongsListVisible.value = !_isTopSongsListVisible.value
+    }
 
   data class UIState(
       val beacon: Beacon? = null,

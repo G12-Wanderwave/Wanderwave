@@ -49,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -59,7 +58,6 @@ import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
 import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
-import ch.epfl.cs311.wanderwave.ui.components.profile.SongsListDisplay
 import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
 import com.google.android.gms.maps.model.CameraPosition
@@ -90,7 +88,9 @@ fun BeaconScreen(
 
   val uiState = viewModel.uiState.collectAsState().value
   Column(
-      modifier = Modifier.fillMaxSize().padding(16.dp),
+      modifier = Modifier
+          .fillMaxSize()
+          .padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         if (!uiState.isLoading) {
           //   BeaconScreen(beacon = uiState.beacon!!, navigationActions = navigationActions)
@@ -110,10 +110,13 @@ private fun BeaconScreen(
     viewModel: BeaconViewModel
 ) {
   Column(
-      modifier = Modifier.fillMaxSize().padding(8.dp).testTag("beaconScreen"),
+      modifier = Modifier
+          .fillMaxSize()
+          .padding(8.dp)
+          .testTag("beaconScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
-        AddTrack(beacon, addTrackToBeacon, navigationActions, viewModel)
+        AddTrack(beacon, navigationActions, viewModel)
         SongList(beacon, addTrackToBeacon, navigationActions)
       }
 }
@@ -138,11 +141,12 @@ fun BeaconInformation(location: Location) {
                 CameraPosition(LatLng(location.latitude, location.longitude), 15f, 0f, 0f)),
         locationSource = null,
         modifier =
-            Modifier.fillMaxWidth()
-                .aspectRatio(4f / 3)
-                .padding(4.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .testTag("beaconMap"),
+        Modifier
+            .fillMaxWidth()
+            .aspectRatio(4f / 3)
+            .padding(4.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .testTag("beaconMap"),
         controlsEnabled = false,
     ) {
       BeaconMapMarker(location.toLatLng(), location.name)
@@ -153,70 +157,26 @@ fun BeaconInformation(location: Location) {
 @Composable
 fun AddTrack(
     beacon: Beacon,
-    addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit,
     navigationActions: NavigationActions,
     viewModel: BeaconViewModel
 ) {
     val songLists by viewModel.songLists.collectAsState()
-//  Button(
-//      onClick = {
-//        // Navigate to SelectSongScreen
-//        navigationActions.navigateToSelectSongScreen(viewModelType.TRACKLIST)
-//        Log.d("AddTrack", "Navigating to SelectSongScreen")
-//        if (viewModel.songLists.value.isNotEmpty()) {
-//          Log.d("AddTrack", "Adding track to beacon")
-//          viewModel.addTrackToBeacon(beacon.id, viewModel.songLists.value[0].tracks[0]) { success ->
-//            if (success) {
-//              Log.i(
-//                  "AddTrack",
-//                  "Track ${viewModel.songLists.value[0].tracks[0].title} added successfully")
-//            } else {
-//              Log.e(
-//                  "AddTrack", "Failed to add track ${viewModel.songLists.value[0].tracks[0].title}")
-//            }
-//          }
-//        }
-//      }) {
-//        Text(text = stringResource(R.string.addTrack))
-//      }
+    viewModel.beaconId = beacon.id
+    Log.d("AddTrack", "Adding track to beacon ${beacon.id}")
+    Button(onClick = {viewModel.changeChosenSongs()}) {
+        Text(text = "Changes the list")
+    }
     IconButton(
         onClick = {
-            navigationActions.navigateToSelectSongScreen(viewModelType.TRACKLIST)
+            Log.d("AddTrack", "Adding track to beacon ${viewModel.beaconId}")
+            navigationActions.navigateToSelectSongScreen(viewModelType.BEACON)
+            Log.d("AddTrack", "Adding track to beacon ${songLists}")
+
         }) { // Toggle dialog visibility
         Icon(
             imageVector = Icons.Filled.Add,
             contentDescription = stringResource(R.string.beaconTitle))
     }
-
-    SongsListDisplay(
-        navigationActions = navigationActions,
-        songLists = songLists,
-        isTopSongsListVisible = true,
-        onAddTrack = { track ->
-//            viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
-            viewModel.addTrackToList(ListType.TOP_SONGS,track)
-            if (viewModel.songLists.value.isNotEmpty()) {
-                Log.d("AddTrack", "Adding track to beacon")
-                viewModel.addTrackToBeacon(
-                    beacon.id,
-                    viewModel.songLists.value[0].tracks[0]
-                ) { success ->
-                    if (success) {
-                        Log.i(
-                            "AddTrack",
-                            "Track ${viewModel.songLists.value[0].tracks[0].title} added successfully"
-                        )
-                    } else {
-                        Log.e(
-                            "AddTrack",
-                            "Failed to add track ${viewModel.songLists.value[0].tracks[0].title}"
-                        )
-                    }
-                }
-            }
-        },
-        viewModelName = viewModelType.TRACKLIST,
-    )
 }
 
 @Composable
@@ -262,13 +222,19 @@ internal fun TrackItem(
               CardDefaults.cardColors().contentColor,
               CardDefaults.cardColors().disabledContainerColor,
               CardDefaults.cardColors().disabledContentColor),
-      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem"),
+      modifier = Modifier
+          .height(80.dp)
+          .fillMaxWidth()
+          .padding(4.dp)
+          .testTag("trackItem"),
   ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
     ) {
       Box(
-          modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+          modifier = Modifier
+              .fillMaxHeight()
+              .aspectRatio(1f),
           contentAlignment = Alignment.Center) {
             Image(
                 imageVector = Icons.Default.PlayArrow,
@@ -276,8 +242,13 @@ internal fun TrackItem(
                 modifier = Modifier.fillMaxSize(.8f),
             )
           }
-      Row(modifier = Modifier.padding(0.dp).weight(3f)) {
-        Column(modifier = Modifier.padding(8.dp).weight(1f).horizontalScroll(scrollState)) {
+      Row(modifier = Modifier
+          .padding(0.dp)
+          .weight(3f)) {
+        Column(modifier = Modifier
+            .padding(8.dp)
+            .weight(1f)
+            .horizontalScroll(scrollState)) {
           Text(
               text = profileAndTrack.track.title,
               color = MaterialTheme.colorScheme.onSurface,
@@ -289,23 +260,25 @@ internal fun TrackItem(
         }
         SelectImage(
             modifier =
-                Modifier.size(width = 150.dp, height = 100.dp)
-                    .clickable(
-                        enabled = profileAndTrack.profile?.isPublic ?: false,
-                        onClick = {
-                          if (profileAndTrack.profile != null && profileAndTrack.profile.isPublic) {
+            Modifier
+                .size(width = 150.dp, height = 100.dp)
+                .clickable(
+                    enabled = profileAndTrack.profile?.isPublic ?: false,
+                    onClick = {
+                        if (profileAndTrack.profile != null && profileAndTrack.profile.isPublic) {
                             // if the profile is public, navigate to the profile view screen
                             navigationActions.navigateToProfile(profileAndTrack.profile.firebaseUid)
-                          } else {
+                        } else {
                             // if the profile is private , output a message that say the profile
                             // is
                             // private, you cannot access to profile informations
                             scope.launch {
-                              snackbarHostState.showSnackbar(
-                                  "This profile is private, you cannot access profile information.")
+                                snackbarHostState.showSnackbar(
+                                    "This profile is private, you cannot access profile information."
+                                )
                             }
-                          }
-                        }),
+                        }
+                    }),
             imageUri = profileAndTrack.profile?.profilePictureUri ?: null,
         )
       }
