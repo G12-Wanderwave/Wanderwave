@@ -99,6 +99,7 @@ class ProfileViewModelTest {
   fun testAddTrackToList() = runBlockingTest {
     // Define a new track
     val newTrack = Track("Some Track ID", "Track Title", "Artist Name")
+    val expectedTrack = Track("spotify:track:Some Track ID", "Track Title", "Artist Name")
 
     // Ensure song lists are initially empty
     assertTrue(viewModel.songLists.value.isEmpty())
@@ -115,7 +116,7 @@ class ProfileViewModelTest {
 
     // Check if the track was added correctly
     val songsInList = songLists.find { it.name == ListType.TOP_SONGS }?.tracks ?: emptyList()
-    assertTrue("Song list should contain the newly added track", songsInList.contains(newTrack))
+    assertTrue("Song list should contain the newly added track", songsInList.contains(expectedTrack))
   }
 
   @Test
@@ -151,11 +152,12 @@ class ProfileViewModelTest {
 
   @Test
   fun testRetrieveTracksFromSpotify() = runBlocking {
-    val expectedListItem = ListItem("id", "title", null, "subtitle", "", false, true)
-    every { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(expectedListItem))
+    val listItem = ListItem("id", "title", null, "subtitle", "", false, true)
+    val expectedListItem = ListItem("spotify:track:id", "title", null, "subtitle", "", false, true)
+    every { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(listItem))
     every {
       spotifyController.getAllChildren(ListItem("id", "title", null, "subtitle", "", false, true))
-    } returns flowOf(listOf(expectedListItem))
+    } returns flowOf(listOf(listItem))
     viewModel.createSpecificSongList(ListType.TOP_SONGS)
     viewModel.retrieveTracksFromSpotify()
 
