@@ -6,22 +6,25 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
+import ch.epfl.cs311.wanderwave.ui.components.login.AppLogoWithTitle
 import ch.epfl.cs311.wanderwave.ui.components.login.LoginAppLogo
 import ch.epfl.cs311.wanderwave.ui.components.login.SignInButton
-import ch.epfl.cs311.wanderwave.ui.components.login.WelcomeTitle
 import ch.epfl.cs311.wanderwave.viewmodel.LoginScreenViewModel
 import com.spotify.sdk.android.auth.AuthorizationClient
-import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -54,7 +57,12 @@ fun LoginScreen(
 
   Column(modifier = Modifier.testTag("loginScreen")) {
     LoginAppLogo(modifier = Modifier.weight(1f))
-    WelcomeTitle(modifier = Modifier.weight(4f))
+    AppLogoWithTitle(
+        modifier = Modifier.weight(4f),
+        initialColor = MaterialTheme.colorScheme.primary,
+        finalColor = Color.Red,
+        title = stringResource(id = R.string.welcome_title),
+        subTitle = stringResource(id = R.string.welcome_subtitle))
     SignInButton(modifier = Modifier.weight(1f)) {
       val intent =
           AuthorizationClient.createLoginActivityIntent(
