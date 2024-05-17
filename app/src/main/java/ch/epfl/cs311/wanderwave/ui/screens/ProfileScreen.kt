@@ -84,6 +84,10 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
+          SignOutButton(modifier = Modifier, navActions = navActions)
+          AboutButton(modifier = Modifier, navActions = navActions)
+        }
         Box(modifier = Modifier.fillMaxWidth()) {
           VisitCard(Modifier, currentProfile)
           ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
@@ -118,13 +122,6 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
             viewModelName = viewModelType.PROFILE,
         )
       }
-
-  Row(horizontalArrangement = Arrangement.Start) {
-    Spacer(modifier = Modifier.width(15.dp))
-    SignOutButton(modifier = Modifier, navActions = navActions)
-    Spacer(modifier = Modifier.width(15.dp))
-    AboutButton(modifier = Modifier, navActions = navActions)
-  }
 }
 /**
  * This handle the logic behind the switch that can permit the user to switch to the anonymous mode
