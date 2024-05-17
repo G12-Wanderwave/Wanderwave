@@ -27,19 +27,18 @@ import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.ui.components.animated.ScrollingTitle
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
-import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
-import kotlinx.coroutines.flow.StateFlow
+import ch.epfl.cs311.wanderwave.viewmodel.PlayerViewModel
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun MiniPlayer(
-    uiStateFlow: StateFlow<TrackListViewModel.UiState>,
+    uiState: PlayerViewModel.UiState,
     onTitleClick: () -> Unit,
     onPlayClick: () -> Unit,
     onPauseClick: () -> Unit,
-    progress: Float
+    progress: MutableFloatState
 ) {
-  Log.d("MiniPlayer", "MiniPlayer: ${uiStateFlow.value.selectedTrack}")
+  Log.d("MiniPlayer", "MiniPlayer: ${uiState.track}")
   Column(modifier = Modifier.testTag("miniPlayer")) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -49,17 +48,17 @@ fun MiniPlayer(
 
           MiniPlayerTitle(
               modifier = Modifier.weight(4f),
-              isPlaying = uiStateFlow.value.isPlaying,
+              isPlaying = uiState.isPlaying,
               onTitleClick = onTitleClick,
-              track = uiStateFlow.value.selectedTrack)
+              track = uiState.track)
 
           PlayPauseButton(
               modifier = Modifier.weight(1f),
-              isPlaying = uiStateFlow.value.isPlaying,
+              isPlaying = uiState.isPlaying,
               onPlayClick = onPlayClick,
               onPauseClick = onPauseClick)
         }
-    ProgressBar(progress = uiStateFlow.value.progress)
+    ProgressBar(progress = progress)
   }
 }
 

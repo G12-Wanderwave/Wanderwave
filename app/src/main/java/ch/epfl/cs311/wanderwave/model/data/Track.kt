@@ -3,8 +3,7 @@ package ch.epfl.cs311.wanderwave.model.data
 import com.google.firebase.firestore.DocumentSnapshot
 
 data class Track(
-
-    /** Spotify id */
+    /** Firebase id = Spotify id */
     val id: String,
 
     /** Title of the track */

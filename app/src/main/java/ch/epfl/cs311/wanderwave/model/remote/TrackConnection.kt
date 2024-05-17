@@ -38,12 +38,17 @@ class TrackConnection(private val database: FirebaseFirestore) :
     // The goal of this function is to add only if the spotify id of the track is not already in the
     // database, for now I just check the normal ID
     tracks.forEach { track ->
-      db.collection(collectionName).whereEqualTo("id", track.id).get().addOnSuccessListener {
-          documentSnapshot ->
-        if (documentSnapshot.isEmpty) {
-          addItemWithId(track)
-        }
-      }
+      val trackId =
+          if (track.id.contains("spotify:track:")) track.id else "spotify:track:" + track.id
+      val correctTrack = track.copy(id = trackId)
+      db.collection(collectionName)
+          .whereEqualTo("id", correctTrack.id)
+          .get()
+          .addOnSuccessListener { documentSnapshot ->
+            if (documentSnapshot.isEmpty) {
+              addItemWithId(correctTrack)
+            }
+          }
     }
   }
 

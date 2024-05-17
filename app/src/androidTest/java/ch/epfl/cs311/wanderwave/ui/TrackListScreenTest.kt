@@ -18,10 +18,12 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
 import io.mockk.Called
+import io.mockk.Runs
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.just
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -61,7 +63,7 @@ class TrackListScreenTest : TestCase() {
   private fun setupViewModel(result: Boolean) {
 
     flowOf(listOf(Track("id1", "title1", "artist1")))
-    every { mockSpotifyController.playTrack(any()) } returns flowOf(result)
+    every { mockSpotifyController.playTrack(any()) } just Runs
     every { trackRepository.getAll() } returns
         flowOf(
             listOf(
@@ -84,7 +86,6 @@ class TrackListScreenTest : TestCase() {
       trackButton {
         assertIsDisplayed()
         performClick()
-        // assertTrue(viewModel.uiState.value.selectedTrack != null)
       }
       advanceUntilIdle()
       coVerify { mockShowMessage wasNot Called }
