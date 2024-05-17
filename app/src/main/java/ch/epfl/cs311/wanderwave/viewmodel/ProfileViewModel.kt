@@ -75,7 +75,7 @@ constructor(
     val existingList = _songLists.value.firstOrNull { it.name == listName }
     if (existingList == null) {
       // Add new list if it doesn't exist
-      _songLists.value = _songLists.value + SongList(listName)
+      _songLists.value += SongList(listName)
     }
     // Do nothing if the list already exists
   }
@@ -107,7 +107,6 @@ constructor(
   }
 
   override fun emptyChildrenList() {
-    _songLists.value = _songLists.value
     _childrenPlaylistTrackList.value = (emptyList())
   }
 
