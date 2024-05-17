@@ -440,11 +440,17 @@ class SpotifyControllerTest {
     val spotifyController = SpotifyController(context, authenticationController)
     spotifyController.appRemote.value = mockAppRemote
 
+    val mockArtist = Artist("artist", "uri")
     // Mock a PlayerState
-    val mockTrack =
+    val mockSpotifyTrack1 =
         com.spotify.protocol.types.Track(
-            mockk(), mockk(), mockk(), 1L, "title", "uri", mockk(), false, false)
-    val mockPlayerState = PlayerState(mockTrack, false, 1f, 0, mockk(), mockk())
+            mockArtist, mockk(), mockk(), 1L, "title", "uri", mockk(), false, false)
+    val mockSpotifyTrack2 =
+        com.spotify.protocol.types.Track(
+            mockArtist, mockk(), mockk(), 1L, "title2", "uri2", mockk(), false, false)
+    val mockTrack1 = mockSpotifyTrack1.toWanderwaveTrack()
+    val mockTrack2 = mockSpotifyTrack2.toWanderwaveTrack()
+    val mockPlayerState = PlayerState(mockSpotifyTrack1, false, 1f, 0, mockk(), mockk())
 
     // Use the mocked PlayerState as the result for the subscription's setEventCallback
     every { mockSubscription.setEventCallback(any()) } answers
@@ -453,6 +459,8 @@ class SpotifyControllerTest {
           callback.onEvent(mockPlayerState)
           mockSubscription
         }
+
+    spotifyController.playTrackList(listOf(mockTrack1, mockTrack2))
 
     advanceUntilIdle()
 
