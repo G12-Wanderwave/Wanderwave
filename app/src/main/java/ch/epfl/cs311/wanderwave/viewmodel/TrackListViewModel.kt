@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.lifecycle.ViewModel
@@ -82,7 +83,16 @@ constructor(
   }
 
   override fun addTrackToList(listName: ListType, track: Track) {
-    val updatedTracks = _uiState.value.tracks + track
+    Log.d("ProfileViewModel", "addTrackToList $track")
+    val newTrack = if (!track.id.contains("spotify:track:")) {
+      Track("spotify:track:"+track.id, track.title, track.artist)
+    } else {
+      track
+    }
+    Log.d("ProfileViewModel", "addTrackToListnewTrack $newTrack")
+
+
+    val updatedTracks = _uiState.value.tracks + newTrack
     _uiState.value = _uiState.value.copy(tracks = updatedTracks)
     _childrenPlaylistTrackList.value = (emptyList())
   }

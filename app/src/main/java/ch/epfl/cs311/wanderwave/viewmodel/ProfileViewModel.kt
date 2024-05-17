@@ -82,12 +82,21 @@ constructor(
 
   // Function to add a track to a song list
   override fun addTrackToList(listName: ListType, track: Track) {
+  Log.d("ProfileViewModel", "addTrackToList $track")
+    val newTrack = if (!track.id.contains("spotify:track:")) {
+      Track("spotify:track:"+track.id, track.title, track.artist)
+    } else {
+      track
+    }
+    Log.d("ProfileViewModel", "addTrackToListnewTrack $newTrack")
+
     val updatedLists =
         _songLists.value.map { list ->
           if (list.name == listName) {
-            if (list.tracks.contains(track)) return@map list
 
-            list.copy(tracks = ArrayList(list.tracks).apply { add(track) })
+            if (list.tracks.contains(newTrack)) return@map list
+
+            list.copy(tracks = ArrayList(list.tracks).apply { add(newTrack) })
           } else {
             list
           }
@@ -118,16 +127,13 @@ constructor(
    */
   fun retrieveTracksFromSpotify() {
     viewModelScope.launch {
-      Log.d("ProfileViewModel", "retrieveTracksFromSpotify")
       val track = spotifyController.getAllElementFromSpotify().firstOrNull()
       if (track != null) {
         for (i in track) {
           if (i.hasChildren) {
             val children = spotifyController.getAllChildren(i).firstOrNull()
-            Log.d("ProfileViewModel", "children: $children")
             if (children != null) {
               for (child in children) {
-                Log.d("ProfileViewModel", "child: $child")
                 addTrackToList(ListType.TOP_SONGS, Track(child.id, child.title, child.subtitle))
               }
             }
@@ -159,12 +165,10 @@ constructor(
   }
 
   override fun getTracksFromPlaylist(playlistId: String) {
-    Log.d("ProfileViewModelbefore", "getTracksFromPlaylist: ${_childrenPlaylistTrackList.value}")
     viewModelScope.launch {
       getTracksFromSpotifyPlaylist(
           playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
     }
-    Log.d("ProfileViewModelAfter", "getTracksFromPlaylist: ${_childrenPlaylistTrackList.value}")
   }
 
   /**
@@ -175,6 +179,7 @@ constructor(
    * @last update 3.0
    */
   override fun retrieveAndAddSubsection() {
+    _spotifySubsectionList.value = emptyList()
     retrieveAndAddSubsectionFromSpotify(_spotifySubsectionList, spotifyController, viewModelScope)
   }
   /**
@@ -185,8 +190,9 @@ constructor(
    * @last update 3.0
    */
   override fun retrieveChild(item: ListItem) {
+    _childrenPlaylistTrackList.value = emptyList()
     retrieveChildFromSpotify(
-        item, this._childrenPlaylistTrackList, spotifyController, viewModelScope)
+        item, _childrenPlaylistTrackList, spotifyController, viewModelScope)
   }
 
   /**

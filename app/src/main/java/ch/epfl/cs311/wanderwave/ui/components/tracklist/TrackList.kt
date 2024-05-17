@@ -42,8 +42,6 @@ fun TrackList(
     viewModelName: viewModelType
 ) {
   Column {
-    var showDialog by remember { mutableStateOf(false) }
-
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -77,21 +75,7 @@ fun TrackList(
             })
       }
     }
-    if (showDialog) {
-      AddTrackDialog(
-          onAddTrack = {
-            onAddTrack(it)
-            showDialog = false
-          },
-          onDismiss = {
-            showDialog = false // Close dialog on dismiss
-          },
-          initialTrackId = "",
-          initialTrackTitle = "",
-          initialTrackArtist = "",
-          dialogTestTag = "addTrackDialog" // For testing purposes
-          )
-    }
+
   }
 }
 

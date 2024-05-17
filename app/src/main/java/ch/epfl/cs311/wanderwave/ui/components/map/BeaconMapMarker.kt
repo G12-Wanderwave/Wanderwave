@@ -43,4 +43,5 @@ fun BeaconMapMarker(
                   bitmapFromResource(R.drawable.beaconlogo, context = LocalContext.current),
                   100,
                   100)))
+  )
 }
