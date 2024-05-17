@@ -10,17 +10,14 @@ import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
-<<<<<<< HEAD
-import ch.epfl.cs311.wanderwave.model.spotify.toWanderwaveTrack
-=======
 import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
 import ch.epfl.cs311.wanderwave.model.spotify.getTracksFromSpotifyPlaylist
 import ch.epfl.cs311.wanderwave.model.spotify.parseTracks
+import ch.epfl.cs311.wanderwave.model.spotify.toWanderwaveTrack
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.request.FutureTarget
->>>>>>> main
 import com.spotify.android.appremote.api.Connector.ConnectionListener
 import com.spotify.android.appremote.api.ContentApi
 import com.spotify.android.appremote.api.PlayerApi
@@ -46,10 +43,7 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
-<<<<<<< HEAD
-=======
 import java.net.URL
->>>>>>> main
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
@@ -63,7 +57,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -100,48 +93,21 @@ class SpotifyControllerTest {
     // Initialize MockK
     mockkStatic(SpotifyAppRemote::class)
 
-    // Initialize context and controller
-    context = ApplicationProvider.getApplicationContext()
-<<<<<<< HEAD
-    spotifyController = SpotifyController(context)
-=======
-    authenticationController = mockk(relaxed = true)
-    requestBuilder = mockk(relaxed = true)
-    futureTarget = mockk(relaxed = true)
-
-    spotifyController = SpotifyController(context, authenticationController)
-    spotifyController.appRemote = mockAppRemote
-
-    // Mock PlayerApi
-    every { mockAppRemote.playerApi } returns mockPlayerApi
-    mockkStatic(Glide::class)
-
-    // Stub the makeApiRequest method
-
-    // Initialize Mockito annotations
-
     // Mocking Glide components
-    context = ApplicationProvider.getApplicationContext()
-    spotifyController = SpotifyController(context, authenticationController)
     mockkStatic(Glide::class)
-
-    // Mocking Glide components
     requestManager = mockk(relaxed = true)
     requestBuilder = mockk(relaxed = true)
     futureTarget = mockk(relaxed = true)
-
     every { Glide.with(any<Context>()) } returns requestManager
     every { requestManager.asBitmap() } returns requestBuilder
     every { requestBuilder.load(any<String>()) } returns requestBuilder
     every { requestBuilder.submit(any(), any()) } returns futureTarget
     every { futureTarget.get() } returns mockk<Bitmap>(relaxed = true)
 
-    spotifyController = mockk(relaxed = true)
     context = ApplicationProvider.getApplicationContext()
     authenticationController = mockk<AuthenticationController>()
     spotifyController = SpotifyController(context, authenticationController)
-    spotifyController.appRemote = mockAppRemote
->>>>>>> main
+    spotifyController.appRemote.value = mockAppRemote
     mockkStatic(SpotifyAppRemote::class)
     spotifyController.appRemote.value = mockAppRemote
     every { mockAppRemote.playerApi } returns mockPlayerApi
@@ -420,7 +386,7 @@ class SpotifyControllerTest {
 
     // Initialize SpotifyController with mocked PlayerApi
     every { mockAppRemote.playerApi } returns mockPlayerApi
-    val spotifyController = SpotifyController(context)
+    val spotifyController = SpotifyController(context, authenticationController)
 
     // Call playerState()
     val playerStateFlow = spotifyController.playerState()
@@ -435,7 +401,7 @@ class SpotifyControllerTest {
 
     // Initialize SpotifyController with mocked PlayerApi
     every { mockAppRemote.playerApi } returns mockPlayerApi
-    val spotifyController = SpotifyController(context)
+    val spotifyController = SpotifyController(context, authenticationController)
     spotifyController.appRemote.value = mockAppRemote
 
     // Mock a PlayerState
@@ -471,13 +437,13 @@ class SpotifyControllerTest {
 
     // Initialize SpotifyController with mocked PlayerApi
     every { mockAppRemote.playerApi } returns mockPlayerApi
-    val spotifyController = SpotifyController(context)
+    val spotifyController = SpotifyController(context, authenticationController)
     spotifyController.appRemote.value = mockAppRemote
 
     // Mock a PlayerState
     val mockTrack =
-      com.spotify.protocol.types.Track(
-        mockk(), mockk(), mockk(), 1L, "title", "uri", mockk(), false, false)
+        com.spotify.protocol.types.Track(
+            mockk(), mockk(), mockk(), 1L, "title", "uri", mockk(), false, false)
     val mockPlayerState = PlayerState(mockTrack, false, 1f, 0, mockk(), mockk())
 
     // Use the mocked PlayerState as the result for the subscription's setEventCallback
@@ -1176,7 +1142,6 @@ class SpotifyControllerTest {
   }
 
   @Test
-<<<<<<< HEAD
   fun testTrackConversion() {
     val fakeArtist = Artist("Rick Astley", "")
     val spotifyTrack =
@@ -1186,7 +1151,7 @@ class SpotifyControllerTest {
     val expected = Track("id", "Never Gonna Give You Up", "Rick Astley")
     assertEquals(track, expected)
   }
-=======
+
   fun spotifyGetFromURLTest() = runBlocking {
     val callResult = mockk<CallResult<ListItems>>(relaxed = true)
     val contentApi = mockk<ContentApi>(relaxed = true)
@@ -1264,5 +1229,4 @@ interface UrlFactory {
 
 class SimpleUrlFactory : UrlFactory {
   override fun create(urlString: String): URL = URL(urlString)
->>>>>>> main
 }

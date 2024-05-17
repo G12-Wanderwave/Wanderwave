@@ -57,34 +57,26 @@ fun TrackListItem(track: Track, selected: Boolean, onClick: () -> Unit) {
 
   TrackListItemCard(onClick = onClick, selected = selected) {
     Row(
-      verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
       Box(
-        modifier = Modifier
-          .fillMaxHeight()
-          .aspectRatio(1f),
-        contentAlignment = Alignment.Center
-      ) {
-        Image(
-          imageVector = Icons.Default.PlayArrow,
-          contentDescription = "Album Cover",
-          modifier = Modifier.fillMaxSize(.8f),
-        )
-      }
-      Column(
-        modifier = Modifier
-          .padding(8.dp)
-          .horizontalScroll(scrollState)
-      ) {
+          modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+          contentAlignment = Alignment.Center) {
+            Image(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = "Album Cover",
+                modifier = Modifier.fillMaxSize(.8f),
+            )
+          }
+      Column(modifier = Modifier.padding(8.dp).horizontalScroll(scrollState)) {
         Text(
-          text = track.title,
-          color = MaterialTheme.colorScheme.onSurface,
-          style = MaterialTheme.typography.titleMedium
-        )
+            text = track.title,
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.titleMedium)
         Text(
-          text = track.artist,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-          style = MaterialTheme.typography.bodyMedium,
+            text = track.artist,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium,
         )
       }
     }
@@ -110,61 +102,49 @@ fun TrackListItemWithProfile(
 
   TrackListItemCard(onClick = onClick, selected = selected) {
     Row(
-      verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
       Box(
-        modifier = Modifier
-          .fillMaxHeight()
-          .aspectRatio(1f),
-        contentAlignment = Alignment.Center
-      ) {
-        Image(
-          imageVector = Icons.Default.PlayArrow,
-          contentDescription = "Album Cover",
-          modifier = Modifier.fillMaxSize(.8f),
-        )
-      }
-      Column(
-        modifier = Modifier
-          .padding(8.dp)
-          .horizontalScroll(scrollState)
-      ) {
+          modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+          contentAlignment = Alignment.Center) {
+            Image(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = "Album Cover",
+                modifier = Modifier.fillMaxSize(.8f),
+            )
+          }
+      Column(modifier = Modifier.padding(8.dp).horizontalScroll(scrollState)) {
         Text(
-          text = trackAndProfile.track.title,
-          color = MaterialTheme.colorScheme.onSurface,
-          style = MaterialTheme.typography.titleMedium
-        )
+            text = trackAndProfile.track.title,
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.titleMedium)
         Text(
-          text = trackAndProfile.track.artist,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-          style = MaterialTheme.typography.bodyMedium,
+            text = trackAndProfile.track.artist,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium,
         )
       }
       if (trackAndProfile.profile != null) {
         SelectImage(
-          modifier =
-          Modifier
-            .size(width = 150.dp, height = 100.dp)
-            .clickable(
-              enabled = trackAndProfile.profile.isPublic,
-              onClick = {
-                if (trackAndProfile.profile.isPublic) {
-                  // if the profile is public, navigate to the profile view screen
-                  navigationActions.navigateToProfile(
-                    trackAndProfile.profile.firebaseUid
-                  )
-                } else {
-                  // if the profile is private , output a message that say the profile
-                  // is
-                  // private, you cannot access to profile informations
-                  scope.launch {
-                    snackbarHostState.showSnackbar(
-                      "This profile is private, you cannot access profile information."
-                    )
-                  }
-                }
-              }),
-          imageUri = trackAndProfile.profile.profilePictureUri,
+            modifier =
+                Modifier.size(width = 150.dp, height = 100.dp)
+                    .clickable(
+                        enabled = trackAndProfile.profile.isPublic,
+                        onClick = {
+                          if (trackAndProfile.profile.isPublic) {
+                            // if the profile is public, navigate to the profile view screen
+                            navigationActions.navigateToProfile(trackAndProfile.profile.firebaseUid)
+                          } else {
+                            // if the profile is private , output a message that say the profile
+                            // is
+                            // private, you cannot access to profile informations
+                            scope.launch {
+                              snackbarHostState.showSnackbar(
+                                  "This profile is private, you cannot access profile information.")
+                            }
+                          }
+                        }),
+            imageUri = trackAndProfile.profile.profilePictureUri,
         )
       }
     }
@@ -178,7 +158,7 @@ internal fun TrackListItemLaunchedEffect(scope: CoroutineScope, scrollState: Scr
     while (true) {
       scope.launch {
         scrollState.animateScrollTo(
-          value = scrollState.maxValue, animationSpec = slowScrollAnimation)
+            value = scrollState.maxValue, animationSpec = slowScrollAnimation)
       }
       delay(6000)
       scope.launch { scrollState.animateScrollTo(value = 0, animationSpec = slowScrollAnimation) }
@@ -188,23 +168,20 @@ internal fun TrackListItemLaunchedEffect(scope: CoroutineScope, scrollState: Scr
 }
 
 @Composable
-internal fun TrackListItemCard(onClick: () -> Unit, selected: Boolean, content: @Composable () -> Unit) {
+internal fun TrackListItemCard(
+    onClick: () -> Unit,
+    selected: Boolean,
+    content: @Composable () -> Unit
+) {
   Card(
-    onClick = onClick,
-    colors =
-    CardColors(
-      containerColor =
-      if (selected) MaterialTheme.colorScheme.surfaceContainerHighest
-      else MaterialTheme.colorScheme.surfaceContainerHigh,
-      CardDefaults.cardColors().contentColor,
-      CardDefaults.cardColors().disabledContainerColor,
-      CardDefaults.cardColors().disabledContentColor
-    ),
-    modifier = Modifier
-      .height(80.dp)
-      .fillMaxWidth()
-      .padding(4.dp)
-      .testTag("trackItem")
-  ) {
-  }
+      onClick = onClick,
+      colors =
+          CardColors(
+              containerColor =
+                  if (selected) MaterialTheme.colorScheme.surfaceContainerHighest
+                  else MaterialTheme.colorScheme.surfaceContainerHigh,
+              CardDefaults.cardColors().contentColor,
+              CardDefaults.cardColors().disabledContainerColor,
+              CardDefaults.cardColors().disabledContentColor),
+      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem")) {}
 }

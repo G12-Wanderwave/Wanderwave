@@ -10,8 +10,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.ui.components.player.ExclusivePlayer
 import ch.epfl.cs311.wanderwave.ui.components.player.MiniPlayer
 import ch.epfl.cs311.wanderwave.ui.screens.components.ExclusivePlayerScreen
-import ch.epfl.cs311.wanderwave.viewmodel.PlayerViewModel
 import ch.epfl.cs311.wanderwave.ui.screens.components.MiniPlayerScreen
+import ch.epfl.cs311.wanderwave.viewmodel.PlayerViewModel
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
