@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.ui.components.player
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.ui.theme.orange
+import ch.epfl.cs311.wanderwave.ui.theme.pink
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 import ch.epfl.cs311.wanderwave.viewmodel.LoopMode
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
@@ -44,8 +46,14 @@ fun ExclusivePlayer(
       modifier = Modifier.fillMaxSize().padding(bottom = 84.dp).testTag("exclusivePlayer"),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.SpaceBetween) {
-        PlayerDragHandleComponent(checked)
-        SwitchComponent(checked)
+        Column(verticalArrangement = Arrangement.Top) {
+          PlayerDragHandleComponent(checked)
+          Box(
+              contentAlignment = Alignment.TopStart,
+              modifier = Modifier.padding(start = 5.dp, top = 5.dp)) {
+                SwitchComponent(checked)
+              }
+        }
         PlayerIconButtonRowComponent()
         VotingButtonsComponent(selectedVote)
         TrackInfoComponent(uiState)
@@ -57,7 +65,7 @@ fun ExclusivePlayer(
 @Composable
 fun PlayerDragHandleComponent(checked: MutableState<Boolean>) {
   if (checked.value) {
-    PlayerDragHandle(duration1 = 1500, duration2 = 1500, duration3 = 1500, startColor = Color.Cyan)
+    PlayerDragHandle(duration1 = 1500, duration2 = 1500, duration3 = 1500, startColor = pink)
   } else {
     PlayerDragHandle(
         duration1 = 4000, duration2 = 3000, duration3 = 2000, startColor = spotify_green)
@@ -72,10 +80,10 @@ fun SwitchComponent(checked: MutableState<Boolean>) {
       onCheckedChange = { checked.value = it },
       colors =
           SwitchColors(
-              checkedThumbColor = Color.White,
+              checkedThumbColor = pink,
               checkedTrackColor = MaterialTheme.colorScheme.surface,
-              checkedBorderColor = Color.White,
-              checkedIconColor = Color.White,
+              checkedBorderColor = pink,
+              checkedIconColor = pink,
               uncheckedThumbColor = spotify_green,
               uncheckedTrackColor = MaterialTheme.colorScheme.surface,
               uncheckedBorderColor = spotify_green,
@@ -272,7 +280,7 @@ fun VotingButtons(selectedVote: MutableState<Int>, onVoteSelected: (Int) -> Unit
   Row(
       horizontalArrangement = Arrangement.SpaceAround,
       verticalAlignment = Alignment.CenterVertically,
-      modifier = Modifier.fillMaxWidth()) {
+      modifier = Modifier.fillMaxWidth().testTag("votingButtons")) {
         voteOptions.forEachIndexed { index, vote ->
           VotingButton(
               vote = vote,
