@@ -116,7 +116,8 @@ class ProfileViewModelTest {
 
     // Check if the track was added correctly
     val songsInList = songLists.find { it.name == ListType.TOP_SONGS }?.tracks ?: emptyList()
-    assertTrue("Song list should contain the newly added track", songsInList.contains(expectedTrack))
+    assertTrue(
+        "Song list should contain the newly added track", songsInList.contains(expectedTrack))
   }
 
   @Test
