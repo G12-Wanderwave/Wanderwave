@@ -127,4 +127,13 @@ class BeaconScreenViewModelTest {
     viewModel.changeChosenSongs()
     assertNotEquals(t, viewModel.isTopSongsListVisible.value)
   }
+
+  @Test
+  fun canSelectTracks() {
+    val viewModel = BeaconViewModel(trackRepository, beaconConnection, mockSpotifyController)
+    val track = Track("trackId", "trackName", "trackArtist")
+    viewModel.selectTrack(track)
+
+    verify { mockSpotifyController.playTrackList(any(), any(), any()) }
+  }
 }

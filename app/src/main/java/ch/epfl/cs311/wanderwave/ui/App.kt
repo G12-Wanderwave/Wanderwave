@@ -56,7 +56,7 @@ fun App(navController: NavHostController) {
 
 @Composable
 fun AppScaffold(navController: NavHostController) {
-  val navActions = NavigationActions(navController)
+  val navActions = remember { NavigationActions(navController) }
   var showBottomBar by remember { mutableStateOf(false) }
   val currentRouteState by navActions.currentRouteFlow.collectAsStateWithLifecycle()
   val snackbarHostState = remember { SnackbarHostState() }
@@ -80,7 +80,7 @@ fun AppScaffold(navController: NavHostController) {
           )
         }
       }) { innerPadding ->
-        SurroundWithMiniPlayer(displayPlayer = showBottomBar, viewModel = trackListViewModel) {
+        SurroundWithMiniPlayer(displayPlayer = showBottomBar) {
           NavHost(
               navController = navController,
               startDestination = Route.SPOTIFY_CONNECT.routeString,

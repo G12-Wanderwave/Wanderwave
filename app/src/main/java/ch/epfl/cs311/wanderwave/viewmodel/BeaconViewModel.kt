@@ -140,6 +140,11 @@ constructor(
     _isTopSongsListVisible.value = !_isTopSongsListVisible.value
   }
 
+  fun selectTrack(track: Track) {
+    val tracks = uiState.value.beacon?.profileAndTrack?.map { it.track }
+    tracks?.let { spotifyController.playTrackList(it, track) }
+  }
+
   data class UIState(
       val beacon: Beacon? = null,
       val isLoading: Boolean = true,

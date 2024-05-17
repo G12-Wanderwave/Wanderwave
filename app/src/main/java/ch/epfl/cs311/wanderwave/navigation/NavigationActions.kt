@@ -17,7 +17,7 @@ enum class Route(val routeString: String, val showBottomBar: Boolean) {
   MAP("map", true),
   PROFILE("profile", true),
   EDIT_PROFILE("editprofile", true),
-  BEACON("beacon", false),
+  BEACON("beacon", true),
   VIEW_PROFILE("viewProfile", false),
   SELECT_SONG("selectsong", false);
 
