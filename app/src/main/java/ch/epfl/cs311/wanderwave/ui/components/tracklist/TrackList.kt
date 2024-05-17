@@ -66,7 +66,7 @@ fun TrackList(
                 }
           }
         }
-    LazyColumn {
+    LazyColumn(Modifier.padding(bottom = 63.dp)) {
       items(tracks) { track ->
         TrackListItem(
             track,

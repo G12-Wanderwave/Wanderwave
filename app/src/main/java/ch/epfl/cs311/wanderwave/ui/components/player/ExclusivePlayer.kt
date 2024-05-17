@@ -4,8 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -49,13 +51,15 @@ fun ExclusivePlayer(
         Column(verticalArrangement = Arrangement.Top) {
           PlayerDragHandleComponent(checked)
           Box(
-              contentAlignment = Alignment.TopStart,
-              modifier = Modifier.padding(start = 5.dp, top = 5.dp)) {
+              contentAlignment = Alignment.Center,
+              modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) {
                 SwitchComponent(checked)
               }
+          Spacer(modifier = Modifier.height(10.dp))
+          PlayerIconButtonRowComponent()
+          Spacer(modifier = Modifier.height(15.dp))
+          VotingButtonsComponent(selectedVote)
         }
-        PlayerIconButtonRowComponent()
-        VotingButtonsComponent(selectedVote)
         TrackInfoComponent(uiState)
         SliderComponent(uiState.progress)
         PlayerControlRowComponent(viewModel, uiState)
