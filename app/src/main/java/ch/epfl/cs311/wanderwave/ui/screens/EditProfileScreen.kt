@@ -26,7 +26,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.profile.ImageSelection
@@ -169,7 +171,7 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit, onDelete: () -> Unit
             colors = ButtonDefaults.buttonColors(containerColor = md_theme_light_primary),
             modifier = Modifier.width(100.dp).testTag("saveButton"),
             shape = RoundedCornerShape(size = 10.dp)) {
-              Text("Save")
+              Text(stringResource(id = R.string.save))
             }
         Spacer(modifier = Modifier.width(8.dp))
         Button(
@@ -178,7 +180,7 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit, onDelete: () -> Unit
             border = BorderStroke(1.dp, md_theme_dark_error),
             shape = RoundedCornerShape(size = 10.dp),
             modifier = Modifier.width(100.dp).testTag("cancelButton")) {
-              Text(text = "Cancel", color = md_theme_dark_error)
+              Text(text = stringResource(id = R.string.cancel), color = md_theme_dark_error)
             }
         Spacer(Modifier.padding(8.dp))
         Button(
@@ -187,7 +189,7 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit, onDelete: () -> Unit
             border = BorderStroke(1.dp, md_theme_dark_error),
             shape = RoundedCornerShape(size = 10.dp),
             modifier = Modifier.width(200.dp).testTag("deleteButton")) {
-              Text(text = "Delete profile", color = md_theme_dark_error)
+              Text(text = stringResource(id = R.string.deleteProfile), color = md_theme_dark_error)
             }
       }
 }

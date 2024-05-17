@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
@@ -109,7 +110,9 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
                     disabledContentColor = Color.Gray,
                     disabledContainerColor = Color.Black),
             shape = RoundedCornerShape(size = 10.dp)) {
-              Text(if (isTopSongsListVisible) "Show CHOSEN TOPS" else "Show LIKED SONGS")
+              Text(
+                  if (isTopSongsListVisible) stringResource(id = R.string.showChosenSongs)
+                  else stringResource(id = R.string.showLikedSongs))
             }
         SongsListDisplay(
             navigationActions = navActions,
@@ -218,7 +221,7 @@ fun SignOutButton(modifier: Modifier, navActions: NavigationActions) {
                   painter = painterResource(id = R.drawable.logout_icon),
                   contentDescription = "logout")
               Spacer(modifier = Modifier.width(5.dp))
-              Text(text = "Sign Out")
+              Text(text = stringResource(id = R.string.signOut))
             }
       }
 }
@@ -241,7 +244,7 @@ fun AboutButton(modifier: Modifier, navActions: NavigationActions) {
               Icon(
                   painter = painterResource(id = R.drawable.info_icon), contentDescription = "info")
               Spacer(modifier = Modifier.width(5.dp))
-              Text(text = "About")
+              Text(text = stringResource(id = R.string.about))
             }
       }
 }

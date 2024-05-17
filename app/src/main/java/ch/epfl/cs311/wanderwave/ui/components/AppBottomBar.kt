@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -55,7 +54,7 @@ fun AppBottomBar(navActions: NavigationActions) {
           Modifier.fillMaxWidth()
               .background(MaterialTheme.colorScheme.surface)
               .testTag("appBottomBar"),
-      containerColor = Color.Black) {
+      containerColor = MaterialTheme.colorScheme.scrim) {
         // Assumes TOP_LEVEL_DESTINATIONS are in the order of Track List, Main, and Map for indexing
         IconButton(
             onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[0].route) },
@@ -70,7 +69,9 @@ fun AppBottomBar(navActions: NavigationActions) {
                         trackListIcon,
                         contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[0].textId),
                     )
-                    Text(text = "Track List", style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        text = stringResource(id = R.string.trackList),
+                        style = MaterialTheme.typography.bodySmall)
                   }
             }
 
@@ -78,7 +79,7 @@ fun AppBottomBar(navActions: NavigationActions) {
             onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[1].route) },
             modifier = Modifier.weight(1f).testTag("bottomAppBarButton" + Route.MAP.routeString)) {
               Image(
-                  modifier = Modifier.weight(4f).padding(top = 5.dp, bottom = 5.dp),
+                  modifier = Modifier.padding(top = 5.dp, bottom = 5.dp),
                   painter = painterResource(id = R.drawable.beaconlogo),
                   contentDescription = "Beacon icon",
               )
@@ -96,7 +97,9 @@ fun AppBottomBar(navActions: NavigationActions) {
                         profileIcon,
                         contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[2].textId),
                     )
-                    Text(text = "Profile", style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        text = stringResource(id = R.string.profile),
+                        style = MaterialTheme.typography.bodySmall)
                   }
             }
       }
