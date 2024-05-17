@@ -119,7 +119,7 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
         )
       }
 
-  Row(horizontalArrangement = Arrangement.Start, modifier = Modifier.fillMaxWidth()) {
+  Row(horizontalArrangement = Arrangement.Start) {
     Spacer(modifier = Modifier.width(15.dp))
     SignOutButton(modifier = Modifier, navActions = navActions)
     Spacer(modifier = Modifier.width(15.dp))
