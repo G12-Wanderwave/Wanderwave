@@ -184,6 +184,6 @@ internal fun TrackListItemCard(
               CardDefaults.cardColors().disabledContainerColor,
               CardDefaults.cardColors().disabledContentColor),
       modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem")) {
-    content()
-  }
+        content()
+      }
 }
