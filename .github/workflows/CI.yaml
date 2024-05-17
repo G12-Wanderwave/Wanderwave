@@ -124,7 +124,12 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: ./gradlew connectedCheck --parallel --stacktrace --build-cache > instrumentation_test_log.txt
-
+      - name: Archive production artifacts
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: androidTest-reports
+          path: app/build/reports/androidTests/connected/debug/
       # This step generates the coverage report which will be used later in the semster for monitoring purposes
       - name: Generate coverage
         run: |
