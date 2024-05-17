@@ -200,8 +200,7 @@ fun handleItemClick(
     viewModel: SpotifySongsActions,
     isTopSongsListVisible: Boolean
 ) {
-    Log.d("SelectSongScreen", "Adding track to list${viewModel.childrenPlaylistTrackList.value}")
-
+  Log.d("SelectSongScreen", "Adding track to list${viewModel.childrenPlaylistTrackList.value}")
 
   if (listItem.id.contains("spotify:track:")) {
     viewModel.addTrackToList(
@@ -220,13 +219,13 @@ fun handleItemClick(
   if (listItem.hasChildren) {
     viewModel.retrieveChild(listItem)
     return
-  }    
-    if (listItem.id.contains("spotify:") ||
-        listItem.id.isBlank()) {//TODO: create an issue for handling this
-        viewModel.emptyChildrenList()
-        navActions.goBack()
-        return
-    }
+  }
+  if (listItem.id.contains("spotify:") ||
+      listItem.id.isBlank()) { // TODO: create an issue for handling this
+    viewModel.emptyChildrenList()
+    navActions.goBack()
+    return
+  }
 
   viewModel.addTrackToList(
       if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS,

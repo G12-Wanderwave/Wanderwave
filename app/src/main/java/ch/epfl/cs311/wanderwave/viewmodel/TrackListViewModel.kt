@@ -144,7 +144,7 @@ constructor(
         playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
   }
 
-  override fun emptyChildrenList(){
+  override fun emptyChildrenList() {
     _uiState.value = _uiState.value
     _childrenPlaylistTrackList.value = (emptyList())
   }
