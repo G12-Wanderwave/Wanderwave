@@ -220,12 +220,6 @@ fun handleItemClick(
     viewModel.retrieveChild(listItem)
     return
   }
-  if (listItem.id.contains("spotify:") ||
-      listItem.id.isBlank()) { // TODO: create an issue for handling this
-    viewModel.emptyChildrenList()
-    navActions.goBack()
-    return
-  }
 
   viewModel.addTrackToList(
       if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS,
