@@ -155,9 +155,3 @@ constructor(
       val progress: MutableFloatState = mutableFloatStateOf(0f),
   )
 }
-
-enum class LoopMode {
-  NONE,
-  ONE,
-  ALL
-}

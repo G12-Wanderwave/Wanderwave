@@ -1,4 +1,5 @@
 import android.util.Log
+import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
@@ -129,6 +130,21 @@ class TrackListViewModelTest {
         assertEquals(listOf(expectedListItem), result)
         assertEquals(listOf(expectedListItem), result2)
       }
+
+  @Test
+  fun testAddTrackToList() = runBlocking {
+    val track = Track("spotify:track:1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
+    viewModel.addTrackToList(ListType.TOP_SONGS, track)
+    assertTrue(viewModel.uiState.value.tracks.contains(track))
+  }
+
+  @Test
+  fun testAddTrackToListWithoutPrefix() = runBlocking {
+    val track = Track("spotify:track:1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
+    val trackWithoutPrefix = Track("1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
+    viewModel.addTrackToList(ListType.TOP_SONGS, trackWithoutPrefix)
+    assertTrue(viewModel.uiState.value.tracks.contains(track))
+  }
 }
 
 // for the CI rerun to be removed
