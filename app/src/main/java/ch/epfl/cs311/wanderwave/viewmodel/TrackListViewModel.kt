@@ -145,7 +145,9 @@ constructor(
   }
 
   data class UiState(
-      val tracks: List<Track> = listOf(),
+    val recentlyListenedTracks: List<Track> = listOf(),
+    val bannedTracks: List<Track> = listOf(),
+    val tracks: List<Track> = listOf(),
       val loading: Boolean = false,
       val expanded: Boolean = false,
       val progress: MutableFloatState = mutableFloatStateOf(0f),
