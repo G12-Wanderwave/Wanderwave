@@ -37,12 +37,17 @@ class TrackConnection(private val database: FirebaseFirestore) :
     // The goal of this function is to add only if the spotify id of the track is not already in the
     // database, for now I just check the normal ID
     tracks.forEach { track ->
-      db.collection(collectionName).whereEqualTo("id", track.id).get().addOnSuccessListener {
-          documentSnapshot ->
-        if (documentSnapshot.isEmpty) {
-          addItemWithId(track)
-        }
-      }
+      val trackId =
+          if (track.id.contains("spotify:track:")) track.id else "spotify:track:" + track.id
+      val correctTrack = track.copy(id = trackId)
+      db.collection(collectionName)
+          .whereEqualTo("id", correctTrack.id)
+          .get()
+          .addOnSuccessListener { documentSnapshot ->
+            if (documentSnapshot.isEmpty) {
+              addItemWithId(correctTrack)
+            }
+          }
     }
   }
 
@@ -58,6 +63,21 @@ class TrackConnection(private val database: FirebaseFirestore) :
     return stateFlow
   }
 
+  override fun getTrackById(trackId: String): Flow<Track?> {
+    val stateFlow = MutableStateFlow<Track?>(null)
+    db.collection(collectionName).document(trackId).addSnapshotListener { snapshot, error ->
+      if (error != null) {
+        stateFlow.value = null
+      } else if (snapshot != null && snapshot.exists()) {
+        stateFlow.value = documentToItem(snapshot)
+      } else {
+        stateFlow.value = null
+      }
+    }
+    return stateFlow
+  }
+  
+  // Fetch a track from a DocumentReference asynchronously
   fun fetchProfileAndTrack(
       profileAndTrackRef: Map<String, DocumentReference>?
   ): Flow<Result<ProfileTrackAssociation>> = callbackFlow {

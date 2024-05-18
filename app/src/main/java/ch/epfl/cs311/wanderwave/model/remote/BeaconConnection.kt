@@ -5,6 +5,8 @@ import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.data.TrackRecord
+import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -27,6 +29,7 @@ class BeaconConnection(
     private val database: FirebaseFirestore,
     val trackConnection: TrackConnection,
     val profileConnection: ProfileConnection,
+    private val appDatabase: AppDatabase,
     private val ioDispatcher: CoroutineDispatcher
 ) : FirebaseConnection<Beacon, Beacon>(database), BeaconRepository {
 
@@ -161,6 +164,7 @@ class BeaconConnection(
 
   override fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
     val beaconRef = db.collection("beacons").document(beaconId)
+    val profileRef = db.collection("users").document("My Firebase UID")
     db.runTransaction { transaction ->
           val snapshot = transaction[beaconRef]
           val beacon = Beacon.from(snapshot)
@@ -177,7 +181,7 @@ class BeaconConnection(
                               false,
                               null,
                               "My Firebase UID",
-                              track.id),
+                              "My Firebase UID"),
                           track))
                 }
             transaction.update(
@@ -187,9 +191,19 @@ class BeaconConnection(
                   hashMapOf(
                       "creator" to
                           db.collection("users")
-                              .document(profileAndTrack.profile?.firebaseUid ?: ""),
+                              .document(profileAndTrack.profile?.firebaseUid ?: profileRef.id),
                       "track" to db.collection("tracks").document(profileAndTrack.track.id))
                 })
+            // After updating Firestore, save the track addition locally
+            coroutineScope.launch {
+              appDatabase
+                  .trackRecordDao()
+                  .insertTrackRecord(
+                      TrackRecord(
+                          beaconId = beaconId,
+                          trackId = track.id,
+                          timestamp = System.currentTimeMillis()))
+            }
           } ?: throw Exception("Beacon not found")
         }
         .addOnSuccessListener { onComplete(true) }

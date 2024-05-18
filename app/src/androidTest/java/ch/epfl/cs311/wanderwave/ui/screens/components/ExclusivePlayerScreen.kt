@@ -14,4 +14,6 @@ class ExclusivePlayerScreen(semanticsProvider: SemanticsNodeInteractionsProvider
   val ignoreButton = onNode { hasTestTag("ignoreButton") }
   val toggleShuffle = onNode { hasTestTag("toggleShuffle") }
   val toggleRepeat = onNode { hasTestTag("toggleRepeat") }
+  val playerDragHandle = onNode { hasTestTag("playerDragHandle") }
+  val votingButtons = onNode { hasTestTag("votingButtons") }
 }

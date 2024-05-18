@@ -38,6 +38,7 @@ import ch.epfl.cs311.wanderwave.ui.screens.SelectSongScreen
 import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
+import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import kotlinx.coroutines.launch
@@ -55,12 +56,13 @@ fun App(navController: NavHostController) {
 
 @Composable
 fun AppScaffold(navController: NavHostController) {
-  val navActions = NavigationActions(navController)
+  val navActions = remember { NavigationActions(navController) }
   var showBottomBar by remember { mutableStateOf(false) }
   val currentRouteState by navActions.currentRouteFlow.collectAsStateWithLifecycle()
   val snackbarHostState = remember { SnackbarHostState() }
   val profileViewModel: ProfileViewModel = hiltViewModel()
   val trackListViewModel = hiltViewModel<TrackListViewModel>()
+  val beaconViewModel = hiltViewModel<BeaconViewModel>()
 
   val scope = rememberCoroutineScope()
   val showSnackbar = { message: String ->
@@ -78,7 +80,7 @@ fun AppScaffold(navController: NavHostController) {
           )
         }
       }) { innerPadding ->
-        SurroundWithMiniPlayer(displayPlayer = showBottomBar, viewModel = trackListViewModel) {
+        SurroundWithMiniPlayer(displayPlayer = showBottomBar) {
           NavHost(
               navController = navController,
               startDestination = Route.SPOTIFY_CONNECT.routeString,
@@ -107,6 +109,7 @@ fun AppScaffold(navController: NavHostController) {
                           when (viewModelType) {
                             "profile" -> profileViewModel
                             "tracklist" -> trackListViewModel
+                            "beacon" -> beaconViewModel
                             else -> error("Invalid ViewModel type for SelectSongScreen")
                           }
 
@@ -116,7 +119,8 @@ fun AppScaffold(navController: NavHostController) {
                   ProfileViewOnlyScreen(it.arguments?.getString("profileId") ?: "", navActions)
                 }
                 composable("${Route.BEACON.routeString}/{beaconId}") {
-                  BeaconScreen(it.arguments?.getString("beaconId") ?: "", navActions)
+                  BeaconScreen(
+                      it.arguments?.getString("beaconId") ?: "", navActions, beaconViewModel)
                 }
               }
         }

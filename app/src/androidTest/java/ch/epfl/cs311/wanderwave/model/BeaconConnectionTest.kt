@@ -8,6 +8,7 @@ import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
@@ -46,7 +47,7 @@ public class BeaconConnectionTest {
 
   private lateinit var trackConnection: TrackConnection
   private lateinit var profileConnection: ProfileConnection // Add a mock for ProfileConnection
-
+  private lateinit var appDatabase: AppDatabase
   private lateinit var firestore: FirebaseFirestore
   private lateinit var documentReference: DocumentReference
   private lateinit var collectionReference: CollectionReference
@@ -61,6 +62,7 @@ public class BeaconConnectionTest {
     collectionReference = mockk<CollectionReference>(relaxed = true)
     trackConnection = mockk<TrackConnection>(relaxed = true)
     profileConnection = mockk<ProfileConnection>(relaxed = true)
+    appDatabase = mockk<AppDatabase>(relaxed = true)
 
     // Mock data
     beacon =
@@ -88,7 +90,7 @@ public class BeaconConnectionTest {
     // Pass the mock Firestore instance to your BeaconConnection
     val testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
     beaconConnection =
-        BeaconConnection(firestore, trackConnection, profileConnection, testDispatcher)
+        BeaconConnection(firestore, trackConnection, profileConnection, appDatabase, testDispatcher)
   }
 
   @Test
@@ -535,7 +537,7 @@ public class BeaconConnectionTest {
     val profileRepository = mockk<ProfileConnection>(relaxed = true)
     val beaconRepository =
         RepositoryModule.provideBeaconRepository(
-            context, firestore, trackRepository, profileRepository)
+            context, firestore, trackRepository, profileRepository, mockk())
     assertEquals(BeaconConnection::class.java, beaconRepository::class.java)
   }
 

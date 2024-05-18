@@ -1,16 +1,8 @@
 package ch.epfl.cs311.wanderwave.ui.components.profile
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,14 +12,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.viewmodel.SongList
-import com.spotify.protocol.types.ListItem
 
 /**
  * Dialog composable that allows the user to add a new track by entering the track ID, title, and
@@ -100,7 +90,7 @@ fun AddTrackDialog(
 /**
  * Displays either the "TOP SONGS" or "CHOSEN SONGS" list based on a toggle.
  *
- * @param songLists List of song lists including "TOP SONGS" and "CHOSEN SONGS".
+ * @param songLists List of song lists including "TOP SONGS" and "LIKED SONGS".
  * @param isTopSongsListVisible Boolean state to toggle between showing "TOP SONGS" or "CHOSEN
  *   SONGS".
  *     @param onAddTrack Callback function to be invoked when a track is added.
@@ -111,7 +101,7 @@ fun AddTrackDialog(
  *     @author Menzo Bouaissi
  *     @author Ayman Bakiri
  *     @since 1.0
- *     @last update 2.0
+ *     @last update 3.0
  */
 @Composable
 fun SongsListDisplay(
@@ -119,48 +109,21 @@ fun SongsListDisplay(
     songLists: List<SongList>,
     isTopSongsListVisible: Boolean,
     onAddTrack: (Track) -> Unit,
+    onSelectTrack: (Track) -> Unit,
     canAddSong: Boolean = true,
     viewModelName: viewModelType = viewModelType.NULL
 ) {
-  val name = if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.CHOSEN_SONGS
+  val name = if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS
   songLists
       .firstOrNull { it.name == name }
       ?.let { songList ->
         TrackList(
             tracks = songList.tracks,
             title = name.name,
-            onSelectTrack = { /* TODO */},
+            onSelectTrack = onSelectTrack,
             onAddTrack = onAddTrack,
             canAddSong = canAddSong,
             navActions = navigationActions,
             viewModelName = viewModelName)
-      }
-}
-
-/**
- * Composable that displays a Track. Each track is represented by the TrackItem composable, which is
- * a Card with the track's title and subtitle.
- *
- * @author Menzo Bouaissi
- * @since 2.0
- * @last update 2.0
- */
-@Composable
-fun TrackItem(listItem: ListItem, onClick: () -> Unit) {
-  Card(
-      colors =
-          CardDefaults.cardColors(
-              containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-              contentColor = MaterialTheme.colorScheme.onSurface,
-              disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariant,
-              disabledContentColor = MaterialTheme.colorScheme.error // Example color
-              ),
-      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).clickable(onClick = onClick)) {
-        Row {
-          Column(modifier = Modifier.padding(8.dp)) {
-            Text(text = listItem.title, style = MaterialTheme.typography.titleMedium)
-            Text(text = listItem.subtitle, style = MaterialTheme.typography.bodyMedium)
-          }
-        }
       }
 }
