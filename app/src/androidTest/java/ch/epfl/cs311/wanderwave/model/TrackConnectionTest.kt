@@ -24,6 +24,8 @@ import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
@@ -188,11 +190,9 @@ class TrackConnectionTest {
         mapOf("creator" to mockProfileDocumentReference, "track" to mockTrackDocumentReference)
 
     // Call the function under test
-    async {
-          retrievedTrackAndProfile = trackConnection.fetchProfileAndTrack(mapOfDocumentReferences)
-        }
-        .await()
-
+    launch {
+      retrievedTrackAndProfile = trackConnection.fetchProfileAndTrack(mapOfDocumentReferences).firstOrNull()?.getOrElse { null }
+    }
     // Verify that the get function is called on the document with the correct id
     coVerify { mockTrackDocumentReference.get() }
 
