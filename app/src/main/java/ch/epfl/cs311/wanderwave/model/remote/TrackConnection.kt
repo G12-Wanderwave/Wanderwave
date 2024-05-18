@@ -8,6 +8,7 @@ import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
@@ -72,6 +73,7 @@ class TrackConnection(private val database: FirebaseFirestore) :
               trySend(
                   Result.failure(Exception("Error fetching the track, firebase format is wrong")))
             } else {
+              Log.d("Firestore", "Fetched profile and track returning : $profile $track")
               trySend(Result.success(ProfileTrackAssociation(profile = profile, track = track)))
             }
           }
@@ -82,6 +84,7 @@ class TrackConnection(private val database: FirebaseFirestore) :
         trySend(Result.failure(e))
       }
     }
+    awaitClose { close() }
   }
 
   // Fetch a track from a DocumentReference asynchronously

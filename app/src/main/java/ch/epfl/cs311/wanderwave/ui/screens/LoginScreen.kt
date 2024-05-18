@@ -2,6 +2,7 @@ package ch.epfl.cs311.wanderwave.ui.screens
 
 import android.content.Context
 import android.content.ContextWrapper
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.login.LoginAppLogo
@@ -56,10 +58,21 @@ fun LoginScreen(
     LoginAppLogo(modifier = Modifier.weight(1f))
     WelcomeTitle(modifier = Modifier.weight(4f))
     SignInButton(modifier = Modifier.weight(1f)) {
-      val intent =
-          AuthorizationClient.createLoginActivityIntent(
-              context.getActivity(), viewModel.getAuthorizationRequest())
-      launcher.launch(intent)
+      // val intent =
+      //     AuthorizationClient.createLoginActivityIntent(
+      //         context.getActivity(), viewModel.getAuthorizationRequest())
+      // launcher.launch(intent)
+
+      val beacon = viewModel.beaconConnection.getItem("aAsRNw9Hl1jIDEMqfG3Y")
+
+      // use Dispatchers.IO coroutine to print the beacon
+      viewModel.viewModelScope.launch {
+        Log.d("Beacon", beacon.toString())
+        beacon.collect {
+          Log.d("Beacon", it.toString())
+          it.onSuccess { Log.d("Beacon", it.toString()) }
+        }
+      }
     }
   }
 }

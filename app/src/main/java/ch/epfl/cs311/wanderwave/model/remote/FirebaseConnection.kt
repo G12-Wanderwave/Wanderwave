@@ -3,8 +3,10 @@ package ch.epfl.cs311.wanderwave.model.remote
 import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.tasks.await
 
@@ -79,26 +81,44 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
   }
 
   open fun getItem(itemId: String): Flow<Result<T>> {
-    val dataFlow = MutableStateFlow<Result<T>>(Result.failure(Exception("No data found")))
+    val callbackFlow =
+        callbackFlow<Flow<Result<T>>> {
+          db.collection(collectionName).document(itemId).addSnapshotListener { document, error ->
+            if (error != null) {
+              Log.e("Firestore", "Error getting document: ", error)
+              // return failure result
+              trySend(flowOf(Result.failure(error)))
+            }
 
-    db.collection(collectionName).document(itemId).addSnapshotListener { document, error ->
-      if (error != null) {
-        Log.e("Firestore", "Error getting document: ", error)
-        // return failure result
-        dataFlow.value = Result.failure(error)
-      }
+            if (document != null && document.data != null) {
+              Log.d("Beacon", "Inside if ${documentToItem(document)}")
+              documentToItem(document)?.let {
+                // dataFlow.value = Result.success(it)
+                // The document transform function is used when references are inside and need to be
+                // fetched
+                Log.d("Beacon", "DocumentSnapshot data inside document transform: ${document.data}")
 
-      if (document != null && document.data != null) {
-        documentToItem(document)?.let {
-          dataFlow.value = Result.success(it)
-          // The document transform function is used when references are inside and need to be
-          // fetched
-          documentTransform(document, it)
+                // documentTransform(document, it).combine(this) { result, dataFlow2 ->
+                //   Log.d("Beacon", "Result and dataFlow2: $result, $dataFlow2")
+                //   dataFlow.value = result
+                // }
+                // launch {
+                //   documentTransform(document, it).collect { trySend(it) }
+                // }
+                trySend(documentTransform(document, it))
+
+                // trySend(Result.success(it))
+
+                // Log.d("Beacon", "Answer inside documentToItem ${answer}")
+
+              }
+            } else trySend(flowOf(Result.failure(Exception("Document does not exist"))))
+          }
+
+          Log.d("Beacon", "Returning flow ${this}")
+          awaitClose {}
         }
-      }
-    }
-
-    return dataFlow
+    return callbackFlow.flattenConcat()
   }
 
   /**
@@ -111,8 +131,14 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
       item: T?
   ): Flow<Result<T>> =
       if (item != null) {
+        Log.d(
+            "Firestore",
+            "DocumentSnapshot data inside old document transform: ${documentSnapshot.data}")
         flowOf(Result.success(item))
       } else {
+        Log.d(
+            "Firestore",
+            "DocumentSnapshot data inside old document transform: ${documentSnapshot.data}")
         flowOf(Result.failure(Exception("Document does not exist")))
       }
 }

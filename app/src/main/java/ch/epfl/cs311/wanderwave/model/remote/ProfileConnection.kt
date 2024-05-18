@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 class ProfileConnection(
     private val database: FirebaseFirestore,
@@ -114,7 +113,7 @@ class ProfileConnection(
                         flow.mapNotNull { result ->
                           result
                               .getOrNull() // Extract the track from Result or return null if it's a
-                                           // failure
+                          // failure
                         }
                       } // map to a list of track
                       ?.fold(flowOf(Result.success(listOf<Track>()))) { acc, track ->
@@ -126,8 +125,8 @@ class ProfileConnection(
                           Result.failure(
                               Exception(
                                   "Could not retrieve topSongs"))) // reduce the list of flow to a
-                                                                   // single flow that contains the
-                                                                   // list of tracks
+              // single flow that contains the
+              // list of tracks
 
               val updatedProfile =
                   topSongs.combine(chosenSongs) { topSongs, chosenSongs ->

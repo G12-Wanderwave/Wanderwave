@@ -102,7 +102,13 @@ constructor(
   fun getProfileByID(id: String) {
     viewModelScope.launch {
       repository.getItem(id).collect { fetchedProfile ->
-        _uiState.value = UIState(profile = fetchedProfile, isLoading = false)
+        fetchedProfile.onSuccess { profile ->
+          _profile.value = profile
+          _uiState.value = UIState(profile = profile, isLoading = false)
+        }
+        fetchedProfile.onFailure { exception ->
+          _uiState.value = UIState(error = exception.message, isLoading = false)
+        }
       }
     }
   }
