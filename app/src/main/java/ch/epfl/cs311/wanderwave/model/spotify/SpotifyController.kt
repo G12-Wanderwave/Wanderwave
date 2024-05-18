@@ -57,6 +57,9 @@ constructor(
 
   var playbackTimer: Job? = null
 
+  private val MAX_RECENT_TRACKS = 10
+  val recentlyPlayedTracks = MutableStateFlow(emptyList<Track>())
+
   private val connectionParams =
       ConnectionParams.Builder(CLIENT_ID).setRedirectUri(REDIRECT_URI).showAuthView(true).build()
 
@@ -169,7 +172,19 @@ constructor(
     appRemote.value?.let {
       it.playerApi
           .play(track.id)
-          .setResultCallback { onSuccess() }
+          .setResultCallback {
+            appRemote.value?.let {
+              it.playerApi.subscribeToPlayerState().setEventCallback {
+                startPlaybackTimer(it.track.duration)
+              }
+            }
+            // prepend to the start of the recently played tracks list
+            recentlyPlayedTracks.value =
+                (listOf(track) + recentlyPlayedTracks.value.filterNot { it.id == track.id }).take(
+                    MAX_RECENT_TRACKS)
+            recentlyPlayedTracks.value
+            onSuccess()
+          }
           .setErrorCallback { error -> onFailure(error) }
     }
   }

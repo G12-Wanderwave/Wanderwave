@@ -22,4 +22,10 @@
     <string name="beaconTitle">Beacon</string>
     <string name="beaconLocation">at %1$s</string>
     <string name="beaconTracksTitle">Tracks</string>
+    <string name="search_tracks">Search Tracks</string>
+    <string name="show_recently_added">Show Recently Added</string>
+    <string name="recently_added_tracks">Recently Added Tracks</string>
+    <string name="liked_tracks">Liked Tracks</string>
+    <string name="banned_tracks">Banned Tracks</string>
+    <string name="recently_viewed_tracks">Recently Viewed Tracks</string>
 </resources>

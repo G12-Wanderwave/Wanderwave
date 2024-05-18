@@ -5,8 +5,10 @@ import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
@@ -21,6 +23,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -28,6 +31,7 @@ class TrackListViewModel
 @Inject
 constructor(
     private val spotifyController: SpotifyController,
+    private val appDatabase: AppDatabase,
     private val repository: TrackRepository
 ) : ViewModel(), SpotifySongsActions {
 
@@ -38,6 +42,28 @@ constructor(
   override val isTopSongsListVisible: StateFlow<Boolean> = _isTopSongsListVisible
 
   private var _searchQuery = MutableStateFlow("")
+
+
+  fun loadTracksBasedOnSource(index: Int) {
+    viewModelScope.launch {
+      _uiState.value = _uiState.value.copy(loading = true)
+      when (index) {
+       0-> _uiState.value = _uiState.value.copy(tracks = spotifyController.recentlyPlayedTracks.value)
+        1-> loadRecentlyAddedTracks()
+       2->loadRecentlyAddedTracks() //TODO: modify here for the banned tracks
+      }
+    }
+  }
+
+  fun loadRecentlyAddedTracks() {
+    viewModelScope.launch {
+      val trackRecords =
+          appDatabase.trackRecordDao().getAllRecentlyAddedTracks().firstOrNull() ?: listOf()
+      val trackDetails =
+          trackRecords.mapNotNull { repository.getTrackById(it.trackId).firstOrNull() }
+      _uiState.value = _uiState.value.copy(tracks = trackDetails, loading = false)
+    }
+  }
 
   private var _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
   override val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
@@ -145,11 +171,12 @@ constructor(
   }
 
   data class UiState(
-    val recentlyListenedTracks: List<Track> = listOf(),
-    val bannedTracks: List<Track> = listOf(),
     val tracks: List<Track> = listOf(),
       val loading: Boolean = false,
       val expanded: Boolean = false,
       val progress: MutableFloatState = mutableFloatStateOf(0f),
+      val isShuffled: Boolean = false,
+      val loopMode: SpotifyController.RepeatMode = SpotifyController.RepeatMode.OFF,
+      val showRecentlyAdded: Boolean = true // New state to toggle between recently added and recently viewed
   )
 }

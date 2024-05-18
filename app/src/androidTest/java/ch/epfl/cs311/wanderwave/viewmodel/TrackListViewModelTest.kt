@@ -1,6 +1,8 @@
 import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.data.TrackRecord
+import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
@@ -12,6 +14,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -19,9 +22,13 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -34,6 +41,7 @@ class TrackListViewModelTest {
 
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
   @RelaxedMockK private lateinit var repository: TrackRepository
+  @RelaxedMockK private lateinit var appDatabase: AppDatabase
 
   private val testDispatcher = TestCoroutineDispatcher()
   private lateinit var track: Track
@@ -75,7 +83,7 @@ class TrackListViewModelTest {
 
     every { repository.getAll() } returns flowOf(trackList)
 
-    viewModel = TrackListViewModel(mockSpotifyController, repository)
+    viewModel = TrackListViewModel(mockSpotifyController, appDatabase, repository)
 
     runBlocking { viewModel.uiState.first { !it.loading } }
   }
@@ -145,6 +153,35 @@ class TrackListViewModelTest {
     viewModel.addTrackToList(ListType.TOP_SONGS, trackWithoutPrefix)
     assertTrue(viewModel.uiState.value.tracks.contains(track))
   }
-}
 
-// for the CI rerun to be removed
+  @Test
+  fun toggleTrackSourceTest() = run {
+    every { mockSpotifyController.recentlyPlayedTracks } returns
+        MutableStateFlow(emptyList<Track>())
+    val initial = viewModel.uiState.value.showRecentlyAdded
+    viewModel.toggleTrackSource()
+    val toggled = viewModel.uiState.value.showRecentlyAdded
+    assertNotEquals(initial, toggled)
+  }
+
+  @Test
+  fun loadRecentlyAddedTracksTest() = runTest {
+    // Arrange
+    val trackRecords = listOf(TrackRecord(1, "beacon1", "track1", System.currentTimeMillis()))
+    val expectedTracks = listOf(Track("track1", "Title 1", "Artist 1"))
+
+    every { appDatabase.trackRecordDao().getAllRecentlyAddedTracks() } returns flowOf(trackRecords)
+    every { repository.getTrackById(any()) } returns flowOf(expectedTracks.first())
+
+    // Act
+    viewModel.loadRecentlyAddedTracks()
+
+    // Assert
+    advanceUntilIdle()
+
+    assertFalse(viewModel.uiState.value.tracks.isEmpty())
+    assertEquals(expectedTracks.first().title, viewModel.uiState.value.tracks.first().title)
+    assertEquals(expectedTracks.first().artist, viewModel.uiState.value.tracks.first().artist)
+    assertFalse(viewModel.uiState.value.loading)
+  }
+}
