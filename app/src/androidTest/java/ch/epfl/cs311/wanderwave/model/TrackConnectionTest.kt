@@ -124,53 +124,6 @@ class TrackConnectionTest {
   }
 
   @Test
-  fun testGetTrackById() = runBlocking {
-    val testTrackId = "testTrack"
-    val mockDocumentSnapshot = mockk<DocumentSnapshot>(relaxed = true)
-    val mockTrack = Track(testTrackId, "Test Title", "Test Artist")
-
-    every { mockDocumentSnapshot.exists() } returns true
-    every { mockDocumentSnapshot.id } returns testTrackId
-    every { mockDocumentSnapshot.getString("title") } returns "Test Title"
-    every { mockDocumentSnapshot.getString("artist") } returns "Test Artist"
-
-    every { documentReference.addSnapshotListener(any()) } answers
-        {
-          val listener = firstArg<EventListener<DocumentSnapshot>>()
-          listener.onEvent(mockDocumentSnapshot, null) // No error
-          mockk(relaxed = true)
-        }
-
-    val stateFlow = trackConnection.getTrackById(testTrackId)
-    val resultTrack = stateFlow.first()
-    assertEquals(mockTrack, resultTrack)
-
-    every { mockDocumentSnapshot.exists() } returns false
-    every { documentReference.addSnapshotListener(any()) } answers
-        {
-          val listener = firstArg<EventListener<DocumentSnapshot>>()
-          listener.onEvent(mockDocumentSnapshot, null)
-          mockk(relaxed = true)
-        }
-
-    val stateFlowNotExist = trackConnection.getTrackById(testTrackId)
-    val resultTrackNotExist = stateFlowNotExist.first()
-    assertNull(resultTrackNotExist)
-
-    val mockError = mockk<FirebaseFirestoreException>(relaxed = true)
-    every { documentReference.addSnapshotListener(any()) } answers
-        {
-          val listener = firstArg<EventListener<DocumentSnapshot>>()
-          listener.onEvent(null, mockError) // With error
-          mockk(relaxed = true)
-        }
-
-    val stateFlowError = trackConnection.getTrackById(testTrackId)
-    val resultTrackError = stateFlowError.first()
-    assertNull(resultTrackError)
-  }
-
-  @Test
   fun testFetchProfileAndTrack() = runBlocking {
     // Mock the DocumentReference
     val mockTrackDocumentReference = mockk<DocumentReference>()

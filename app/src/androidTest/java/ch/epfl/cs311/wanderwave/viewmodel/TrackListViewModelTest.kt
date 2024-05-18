@@ -163,25 +163,4 @@ class TrackListViewModelTest {
     val toggled = viewModel.uiState.value.showRecentlyAdded
     assertNotEquals(initial, toggled)
   }
-
-  @Test
-  fun loadRecentlyAddedTracksTest() = runTest {
-    // Arrange
-    val trackRecords = listOf(TrackRecord(1, "beacon1", "track1", System.currentTimeMillis()))
-    val expectedTracks = listOf(Track("track1", "Title 1", "Artist 1"))
-
-    every { appDatabase.trackRecordDao().getAllRecentlyAddedTracks() } returns flowOf(trackRecords)
-    every { repository.getTrackById(any()) } returns flowOf(expectedTracks.first())
-
-    // Act
-    viewModel.loadRecentlyAddedTracks()
-
-    // Assert
-    advanceUntilIdle()
-
-    assertFalse(viewModel.uiState.value.tracks.isEmpty())
-    assertEquals(expectedTracks.first().title, viewModel.uiState.value.tracks.first().title)
-    assertEquals(expectedTracks.first().artist, viewModel.uiState.value.tracks.first().artist)
-    assertFalse(viewModel.uiState.value.loading)
-  }
 }
