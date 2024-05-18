@@ -1,7 +1,9 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
 import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -131,18 +135,33 @@ fun BeaconInformation(location: Location) {
 @Composable
 fun AddTrack(beacon: Beacon, navigationActions: NavigationActions, viewModel: BeaconViewModel) {
   val songLists by viewModel.songLists.collectAsState()
+  var chosenList = remember {
+    mutableStateOf(if (viewModel.isTopSongsListVisible.value) " Top Songs " else "Liked Songs")
+  }
   viewModel.beaconId = beacon.id
   Log.d("AddTrack", "Adding track to beacon ${beacon.id}")
-  Button(onClick = { viewModel.changeChosenSongs() }) { Text(text = "Changes the list") }
-  IconButton(
-      onClick = {
-        Log.d("AddTrack", "Adding track to beacon ${viewModel.beaconId}")
-        navigationActions.navigateToSelectSongScreen(viewModelType.BEACON)
-        Log.d("AddTrack", "Adding track to beacon ${songLists}")
-      }) { // Toggle dialog visibility
-        Icon(
-            imageVector = Icons.Filled.Add,
-            contentDescription = stringResource(R.string.beaconTitle))
+
+  Row(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+      horizontalArrangement = Arrangement.Center) {
+        Button(
+            onClick = {
+              viewModel.changeChosenSongs()
+              chosenList.value =
+                  if (viewModel.isTopSongsListVisible.value) " Top Songs " else "Liked Songs"
+            }) {
+              Text(text = chosenList.value)
+            }
+        IconButton(
+            onClick = {
+              Log.d("AddTrack", "Adding track to beacon ${viewModel.beaconId}")
+              navigationActions.navigateToSelectSongScreen(viewModelType.BEACON)
+              Log.d("AddTrack", "Adding track to beacon $songLists")
+            }) { // Toggle dialog visibility
+              Icon(
+                  imageVector = Icons.Filled.Add,
+                  contentDescription = stringResource(R.string.beaconTitle))
+            }
       }
 }
 
