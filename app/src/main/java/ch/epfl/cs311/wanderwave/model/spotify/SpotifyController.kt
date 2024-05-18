@@ -180,8 +180,8 @@ constructor(
             }
             // prepend to the start of the recently played tracks list
             recentlyPlayedTracks.value =
-              (listOf(track) + recentlyPlayedTracks.value.filterNot { it.id == track.id }).take(
-                MAX_RECENT_TRACKS)
+                (listOf(track) + recentlyPlayedTracks.value.filterNot { it.id == track.id }).take(
+                    MAX_RECENT_TRACKS)
             recentlyPlayedTracks.value
             onSuccess()
           }
