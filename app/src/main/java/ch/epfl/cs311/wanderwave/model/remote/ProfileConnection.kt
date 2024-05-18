@@ -10,6 +10,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
@@ -72,7 +73,7 @@ class ProfileConnection(
   ): Flow<Result<Profile>> =
       callbackFlow<Result<Profile>> {
         if (document == null || !document.exists()) {
-          Result.failure<Profile>(Exception("Document does not exist"))
+          trySend(Result.failure<Profile>(Exception("Document does not exist")))
         }
         val profile: Profile? = item ?: Profile.from(document)
 
@@ -106,25 +107,17 @@ class ProfileConnection(
 
               val topSongs =
                   topSongRefs
-                      ?.map { trackRef ->
-                        trackConnection.fetchTrack(trackRef)
-                      } // map to a list of flow
-                      ?.map { flow ->
-                        flow.mapNotNull { result ->
-                          result
-                              .getOrNull() // Extract the track from Result or return null if it's a
-                          // failure
-                        }
-                      } // map to a list of track
+                      // map to a list of flow
+                      ?.map { trackRef -> trackConnection.fetchTrack(trackRef) }
+                      // Extract the track from Result or return null if it's a failure
+                      ?.map { flow -> flow.mapNotNull { result -> result.getOrNull() } }
+                      // map to a list of track
                       ?.fold(flowOf(Result.success(listOf<Track>()))) { acc, track ->
                         acc.combine(track) { accTracks, track ->
                           accTracks.map { tracks -> tracks + track }
                         }
-                      }
-                      ?: flowOf(
-                          Result.failure(
-                              Exception(
-                                  "Could not retrieve topSongs"))) // reduce the list of flow to a
+                      } ?: flowOf(Result.failure(Exception("Could not retrieve topSongs")))
+              // reduce the list of flow to a
               // single flow that contains the
               // list of tracks
 
@@ -140,15 +133,24 @@ class ProfileConnection(
                       profile
                     }
                   }
-              updatedProfile.map { Result.success(it) }
+
+              // would like to keep the flow without collecting it, but I don't know how to do it...
+              updatedProfile
+                  .map { Result.success(it) }
+                  .collect { result ->
+                    result.onSuccess { profile -> trySend(Result.success(profile)) }
+                  }
             }
           } else {
-            Result.failure<Profile>(Exception("Songs lists have a Wrong Firebase Format"))
+            trySend(Result.failure<Profile>(Exception("Songs lists have a Wrong Firebase Format")))
           }
         }
             ?: run {
-              Result.failure<Profile>(
-                  Exception("The profile is not in the correct format or could not be fetched"))
+              trySend(
+                  Result.failure<Profile>(
+                      Exception(
+                          "The profile is not in the correct format or could not be fetched")))
             }
+        awaitClose {}
       }
 }

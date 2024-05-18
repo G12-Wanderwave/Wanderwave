@@ -10,6 +10,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
@@ -247,26 +248,25 @@ public class ProfileConnectionTest {
       every { mockDocumentSnapshot.getString("artist") } returns track.artist
 
       // Define behavior for the addOnSuccessListener method
-      every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentSnapshot>>()) } answers
+      every { documentReference.addSnapshotListener(any()) } answers
           {
-            val listener = arg<OnSuccessListener<DocumentSnapshot>>(0)
+            val listener = arg<EventListener<DocumentSnapshot>>(0)
 
             // Define the behavior of the mock DocumentSnapshot here
-            listener.onSuccess(mockDocumentSnapshot)
-            mockTask
+            listener.onEvent(mockDocumentSnapshot, null)
+
+            mockk(relaxed = true)
           }
-      every { mockTask.addOnFailureListener(any()) } answers { mockTask }
 
-      every { mockTask.isComplete } returns true
-      every { mockTask.isSuccessful } returns true
-      every { mockTask.exception } returns null
-      every { mockTask.isCanceled } returns false
-      // get result
-      every { mockTask.result } returns mockDocumentSnapshot
+      every { trackDocumentReference.addSnapshotListener(any()) } answers
+          {
+            val listener = arg<EventListener<DocumentSnapshot>>(0)
 
-      // Define behavior for the get() method on the DocumentReference to return the mock task
-      every { documentReference.get() } returns mockTask
-      every { trackDocumentReference.get() } returns mockTask
+            // Define the behavior of the mock DocumentSnapshot here
+            listener.onEvent(mockDocumentSnapshot, null)
+
+            mockk(relaxed = true)
+          }
 
       every { firebaseFirestore.collection(profileConnection.collectionName) } returns
           collectionReference
@@ -280,7 +280,7 @@ public class ProfileConnectionTest {
               .firstOrNull()
 
       // Verify that the get function is called on the document with the correct id
-      coVerify { documentReference.get() }
+      coVerify { documentReference.addSnapshotListener(any()) }
 
       assertEquals(Result.success<Profile>(getTestProfile), retrievedProfile)
     }

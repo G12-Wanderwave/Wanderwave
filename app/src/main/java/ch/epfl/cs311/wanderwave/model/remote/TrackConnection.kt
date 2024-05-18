@@ -113,5 +113,6 @@ class TrackConnection(private val database: FirebaseFirestore) :
         trySend(Result.failure(e))
       }
     }
+    awaitClose {}
   }
 }

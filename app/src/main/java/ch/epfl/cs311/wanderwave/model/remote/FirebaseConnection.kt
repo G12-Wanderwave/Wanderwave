@@ -6,7 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flattenConcat
+import kotlinx.coroutines.flow.flattenMerge
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.tasks.await
 
@@ -91,34 +91,17 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
             }
 
             if (document != null && document.data != null) {
-              Log.d("Beacon", "Inside if ${documentToItem(document)}")
+
               documentToItem(document)?.let {
-                // dataFlow.value = Result.success(it)
                 // The document transform function is used when references are inside and need to be
                 // fetched
-                Log.d("Beacon", "DocumentSnapshot data inside document transform: ${document.data}")
-
-                // documentTransform(document, it).combine(this) { result, dataFlow2 ->
-                //   Log.d("Beacon", "Result and dataFlow2: $result, $dataFlow2")
-                //   dataFlow.value = result
-                // }
-                // launch {
-                //   documentTransform(document, it).collect { trySend(it) }
-                // }
                 trySend(documentTransform(document, it))
-
-                // trySend(Result.success(it))
-
-                // Log.d("Beacon", "Answer inside documentToItem ${answer}")
-
               }
             } else trySend(flowOf(Result.failure(Exception("Document does not exist"))))
           }
-
-          Log.d("Beacon", "Returning flow ${this}")
           awaitClose {}
         }
-    return callbackFlow.flattenConcat()
+    return callbackFlow.flattenMerge()
   }
 
   /**
