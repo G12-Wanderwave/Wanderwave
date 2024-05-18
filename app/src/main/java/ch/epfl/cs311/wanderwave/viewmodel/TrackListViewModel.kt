@@ -5,7 +5,6 @@ import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
@@ -43,14 +42,15 @@ constructor(
 
   private var _searchQuery = MutableStateFlow("")
 
-
   fun loadTracksBasedOnSource(index: Int) {
     viewModelScope.launch {
       _uiState.value = _uiState.value.copy(loading = true)
       when (index) {
-       0-> _uiState.value = _uiState.value.copy(tracks = spotifyController.recentlyPlayedTracks.value)
-        1-> loadRecentlyAddedTracks()
-       2->loadRecentlyAddedTracks() //TODO: modify here for the banned tracks
+        0 ->
+            _uiState.value =
+                _uiState.value.copy(tracks = spotifyController.recentlyPlayedTracks.value)
+        1 -> loadRecentlyAddedTracks()
+        2 -> loadRecentlyAddedTracks() // TODO: modify here for the banned tracks
       }
     }
   }
@@ -171,12 +171,11 @@ constructor(
   }
 
   data class UiState(
-    val tracks: List<Track> = listOf(),
+      val tracks: List<Track> = listOf(),
       val loading: Boolean = false,
       val expanded: Boolean = false,
       val progress: MutableFloatState = mutableFloatStateOf(0f),
       val isShuffled: Boolean = false,
-      val loopMode: SpotifyController.RepeatMode = SpotifyController.RepeatMode.OFF,
-      val showRecentlyAdded: Boolean = true // New state to toggle between recently added and recently viewed
+      val loopMode: SpotifyController.RepeatMode = SpotifyController.RepeatMode.OFF
   )
 }

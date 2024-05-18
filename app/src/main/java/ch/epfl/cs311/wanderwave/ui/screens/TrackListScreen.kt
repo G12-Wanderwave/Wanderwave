@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,7 +14,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -35,68 +33,63 @@ fun TrackListScreen(
     viewModel: TrackListViewModel = hiltViewModel()
 ) {
 
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
-    val tabs = listOf(
-        stringResource(R.string.recently_added_tracks),
-        stringResource(R.string.liked_tracks),
-        stringResource(R.string.banned_tracks)
-    )
-    LaunchedEffect(Unit) {
-        viewModel.loadTracksBasedOnSource(selectedTabIndex)
+  var selectedTabIndex by remember { mutableIntStateOf(0) }
+  val tabs =
+      listOf(
+          stringResource(R.string.recently_added_tracks),
+          stringResource(R.string.liked_tracks),
+          stringResource(R.string.banned_tracks))
+  LaunchedEffect(Unit) { viewModel.loadTracksBasedOnSource(selectedTabIndex) }
+  Column {
+    TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.fillMaxWidth()) {
+      tabs.forEachIndexed { index, title ->
+        Tab(
+            selected = selectedTabIndex == index,
+            onClick = {
+              selectedTabIndex = index
+              viewModel.loadTracksBasedOnSource(selectedTabIndex)
+            },
+            text = { Text(text = title, fontSize = 10.sp) })
+      }
     }
-    Column {
-        TabRow(
-            selectedTabIndex = selectedTabIndex,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    selected = selectedTabIndex == index,
-                    onClick = {
-                        selectedTabIndex = index
-                        viewModel.loadTracksBasedOnSource(selectedTabIndex)},
-                    text = { Text(text = title, fontSize =10.sp ) }
-                )
-            }
-        }
-            TabContent1(navActions,viewModel,selectedTabIndex)
-        }
-    }
+    TabContent1(navActions, viewModel, selectedTabIndex)
+  }
+}
 
 @Composable
 fun TabContent1(
     navActions: NavigationActions,
     viewModel: TrackListViewModel = hiltViewModel(),
-    selectedTabIndex: Int) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var searchQuery by remember { mutableStateOf("") }
+    selectedTabIndex: Int
+) {
+  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+  var searchQuery by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.testTag("trackListScreen")) {
-        TextField(
-            value = searchQuery,
-            onValueChange = { query ->
-                searchQuery = query
-                viewModel.setSearchQuery(query)
-            },
-            label = { Text("Search Tracks") },
-            modifier =
-            Modifier
-                .fillMaxWidth()
+  Column(modifier = Modifier.testTag("trackListScreen")) {
+    TextField(
+        value = searchQuery,
+        onValueChange = { query ->
+          searchQuery = query
+          viewModel.setSearchQuery(query)
+        },
+        label = { Text("Search Tracks") },
+        modifier =
+            Modifier.fillMaxWidth()
                 .padding(16.dp)
                 .testTag("searchBar") // Adding a test tag for the search bar
         )
-        TrackList(
-            tracks = uiState.tracks,
-            title =  when (selectedTabIndex) {
-                0-> stringResource(R.string.recently_added_tracks)
-                1-> stringResource(R.string.liked_tracks)
-                2 -> stringResource(R.string.banned_tracks)
-                else -> stringResource(R.string.recently_added_tracks)
+    TrackList(
+        tracks = uiState.tracks,
+        title =
+            when (selectedTabIndex) {
+              0 -> stringResource(R.string.recently_added_tracks)
+              1 -> stringResource(R.string.liked_tracks)
+              2 -> stringResource(R.string.banned_tracks)
+              else -> stringResource(R.string.recently_added_tracks)
             },
-            onAddTrack = {},
-            onSelectTrack = viewModel::playTrack,
-            navActions = navActions,
-            viewModelName = viewModelType.TRACKLIST)
-
-    }
+        onAddTrack = {},
+        onSelectTrack = viewModel::playTrack,
+        navActions = navActions,
+        viewModelName = viewModelType.TRACKLIST)
+  }
 }
