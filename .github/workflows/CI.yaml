@@ -123,7 +123,7 @@ jobs:
           force-avd-creation: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew connectedCheck --parallel --stacktrace --build-cache > instrumentation_test_log.txt
+          script: ./gradlew connectedCheck --parallel --stacktrace --build-cache | tee instrumentation_test_log.txt
 
       # This step generates the coverage report which will be used later in the semster for monitoring purposes
       - name: Generate coverage
