@@ -176,7 +176,7 @@ public class ProfileConnectionTest {
             recordPrivateCalls = true)
 
     // Define the behavior for the second getItem method
-    every { profileConnection.getItem(itemId) } returns flowOf<Profile>()
+    every { profileConnection.getItem(itemId) } returns flowOf<Result<Profile>>()
 
     // Call the method under test
     profileConnection.getItem(itemId)
@@ -274,12 +274,15 @@ public class ProfileConnectionTest {
 
       // Call the function under test
       val retrievedProfile =
-          profileConnection.getItem("testProfile").filter { !it.topSongs.isEmpty() }.firstOrNull()
+          profileConnection
+              .getItem("testProfile")
+              .filter { it.getOrNull()?.topSongs?.isNotEmpty() ?: false }
+              .firstOrNull()
 
       // Verify that the get function is called on the document with the correct id
       coVerify { documentReference.get() }
 
-      assert(getTestProfile == retrievedProfile)
+      assertEquals(Result.success<Profile>(getTestProfile), retrievedProfile)
     }
   }
 

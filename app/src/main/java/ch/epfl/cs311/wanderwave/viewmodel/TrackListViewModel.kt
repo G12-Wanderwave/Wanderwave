@@ -67,7 +67,9 @@ constructor(
       val trackRecords =
           appDatabase.trackRecordDao().getAllRecentlyAddedTracks().firstOrNull() ?: listOf()
       val trackDetails =
-          trackRecords.mapNotNull { repository.getItem(it.trackId).firstOrNull()?.getOrElse { null } }
+          trackRecords.mapNotNull {
+            repository.getItem(it.trackId).firstOrNull()?.getOrElse { null }
+          }
       _uiState.value = _uiState.value.copy(tracks = trackDetails, loading = false)
     }
   }

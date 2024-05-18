@@ -10,9 +10,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.QuerySnapshot
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -21,8 +19,6 @@ import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertNull
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -191,7 +187,10 @@ class TrackConnectionTest {
 
     // Call the function under test
     launch {
-      retrievedTrackAndProfile = trackConnection.fetchProfileAndTrack(mapOfDocumentReferences).firstOrNull()?.getOrElse { null }
+      retrievedTrackAndProfile =
+          trackConnection.fetchProfileAndTrack(mapOfDocumentReferences).firstOrNull()?.getOrElse {
+            null
+          }
     }
     // Verify that the get function is called on the document with the correct id
     coVerify { mockTrackDocumentReference.get() }

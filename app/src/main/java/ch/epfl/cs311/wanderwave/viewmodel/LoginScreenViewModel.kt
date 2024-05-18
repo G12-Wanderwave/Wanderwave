@@ -18,8 +18,7 @@ class LoginScreenViewModel
 @Inject
 constructor(
     private val spotifyController: SpotifyController,
-    private val authenticationController: AuthenticationController,
-    val beaconConnection: BeaconRepository
+    private val authenticationController: AuthenticationController
 ) : ViewModel() {
 
   private var _uiState = MutableStateFlow(UiState())

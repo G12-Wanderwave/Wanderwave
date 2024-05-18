@@ -62,7 +62,7 @@ class TrackConnection(private val database: FirebaseFirestore) :
     }
     return stateFlow
   }
-  
+
   // Fetch a track from a DocumentReference asynchronously
   fun fetchProfileAndTrack(
       profileAndTrackRef: Map<String, DocumentReference>?
