@@ -12,6 +12,9 @@ data class Beacon(
 
     /** List of tracks that are broadcast from the beacon */
     val profileAndTrack: List<ProfileTrackAssociation> = listOf<ProfileTrackAssociation>(),
+
+    /** Number of likes the beacon has */
+    val likes: Int = 0
 ) {
 
   companion object {
