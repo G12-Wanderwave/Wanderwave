@@ -215,4 +215,11 @@ class ProfileViewModelTest {
         ProfileViewModel.UIState(profile = null, isLoading = false, error = "Test Exception"),
         viewModel.uiState.value)
   }
+
+  @Test
+  fun emptyChildrenList_clearsChildrenPlaylistTrackList() = runBlockingTest {
+
+    // Act
+    viewModel.emptyChildrenList()
+  }
 }

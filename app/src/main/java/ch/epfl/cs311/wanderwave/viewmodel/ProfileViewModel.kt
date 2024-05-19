@@ -213,7 +213,6 @@ constructor(
   }
 
   override fun emptyChildrenList() {
-    _songLists.value = _songLists.value
     _childrenPlaylistTrackList.value = (emptyList())
   }
 

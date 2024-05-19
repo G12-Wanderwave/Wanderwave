@@ -144,7 +144,6 @@ constructor(
   }
 
   override fun emptyChildrenList() {
-    _uiState.value = _uiState.value
     _childrenPlaylistTrackList.value = (emptyList())
   }
 
