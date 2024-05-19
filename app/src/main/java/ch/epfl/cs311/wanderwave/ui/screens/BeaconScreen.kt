@@ -134,7 +134,6 @@ fun BeaconInformation(location: Location) {
 
 @Composable
 fun AddTrack(beacon: Beacon, navigationActions: NavigationActions, viewModel: BeaconViewModel) {
-  val songLists by viewModel.songLists.collectAsState()
   val chosenList = remember {
     mutableStateOf(if (viewModel.isTopSongsListVisible.value) " Top Songs " else "Liked Songs")
   }
