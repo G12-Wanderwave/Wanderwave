@@ -80,13 +80,16 @@ class ProfileConnection(
           profile!!.let { profile ->
             val topSongsObject = document["topSongs"]
             val chosenSongsObject = document["chosenSongs"]
+            val bannedSongsObject = document["bannedSongs"]
+            val likedSongsObject = document["likedSongs"]
 
-            if (topSongsObject is List<*> &&
-                topSongsObject.all { it is DocumentReference } &&
-                chosenSongsObject is List<*> &&
-                chosenSongsObject.all { it is DocumentReference }) {
+            if (isValidObject(topSongsObject) && isValidObject(chosenSongsObject) && isValidObject(
+                    bannedSongsObject
+                ) && isValidObject(likedSongsObject)  ){
               val topSongRefs = topSongsObject as? List<DocumentReference>
               val chosenSongRefs = chosenSongsObject as? List<DocumentReference>
+              val bannedSongRefs = bannedSongsObject as? List<DocumentReference>
+              val likedSongRefs = likedSongsObject as? List<DocumentReference>
 
               coroutineScope.launch {
 
@@ -96,44 +99,29 @@ class ProfileConnection(
                 // then reduce the list of flow to a single flow that contains the list of tracks
                 // and then combine the two lists of tracks to update the profile
 
-                val chosenSongs =
-                    chosenSongRefs
-                        ?.map { trackRef -> trackConnection.fetchTrack(trackRef) }
-                        ?.map { flow -> flow.mapNotNull { result -> result.getOrNull() } }
-                        ?.fold(flowOf(Result.success(listOf<Track>()))) { acc, track ->
-                          acc.combine(track) { accTracks, track ->
-                            accTracks.map { tracks -> tracks + track }
-                          }
-                        } ?: flowOf(Result.failure(Exception("Could not retrieve chosenSongs")))
+                val chosenSongs = documentReferencesToFlows(chosenSongRefs, trackConnection)
+                val topSongs = documentReferencesToFlows(topSongRefs, trackConnection)
+                val bannedSongs = documentReferencesToFlows(bannedSongRefs, trackConnection)
+                val likedSongs = documentReferencesToFlows(likedSongRefs, trackConnection)
 
-                val topSongs =
-                    topSongRefs
-                        // map to a list of flow
-                        ?.map { trackRef -> trackConnection.fetchTrack(trackRef) }
-                        // Extract the track from Result or return null if it's a failure
-                        ?.map { flow -> flow.mapNotNull { result -> result.getOrNull() } }
-                        // map to a list of track
-                        ?.fold(flowOf(Result.success(listOf<Track>()))) { acc, track ->
-                          acc.combine(track) { accTracks, track ->
-                            accTracks.map { tracks -> tracks + track }
-                          }
-                        } ?: flowOf(Result.failure(Exception("Could not retrieve topSongs")))
-                // reduce the list of flow to a
-                // single flow that contains the
-                // list of tracks
-
-                val updatedProfile =
-                    topSongs.combine(chosenSongs) { topSongs, chosenSongs ->
-                      // if one of the two or the two have a success value, we update the profile,
-                      // else we return the profile as is
-                      if (topSongs.isSuccess || chosenSongs.isSuccess) {
-                        profile.copy(
-                            topSongs = topSongs.getOrNull() ?: profile.topSongs,
-                            chosenSongs = chosenSongs.getOrNull() ?: profile.chosenSongs)
-                      } else {
-                        profile
-                      }
-                    }
+                val updatedProfile = topSongs.combine(chosenSongs) { topSongs, chosenSongs ->
+                  Pair(topSongs, chosenSongs)
+                }.combine(bannedSongs) { pair, bannedSongs ->
+                  Triple(pair.first, pair.second, bannedSongs)
+                }.combine(likedSongs) { triple, likedSongs ->
+                  // if any of the four have a success value, we update the profile,
+                  // else we return the profile as is
+                  if (triple.first.isSuccess || triple.second.isSuccess || triple.third.isSuccess || likedSongs.isSuccess) {
+                    profile.copy(
+                      topSongs = triple.first.getOrNull() ?: profile.topSongs,
+                      chosenSongs = triple.second.getOrNull() ?: profile.chosenSongs,
+                      bannedSongs = triple.third.getOrNull() ?: profile.bannedSongs,
+                      likedSongs = likedSongs.getOrNull() ?: profile.likedSongs
+                    )
+                  } else {
+                    profile
+                  }
+                }
 
                 // would like to keep the flow without collecting it, but I don't know how to do
                 // it...
@@ -151,4 +139,28 @@ class ProfileConnection(
         }
         awaitClose {}
       }
+
+  private fun documentReferencesToFlows(
+      documentReferences: List<DocumentReference>?,
+      trackConnection: TrackConnection
+  ): Flow<Result<List<Track>>> {
+    return documentReferences
+        // map to a list of flow
+        ?.map { trackRef -> trackConnection.fetchTrack(trackRef) }
+        // Extract the track from Result or return null if it's a failure
+        ?.map { flow -> flow.mapNotNull { result -> result.getOrNull() } }
+        // map to a list of track
+        ?.fold(flowOf(Result.success(listOf<Track>()))) { acc, track ->
+          acc.combine(track) { accTracks, track ->
+            accTracks.map { tracks -> tracks + track }
+          }
+        } ?: flowOf(Result.failure(Exception("Could not retrieve topSongs")))
+    // reduce the list of flow to a
+    // single flow that contains the
+    // list of tracks
+  }
+
+  fun isValidObject(obj: Any?): Boolean {
+    return obj is List<*> && obj.all { it is Map<*, *> }
+  }
 }
