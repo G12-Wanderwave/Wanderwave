@@ -121,7 +121,7 @@ fun BeaconInformation(location: Location) {
         locationSource = null,
         modifier =
             Modifier.fillMaxWidth()
-                .aspectRatio(4f / 3)
+                .aspectRatio(5f / 3)
                 .padding(4.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .testTag("beaconMap"),
@@ -135,14 +135,14 @@ fun BeaconInformation(location: Location) {
 @Composable
 fun AddTrack(beacon: Beacon, navigationActions: NavigationActions, viewModel: BeaconViewModel) {
   val songLists by viewModel.songLists.collectAsState()
-  var chosenList = remember {
+  val chosenList = remember {
     mutableStateOf(if (viewModel.isTopSongsListVisible.value) " Top Songs " else "Liked Songs")
   }
   viewModel.beaconId = beacon.id
   Log.d("AddTrack", "Adding track to beacon ${beacon.id}")
 
   Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
       horizontalArrangement = Arrangement.Center) {
         Button(
             onClick = {
@@ -185,7 +185,7 @@ fun SongList(
         }
       },
       navigationActions = navigationActions,
-      canAddSong = true,
+      canAddSong = false,
       onSelectTrack = onSelectTrack,
   )
 }
