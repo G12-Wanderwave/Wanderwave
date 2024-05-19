@@ -83,9 +83,10 @@ class ProfileConnection(
             val bannedSongsObject = document["bannedSongs"]
             val likedSongsObject = document["likedSongs"]
 
-            if (isValidObject(topSongsObject) || isValidObject(chosenSongsObject) || isValidObject(
-                    bannedSongsObject
-                ) || isValidObject(likedSongsObject)  ){
+            if (isValidObject(topSongsObject) ||
+                isValidObject(chosenSongsObject) ||
+                isValidObject(bannedSongsObject) ||
+                isValidObject(likedSongsObject)) {
               val topSongRefs = topSongsObject as? List<DocumentReference> ?: emptyList()
               val chosenSongRefs = chosenSongsObject as? List<DocumentReference> ?: emptyList()
               val bannedSongRefs = bannedSongsObject as? List<DocumentReference> ?: emptyList()
@@ -103,24 +104,30 @@ class ProfileConnection(
                 val bannedSongs = documentReferencesToFlows(bannedSongRefs, trackConnection)
                 val likedSongs = documentReferencesToFlows(likedSongRefs, trackConnection)
 
-                val updatedProfile = topSongs.combine(chosenSongs) { topSongs, chosenSongs ->
-                  Pair(topSongs, chosenSongs)
-                }.combine(bannedSongs) { pair, bannedSongs ->
-                  Triple(pair.first, pair.second, bannedSongs)
-                }.combine(likedSongs) { triple, likedSongs ->
-                  // if any of the four have a success value, we update the profile,
-                  // else we return the profile as is
-                  if (triple.first.isSuccess || triple.second.isSuccess || triple.third.isSuccess || likedSongs.isSuccess) {
-                    profile.copy(
-                      topSongs = triple.first.getOrNull() ?: profile.topSongs,
-                      chosenSongs = triple.second.getOrNull() ?: profile.chosenSongs,
-                      bannedSongs = triple.third.getOrNull() ?: profile.bannedSongs,
-                      likedSongs = likedSongs.getOrNull() ?: profile.likedSongs
-                    )
-                  } else {
-                    profile
-                  }
-                }
+                val updatedProfile =
+                    topSongs
+                        .combine(chosenSongs) { topSongs, chosenSongs ->
+                          Pair(topSongs, chosenSongs)
+                        }
+                        .combine(bannedSongs) { pair, bannedSongs ->
+                          Triple(pair.first, pair.second, bannedSongs)
+                        }
+                        .combine(likedSongs) { triple, likedSongs ->
+                          // if any of the four have a success value, we update the profile,
+                          // else we return the profile as is
+                          if (triple.first.isSuccess ||
+                              triple.second.isSuccess ||
+                              triple.third.isSuccess ||
+                              likedSongs.isSuccess) {
+                            profile.copy(
+                                topSongs = triple.first.getOrNull() ?: profile.topSongs,
+                                chosenSongs = triple.second.getOrNull() ?: profile.chosenSongs,
+                                bannedSongs = triple.third.getOrNull() ?: profile.bannedSongs,
+                                likedSongs = likedSongs.getOrNull() ?: profile.likedSongs)
+                          } else {
+                            profile
+                          }
+                        }
 
                 // would like to keep the flow without collecting it, but I don't know how to do
                 // it...
@@ -150,9 +157,7 @@ class ProfileConnection(
         ?.map { flow -> flow.mapNotNull { result -> result.getOrNull() } }
         // map to a list of track
         ?.fold(flowOf(Result.success(listOf<Track>()))) { acc, track ->
-          acc.combine(track) { accTracks, track ->
-            accTracks.map { tracks -> tracks + track }
-          }
+          acc.combine(track) { accTracks, track -> accTracks.map { tracks -> tracks + track } }
         } ?: flowOf(Result.failure(Exception("Could not retrieve topSongs")))
     // reduce the lists of flows to a
     // single flows that contains the
