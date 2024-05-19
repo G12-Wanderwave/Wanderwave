@@ -22,7 +22,6 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -165,23 +164,31 @@ class TrackListViewModelTest {
   }
 
   @Test
-  fun loadRecentlyAddedTracksTest() = runTest {
+  fun testLoadRecentlyAddedTracks() = runBlockingTest {
     // Arrange
-    val trackRecords = listOf(TrackRecord(1, "beacon1", "track1", System.currentTimeMillis()))
-    val expectedTracks = listOf(Track("track1", "Title 1", "Artist 1"))
+    val testTrackRecord = TrackRecord(0, "testTitle", "testArtist", 0.1.toLong())
+    val testTrack = Track("testId", "testTitle", "testArtist")
+    val testTrackRecords = listOf(testTrackRecord)
+    val testTrackDetails = listOf(testTrack)
 
-    every { appDatabase.trackRecordDao().getAllRecentlyAddedTracks() } returns flowOf(trackRecords)
-    every { repository.getTrackById(any()) } returns flowOf(expectedTracks.first())
+    every { appDatabase.trackRecordDao().getAllRecentlyAddedTracks() } returns
+        flowOf(testTrackRecords)
+    every { repository.getItem(testTrackRecord.trackId) } returns flowOf(Result.success(testTrack))
 
     // Act
     viewModel.loadRecentlyAddedTracks()
 
     // Assert
-    advanceUntilIdle()
+    assertEquals(testTrackDetails, viewModel.uiState.value.tracks)
+    assertEquals(false, viewModel.uiState.value.loading)
 
-    assertFalse(viewModel.uiState.value.tracks.isEmpty())
-    assertEquals(expectedTracks.first().title, viewModel.uiState.value.tracks.first().title)
-    assertEquals(expectedTracks.first().artist, viewModel.uiState.value.tracks.first().artist)
-    assertFalse(viewModel.uiState.value.loading)
+    // null case of repository
+    every { repository.getItem(testTrackRecord.trackId) } returns
+        flowOf(Result.failure(Exception()))
+    viewModel.loadRecentlyAddedTracks()
+
+    // Assert
+    assertEquals(emptyList<Track>(), viewModel.uiState.value.tracks)
+    assertEquals(false, viewModel.uiState.value.loading)
   }
 }
