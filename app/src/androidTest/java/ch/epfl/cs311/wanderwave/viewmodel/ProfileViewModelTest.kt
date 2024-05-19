@@ -202,7 +202,7 @@ class ProfileViewModelTest {
     every { profileRepository.getItem(testId) } returns testFlow
 
     // Act
-    viewModel.getProfileByID(testId)
+    viewModel.getProfileByID(testId, false)
 
     // Assert
     assertEquals(testProfile, viewModel.profile.value)
@@ -213,7 +213,7 @@ class ProfileViewModelTest {
     val testFlowError = flowOf(Result.failure<Profile>(Exception("Test Exception")))
     every { profileRepository.getItem(testId) } returns testFlowError
 
-    viewModel.getProfileByID(testId)
+    viewModel.getProfileByID(testId, false)
     assertEquals(
         ProfileViewModel.UIState(profile = null, isLoading = false, error = "Test Exception"),
         viewModel.uiState.value)
@@ -221,11 +221,8 @@ class ProfileViewModelTest {
 
   @Test
   fun testCreateProfile() = runBlockingTest {
-    every { profileRepository.isUidExisting("firebaseUid", any()) } answers
-        {
-          val callback = arg<(Boolean, Profile?) -> Unit>(1)
-          callback(false, null)
-        }
+    every { profileRepository.getItem(any()) } returns
+        flowOf(Result.failure(Exception("Document does not exist")))
 
     viewModel.getProfileByID("firebaseUid", true)
 
