@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.model.remote
 
-import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
@@ -31,18 +30,6 @@ class ProfileConnection(
   override val db = database
   private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-  override fun isUidExisting(firebaseUid: String, callback: (Boolean, Profile?) -> Unit) {
-    db.collection("users")
-        .document(firebaseUid)
-        .get()
-        .addOnSuccessListener { document -> callback(true, documentToItem(document)) }
-        .addOnFailureListener { exception ->
-          Log.w("Firestore", "Error getting documents: ", exception)
-          callback(false, null) // Assuming failure means document doesn't exist
-        }
-  }
-
-  // Document to Profile
   override fun documentToItem(document: DocumentSnapshot): Profile? {
     return Profile.from(document)
   }
