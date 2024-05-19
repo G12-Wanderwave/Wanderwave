@@ -79,7 +79,6 @@ class TrackConnection(private val database: FirebaseFirestore) :
               trySend(
                   Result.failure(Exception("Error fetching the track, firebase format is wrong")))
             } else {
-              Log.d("Firestore", "Fetched profile and track returning : $profile $track")
               trySend(Result.success(ProfileTrackAssociation(profile = profile, track = track)))
             }
           }
