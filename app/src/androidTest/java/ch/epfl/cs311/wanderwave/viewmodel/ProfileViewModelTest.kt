@@ -2,6 +2,7 @@ package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.ListType
+import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
@@ -177,5 +178,41 @@ class ProfileViewModelTest {
 
     viewModel.selectTrack(track, "fake name")
     verify { spotifyController.playTrack(track) }
+  }
+
+  @Test
+  fun testGetProfileByID() = runBlocking {
+    // Arrange
+    val testId = "testId"
+    val testProfile =
+        Profile(
+            firstName = "Test",
+            lastName = "User",
+            description = "Test Description",
+            numberOfLikes = 0,
+            isPublic = true,
+            spotifyUid = "Test Spotify UID",
+            firebaseUid = "Test Firebase UID",
+            profilePictureUri = null)
+    val testFlow = flowOf(Result.success(testProfile))
+
+    every { profileRepository.getItem(testId) } returns testFlow
+
+    // Act
+    viewModel.getProfileByID(testId)
+
+    // Assert
+    assertEquals(testProfile, viewModel.profile.value)
+    assertEquals(
+        ProfileViewModel.UIState(profile = testProfile, isLoading = false), viewModel.uiState.value)
+
+    // failure case
+    val testFlowError = flowOf(Result.failure<Profile>(Exception("Test Exception")))
+    every { profileRepository.getItem(testId) } returns testFlowError
+
+    viewModel.getProfileByID(testId)
+    assertEquals(
+        ProfileViewModel.UIState(profile = null, isLoading = false, error = "Test Exception"),
+        viewModel.uiState.value)
   }
 }

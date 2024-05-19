@@ -78,7 +78,14 @@ constructor(
   fun getBeaconById(id: String) {
     viewModelScope.launch {
       beaconRepository.getItem(id).collect { fetchedBeacon ->
-        _uiState.value = UIState(beacon = fetchedBeacon, isLoading = false)
+        // the fetched beacon has a result
+        fetchedBeacon.onSuccess { beacon ->
+          _uiState.value = UIState(beacon = beacon, isLoading = false)
+        }
+
+        fetchedBeacon.onFailure { exception ->
+          _uiState.value = UIState(error = exception.message, isLoading = false)
+        }
       }
     }
   }
