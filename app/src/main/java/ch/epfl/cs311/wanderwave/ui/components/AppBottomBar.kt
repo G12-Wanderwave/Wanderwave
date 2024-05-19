@@ -1,8 +1,12 @@
 package ch.epfl.cs311.wanderwave.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.LocationOn
@@ -11,11 +15,16 @@ import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.navigation.TOP_LEVEL_DESTINATIONS
@@ -45,34 +54,53 @@ fun AppBottomBar(navActions: NavigationActions) {
           Modifier.fillMaxWidth()
               .background(MaterialTheme.colorScheme.surface)
               .testTag("appBottomBar"),
-  ) {
-    // Assumes TOP_LEVEL_DESTINATIONS are in the order of Track List, Main, and Map for indexing
-    IconButton(
-        onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[0].route) },
-        modifier =
-            Modifier.weight(1f) // Spread the icons evenly across the BottomAppBar
-                .testTag("bottomAppBarButton" + Route.TRACK_LIST.routeString)) {
-          Icon(
-              trackListIcon,
-              contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[0].textId))
-        }
+      containerColor = MaterialTheme.colorScheme.scrim) {
+        // Assumes TOP_LEVEL_DESTINATIONS are in the order of Track List, Main, and Map for indexing
+        IconButton(
+            onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[0].route) },
+            modifier =
+                Modifier.weight(1f) // Spread the icons evenly across the BottomAppBar
+                    .testTag("bottomAppBarButton" + Route.TRACK_LIST.routeString)) {
+              Column(
+                  verticalArrangement = Arrangement.Center,
+                  horizontalAlignment = Alignment.CenterHorizontally,
+                  modifier = Modifier.fillMaxHeight()) {
+                    Icon(
+                        trackListIcon,
+                        contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[0].textId),
+                    )
+                    Text(
+                        text = stringResource(id = R.string.trackList),
+                        style = MaterialTheme.typography.bodySmall)
+                  }
+            }
 
-    Spacer(Modifier.weight(1f)) // Spacer for centering the middle icon
+        IconButton(
+            onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[1].route) },
+            modifier = Modifier.weight(1f).testTag("bottomAppBarButton" + Route.MAP.routeString)) {
+              Image(
+                  modifier = Modifier.padding(top = 5.dp, bottom = 5.dp),
+                  painter = painterResource(id = R.drawable.beaconlogo),
+                  contentDescription = "Beacon icon",
+              )
+            }
 
-    IconButton(
-        onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[1].route) },
-        modifier = Modifier.weight(1f).testTag("bottomAppBarButton" + Route.MAP.routeString)) {
-          Icon(mapIcon, contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[1].textId))
-        }
-
-    Spacer(Modifier.weight(1f)) // Spacer for centering the middle icon
-
-    IconButton(
-        onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[2].route) },
-        modifier = Modifier.weight(1f).testTag("bottomAppBarButton" + Route.PROFILE.routeString)) {
-          Icon(
-              profileIcon,
-              contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[2].textId))
-        }
-  }
+        IconButton(
+            onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[2].route) },
+            modifier =
+                Modifier.weight(1f).testTag("bottomAppBarButton" + Route.PROFILE.routeString)) {
+              Column(
+                  verticalArrangement = Arrangement.Center,
+                  horizontalAlignment = Alignment.CenterHorizontally,
+                  modifier = Modifier.fillMaxHeight()) {
+                    Icon(
+                        profileIcon,
+                        contentDescription = stringResource(id = TOP_LEVEL_DESTINATIONS[2].textId),
+                    )
+                    Text(
+                        text = stringResource(id = R.string.profile),
+                        style = MaterialTheme.typography.bodySmall)
+                  }
+            }
+      }
 }
