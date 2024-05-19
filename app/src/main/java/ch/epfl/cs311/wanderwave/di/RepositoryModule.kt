@@ -51,12 +51,14 @@ object RepositoryModule {
       @ApplicationContext context: Context,
       db: FirebaseFirestore,
       trackRepository: TrackRepository,
-      profileRepository: ProfileRepository
+      profileRepository: ProfileRepository,
+      appDatabase: AppDatabase
   ): BeaconRepository {
     return BeaconConnection(
         database = db,
         trackConnection = trackRepository as TrackConnection,
         profileConnection = profileRepository as ProfileConnection,
+        appDatabase = appDatabase,
         ioDispatcher = Dispatchers.IO)
   }
 
