@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.ui.components.player
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,25 +28,32 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
+import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.ui.theme.orange
+import ch.epfl.cs311.wanderwave.ui.theme.pink
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
-import ch.epfl.cs311.wanderwave.viewmodel.LoopMode
-import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.PlayerViewModel
 
 @Composable
 fun ExclusivePlayer(
     checked: MutableState<Boolean>,
     selectedVote: MutableIntState,
-    uiState: TrackListViewModel.UiState,
+    uiState: PlayerViewModel.UiState,
     progress: MutableFloatState
 ) {
-  val viewModel: TrackListViewModel = hiltViewModel()
+  val viewModel: PlayerViewModel = hiltViewModel()
   Column(
       modifier = Modifier.fillMaxSize().padding(bottom = 84.dp).testTag("exclusivePlayer"),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.SpaceBetween) {
-        PlayerDragHandleComponent(checked)
-        SwitchComponent(checked)
+        Column(verticalArrangement = Arrangement.Top) {
+          PlayerDragHandleComponent(checked)
+          Box(
+              contentAlignment = Alignment.TopStart,
+              modifier = Modifier.padding(start = 5.dp, top = 5.dp)) {
+                SwitchComponent(checked)
+              }
+        }
         PlayerIconButtonRowComponent()
         VotingButtonsComponent(selectedVote)
         TrackInfoComponent(uiState)
@@ -57,7 +65,7 @@ fun ExclusivePlayer(
 @Composable
 fun PlayerDragHandleComponent(checked: MutableState<Boolean>) {
   if (checked.value) {
-    PlayerDragHandle(duration1 = 1500, duration2 = 1500, duration3 = 1500, startColor = Color.Cyan)
+    PlayerDragHandle(duration1 = 1500, duration2 = 1500, duration3 = 1500, startColor = pink)
   } else {
     PlayerDragHandle(
         duration1 = 4000, duration2 = 3000, duration3 = 2000, startColor = spotify_green)
@@ -72,10 +80,10 @@ fun SwitchComponent(checked: MutableState<Boolean>) {
       onCheckedChange = { checked.value = it },
       colors =
           SwitchColors(
-              checkedThumbColor = Color.White,
+              checkedThumbColor = pink,
               checkedTrackColor = MaterialTheme.colorScheme.surface,
-              checkedBorderColor = Color.White,
-              checkedIconColor = Color.White,
+              checkedBorderColor = pink,
+              checkedIconColor = pink,
               uncheckedThumbColor = spotify_green,
               uncheckedTrackColor = MaterialTheme.colorScheme.surface,
               uncheckedBorderColor = spotify_green,
@@ -126,15 +134,13 @@ fun VotingButtonsComponent(selectedVote: MutableIntState) {
 }
 
 @Composable
-fun TrackInfoComponent(uiState: TrackListViewModel.UiState) {
+fun TrackInfoComponent(uiState: PlayerViewModel.UiState) {
   Column(
       modifier = Modifier.fillMaxWidth(),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center) {
-        Text(
-            text = uiState.selectedTrack?.artist ?: "", style = MaterialTheme.typography.titleSmall)
-        Text(
-            text = uiState.selectedTrack?.title ?: "", style = MaterialTheme.typography.titleMedium)
+        Text(text = uiState.track?.artist ?: "", style = MaterialTheme.typography.titleSmall)
+        Text(text = uiState.track?.title ?: "", style = MaterialTheme.typography.titleMedium)
       }
 }
 
@@ -159,7 +165,7 @@ fun SliderComponent(progress: MutableFloatState) {
 }
 
 @Composable
-fun PlayerControlRowComponent(viewModel: TrackListViewModel, uiState: TrackListViewModel.UiState) {
+fun PlayerControlRowComponent(viewModel: PlayerViewModel, uiState: PlayerViewModel.UiState) {
   Row(
       horizontalArrangement = Arrangement.SpaceAround,
       verticalAlignment = Alignment.CenterVertically,
@@ -181,10 +187,10 @@ fun PlayerControlRowComponent(viewModel: TrackListViewModel, uiState: TrackListV
 }
 
 @Composable
-fun ShuffleButton(viewModel: TrackListViewModel, uiState: TrackListViewModel.UiState) {
+fun ShuffleButton(viewModel: PlayerViewModel, uiState: PlayerViewModel.UiState) {
   IconButton(
       onClick = { viewModel.toggleShuffle() }, modifier = Modifier.testTag("toggleShuffle")) {
-        if (!uiState.isShuffled) {
+        if (!uiState.isShuffling) {
           Icon(
               painter = painterResource(id = R.drawable.shuffle_off_icon),
               contentDescription = "",
@@ -201,9 +207,9 @@ fun ShuffleButton(viewModel: TrackListViewModel, uiState: TrackListViewModel.UiS
 }
 
 @Composable
-fun PlayPauseButton(viewModel: TrackListViewModel, uiState: TrackListViewModel.UiState) {
+fun PlayPauseButton(viewModel: PlayerViewModel, uiState: PlayerViewModel.UiState) {
   IconButton(
-      onClick = { if (uiState.isPlaying) viewModel.pause() else viewModel.play() },
+      onClick = { if (uiState.isPlaying) viewModel.pause() else viewModel.resume() },
       modifier = Modifier.size(70.dp)) {
         if (uiState.isPlaying) {
           Icon(
@@ -222,22 +228,22 @@ fun PlayPauseButton(viewModel: TrackListViewModel, uiState: TrackListViewModel.U
 }
 
 @Composable
-fun RepeatButton(viewModel: TrackListViewModel, uiState: TrackListViewModel.UiState) {
-  IconButton(onClick = { viewModel.toggleLoop() }, modifier = Modifier.testTag("toggleRepeat")) {
-    when (uiState.loopMode) {
-      LoopMode.NONE ->
+fun RepeatButton(viewModel: PlayerViewModel, uiState: PlayerViewModel.UiState) {
+  IconButton(onClick = { viewModel.toggleRepeat() }, modifier = Modifier.testTag("toggleRepeat")) {
+    when (uiState.repeatMode) {
+      SpotifyController.RepeatMode.OFF ->
           Icon(
               painter = painterResource(id = R.drawable.repeat_icon),
               contentDescription = "",
               tint = MaterialTheme.colorScheme.onSurface,
               modifier = Modifier.size(30.dp))
-      LoopMode.ALL ->
+      SpotifyController.RepeatMode.ALL ->
           Icon(
               painter = painterResource(id = R.drawable.repeat_icon),
               contentDescription = "",
               tint = spotify_green,
               modifier = Modifier.size(30.dp))
-      else ->
+      SpotifyController.RepeatMode.ONE ->
           Icon(
               painter = painterResource(id = R.drawable.repeat_one_icon),
               contentDescription = "",
@@ -272,7 +278,7 @@ fun VotingButtons(selectedVote: MutableState<Int>, onVoteSelected: (Int) -> Unit
   Row(
       horizontalArrangement = Arrangement.SpaceAround,
       verticalAlignment = Alignment.CenterVertically,
-      modifier = Modifier.fillMaxWidth()) {
+      modifier = Modifier.fillMaxWidth().testTag("votingButtons")) {
         voteOptions.forEachIndexed { index, vote ->
           VotingButton(
               vote = vote,

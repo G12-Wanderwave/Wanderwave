@@ -35,14 +35,18 @@ object ServiceModule {
 
   @Provides
   @Singleton
-  fun provideSpotifyController(@ApplicationContext context: Context): SpotifyController {
-    return SpotifyController(context)
+  fun provideSpotifyController(
+      @ApplicationContext context: Context,
+      authenticationController: AuthenticationController
+  ): SpotifyController {
+    return SpotifyController(context, authenticationController)
   }
 
   @Provides
   @Singleton
   fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
     return Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, "app_database")
+        .fallbackToDestructiveMigration()
         .build()
   }
 

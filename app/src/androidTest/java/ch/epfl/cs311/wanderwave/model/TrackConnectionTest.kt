@@ -10,6 +10,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import io.mockk.coEvery
@@ -19,7 +20,7 @@ import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
-import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -89,25 +90,22 @@ class TrackConnectionTest {
       every { mockDocumentSnapshot.getString("artist") } returns getTestTrack.artist
 
       // Define behavior for the addOnSuccessListener method
-      every { mockTask.addOnSuccessListener(any<OnSuccessListener<DocumentSnapshot>>()) } answers
+      coEvery { documentReference.addSnapshotListener(any()) } answers
           {
-            val listener = arg<OnSuccessListener<DocumentSnapshot>>(0)
+            val listener = arg<EventListener<DocumentSnapshot>>(0)
 
             // Define the behavior of the mock DocumentSnapshot here
-            listener.onSuccess(mockDocumentSnapshot)
-            mockTask
-          }
-      every { mockTask.addOnFailureListener(any()) } answers { mockTask }
+            listener.onEvent(mockDocumentSnapshot, null)
 
-      // Define behavior for the get() method on the DocumentReference to return the mock task
-      every { documentReference.get() } returns mockTask
+            mockk(relaxed = true)
+          }
 
       // Call the function under test
       val retrievedTrack = trackConnection.getItem("testTrack").first()
 
       // Verify that the get function is called on the document with the correct id
-      coVerify { documentReference.get() }
-      assertEquals(getTestTrack, retrievedTrack)
+      coVerify { documentReference.addSnapshotListener(any()) }
+      assertEquals(Result.success(getTestTrack), retrievedTrack)
     }
   }
 
@@ -145,22 +143,24 @@ class TrackConnectionTest {
     val mockProfileTrackAssociation = ProfileTrackAssociation(mockProfile, mockTrack)
 
     // Define behavior for the get() method on the DocumentReference to return the mock task
-    coEvery { mockTrackDocumentReference.get() } returns
-        mockk {
-          every { isComplete } returns true
-          every { isSuccessful } returns true
-          every { result } returns mockDocumentSnapshot
-          every { getException() } returns null
-          every { isCanceled } returns false
+    coEvery { mockTrackDocumentReference.addSnapshotListener(any()) } answers
+        {
+          val listener = arg<EventListener<DocumentSnapshot>>(0)
+
+          // Define the behavior of the mock DocumentSnapshot here
+          listener.onEvent(mockDocumentSnapshot, null)
+
+          mockk(relaxed = true)
         }
 
-    coEvery { mockProfileDocumentReference.get() } returns
-        mockk {
-          every { isComplete } returns true
-          every { isSuccessful } returns true
-          every { result } returns mockDocumentSnapshot
-          every { getException() } returns null
-          every { isCanceled } returns false
+    coEvery { mockProfileDocumentReference.addSnapshotListener(any()) } answers
+        {
+          val listener = arg<EventListener<DocumentSnapshot>>(0)
+
+          // Define the behavior of the mock DocumentSnapshot here
+          listener.onEvent(mockDocumentSnapshot, null)
+
+          mockk(relaxed = true)
         }
 
     // Define behavior for the DocumentSnapshot
@@ -185,13 +185,15 @@ class TrackConnectionTest {
         mapOf("creator" to mockProfileDocumentReference, "track" to mockTrackDocumentReference)
 
     // Call the function under test
-    async {
-          retrievedTrackAndProfile = trackConnection.fetchProfileAndTrack(mapOfDocumentReferences)
-        }
-        .await()
+    retrievedTrackAndProfile =
+        trackConnection
+            .fetchProfileAndTrack(mapOfDocumentReferences)
+            .filterNotNull()
+            .first()
+            .fold(onSuccess = { it }, onFailure = { null })
 
     // Verify that the get function is called on the document with the correct id
-    coVerify { mockTrackDocumentReference.get() }
+    coVerify { mockTrackDocumentReference.addSnapshotListener(any()) }
 
     // Assert that the retrieved track is the same as the mock track
     assertEquals(mockProfileTrackAssociation, retrievedTrackAndProfile)
@@ -200,66 +202,39 @@ class TrackConnectionTest {
   @Test
   fun testFetchProfileAndTrackNullDocumentReference() = runBlocking {
     // Call the function under test
-    val retrievedTrack = trackConnection.fetchProfileAndTrack(null)
+    val retrievedTrack = trackConnection.fetchProfileAndTrack(null).first()
 
     // Assert that the retrieved track is null
-    assertEquals(null, retrievedTrack)
+    assert(retrievedTrack.isFailure)
   }
 
   @Test
-  fun testFetchTrackNullTrackDocument() = runBlocking {
-    // Mock the DocumentReference
+  fun testTrackDocument() = runBlocking {
+    // Mock the DocumenttestFetchTrackNullReference
     val mockDocumentReference = mockk<DocumentReference>()
 
     // Define behavior for the get() method on the DocumentReference to return the mock task
-    coEvery { mockDocumentReference.get() } returns
-        mockk {
-          every { isComplete } returns true
-          every { isSuccessful } returns true
-          every { result } returns null
-          every { getException() } returns null
-          every { isCanceled } returns false
+    coEvery { mockDocumentReference.addSnapshotListener(any()) } answers
+        {
+          val listener = arg<EventListener<DocumentSnapshot>>(0)
+
+          // Define the behavior of the mock DocumentSnapshot here
+          listener.onEvent(null, null)
+
+          mockk(relaxed = true)
         }
 
     val documentReferenceMap =
         mapOf("track" to mockDocumentReference, "creator" to mockDocumentReference)
 
     // Call the function under test
-    val retrievedTrack = trackConnection.fetchProfileAndTrack(documentReferenceMap)
+    val retrievedTrack = trackConnection.fetchProfileAndTrack(documentReferenceMap).first()
 
     // Verify that the get function is called on the document with the correct id
-    coVerify { mockDocumentReference.get() }
+    coVerify { mockDocumentReference.addSnapshotListener(any()) }
 
     // Assert that the retrieved track is null
-    assertEquals(null, retrievedTrack)
-  }
-
-  @Test
-  fun testFetchProfileAndTrackException() = runBlocking {
-    // Mock the DocumentReference
-    val mockDocumentReference = mockk<DocumentReference>()
-
-    // Define behavior for the get() method on the DocumentReference to return the mock task
-    coEvery { mockDocumentReference.get() } returns
-        mockk {
-          every { isComplete } returns true
-          every { isSuccessful } returns false
-          every { result } returns null
-          every { getException() } returns Exception("Test Exception")
-          every { isCanceled } returns false
-        }
-
-    val documentReferenceMap =
-        mapOf("track" to mockDocumentReference, "creator" to mockDocumentReference)
-
-    // Call the function under test
-    val retrievedTrack = trackConnection.fetchProfileAndTrack(documentReferenceMap)
-
-    // Verify that the get function is called on the document with the correct id
-    coVerify { mockDocumentReference.get() }
-
-    // Assert that the retrieved track is null
-    assertEquals(null, retrievedTrack)
+    assert(retrievedTrack.isFailure)
   }
 
   @Test
@@ -274,13 +249,14 @@ class TrackConnectionTest {
     val mockTrack = Track("testTrackId", "Test Title", "Test Artist")
 
     // Define behavior for the get() method on the DocumentReference to return the mock task
-    coEvery { mockTrackDocumentReference.get() } returns
-        mockk {
-          every { isComplete } returns true
-          every { isSuccessful } returns true
-          every { result } returns mockDocumentSnapshot
-          every { getException() } returns null
-          every { isCanceled } returns false
+    coEvery { mockTrackDocumentReference.addSnapshotListener(any()) } answers
+        {
+          val listener = arg<EventListener<DocumentSnapshot>>(0)
+
+          // Define the behavior of the mock DocumentSnapshot here
+          listener.onEvent(mockDocumentSnapshot, null)
+
+          mockk(relaxed = true)
         }
 
     // Define behavior for the DocumentSnapshot
@@ -290,22 +266,22 @@ class TrackConnectionTest {
     every { mockDocumentSnapshot.getString("artist") } returns mockTrack.artist
 
     // Call the function under test
-    val retrievedTrack = trackConnection.fetchTrack(mockTrackDocumentReference)
+    val retrievedTrack = trackConnection.fetchTrack(mockTrackDocumentReference).first()
 
     // Verify that the get function is called on the document with the correct id
-    coVerify { mockTrackDocumentReference.get() }
+    coVerify { mockTrackDocumentReference.addSnapshotListener(any()) }
 
     // Assert that the retrieved track is the same as the mock track
-    assertEquals(mockTrack, retrievedTrack)
+    assertEquals(Result.success(mockTrack), retrievedTrack)
   }
 
   @Test
   fun testFetchTrackNullDocumentReference() = runBlocking {
     // Call the function under test
-    val retrievedTrack = trackConnection.fetchTrack(null)
+    val retrievedTrack = trackConnection.fetchTrack(null).first()
 
     // Assert that the retrieved track is null
-    assertEquals(null, retrievedTrack)
+    assert(retrievedTrack.isFailure)
   }
 
   @Test
@@ -314,23 +290,24 @@ class TrackConnectionTest {
     val mockDocumentReference = mockk<DocumentReference>()
 
     // Define behavior for the get() method on the DocumentReference to return the mock task
-    coEvery { mockDocumentReference.get() } returns
-        mockk {
-          every { isComplete } returns true
-          every { isSuccessful } returns false
-          every { result } returns null
-          every { getException() } returns Exception("Test Exception")
-          every { isCanceled } returns false
+    coEvery { mockDocumentReference.addSnapshotListener(any()) } answers
+        {
+          val listener = arg<EventListener<DocumentSnapshot>>(0)
+
+          // Define the behavior of the mock DocumentSnapshot here
+          listener.onEvent(null, null)
+
+          mockk(relaxed = true)
         }
 
     // Call the function under test
-    val retrievedTrack = trackConnection.fetchTrack(mockDocumentReference)
+    val retrievedTrack = trackConnection.fetchTrack(mockDocumentReference).first()
 
     // Verify that the get function is called on the document with the correct id
-    coVerify { mockDocumentReference.get() }
+    coVerify { mockDocumentReference.addSnapshotListener(any()) }
 
     // Assert that the retrieved track is null
-    assertEquals(null, retrievedTrack)
+    assert(retrievedTrack.isFailure)
   }
 
   @Test
@@ -369,7 +346,31 @@ class TrackConnectionTest {
     trackConnection.addItemsIfNotExist(listOf(track))
 
     // Verify that the get function is called on the document with the correct id
-    coVerify { collectionReference.whereEqualTo("id", track.id) }
-    coVerify { collectionReference.get() }
+    coVerify { collectionReference.whereEqualTo("id", "spotify:track:" + track.id) }
+    coVerify { collectionReference.whereEqualTo("id", "spotify:track:" + track.id).get() }
+  }
+
+  @Test
+  fun testDocumentTransform() {
+    runBlocking {
+      // Mock the DocumentSnapshot
+      val mockDocumentSnapshot = mockk<DocumentSnapshot>()
+
+      // Mock the Track
+      val mockTrack = Track("testTrackId", "Test Title", "Test Artist")
+
+      // Call the function under test
+      val retrievedTrack =
+          trackConnection.documentTransform(mockDocumentSnapshot, mockTrack).first()
+
+      // Assert that the retrieved track is the same as the mock track
+      assertEquals(Result.success(mockTrack), retrievedTrack)
+
+      // null item case
+      val retrievedTrackNull = trackConnection.documentTransform(mockDocumentSnapshot, null).first()
+
+      // Assert that the retrieved track is the same as the mock track
+      assert(retrievedTrackNull.isFailure)
+    }
   }
 }

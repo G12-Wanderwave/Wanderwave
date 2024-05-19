@@ -104,5 +104,5 @@ As a history passionate tourist, I want to discover historical songs by showing 
 
 The following is the architecture diagram of our application
 
-![architecture diagram](architectureDiagram.png)
+![architecture diagram](deliverables/M2/architectureDiagram.png)
 

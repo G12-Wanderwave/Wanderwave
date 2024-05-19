@@ -94,5 +94,7 @@ val md_theme_dark_scrim = Color(0xFF000000)
 
 val spotify_green = Color(0xFF1DB954)
 val orange = Color(0xFFFFA500)
-
+val pink = Color(0xFFFE3C72)
+val coldStart = Color(0xFF03045E)
+val coldEnd = Color(0xFFCAF0F8)
 val seed = Color(0xFF008BBB)
