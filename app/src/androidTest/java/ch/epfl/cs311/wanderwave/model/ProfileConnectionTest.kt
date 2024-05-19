@@ -288,13 +288,13 @@ public class ProfileConnectionTest {
   }
 
   @Test
-  fun testDocumentTransformNullDocument() { runBlocking {
+  fun testDocumentTransformNullDocument() {
+    runBlocking {
+      val documentSnapshot = mockk<DocumentSnapshot>()
+      every { documentSnapshot.exists() } returns false
 
-    val documentSnapshot = mockk<DocumentSnapshot>()
-    every { documentSnapshot.exists() } returns false
-
-    val result = profileConnection.documentTransform(documentSnapshot, null).first()
-    assert(result.isFailure)
+      val result = profileConnection.documentTransform(documentSnapshot, null).first()
+      assert(result.isFailure)
     }
   }
 

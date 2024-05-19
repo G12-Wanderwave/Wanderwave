@@ -387,7 +387,7 @@ public class BeaconConnectionTest {
     runBlocking {
       val documentSnapshot = mockk<DocumentSnapshot>()
       every { documentSnapshot.exists() } returns false
-      val result = beaconConnection.documentTransform(documentSnapshot,null).first()
+      val result = beaconConnection.documentTransform(documentSnapshot, null).first()
       assert(result.isFailure)
     }
   }
