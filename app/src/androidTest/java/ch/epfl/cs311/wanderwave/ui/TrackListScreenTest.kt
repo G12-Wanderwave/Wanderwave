@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
+import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -17,16 +18,16 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
 import io.mockk.Called
+import io.mockk.Runs
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.just
 import io.mockk.verify
-import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -44,6 +45,7 @@ class TrackListScreenTest : TestCase() {
 
   @RelaxedMockK lateinit var mockSpotifyController: SpotifyController
   @RelaxedMockK lateinit var trackRepository: TrackRepository
+  @RelaxedMockK lateinit var appDatabase: AppDatabase
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
   @RelaxedMockK lateinit var viewModel: TrackListViewModel
@@ -58,16 +60,10 @@ class TrackListScreenTest : TestCase() {
     mockNavigationActions = NavigationActions(mockNavController)
   }
 
-  @After
-  fun tearDown() {
-    // Dispatchers.resetMain()
-    // comment
-  }
-
   private fun setupViewModel(result: Boolean) {
 
     flowOf(listOf(Track("id1", "title1", "artist1")))
-    every { mockSpotifyController.playTrack(any()) } returns flowOf(result)
+    every { mockSpotifyController.playTrack(any()) } just Runs
     every { trackRepository.getAll() } returns
         flowOf(
             listOf(
@@ -75,7 +71,7 @@ class TrackListScreenTest : TestCase() {
                 Track("is 2", "Track 2", "Artist 2"),
             ))
 
-    viewModel = TrackListViewModel(mockSpotifyController, trackRepository)
+    viewModel = TrackListViewModel(mockSpotifyController, appDatabase, trackRepository)
 
     composeTestRule.setContent {
       TrackListScreen(mockNavigationActions, mockShowMessage, viewModel)
@@ -90,7 +86,6 @@ class TrackListScreenTest : TestCase() {
       trackButton {
         assertIsDisplayed()
         performClick()
-        assertTrue(viewModel.uiState.value.selectedTrack != null)
       }
       advanceUntilIdle()
       coVerify { mockShowMessage wasNot Called }

@@ -88,7 +88,7 @@ android {
 }
 
 dependencies {
-
+    // AndroidX
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -99,83 +99,69 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.appcompat)
+
+    // Firebase
     implementation(libs.firebase.firestore.ktx)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.database)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.auth)
+    implementation ("com.google.firebase:firebase-database-ktx:20.3.1")
+
+    // OkHttp
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.coroutines)
+
+    // Hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+    androidTestImplementation(libs.hilt.android.testing)
+    kaptAndroidTest(libs.dagger.hilt.android.compiler)
+    testImplementation(libs.dagger.hilt.android.testing)
+    kaptTest(libs.google.hilt.android.compiler)
+    // Glide
+    implementation("com.github.bumptech.glide:glide:4.15.1")
+    kapt("com.github.bumptech.glide:compiler:4.15.1")
+    // Room
+    implementation(libs.androidx.room.runtime)
+    kapt(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+
+    // Other libraries
+    implementation(libs.spotify.auth)
+    implementation(libs.gson)
+    implementation(files("../libs/spotify-app-remote-release-0.8.0.aar"))
+    implementation("com.google.android.play:core-ktx:1.7.0")
+    implementation(libs.maps.compose)
     implementation(libs.places)
+    implementation(libs.play.services.location)
+    implementation(libs.accompanist.permissions)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.coil.compose)
+
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation("org.testng:testng:6.9.6")
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
-
-    implementation(libs.spotify.auth)
-    implementation(libs.gson)
-    implementation(files("../libs/spotify-app-remote-release-0.8.0.aar"))
-
-    implementation(libs.androidx.room.runtime)
-    kapt(libs.androidx.room.compiler)
-    implementation(libs.androidx.room.ktx)
-
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.database)
-    implementation(libs.firebase.firestore)
-    implementation(libs.firebase.auth)
-
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.coroutines)
-
-    implementation("com.google.android.play:core-ktx:1.7.0")
-
-    implementation(libs.maps.compose)
-
-    implementation(libs.play.services.location)
-    implementation(libs.accompanist.permissions)
-
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.android.compiler)
-
-    androidTestImplementation(libs.hilt.android.testing)
-    kaptAndroidTest(libs.dagger.hilt.android.compiler)
-
-    testImplementation(libs.dagger.hilt.android.testing)
-    kaptTest(libs.google.hilt.android.compiler)
-
-    implementation(libs.androidx.navigation.compose)
-    // Hilt Navigation Compose library for injecting ViewModels in Compose
-    implementation(libs.androidx.hilt.navigation.compose)
-
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.ui.test.junit4)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-
     androidTestImplementation(libs.kaspresso)
-    // Allure support
     androidTestImplementation(libs.kaspresso.allure.support)
-    // Jetpack Compose support
     androidTestImplementation(libs.kaspresso.compose.support)
-
-    // Dependency for using Intents in instrumented tests
     androidTestImplementation(libs.androidx.espresso.intents)
-
-    // Dependencies for using MockK in instrumented tests
     testImplementation(libs.mockk)
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.mockk.agent)
+    androidTestImplementation (libs.junit)
 
-    // Dependencies for the photo part
-    implementation(libs.coil.compose)
-
-    androidTestImplementation("io.mockk:mockk:1.13.10")
-    androidTestImplementation("io.mockk:mockk-android:1.13.10")
-    androidTestImplementation("io.mockk:mockk-agent:1.13.10")
-
-    //Dependencies for Firebase
-    implementation ("com.google.firebase:firebase-database-ktx:20.3.1")
+    // Debugging
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }
+
 kapt {
     correctErrorTypes = true
 }

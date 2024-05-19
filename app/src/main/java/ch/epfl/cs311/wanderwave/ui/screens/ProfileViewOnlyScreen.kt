@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,15 +18,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.profile.ClickableIcon
 import ch.epfl.cs311.wanderwave.ui.components.profile.SongsListDisplay
 import ch.epfl.cs311.wanderwave.ui.components.profile.VisitCard
 import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.SongList
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 val mockSongLists =
     listOf(
@@ -35,7 +31,7 @@ val mockSongLists =
             ListType.TOP_SONGS,
             listOf(Track("1", "Track 1", "Artist 1"), Track("2", "Track 2", "Artist 2"))),
         SongList(
-            ListType.CHOSEN_SONGS,
+            ListType.LIKED_SONGS,
             listOf(Track("3", "Track 3", "Artist 3"), Track("4", "Track 4", "Artist 4"))))
 // TODO: modify this, because the profile.songLists is not available yet
 
@@ -55,16 +51,7 @@ fun ProfileViewOnlyScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
 
-  LaunchedEffect(profileId) {
-    if (profileId != null) {
-      viewModel.getProfileByID(profileId, false)
-    } else {
-      withContext(Dispatchers.Main) {
-        navigationActions.navigateTo(Route.MAIN)
-        Log.e("No profile found", "No beacons found for the given id")
-      }
-    }
-  }
+  LaunchedEffect(profileId) { viewModel.getProfileByID(profileId, false) }
 
   val uiState = viewModel.uiState.collectAsState().value
 
@@ -85,6 +72,7 @@ fun ProfileViewOnlyScreen(
               mockSongLists,
               isTopSongsListVisible = true,
               {},
+              onSelectTrack = { viewModel.selectTrack(it, ListType.TOP_SONGS.name) },
               canAddSong = false,
           )
         }

@@ -21,10 +21,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.timeout
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -68,10 +70,40 @@ class ProfileViewModelTest {
     clearAllMocks() // Clear all MockK mocks
   }
 
+  //  override fun getTracksFromPlaylist(
+  //    playlistId: String,
+  //    playlist: MutableStateFlow<List<ListItem>>
+  //  ) {
+  //    viewModelScope.launch {
+  //      getTracksFromSpotifyPlaylist(playlistId, playlist, spotifyController, viewModelScope)
+  //    }
+  //  }
+
+  @Test
+  fun testGetTracksFromPlaylist() = runBlockingTest {
+    val playlistId = "Some Playlist ID"
+
+    // Call getTracksFromPlaylist to initialize the playlist
+    viewModel.getTracksFromPlaylist(playlistId)
+  }
+
+  @Test
+  fun testChangeChosenSongs() = runBlockingTest {
+    // Ensure the initial value is true
+    assertTrue(viewModel.isTopSongsListVisible.value)
+
+    // Change the value
+    viewModel.changeChosenSongs()
+
+    // Ensure the value is now false
+    assertFalse(viewModel.isTopSongsListVisible.value)
+  }
+
   @Test
   fun testAddTrackToList() = runBlockingTest {
     // Define a new track
     val newTrack = Track("Some Track ID", "Track Title", "Artist Name")
+    val expectedTrack = Track("spotify:track:Some Track ID", "Track Title", "Artist Name")
 
     // Ensure song lists are initially empty
     assertTrue(viewModel.songLists.value.isEmpty())
@@ -88,7 +120,8 @@ class ProfileViewModelTest {
 
     // Check if the track was added correctly
     val songsInList = songLists.find { it.name == ListType.TOP_SONGS }?.tracks ?: emptyList()
-    assertTrue("Song list should contain the newly added track", songsInList.contains(newTrack))
+    assertTrue(
+        "Song list should contain the newly added track", songsInList.contains(expectedTrack))
   }
 
   @Test
@@ -123,12 +156,73 @@ class ProfileViewModelTest {
   }
 
   @Test
+  fun testRetrieveTracksFromSpotify() = runBlocking {
+    val listItem = ListItem("id", "title", null, "subtitle", "", false, true)
+    val expectedListItem = ListItem("spotify:track:id", "title", null, "subtitle", "", false, true)
+    every { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(listItem))
+    every {
+      spotifyController.getAllChildren(ListItem("id", "title", null, "subtitle", "", false, true))
+    } returns flowOf(listOf(listItem))
+    viewModel.createSpecificSongList(ListType.TOP_SONGS)
+    viewModel.retrieveTracksFromSpotify()
+
+    val flow = viewModel.songLists
+    val result = flow.timeout(2.seconds).catch {}.firstOrNull()
+
+    assertEquals(expectedListItem.id, result?.get(0)?.tracks?.get(0)?.id)
+  }
+
+  @Test
+  fun testSelectTrack() = runTest {
+    val track = Track("id", "title", "artist")
+    viewModel.createSpecificSongList(ListType.TOP_SONGS)
+    viewModel.selectTrack(track, ListType.TOP_SONGS.name)
+    verify { spotifyController.playTrackList(any(), any(), any(), any()) }
+
+    viewModel.selectTrack(track, "fake name")
+    verify { spotifyController.playTrack(track) }
+  }
+
+  @Test
+  fun testGetProfileByID() = runBlocking {
+    // Arrange
+    val testId = "testId"
+    val testProfile =
+        Profile(
+            firstName = "Test",
+            lastName = "User",
+            description = "Test Description",
+            numberOfLikes = 0,
+            isPublic = true,
+            spotifyUid = "Test Spotify UID",
+            firebaseUid = "Test Firebase UID",
+            profilePictureUri = null)
+    val testFlow = flowOf(Result.success(testProfile))
+
+    every { profileRepository.getItem(testId) } returns testFlow
+
+    // Act
+    viewModel.getProfileByID(testId, false)
+
+    // Assert
+    assertEquals(testProfile, viewModel.profile.value)
+    assertEquals(
+        ProfileViewModel.UIState(profile = testProfile, isLoading = false), viewModel.uiState.value)
+
+    // failure case
+    val testFlowError = flowOf(Result.failure<Profile>(Exception("Test Exception")))
+    every { profileRepository.getItem(testId) } returns testFlowError
+
+    viewModel.getProfileByID(testId, false)
+    assertEquals(
+        ProfileViewModel.UIState(profile = null, isLoading = false, error = "Test Exception"),
+        viewModel.uiState.value)
+  }
+
+  @Test
   fun testCreateProfile() = runBlockingTest {
-    every { profileRepository.isUidExisting("firebaseUid", any()) } answers
-        {
-          val callback = arg<(Boolean, Profile?) -> Unit>(1)
-          callback(false, null)
-        }
+    every { profileRepository.getItem(any()) } returns
+        flowOf(Result.failure(Exception("Document does not exist")))
 
     viewModel.getProfileByID("firebaseUid", true)
 
