@@ -154,9 +154,7 @@ fun AddTrack(beacon: Beacon, navigationActions: NavigationActions, viewModel: Be
             }
         IconButton(
             onClick = {
-              Log.d("AddTrack", "Adding track to beacon ${viewModel.beaconId}")
               navigationActions.navigateToSelectSongScreen(viewModelType.BEACON)
-              Log.d("AddTrack", "Adding track to beacon $songLists")
             }) { // Toggle dialog visibility
               Icon(
                   imageVector = Icons.Filled.Add,
