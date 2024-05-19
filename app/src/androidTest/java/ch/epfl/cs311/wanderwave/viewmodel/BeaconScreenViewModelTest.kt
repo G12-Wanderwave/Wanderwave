@@ -189,4 +189,11 @@ class BeaconScreenViewModelTest {
     assertFalse(uiStateError.isLoading)
     assertEquals("Test Exception", uiStateError.error)
   }
+
+  @Test
+  fun emptyChildrenList_clearsChildrenPlaylistTrackList() = runBlockingTest {
+
+    // Act
+    viewModel.emptyChildrenList()
+  }
 }

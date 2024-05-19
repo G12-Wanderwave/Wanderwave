@@ -191,4 +191,11 @@ class TrackListViewModelTest {
     assertEquals(emptyList<Track>(), viewModel.uiState.value.tracks)
     assertEquals(false, viewModel.uiState.value.loading)
   }
+
+  @Test
+  fun emptyChildrenList_clearsChildrenPlaylistTrackList() = runBlockingTest {
+
+    // Act
+    viewModel.emptyChildrenList()
+  }
 }

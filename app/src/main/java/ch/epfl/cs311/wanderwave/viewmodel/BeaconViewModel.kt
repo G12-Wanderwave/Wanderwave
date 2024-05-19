@@ -143,6 +143,10 @@ constructor(
         playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
   }
 
+  override fun emptyChildrenList() {
+    _childrenPlaylistTrackList.value = (emptyList())
+  }
+
   fun changeChosenSongs() {
     _isTopSongsListVisible.value = !_isTopSongsListVisible.value
   }
