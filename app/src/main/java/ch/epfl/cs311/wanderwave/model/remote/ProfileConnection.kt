@@ -77,7 +77,7 @@ class ProfileConnection(
         }
         val profile: Profile? = item ?: Profile.from(document)
 
-        profile?.let { profile ->
+        profile!!.let { profile ->
           val topSongsObject = document["topSongs"]
           val chosenSongsObject = document["chosenSongs"]
 
@@ -145,12 +145,6 @@ class ProfileConnection(
             trySend(Result.failure<Profile>(Exception("Songs lists have a Wrong Firebase Format")))
           }
         }
-            ?: run {
-              trySend(
-                  Result.failure<Profile>(
-                      Exception(
-                          "The profile is not in the correct format or could not be fetched")))
-            }
         awaitClose {}
       }
 }

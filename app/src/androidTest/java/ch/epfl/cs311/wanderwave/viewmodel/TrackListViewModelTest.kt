@@ -1,6 +1,7 @@
 import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.data.TrackRecord
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
@@ -160,5 +161,34 @@ class TrackListViewModelTest {
     viewModel.toggleTrackSource()
     val toggled = viewModel.uiState.value.showRecentlyAdded
     assertNotEquals(initial, toggled)
+  }
+
+  @Test
+  fun testLoadRecentlyAddedTracks() = runBlockingTest {
+    // Arrange
+    val testTrackRecord = TrackRecord(0, "testTitle", "testArtist", 0.1.toLong())
+    val testTrack = Track("testId", "testTitle", "testArtist")
+    val testTrackRecords = listOf(testTrackRecord)
+    val testTrackDetails = listOf(testTrack)
+
+    every { appDatabase.trackRecordDao().getAllRecentlyAddedTracks() } returns
+        flowOf(testTrackRecords)
+    every { repository.getItem(testTrackRecord.trackId) } returns flowOf(Result.success(testTrack))
+
+    // Act
+    viewModel.loadRecentlyAddedTracks()
+
+    // Assert
+    assertEquals(testTrackDetails, viewModel.uiState.value.tracks)
+    assertEquals(false, viewModel.uiState.value.loading)
+
+    // null case of repository
+    every { repository.getItem(testTrackRecord.trackId) } returns
+        flowOf(Result.failure(Exception()))
+    viewModel.loadRecentlyAddedTracks()
+
+    // Assert
+    assertEquals(emptyList<Track>(), viewModel.uiState.value.tracks)
+    assertEquals(false, viewModel.uiState.value.loading)
   }
 }

@@ -31,6 +31,7 @@ import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
 import junit.framework.TestCase.fail
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -538,4 +539,6 @@ public class BeaconConnectionTest {
     // Verify that the delete function is called on the document with the correct id
     verify { documentReference.delete() }
   }
+
+
 }

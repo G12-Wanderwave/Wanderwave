@@ -79,7 +79,7 @@ class BeaconConnection(
         } else {
           val beacon: Beacon? = item ?: Beacon.from(document)
 
-          beacon?.let { beacon ->
+          beacon!!.let { beacon ->
             val tracksObject = document["tracks"]
 
             if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
@@ -118,12 +118,6 @@ class BeaconConnection(
               trySend(Result.failure(Exception("Tracks are not in the correct format")))
             }
           }
-              ?: run {
-                trySend(
-                    Result.failure<Beacon>(
-                        Exception(
-                            "The beacon is not in the correct format or could not be fetched")))
-              }
         }
 
         awaitClose {}
