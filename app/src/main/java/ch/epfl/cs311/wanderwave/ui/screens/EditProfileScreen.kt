@@ -44,7 +44,11 @@ import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
  * @last update 1.0
  */
 @Composable
-fun EditProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
+fun EditProfileScreen(
+    navActions: NavigationActions,
+    viewModel: ProfileViewModel,
+    canCancel: Boolean = true
+) {
   val profile by viewModel.profile.collectAsState()
   val profile2 = profile.copy()
   var firstName by remember { mutableStateOf(profile2.firstName) }
@@ -85,11 +89,12 @@ fun EditProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel
               viewModel.updateProfile(profileCopy)
               navActions.goBack()
             },
-            onCancel = { navActions.goBack() },
+            onCancel = { if (canCancel) navActions.goBack() },
             onDelete = {
               viewModel.deleteProfile()
               navActions.navigateToTopLevel(Route.LOGIN)
-            })
+            },
+            canCancel = canCancel)
       }
 }
 
@@ -161,7 +166,12 @@ fun EditableTextFields(
  * @last update 1.0
  */
 @Composable
-fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit, onDelete: () -> Unit) {
+fun ActionButtons(
+    onSave: () -> Unit,
+    onCancel: () -> Unit,
+    onDelete: () -> Unit,
+    canCancel: Boolean = true
+) {
   Column(
       verticalArrangement = Arrangement.spacedBy(2.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
@@ -172,20 +182,22 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit, onDelete: () -> Unit
               Text("Save")
             }
         Spacer(modifier = Modifier.width(8.dp))
-        Button(
-            onClick = onCancel,
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-            border = BorderStroke(1.dp, md_theme_light_error),
-            modifier = Modifier.width(100.dp).testTag("cancelButton")) {
-              Text(text = "Cancel", color = md_theme_light_error)
-            }
-        Spacer(Modifier.padding(8.dp))
-        Button(
-            onClick = onDelete,
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-            border = BorderStroke(1.dp, md_theme_light_error),
-            modifier = Modifier.width(200.dp).testTag("deleteButton")) {
-              Text(text = "Delete profile", color = md_theme_light_error)
-            }
+        if (canCancel) {
+          Button(
+              onClick = onCancel,
+              colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+              border = BorderStroke(1.dp, md_theme_light_error),
+              modifier = Modifier.width(100.dp).testTag("cancelButton")) {
+                Text(text = "Cancel", color = md_theme_light_error)
+              }
+          Spacer(Modifier.padding(8.dp))
+          Button(
+              onClick = onDelete,
+              colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+              border = BorderStroke(1.dp, md_theme_light_error),
+              modifier = Modifier.width(200.dp).testTag("deleteButton")) {
+                Text(text = "Delete profile", color = md_theme_light_error)
+              }
+        }
       }
 }

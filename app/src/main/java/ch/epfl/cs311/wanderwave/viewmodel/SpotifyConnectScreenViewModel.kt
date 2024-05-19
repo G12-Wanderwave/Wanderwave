@@ -36,8 +36,13 @@ constructor(
     _uiState.value = UiState(hasResult = true, success = connectSuccess)
   }
 
+  fun updateState(success: Boolean, isFirstTime: Boolean) {
+    _uiState.value = UiState(hasResult = true, success = success, isFirstTime = isFirstTime)
+  }
+
   data class UiState(
       val hasResult: Boolean = false,
       val success: Boolean = false,
+      val isFirstTime: Boolean = false
   )
 }
