@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Location
@@ -30,7 +31,8 @@ class BeaconViewModel
 constructor(
     private val trackRepository: TrackRepository,
     private val beaconRepository: BeaconRepository,
-    private val spotifyController: SpotifyController
+    private val spotifyController: SpotifyController,
+    private val authenticationController: AuthenticationController
 ) : ViewModel(), SpotifySongsActions {
 
   private var _uiState = MutableStateFlow(UIState())
@@ -94,7 +96,8 @@ constructor(
     // Call the BeaconConnection's addTrackToBeacon with the provided beaconId and track
     val correctTrack = track.copy(id = "spotify:track:" + track.id)
     trackRepository.addItemsIfNotExist(listOf(correctTrack))
-    beaconRepository.addTrackToBeacon(beaconId, correctTrack, onComplete)
+    beaconRepository.addTrackToBeacon(
+        beaconId, correctTrack, authenticationController.getUserData()!!.id, onComplete)
   }
 
   // Function to add a track to a song list

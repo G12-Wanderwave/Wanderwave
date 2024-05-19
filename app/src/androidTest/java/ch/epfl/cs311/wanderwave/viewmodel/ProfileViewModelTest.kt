@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -47,10 +48,12 @@ class ProfileViewModelTest {
 
   @RelaxedMockK private lateinit var spotifyController: SpotifyController
 
+  @RelaxedMockK private lateinit var authenticationController: AuthenticationController
+
   @Before
   fun setup() {
     Dispatchers.setMain(testDispatcher)
-    viewModel = ProfileViewModel(profileRepository, spotifyController)
+    viewModel = ProfileViewModel(profileRepository, spotifyController, authenticationController)
   }
 
   @After
@@ -199,7 +202,7 @@ class ProfileViewModelTest {
     every { profileRepository.getItem(testId) } returns testFlow
 
     // Act
-    viewModel.getProfileByID(testId)
+    viewModel.getProfileByID(testId, false)
 
     // Assert
     assertEquals(testProfile, viewModel.profile.value)
@@ -210,16 +213,21 @@ class ProfileViewModelTest {
     val testFlowError = flowOf(Result.failure<Profile>(Exception("Test Exception")))
     every { profileRepository.getItem(testId) } returns testFlowError
 
-    viewModel.getProfileByID(testId)
+    viewModel.getProfileByID(testId, false)
     assertEquals(
         ProfileViewModel.UIState(profile = null, isLoading = false, error = "Test Exception"),
         viewModel.uiState.value)
   }
 
   @Test
-  fun emptyChildrenList_clearsChildrenPlaylistTrackList() = runBlockingTest {
+  fun testCreateProfile() = runBlockingTest {
+    every { profileRepository.getItem(any()) } returns
+        flowOf(Result.failure(Exception("Document does not exist")))
 
-    // Act
-    viewModel.emptyChildrenList()
+    viewModel.getProfileByID("firebaseUid", true)
+
+    verify { profileRepository.addItemWithId(any()) }
+
+    viewModel.getProfileByID("firebaseUid", false)
   }
 }

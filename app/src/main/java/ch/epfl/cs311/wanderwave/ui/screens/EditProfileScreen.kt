@@ -17,6 +17,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +54,8 @@ fun EditProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel
   var firstName by remember { mutableStateOf(profile2.firstName) }
   var lastName by remember { mutableStateOf(profile2.lastName) }
   var description by remember { mutableStateOf(profile2.description) }
+
+  LaunchedEffect(Unit) { viewModel.getProfileOfCurrentUser(true) }
 
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,

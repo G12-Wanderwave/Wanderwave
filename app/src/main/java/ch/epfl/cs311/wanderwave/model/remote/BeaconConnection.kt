@@ -160,15 +160,31 @@ class BeaconConnection(
     return beaconMap
   }
 
-  override fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
+  override fun addTrackToBeacon(
+      beaconId: String,
+      track: Track,
+      profileUid: String,
+      onComplete: (Boolean) -> Unit
+  ) {
     val beaconRef = db.collection("beacons").document(beaconId)
-    val profileRef = db.collection("users").document("My Firebase UID")
     db.runTransaction { transaction ->
-          val snapshot = transaction[beaconRef]
+          val snapshot: DocumentSnapshot = transaction[beaconRef]
           val beacon = Beacon.from(snapshot)
+          val tracks = snapshot.get("tracks") as? List<Map<String, DocumentReference>> ?: listOf()
+          val associations =
+              tracks.mapNotNull {
+                val creatorRef = it["creator"]
+                val trackRef = it["track"]
+
+                val creator = creatorRef?.let { Profile.from(transaction[it]) }
+                val track = trackRef?.let { Track.from(transaction[it]) }
+
+                track?.let { ProfileTrackAssociation(creator, it) }
+              }
+
           beacon?.let {
             val newTracks =
-                ArrayList(it.profileAndTrack).apply {
+                ArrayList(associations).apply {
                   add(
                       ProfileTrackAssociation(
                           Profile(
@@ -178,19 +194,22 @@ class BeaconConnection(
                               0,
                               false,
                               null,
-                              "My Firebase UID",
-                              "My Firebase UID"),
+                              "sample spotify uid",
+                              profileUid),
                           track))
                 }
             transaction.update(
                 beaconRef,
                 "tracks",
                 newTracks.map { profileAndTrack ->
-                  hashMapOf(
-                      "creator" to
-                          db.collection("users")
-                              .document(profileAndTrack.profile?.firebaseUid ?: profileRef.id),
-                      "track" to db.collection("tracks").document(profileAndTrack.track.id))
+                  if (profileAndTrack.profile == null) {
+                    hashMapOf("track" to db.collection("tracks").document(profileAndTrack.track.id))
+                  } else {
+                    hashMapOf(
+                        "creator" to
+                            db.collection("users").document(profileAndTrack.profile.firebaseUid),
+                        "track" to db.collection("tracks").document(profileAndTrack.track.id))
+                  }
                 })
             // After updating Firestore, save the track addition locally
             coroutineScope.launch {
@@ -202,7 +221,7 @@ class BeaconConnection(
                           trackId = track.id,
                           timestamp = System.currentTimeMillis()))
             }
-          } ?: throw Exception("Beacon not found")
+          }
         }
         .addOnSuccessListener { onComplete(true) }
         .addOnFailureListener { onComplete(false) }
