@@ -59,4 +59,6 @@ interface SpotifySongsActions {
    * @last update 3.0
    */
   fun getTracksFromPlaylist(playlistId: String)
+
+  fun emptyChildrenList()
 }

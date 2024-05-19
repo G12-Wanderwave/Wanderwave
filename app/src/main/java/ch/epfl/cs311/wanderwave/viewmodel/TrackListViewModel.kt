@@ -179,6 +179,10 @@ constructor(
         playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
   }
 
+  override fun emptyChildrenList() {
+    _childrenPlaylistTrackList.value = (emptyList())
+  }
+
   data class UiState(
       val tracks: List<Track> = listOf(),
       val loading: Boolean = false,

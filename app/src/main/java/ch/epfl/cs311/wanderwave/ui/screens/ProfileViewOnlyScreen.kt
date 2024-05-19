@@ -51,7 +51,7 @@ fun ProfileViewOnlyScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
 
-  LaunchedEffect(profileId) { viewModel.getProfileByID(profileId) }
+  LaunchedEffect(profileId) { viewModel.getProfileByID(profileId, false) }
 
   val uiState = viewModel.uiState.collectAsState().value
 

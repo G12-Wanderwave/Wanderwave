@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -29,7 +30,8 @@ class ProfileViewModel
 @Inject
 constructor(
     private val repository: ProfileRepository, // TODO revoir
-    private val spotifyController: SpotifyController
+    private val spotifyController: SpotifyController,
+    private val authenticationController: AuthenticationController
 ) : ViewModel(), SpotifySongsActions {
 
   private val _profile =
@@ -157,7 +159,7 @@ constructor(
     _isTopSongsListVisible.value = !_isTopSongsListVisible.value
   }
 
-  fun getProfileByID(id: String) {
+  fun getProfileByID(id: String, create: Boolean) {
     viewModelScope.launch {
       repository.getItem(id).collect { fetchedProfile ->
         fetchedProfile.onSuccess { profile ->
@@ -165,10 +167,21 @@ constructor(
           _uiState.value = UIState(profile = profile, isLoading = false)
         }
         fetchedProfile.onFailure { exception ->
-          _uiState.value = UIState(error = exception.message, isLoading = false)
+          if (exception.message == "Document does not exist" && create) {
+            val newProfile = profile.value.copy(firebaseUid = id)
+            repository.addItemWithId(newProfile)
+            _uiState.value = UIState(error = "Creating Profile...", isLoading = true)
+          } else {
+            _uiState.value = UIState(error = exception.message, isLoading = false)
+          }
         }
       }
     }
+  }
+
+  suspend fun getProfileOfCurrentUser(create: Boolean) {
+    val currentUserId = authenticationController.getUserData()!!.id
+    getProfileByID(currentUserId, create)
   }
 
   override fun getTracksFromPlaylist(playlistId: String) {
@@ -210,6 +223,10 @@ constructor(
    */
   override suspend fun getLikedTracks() {
     getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
+  }
+
+  override fun emptyChildrenList() {
+    _childrenPlaylistTrackList.value = (emptyList())
   }
 
   data class UIState(

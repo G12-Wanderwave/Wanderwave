@@ -469,9 +469,28 @@ public class BeaconConnectionTest {
         hashMapOf(
             "id" to getTestBeacon.id,
             "location" to getTestBeacon.location.toMap(),
-            "tracks" to getTestBeacon.profileAndTrack.map { it.toMap() })
+            "tracks" to
+                getTestBeacon.profileAndTrack.map {
+                  hashMapOf(
+                      "creator" to firestore.collection("users").document(profile.firebaseUid),
+                      "track" to firestore.collection("tracks").document(track.id))
+                })
 
-    every { mockTransaction.get(any<DocumentReference>()) } returns mockDocumentSnapshot
+    every { mockTransaction.get(any<DocumentReference>()) } answers
+        {
+          val reference = arg<DocumentReference>(0)
+
+          when {
+            reference.path.contains("beacons") -> mockDocumentSnapshot
+            reference.path.contains("users") ->
+                mockk<DocumentSnapshot>() { every { getData() } returns profile.toMap() }
+            reference.path.contains("tracks") ->
+                mockk<DocumentSnapshot>() { every { getData() } returns track.toMap() }
+            reference.path.equals("") -> mockDocumentSnapshot
+            else -> throw IllegalStateException("Invalid reference path: ${reference.path}")
+          }
+        }
+
     every { mockTransaction.update(any<DocumentReference>(), any<String>(), any()) } answers
         {
           mockTransaction
@@ -481,7 +500,26 @@ public class BeaconConnectionTest {
     every { mockDocumentSnapshot.id } returns getTestBeacon.id
     every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
     every { mockDocumentSnapshot.get("tracks") } returns
-        getTestBeacon.profileAndTrack.map { it.toMap() }
+        getTestBeacon.profileAndTrack.map {
+          hashMapOf(
+              "creator" to firestore.collection("users").document(profile.firebaseUid),
+              "track" to firestore.collection("tracks").document(track.id))
+        }
+
+    profile.toMap().forEach { (key, value) ->
+      every { mockDocumentSnapshot.get(key) } returns value
+      (value as? String)?.let { every { mockDocumentSnapshot.getString(key) } returns it }
+      (value as? Int)?.let { every { mockDocumentSnapshot.getLong(key) } returns it.toLong() }
+      (value as? Boolean)?.let { every { mockDocumentSnapshot.getBoolean(key) } returns it }
+    }
+    track.toMap().forEach { (key, value) ->
+      every { mockDocumentSnapshot.get(key) } returns value
+      (value as? String)?.let { every { mockDocumentSnapshot.getString(key) } returns it }
+      (value as? Int)?.let { every { mockDocumentSnapshot.getLong(key) } returns it.toLong() }
+      (value as? Boolean)?.let { every { mockDocumentSnapshot.getBoolean(key) } returns it }
+    }
+
+    every { mockDocumentSnapshot.getLong(any()) } returns 0
 
     // Define behavior for the addOnSuccessListener method
     every { mockTask.addOnSuccessListener(any<OnSuccessListener<Transaction>>()) } answers
@@ -503,7 +541,7 @@ public class BeaconConnectionTest {
         }
 
     // Call the function under test
-    beaconConnection.addTrackToBeacon(beacon.id, track, {})
+    beaconConnection.addTrackToBeacon(beacon.id, track, "testing-uid", {})
 
     verify { firestore.runTransaction<Transaction>(any()) }
     verify { mockTransaction.get(any<DocumentReference>()) }
@@ -573,7 +611,7 @@ public class BeaconConnectionTest {
 
     // Call the function under test
     try {
-      beaconConnection.addTrackToBeacon(beacon.id, track, {})
+      beaconConnection.addTrackToBeacon(beacon.id, track, "testing-uid", {})
       fail("Should have thrown an exception")
     } catch (e: Exception) {
       // Verify that the exception is thrown
