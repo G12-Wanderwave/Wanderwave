@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import io.mockk.called
 import io.mockk.coEvery
@@ -24,6 +25,7 @@ class SpotifyConnectScreenViewModelTest {
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
 
   @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
+  @RelaxedMockK private lateinit var mockProfileRepository: ProfileRepository
 
   private lateinit var viewModel: SpotifyConnectScreenViewModel
 
@@ -36,7 +38,9 @@ class SpotifyConnectScreenViewModelTest {
     every { mockAuthenticationController.isSignedIn() } returns isSignedIn
     coEvery { mockAuthenticationController.refreshTokenIfNecessary() } returns
         (isSignedIn || canRefresh)
-    viewModel = SpotifyConnectScreenViewModel(mockSpotifyController, mockAuthenticationController)
+    viewModel =
+        SpotifyConnectScreenViewModel(
+            mockSpotifyController, mockAuthenticationController, mockProfileRepository)
   }
 
   @Test

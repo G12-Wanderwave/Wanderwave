@@ -5,7 +5,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
-import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.SpotifyConnectScreenViewModel
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
@@ -31,20 +30,10 @@ class SpotifyConnectScreenTest :
 
   @RelaxedMockK private lateinit var mockViewModel: SpotifyConnectScreenViewModel
 
-  @RelaxedMockK private lateinit var mockProfileViewModel: ProfileViewModel
-
-  private fun setup(
-      uiState: SpotifyConnectScreenViewModel.UiState,
-      profileUiState: ProfileViewModel.UIState = ProfileViewModel.UIState()
-  ) {
+  private fun setup(uiState: SpotifyConnectScreenViewModel.UiState) {
     every { mockViewModel.uiState } returns MutableStateFlow(uiState)
-    every { mockProfileViewModel.uiState } returns MutableStateFlow(profileUiState)
-
     composeTestRule.setContent {
-      SpotifyConnectScreen(
-          navigationActions = mockNavigationActions,
-          viewModel = mockViewModel,
-          profileViewModel = mockProfileViewModel)
+      SpotifyConnectScreen(navigationActions = mockNavigationActions, viewModel = mockViewModel)
     }
   }
 
