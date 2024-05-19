@@ -115,13 +115,11 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
   ): Flow<Result<T>> =
       if (item != null) {
         Log.d(
-            "Firestore",
-            "DocumentSnapshot data inside old document transform: ${documentSnapshot.data}")
+            "Firestore", "DocumentSnapshot data inside old document transform: ${documentSnapshot}")
         flowOf(Result.success(item))
       } else {
         Log.d(
-            "Firestore",
-            "DocumentSnapshot data inside old document transform: ${documentSnapshot.data}")
+            "Firestore", "DocumentSnapshot data inside old document transform: ${documentSnapshot}")
         flowOf(Result.failure(Exception("Document does not exist")))
       }
 }

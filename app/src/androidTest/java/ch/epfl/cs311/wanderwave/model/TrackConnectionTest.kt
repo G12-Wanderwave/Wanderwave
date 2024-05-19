@@ -349,4 +349,28 @@ class TrackConnectionTest {
     coVerify { collectionReference.whereEqualTo("id", "spotify:track:" + track.id) }
     coVerify { collectionReference.whereEqualTo("id", "spotify:track:" + track.id).get() }
   }
+
+  @Test
+  fun testDocumentTransform() {
+    runBlocking {
+      // Mock the DocumentSnapshot
+      val mockDocumentSnapshot = mockk<DocumentSnapshot>()
+
+      // Mock the Track
+      val mockTrack = Track("testTrackId", "Test Title", "Test Artist")
+
+      // Call the function under test
+      val retrievedTrack =
+          trackConnection.documentTransform(mockDocumentSnapshot, mockTrack).first()
+
+      // Assert that the retrieved track is the same as the mock track
+      assertEquals(Result.success(mockTrack), retrievedTrack)
+
+      // null item case
+      val retrievedTrackNull = trackConnection.documentTransform(mockDocumentSnapshot, null).first()
+
+      // Assert that the retrieved track is the same as the mock track
+      assert(retrievedTrackNull.isFailure)
+    }
+  }
 }
