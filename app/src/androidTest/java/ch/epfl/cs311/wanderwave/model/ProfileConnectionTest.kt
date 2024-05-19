@@ -24,6 +24,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -287,11 +288,14 @@ public class ProfileConnectionTest {
   }
 
   @Test
-  fun testDocumentTransformNullDocument() {
+  fun testDocumentTransformNullDocument() { runBlocking {
+
     val documentSnapshot = mockk<DocumentSnapshot>()
     every { documentSnapshot.exists() } returns false
-    val result = profileConnection.documentToItem(documentSnapshot)
-    assertEquals(null, result)
+
+    val result = profileConnection.documentTransform(documentSnapshot, null).first()
+    assert(result.isFailure)
+    }
   }
 
   @Test

@@ -74,7 +74,7 @@ class ProfileConnection(
       callbackFlow<Result<Profile>> {
         if (!document.exists()) {
           trySend(Result.failure<Profile>(Exception("Document does not exist")))
-        }
+        } else {
         val profile: Profile? = item ?: Profile.from(document)
 
         profile!!.let { profile ->
@@ -144,6 +144,7 @@ class ProfileConnection(
           } else {
             trySend(Result.failure<Profile>(Exception("Songs lists have a Wrong Firebase Format")))
           }
+        }
         }
         awaitClose {}
       }

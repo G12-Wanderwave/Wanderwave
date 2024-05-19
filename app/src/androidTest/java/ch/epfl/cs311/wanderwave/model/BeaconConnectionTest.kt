@@ -384,10 +384,12 @@ public class BeaconConnectionTest {
 
   @Test
   fun testDocumentTransformNullDocument() {
-    val documentSnapshot = mockk<DocumentSnapshot>()
-    every { documentSnapshot.exists() } returns false
-    val result = beaconConnection.documentToItem(documentSnapshot)
-    assertEquals(null, result)
+    runBlocking {
+      val documentSnapshot = mockk<DocumentSnapshot>()
+      every { documentSnapshot.exists() } returns false
+      val result = beaconConnection.documentTransform(documentSnapshot,null).first()
+      assert(result.isFailure)
+    }
   }
 
   @Test
