@@ -83,19 +83,18 @@ class ProfileConnection(
             val bannedSongsObject = document["bannedSongs"]
             val likedSongsObject = document["likedSongs"]
 
-            if (isValidObject(topSongsObject) && isValidObject(chosenSongsObject) && isValidObject(
+            if (isValidObject(topSongsObject) || isValidObject(chosenSongsObject) || isValidObject(
                     bannedSongsObject
-                ) && isValidObject(likedSongsObject)  ){
-              val topSongRefs = topSongsObject as? List<DocumentReference>
-              val chosenSongRefs = chosenSongsObject as? List<DocumentReference>
-              val bannedSongRefs = bannedSongsObject as? List<DocumentReference>
-              val likedSongRefs = likedSongsObject as? List<DocumentReference>
+                ) || isValidObject(likedSongsObject)  ){
+              val topSongRefs = topSongsObject as? List<DocumentReference> ?: emptyList()
+              val chosenSongRefs = chosenSongsObject as? List<DocumentReference> ?: emptyList()
+              val bannedSongRefs = bannedSongsObject as? List<DocumentReference> ?: emptyList()
+              val likedSongRefs = likedSongsObject as? List<DocumentReference> ?: emptyList()
 
               coroutineScope.launch {
 
                 // The goal is to : map the references to the actual tracks by fetching, this gives
-                // a
-                // list of flow,
+                // a list of flow,
                 // then reduce the list of flow to a single flow that contains the list of tracks
                 // and then combine the two lists of tracks to update the profile
 
@@ -155,8 +154,8 @@ class ProfileConnection(
             accTracks.map { tracks -> tracks + track }
           }
         } ?: flowOf(Result.failure(Exception("Could not retrieve topSongs")))
-    // reduce the list of flow to a
-    // single flow that contains the
+    // reduce the lists of flows to a
+    // single flows that contains the
     // list of tracks
   }
 
