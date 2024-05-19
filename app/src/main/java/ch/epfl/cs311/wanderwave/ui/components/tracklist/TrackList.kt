@@ -62,8 +62,9 @@ fun TrackList(
                 }
           }
         }
+
     var selectedTrack by remember { mutableStateOf<Track?>(null) }
-    LazyColumn {
+    LazyColumn(Modifier.padding(bottom = 63.dp)) {
       items(tracks) { track ->
         TrackListItem(
             track,
