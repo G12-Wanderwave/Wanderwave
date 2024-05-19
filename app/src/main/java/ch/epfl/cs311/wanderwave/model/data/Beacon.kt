@@ -29,7 +29,9 @@ data class Beacon(
 
         val profileAndTrack = listOf<ProfileTrackAssociation>()
 
-        Beacon(id = id, location = location, profileAndTrack = profileAndTrack)
+        val likes = document.getLong("likes")?.toInt() ?: 0
+
+        Beacon(id = id, location = location, profileAndTrack = profileAndTrack, likes = likes)
       } else {
         null
       }

@@ -149,6 +149,7 @@ class BeaconConnection(
         hashMapOf(
             "id" to beacon.id,
             "location" to beacon.location.toMap(),
+            "likes" to beacon.likes,
             "tracks" to
                 beacon.profileAndTrack.map { profileAndTrack ->
                   hashMapOf(
