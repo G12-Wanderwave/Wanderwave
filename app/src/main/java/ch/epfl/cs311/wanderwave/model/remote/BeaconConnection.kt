@@ -74,7 +74,7 @@ class BeaconConnection(
 
   override fun documentTransform(document: DocumentSnapshot, item: Beacon?): Flow<Result<Beacon>> =
       callbackFlow {
-        if (document == null || !document.exists()) {
+        if (!document.exists()) {
           trySend(Result.failure(Exception("Document does not exist")))
         } else {
           val beacon: Beacon? = item ?: Beacon.from(document)

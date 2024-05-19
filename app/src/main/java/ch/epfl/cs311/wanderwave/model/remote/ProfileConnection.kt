@@ -72,7 +72,7 @@ class ProfileConnection(
       item: Profile?
   ): Flow<Result<Profile>> =
       callbackFlow<Result<Profile>> {
-        if (document == null || !document.exists()) {
+        if (!document.exists()) {
           trySend(Result.failure<Profile>(Exception("Document does not exist")))
         }
         val profile: Profile? = item ?: Profile.from(document)

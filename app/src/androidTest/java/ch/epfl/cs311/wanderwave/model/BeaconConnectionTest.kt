@@ -383,6 +383,14 @@ public class BeaconConnectionTest {
   }
 
   @Test
+  fun testDocumentTransformNullDocument() {
+    val documentSnapshot = mockk<DocumentSnapshot>()
+    every { documentSnapshot.exists() } returns false
+    val result = beaconConnection.documentToItem(documentSnapshot)
+    assertEquals(null, result)
+  }
+
+  @Test
   fun testAddItemWithId() {
     // Call the function under test
     beaconConnection.addItemWithId(beacon)

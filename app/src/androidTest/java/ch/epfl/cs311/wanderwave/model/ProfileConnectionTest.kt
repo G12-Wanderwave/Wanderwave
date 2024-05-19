@@ -287,6 +287,14 @@ public class ProfileConnectionTest {
   }
 
   @Test
+  fun testDocumentTransformNullDocument() {
+    val documentSnapshot = mockk<DocumentSnapshot>()
+    every { documentSnapshot.exists() } returns false
+    val result = profileConnection.documentToItem(documentSnapshot)
+    assertEquals(null, result)
+  }
+
+  @Test
   fun testIsUidExisting() {
     runBlocking {
       withTimeout(3000) {
