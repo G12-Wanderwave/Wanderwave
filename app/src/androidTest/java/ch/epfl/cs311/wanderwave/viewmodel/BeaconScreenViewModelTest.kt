@@ -1,5 +1,7 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationUserData
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Location
@@ -47,6 +49,7 @@ class BeaconScreenViewModelTest {
   @get:Rule val mockkRule = MockKRule(this)
   @RelaxedMockK private lateinit var beaconConnection: BeaconConnection
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
+  @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
 
   lateinit var viewModel: BeaconViewModel
   val testDispatcher = TestCoroutineDispatcher()
@@ -57,7 +60,14 @@ class BeaconScreenViewModelTest {
   @Before
   fun setup() {
     Dispatchers.setMain(testDispatcher)
-    viewModel = BeaconViewModel(trackRepository, beaconRepository, mockSpotifyController)
+
+    every { mockAuthenticationController.isSignedIn() } returns true
+    every { mockAuthenticationController.getUserData() } returns
+        AuthenticationUserData("uid", "email", "name", "http://photoUrl/img.jpg")
+
+    viewModel =
+        BeaconViewModel(
+            trackRepository, beaconRepository, mockSpotifyController, mockAuthenticationController)
   }
 
   @OptIn(ExperimentalCoroutinesApi::class)
@@ -79,16 +89,19 @@ class BeaconScreenViewModelTest {
   fun canConstructWithNoErrors() {
     val connectResult = SpotifyController.ConnectResult.SUCCESS
     every { mockSpotifyController.connectRemote() } returns flowOf(connectResult)
-    BeaconViewModel(trackRepository, beaconConnection, mockSpotifyController)
+    BeaconViewModel(
+        trackRepository, beaconConnection, mockSpotifyController, mockAuthenticationController)
   }
 
   @Test
   fun addTrackToBeaconTest() {
-    val viewModel = BeaconViewModel(trackRepository, beaconConnection, mockSpotifyController)
+    val viewModel =
+        BeaconViewModel(
+            trackRepository, beaconConnection, mockSpotifyController, mockAuthenticationController)
     val track = Track("trackId", "trackName", "trackArtist")
     viewModel.addTrackToBeacon("beaconId", track, {})
 
-    verify { beaconConnection.addTrackToBeacon(any(), any(), any()) }
+    verify { beaconConnection.addTrackToBeacon(any(), any(), any(), any()) }
   }
 
   @OptIn(ExperimentalCoroutinesApi::class)
@@ -137,7 +150,9 @@ class BeaconScreenViewModelTest {
 
   @Test
   fun canSelectTracks() {
-    val viewModel = BeaconViewModel(trackRepository, beaconConnection, mockSpotifyController)
+    val viewModel =
+        BeaconViewModel(
+            trackRepository, beaconConnection, mockSpotifyController, mockAuthenticationController)
     val track = Track("trackId", "trackName", "trackArtist")
     viewModel.selectTrack(track)
 
