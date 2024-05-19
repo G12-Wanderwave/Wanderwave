@@ -225,6 +225,10 @@ constructor(
     getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
   }
 
+  override fun emptyChildrenList() {
+    _childrenPlaylistTrackList.value = (emptyList())
+  }
+
   data class UIState(
       val profile: Profile? = null,
       val isLoading: Boolean = true,

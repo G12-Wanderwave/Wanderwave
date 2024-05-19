@@ -51,6 +51,13 @@ val Typography =
                 fontSize = 16.sp,
                 lineHeight = 24.sp,
                 letterSpacing = 0.5.sp),
+        bodySmall =
+            TextStyle(
+                fontFamily = Ubuntu,
+                fontWeight = FontWeight.Medium,
+                fontSize = 10.sp,
+                lineHeight = 10.sp,
+                letterSpacing = 0.5.sp),
         titleMedium =
             TextStyle(
                 fontFamily = Ubuntu,

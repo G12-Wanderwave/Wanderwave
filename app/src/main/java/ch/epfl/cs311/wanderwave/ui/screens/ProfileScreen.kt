@@ -2,6 +2,7 @@ package ch.epfl.cs311.wanderwave.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,9 +13,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -32,8 +36,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
@@ -43,6 +50,7 @@ import ch.epfl.cs311.wanderwave.ui.components.profile.ClickableIcon
 import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
 import ch.epfl.cs311.wanderwave.ui.components.profile.SongsListDisplay
 import ch.epfl.cs311.wanderwave.ui.components.profile.VisitCard
+import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
 const val SCALE_X = 0.5f
@@ -78,6 +86,10 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
+          SignOutButton(modifier = Modifier, navActions = navActions)
+          AboutButton(modifier = Modifier, navActions = navActions)
+        }
         Box(modifier = Modifier.fillMaxWidth()) {
           VisitCard(Modifier, currentProfile)
           ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
@@ -89,8 +101,19 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
         // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
         Button(
             onClick = { viewModel.changeChosenSongs() },
-            modifier = Modifier.testTag("toggleSongList")) {
-              Text(if (isTopSongsListVisible) "Show CHOSEN TOPS" else "Show LIKED SONGS")
+            modifier = Modifier.testTag("toggleSongList"),
+            colors =
+                ButtonColors(
+                    contentColor = Color.Black,
+                    containerColor =
+                        if (isTopSongsListVisible) MaterialTheme.colorScheme.primary
+                        else spotify_green,
+                    disabledContentColor = Color.Gray,
+                    disabledContainerColor = Color.Black),
+            shape = RoundedCornerShape(size = 10.dp)) {
+              Text(
+                  if (isTopSongsListVisible) stringResource(id = R.string.showChosenSongs)
+                  else stringResource(id = R.string.showLikedSongs))
             }
         SongsListDisplay(
             navigationActions = navActions,
@@ -104,12 +127,6 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
             viewModelName = viewModelType.PROFILE,
         )
       }
-
-  Row {
-    SignOutButton(modifier = Modifier, navActions = navActions)
-    Spacer(modifier = Modifier.width(5.dp))
-    AboutButton(modifier = Modifier, navActions = navActions)
-  }
 }
 /**
  * This handle the logic behind the switch that can permit the user to switch to the anonymous mode
@@ -191,8 +208,23 @@ fun SignOutButton(modifier: Modifier, navActions: NavigationActions) {
   // TODO: Implement actual user sign out
   Button(
       onClick = { navActions.navigateToTopLevel(Route.LOGIN) },
-      modifier = modifier.testTag("signOutButton")) {
-        Text(text = "Sign Out")
+      modifier = modifier.testTag("signOutButton"),
+      colors =
+          ButtonColors(
+              containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+              contentColor = MaterialTheme.colorScheme.onSurface,
+              disabledContainerColor = Color.Gray,
+              disabledContentColor = MaterialTheme.colorScheme.primary),
+      shape = RoundedCornerShape(size = 10.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween) {
+              Icon(
+                  painter = painterResource(id = R.drawable.logout_icon),
+                  contentDescription = "logout")
+              Spacer(modifier = Modifier.width(5.dp))
+              Text(text = stringResource(id = R.string.signOut))
+            }
       }
 }
 
@@ -200,7 +232,21 @@ fun SignOutButton(modifier: Modifier, navActions: NavigationActions) {
 fun AboutButton(modifier: Modifier, navActions: NavigationActions) {
   Button(
       onClick = { navActions.navigateTo(Route.ABOUT) },
-      modifier = modifier.testTag("aboutButton")) {
-        Text(text = "About")
+      modifier = modifier.testTag("aboutButton"),
+      colors =
+          ButtonColors(
+              containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+              contentColor = MaterialTheme.colorScheme.onSurface,
+              disabledContainerColor = Color.Gray,
+              disabledContentColor = MaterialTheme.colorScheme.primary),
+      shape = RoundedCornerShape(size = 10.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween) {
+              Icon(
+                  painter = painterResource(id = R.drawable.info_icon), contentDescription = "info")
+              Spacer(modifier = Modifier.width(5.dp))
+              Text(text = stringResource(id = R.string.about))
+            }
       }
 }
