@@ -111,11 +111,15 @@ class BeaconConnection(
                     val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks)
                     trySend(Result.success(updatedBeacon))
                   }
-                  result.onFailure { exception -> trySend(Result.failure(exception)) }
+                  result.onFailure { exception ->
+                    trySend(Result.success(beacon))
+                    Log.e("Firestore", "Error getting profile and track: ", exception)
+                  }
                 }
               }
             } else {
-              trySend(Result.failure(Exception("Tracks are not in the correct format")))
+              trySend(Result.success(beacon))
+              Log.e("Firestore", "Tracks are not in the correct format ")
             }
           }
         }

@@ -181,7 +181,7 @@ class ProfileViewModelTest {
   }
 
   @Test
-  fun testGetProfileByID() = runBlockingTest {
+  fun testGetProfileByID() = runBlocking {
     // Arrange
     val testId = "testId"
     val testProfile =

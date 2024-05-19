@@ -67,6 +67,7 @@ class TrackConnection(private val database: FirebaseFirestore) :
   fun fetchProfileAndTrack(
       profileAndTrackRef: Map<String, DocumentReference>?
   ): Flow<Result<ProfileTrackAssociation>> = callbackFlow {
+    Log.d("Firestore", "Fetching profile and track ${profileAndTrackRef.toString()}")
     if (profileAndTrackRef == null) {
       trySend(Result.failure(Exception("Profile and Track reference is null")))
     } else {

@@ -33,6 +33,7 @@ import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -162,20 +163,57 @@ public class BeaconConnectionTest {
           Beacon(
               id = "testBeacon",
               location = Location(1.0, 1.0, "Test Location"),
-              profileAndTrack = listOf())
+              profileAndTrack =
+                  listOf(
+                      ProfileTrackAssociation(
+                          Profile(
+                              "Sample First Name",
+                              "Sample last name",
+                              "Sample desc",
+                              0,
+                              false,
+                              null,
+                              "Sample Profile ID",
+                              "Sample Track ID"),
+                          Track("Sample Track ID", "Sample Track Title", "Sample Artist Name")),
+                      ProfileTrackAssociation(
+                          Profile(
+                              "Sample First Name",
+                              "Sample last name",
+                              "Sample desc",
+                              0,
+                              false,
+                              null,
+                              "Sample Profile ID",
+                              "Sample Track ID"),
+                          Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
       val mapOfTestBeacon =
           hashMapOf(
               "id" to getTestBeacon.id,
               "location" to getTestBeacon.location.toMap(),
-              "tracks" to getTestBeacon.profileAndTrack.map { it.toMap() })
+              "tracks" to
+                  getTestBeacon.profileAndTrack.map { profileAndTrack ->
+                    hashMapOf(
+                        "creator" to
+                            firestore
+                                .collection("users")
+                                .document(profileAndTrack.profile?.firebaseUid ?: ""),
+                        "track" to
+                            firestore.collection("tracks").document(profileAndTrack.track.id))
+                  })
 
       every { mockDocumentSnapshot.getData() } returns mapOfTestBeacon
       every { mockDocumentSnapshot.exists() } returns true
       every { mockDocumentSnapshot.id } returns getTestBeacon.id
       every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
+      // get track needs to return a List<Map<String, DocumentReference>>
       every { mockDocumentSnapshot.get("tracks") } returns
-          getTestBeacon.profileAndTrack.map { it.toMap() }
+          getTestBeacon.profileAndTrack.map({
+            hashMapOf(
+                "creator" to firestore.collection("users").document(it.profile?.firebaseUid ?: ""),
+                "track" to firestore.collection("tracks").document(it.track.id))
+          })
 
       // Define behavior for the addOnSuccessListener method
       every { documentReference.addSnapshotListener(any()) } answers
@@ -187,6 +225,21 @@ public class BeaconConnectionTest {
 
             mockk(relaxed = true)
           }
+
+      every { trackConnection.fetchProfileAndTrack(any()) } returns
+          flowOf(
+              Result.success(
+                  ProfileTrackAssociation(
+                      Profile(
+                          "Sample First Name",
+                          "Sample last name",
+                          "Sample desc",
+                          0,
+                          false,
+                          null,
+                          "Sample Profile ID",
+                          "Sample Track ID"),
+                      Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
       // Call the function under test
       val retrievedBeacon = beaconConnection.getItem("testBeacon").first()
