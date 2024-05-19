@@ -16,15 +16,22 @@ data class Profile(
     var firebaseUid: String,
     var topSongs: List<Track> = emptyList(),
     var chosenSongs: List<Track> = emptyList(),
+    var bannedSongs: List<Track> = emptyList(),
+    var likedSongs: List<Track> = emptyList(),
 ) {
 
   fun toMap(db: FirebaseFirestore? = null): Map<String, Any> {
-    val topSongsReferences: List<DocumentReference> =
-        db?.let { nonNulldb -> topSongs.map { nonNulldb.collection("tracks").document(it.id) } }
+
+    fun mapToDocumentReference(tracks: List<Track>): List<DocumentReference> {
+        return db?.let { nonNulldb -> tracks.map { nonNulldb.collection("tracks").document(it.id) } }
             ?: emptyList()
-    val chosenSongsReferences: List<DocumentReference> =
-        db?.let { nonNulldb -> chosenSongs.map { nonNulldb.collection("tracks").document(it.id) } }
-            ?: emptyList()
+    }
+
+    val topSongsReferences: List<DocumentReference> = mapToDocumentReference(topSongs)
+    val chosenSongsReferences: List<DocumentReference> = mapToDocumentReference(chosenSongs)
+    val bannedSongsReferences: List<DocumentReference> = mapToDocumentReference(bannedSongs)
+    val likedSongsReferences: List<DocumentReference> = mapToDocumentReference(likedSongs)
+
 
     return hashMapOf(
         "firstName" to firstName,
@@ -37,6 +44,8 @@ data class Profile(
         "profilePictureUri" to (profilePictureUri?.toString() ?: ""),
         "topSongs" to topSongsReferences,
         "chosenSongs" to chosenSongsReferences,
+        "bannedSongs" to bannedSongsReferences,
+        "likedSongs" to likedSongsReferences,
     )
   }
 
