@@ -16,11 +16,13 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ch.epfl.cs311.wanderwave.AppResources
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
+import ch.epfl.cs311.wanderwave.ui.components.map.getIcon
 import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
@@ -62,7 +64,9 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
       locationEnabled = permissionState.allPermissionsGranted,
       locationSource = viewModel.locationSource,
       modifier = Modifier.testTag("mapScreen"),
-      onMapLoaded = { mapIsLoaded.value = true }) {
+      onMapLoaded = { mapIsLoaded.value = true
+          AppResources.beaconIcon = getIcon(context)
+      }) {
         MapContent(navigationActions, viewModel)
       }
 
