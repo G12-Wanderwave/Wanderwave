@@ -144,22 +144,7 @@ class BeaconConnection(
     return dataFlow.filterNotNull()
   }
 
-  override fun itemToMap(beacon: Beacon): Map<String, Any> {
-    val beaconMap: HashMap<String, Any> =
-        hashMapOf(
-            "id" to beacon.id,
-            "location" to beacon.location.toMap(),
-            "likes" to beacon.likes,
-            "tracks" to
-                beacon.profileAndTrack.map { profileAndTrack ->
-                  hashMapOf(
-                      "creator" to
-                          db.collection("users")
-                              .document(profileAndTrack.profile?.firebaseUid ?: ""),
-                      "track" to db.collection("tracks").document(profileAndTrack.track.id))
-                })
-    return beaconMap
-  }
+  override fun itemToMap(beacon: Beacon): Map<String, Any> = beacon.toMap(db)
 
   override fun addTrackToBeacon(
       beaconId: String,
@@ -167,7 +152,8 @@ class BeaconConnection(
       profileUid: String,
       onComplete: (Boolean) -> Unit
   ) {
-    val beaconRef = db.collection("beacons").document(beaconId)
+    val beaconRef = db.collection(collectionName).document(beaconId)
+    val profileRef = db.collection(profileConnection.collectionName).document(profileUid)
     db.runTransaction { transaction ->
           val snapshot: DocumentSnapshot = transaction[beaconRef]
           val beacon = Beacon.from(snapshot)
@@ -183,46 +169,39 @@ class BeaconConnection(
                 track?.let { ProfileTrackAssociation(creator, it) }
               }
 
-          beacon?.let {
-            val newTracks =
+          val profile: Profile? = Profile.from(transaction[profileRef])
+
+          beacon?.let {beaconNotNull ->
+            profile?.let {profileNotNull ->
+              val newTracks =
                 ArrayList(associations).apply {
                   add(
-                      ProfileTrackAssociation(
-                          Profile(
-                              "Sample First Name",
-                              "Sample last name",
-                              "Sample desc",
-                              0,
-                              false,
-                              null,
-                              "sample spotify uid",
-                              profileUid),
-                          track))
+                    ProfileTrackAssociation(
+                      profileNotNull,
+                      track
+                    )
+                  )
                 }
-            transaction.update(
+
+              transaction.update(
                 beaconRef,
                 "tracks",
-                newTracks.map { profileAndTrack ->
-                  if (profileAndTrack.profile == null) {
-                    hashMapOf("track" to db.collection("tracks").document(profileAndTrack.track.id))
-                  } else {
-                    hashMapOf(
-                        "creator" to
-                            db.collection("users").document(profileAndTrack.profile.firebaseUid),
-                        "track" to db.collection("tracks").document(profileAndTrack.track.id))
-                  }
-                })
-            // After updating Firestore, save the track addition locally
-            coroutineScope.launch {
-              appDatabase
+                newTracks.map { it.toMap(db) })
+
+              // After updating Firestore, save the track addition locally
+              coroutineScope.launch {
+                appDatabase
                   .trackRecordDao()
                   .insertTrackRecord(
-                      TrackRecord(
-                          beaconId = beaconId,
-                          trackId = track.id,
-                          timestamp = System.currentTimeMillis()))
-            }
-          }
+                    TrackRecord(
+                      beaconId = beaconId,
+                      trackId = track.id,
+                      timestamp = System.currentTimeMillis()
+                    )
+                  )
+              }
+            } ?: Log.e("Firestore", "Error getting profile")
+          } ?: Log.e("Firestore", "Error getting beacon")
         }
         .addOnSuccessListener { onComplete(true) }
         .addOnFailureListener { onComplete(false) }

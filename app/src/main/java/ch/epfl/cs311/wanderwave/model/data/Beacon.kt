@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.model.data
 
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 
 data class Beacon(
 
@@ -16,6 +17,13 @@ data class Beacon(
     /** Number of likes the beacon has */
     val likes: Int = 0
 ) {
+
+  fun toMap(db: FirebaseFirestore): HashMap<String, Any> =
+    hashMapOf(
+      "id" to id,
+      "location" to location.toMap(),
+      "likes" to likes,
+      "tracks" to profileAndTrack.map { it.toMap(db) })
 
   companion object {
     fun from(document: DocumentSnapshot): Beacon? {
