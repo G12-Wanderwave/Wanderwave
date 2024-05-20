@@ -170,29 +170,30 @@ class BeaconConnection(
                 track?.let { ProfileTrackAssociation(creator, it, likes) }
               }
 
-          val profile: Profile? = Profile.from(transaction[profileRef])
-
           beacon?.let { beaconNotNull ->
-            profile?.let { profileNotNull ->
-              val newTracks =
-                  ArrayList(associations).apply {
-                    add(ProfileTrackAssociation(profileNotNull, track))
-                  }
+            val newTracks =
+                associations
+                    .map { it.toMap(db) }
+                    .toMutableList()
+                    .apply {
+                      val trackRef =
+                          db.collection(trackConnection.collectionName).document(track.id)
+                      add(hashMapOf("profile" to profileRef, "track" to trackRef, "likes" to 0))
+                    }
 
-              transaction.update(beaconRef, "tracks", newTracks.map { it.toMap(db) })
+            transaction.update(beaconRef, "tracks", newTracks)
 
-              // After updating Firestore, save the track addition locally
-              coroutineScope.launch {
-                appDatabase
-                    .trackRecordDao()
-                    .insertTrackRecord(
-                        TrackRecord(
-                            beaconId = beaconId,
-                            trackId = track.id,
-                            timestamp = System.currentTimeMillis()))
-              }
-            } ?: Log.e("Firestore", "Error getting profile")
-          } ?: Log.e("Firestore", "Error getting beacon")
+            // After updating Firestore, save the track addition locally
+            coroutineScope.launch {
+              appDatabase
+                  .trackRecordDao()
+                  .insertTrackRecord(
+                      TrackRecord(
+                          beaconId = beaconId,
+                          trackId = track.id,
+                          timestamp = System.currentTimeMillis()))
+            }
+          } ?: Log.e("Firestore", "Error getting profile")
         }
         .addOnSuccessListener { onComplete(true) }
         .addOnFailureListener { onComplete(false) }
