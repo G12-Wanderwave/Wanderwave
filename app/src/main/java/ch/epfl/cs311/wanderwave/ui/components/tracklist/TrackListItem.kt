@@ -111,15 +111,15 @@ fun TrackListItemWithProfile(
     Row(
         verticalAlignment = Alignment.CenterVertically,
     ) {
-      var isLiked = remember { mutableStateOf(false) }
+      val isLiked = remember { mutableStateOf(false) }
       LikeButton(
           isLiked = isLiked,
           onLike = {
-            trackAndProfile.likeTrack()
+            trackAndProfile.likeTrack() //TODO: Update the value in the database and in the profile
             isLiked.value = true
           },
           onUnlike = {
-            trackAndProfile.unlikeTrack()
+            trackAndProfile.unlikeTrack() //TODO: Update the value in the database and in the profile
             isLiked.value = false
           })
       Box(
