@@ -188,22 +188,8 @@ public class BeaconConnectionTest {
                               "Sample Track ID"),
                           Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
-      val mapOfTestBeacon =
-          hashMapOf(
-              "id" to getTestBeacon.id,
-              "location" to getTestBeacon.location.toMap(),
-              "tracks" to
-                  getTestBeacon.profileAndTrack.map { profileAndTrack ->
-                    hashMapOf(
-                        "creator" to
-                            firestore
-                                .collection("users")
-                                .document(profileAndTrack.profile?.firebaseUid ?: ""),
-                        "track" to
-                            firestore.collection("tracks").document(profileAndTrack.track.id))
-                  })
 
-      every { mockDocumentSnapshot.getData() } returns mapOfTestBeacon
+      every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap(firestore)
       every { mockDocumentSnapshot.exists() } returns true
       every { mockDocumentSnapshot.id } returns getTestBeacon.id
       every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
@@ -262,12 +248,7 @@ public class BeaconConnectionTest {
               location = Location(1.0, 1.0, "Test Location"),
               profileAndTrack = listOf())
 
-      val mapOfTestBeacon =
-          hashMapOf(
-              "id" to getTestBeacon.id,
-              "location" to getTestBeacon.location.toMap(),
-              "tracks" to getTestBeacon.profileAndTrack.map { it.toMap() })
-      every { mockDocumentSnapshot.getData() } returns mapOfTestBeacon
+      every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap(firestore)
       every { mockDocumentSnapshot.exists() } returns true
       every { mockDocumentSnapshot.id } returns getTestBeacon.id
       every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
@@ -339,20 +320,15 @@ public class BeaconConnectionTest {
               location = Location(1.0, 1.0, "Test Location"),
               profileAndTrack = listOf())
 
-      val mapOfTestBeacon =
-          hashMapOf(
-              "id" to getTestBeacon.id,
-              "location" to getTestBeacon.location.toMap(),
-              "tracks" to getTestBeacon.profileAndTrack.map { it.toMap() })
 
       val getTestBeaconList = listOf(getTestBeacon, getTestBeacon)
 
-      every { mockDocumentSnapshot.getData() } returns mapOfTestBeacon
+      every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap(firestore)
       every { mockDocumentSnapshot.exists() } returns true
       every { mockDocumentSnapshot.id } returns getTestBeacon.id
       every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
       every { mockDocumentSnapshot.get("tracks") } returns
-          getTestBeacon.profileAndTrack.map { it.toMap() }
+          getTestBeacon.profileAndTrack.map { it.toMap(firestore) }
 
       every { mockQuerySnapshot.documents } returns
           listOf(mockDocumentSnapshot, mockDocumentSnapshot)
@@ -568,12 +544,6 @@ public class BeaconConnectionTest {
             Location(1.0, 1.0, "Test Location"),
             listOf(ProfileTrackAssociation(profile, track)))
 
-    val mapOfTestBeacon =
-        hashMapOf(
-            "id" to beacon.id,
-            "location" to beacon.location.toMap(),
-            "tracks" to beacon.profileAndTrack.map { it.toMap() })
-
     // Mock the Task
     val mockTask = mockk<Task<Transaction>>()
     val mockTransaction = mockk<Transaction>()
@@ -585,7 +555,7 @@ public class BeaconConnectionTest {
             location = Location(1.0, 1.0, "Test Location"),
             profileAndTrack = listOf(ProfileTrackAssociation(profile, track)))
 
-    every { mockDocumentSnapshot.getData() } returns mapOfTestBeacon
+    every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap(firestore)
     every { mockDocumentSnapshot.exists() } returns false
 
     every { mockTransaction.get(any<DocumentReference>()) } returns mockDocumentSnapshot
