@@ -9,7 +9,11 @@ package ch.epfl.cs311.wanderwave.model.data
  * @since 2.0
  * @last update 2.0
  */
-data class ProfileTrackAssociation(val profile: Profile? = null, val track: Track, val likes: Int = 0) {
+data class ProfileTrackAssociation(
+    val profile: Profile? = null,
+    val track: Track,
+    val likes: Int = 0
+) {
 
   fun toMap(): Map<String, Any?> {
     return hashMapOf("profile" to profile?.toMap(), "track" to track.toMap())

@@ -67,9 +67,7 @@ fun TrackListItem(track: Track, selected: Boolean, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
       Box(
-          modifier = Modifier
-              .fillMaxHeight()
-              .aspectRatio(1f),
+          modifier = Modifier.fillMaxHeight().aspectRatio(1f),
           contentAlignment = Alignment.Center) {
             Image(
                 imageVector = Icons.Default.PlayArrow,
@@ -77,9 +75,7 @@ fun TrackListItem(track: Track, selected: Boolean, onClick: () -> Unit) {
                 modifier = Modifier.fillMaxSize(.8f),
             )
           }
-      Column(modifier = Modifier
-          .padding(8.dp)
-          .horizontalScroll(scrollState)) {
+      Column(modifier = Modifier.padding(8.dp).horizontalScroll(scrollState)) {
         Text(
             text = track.title,
             color = MaterialTheme.colorScheme.onSurface,
@@ -117,14 +113,17 @@ fun TrackListItemWithProfile(
     ) {
       var isLiked = remember { mutableStateOf(false) }
       LikeButton(
-        isLiked = isLiked,
-        onLike = {trackAndProfile.likeTrack(); isLiked.value = true},
-        onUnlike = {trackAndProfile.unlikeTrack(); isLiked.value = false}
-      )
+          isLiked = isLiked,
+          onLike = {
+            trackAndProfile.likeTrack()
+            isLiked.value = true
+          },
+          onUnlike = {
+            trackAndProfile.unlikeTrack()
+            isLiked.value = false
+          })
       Box(
-          modifier = Modifier
-              .fillMaxHeight()
-              .aspectRatio(1f),
+          modifier = Modifier.fillMaxHeight().aspectRatio(1f),
           contentAlignment = Alignment.Center) {
             Image(
                 imageVector = Icons.Default.PlayArrow,
@@ -132,9 +131,7 @@ fun TrackListItemWithProfile(
                 modifier = Modifier.fillMaxSize(.8f),
             )
           }
-      Column(modifier = Modifier
-          .padding(8.dp)
-          .horizontalScroll(scrollState)) {
+      Column(modifier = Modifier.padding(8.dp).horizontalScroll(scrollState)) {
         Text(
             text = trackAndProfile.track.title,
             color = MaterialTheme.colorScheme.onSurface,
@@ -149,25 +146,23 @@ fun TrackListItemWithProfile(
       if (trackAndProfile.profile != null) {
         SelectImage(
             modifier =
-            Modifier
-                .size(width = 150.dp, height = 100.dp)
-                .clickable(
-                    enabled = trackAndProfile.profile.isPublic,
-                    onClick = {
-                        if (trackAndProfile.profile.isPublic) {
+                Modifier.size(width = 150.dp, height = 100.dp)
+                    .clickable(
+                        enabled = trackAndProfile.profile.isPublic,
+                        onClick = {
+                          if (trackAndProfile.profile.isPublic) {
                             // if the profile is public, navigate to the profile view screen
                             navigationActions.navigateToProfile(trackAndProfile.profile.firebaseUid)
-                        } else {
+                          } else {
                             // if the profile is private , output a message that say the profile
                             // is
                             // private, you cannot access to profile informations
                             scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    "This profile is private, you cannot access profile information."
-                                )
+                              snackbarHostState.showSnackbar(
+                                  "This profile is private, you cannot access profile information.")
                             }
-                        }
-                    }),
+                          }
+                        }),
             imageUri = trackAndProfile.profile.profilePictureUri,
         )
       }
@@ -182,26 +177,23 @@ internal fun LikeButton(
     onUnlike: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxHeight()
-            .aspectRatio(1f)
-            .padding(start = 8.dp),
-        contentAlignment = Alignment.Center) {
+  Box(
+      modifier = Modifier.fillMaxHeight().aspectRatio(1f).padding(start = 8.dp),
+      contentAlignment = Alignment.Center) {
         Image(
-            imageVector = if (isLiked.value) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+            imageVector =
+                if (isLiked.value) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
             contentDescription = "Like Button",
-            modifier = modifier.fillMaxSize(.65f)
-                .clickable {
-                    if (isLiked.value) {
-                        onUnlike()
-                    } else {
-                        onLike()
-                    }
+            modifier =
+                modifier.fillMaxSize(.65f).clickable {
+                  if (isLiked.value) {
+                    onUnlike()
+                  } else {
+                    onLike()
+                  }
                 },
-            colorFilter = ColorFilter.tint(if (isLiked.value) spotify_green else Color.DarkGray)
-        )
-    }
+            colorFilter = ColorFilter.tint(if (isLiked.value) spotify_green else Color.DarkGray))
+      }
 }
 
 @Composable
@@ -236,11 +228,7 @@ internal fun TrackListItemCard(
               CardDefaults.cardColors().contentColor,
               CardDefaults.cardColors().disabledContainerColor,
               CardDefaults.cardColors().disabledContentColor),
-      modifier = Modifier
-          .height(80.dp)
-          .fillMaxWidth()
-          .padding(4.dp)
-          .testTag("trackItem")) {
+      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem")) {
         content()
       }
 }
