@@ -3,6 +3,8 @@ package ch.epfl.cs311.wanderwave.ui
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationUserData
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
@@ -41,6 +43,7 @@ class BeaconScreenTest {
   @RelaxedMockK private lateinit var trackRepository: TrackRepository
   @RelaxedMockK private lateinit var mockNavController: NavHostController
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
+  @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
 
   @Before
   fun setup() {
@@ -49,29 +52,37 @@ class BeaconScreenTest {
 
     val beaconFlow =
         flowOf(
-            Beacon(
-                beaconId,
-                Location(46.519653, 6.632273, "Lausanne"),
-                profileAndTrack =
-                    listOf(
-                        ProfileTrackAssociation(
-                            Profile(
-                                "Sample First Name",
-                                "Sample last name",
-                                "Sample desc",
-                                0,
-                                false,
-                                null,
-                                "Sample Profile ID",
-                                "Sample Track ID"),
-                            Track("Sample Track ID", "Sample Track Title", "Sample Artist Name")))))
-
+            Result.success(
+                Beacon(
+                    beaconId,
+                    Location(46.519653, 6.632273, "Lausanne"),
+                    profileAndTrack =
+                        listOf(
+                            ProfileTrackAssociation(
+                                Profile(
+                                    "Sample First Name",
+                                    "Sample last name",
+                                    "Sample desc",
+                                    0,
+                                    false,
+                                    null,
+                                    "Sample Profile ID",
+                                    "Sample Track ID"),
+                                Track(
+                                    "Sample Track ID",
+                                    "Sample Track Title",
+                                    "Sample Artist Name"))))))
     coEvery { beaconConnection.getItem(any<String>()) } returns beaconFlow
 
     val connectResult = SpotifyController.ConnectResult.SUCCESS
     every { mockSpotifyController.connectRemote() } returns flowOf(connectResult)
 
-    val viewModel = BeaconViewModel(trackRepository, beaconConnection, mockSpotifyController)
+    every { mockAuthenticationController.getUserData() } returns
+        AuthenticationUserData("test-uid", "test-email", "test-name", "test-photo-url")
+
+    val viewModel =
+        BeaconViewModel(
+            trackRepository, beaconConnection, mockSpotifyController, mockAuthenticationController)
 
     composeTestRule.setContent { BeaconScreen(beaconId, mockNavigationActions, viewModel) }
 

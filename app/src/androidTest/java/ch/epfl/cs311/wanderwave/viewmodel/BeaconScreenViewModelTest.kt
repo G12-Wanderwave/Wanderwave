@@ -1,6 +1,12 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationUserData
+import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.ListType
+import ch.epfl.cs311.wanderwave.model.data.Location
+import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
@@ -27,7 +33,10 @@ import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -40,6 +49,7 @@ class BeaconScreenViewModelTest {
   @get:Rule val mockkRule = MockKRule(this)
   @RelaxedMockK private lateinit var beaconConnection: BeaconConnection
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
+  @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
 
   lateinit var viewModel: BeaconViewModel
   val testDispatcher = TestCoroutineDispatcher()
@@ -50,7 +60,14 @@ class BeaconScreenViewModelTest {
   @Before
   fun setup() {
     Dispatchers.setMain(testDispatcher)
-    viewModel = BeaconViewModel(trackRepository, beaconRepository, mockSpotifyController)
+
+    every { mockAuthenticationController.isSignedIn() } returns true
+    every { mockAuthenticationController.getUserData() } returns
+        AuthenticationUserData("uid", "email", "name", "http://photoUrl/img.jpg")
+
+    viewModel =
+        BeaconViewModel(
+            trackRepository, beaconRepository, mockSpotifyController, mockAuthenticationController)
   }
 
   @OptIn(ExperimentalCoroutinesApi::class)
@@ -72,16 +89,19 @@ class BeaconScreenViewModelTest {
   fun canConstructWithNoErrors() {
     val connectResult = SpotifyController.ConnectResult.SUCCESS
     every { mockSpotifyController.connectRemote() } returns flowOf(connectResult)
-    BeaconViewModel(trackRepository, beaconConnection, mockSpotifyController)
+    BeaconViewModel(
+        trackRepository, beaconConnection, mockSpotifyController, mockAuthenticationController)
   }
 
   @Test
   fun addTrackToBeaconTest() {
-    val viewModel = BeaconViewModel(trackRepository, beaconConnection, mockSpotifyController)
+    val viewModel =
+        BeaconViewModel(
+            trackRepository, beaconConnection, mockSpotifyController, mockAuthenticationController)
     val track = Track("trackId", "trackName", "trackArtist")
     viewModel.addTrackToBeacon("beaconId", track, {})
 
-    verify { beaconConnection.addTrackToBeacon(any(), any(), any()) }
+    verify { beaconConnection.addTrackToBeacon(any(), any(), any(), any()) }
   }
 
   @OptIn(ExperimentalCoroutinesApi::class)
@@ -130,10 +150,65 @@ class BeaconScreenViewModelTest {
 
   @Test
   fun canSelectTracks() {
-    val viewModel = BeaconViewModel(trackRepository, beaconConnection, mockSpotifyController)
+    val viewModel =
+        BeaconViewModel(
+            trackRepository, beaconConnection, mockSpotifyController, mockAuthenticationController)
     val track = Track("trackId", "trackName", "trackArtist")
     viewModel.selectTrack(track)
 
     verify { mockSpotifyController.playTrackList(any(), any(), any()) }
+  }
+
+  @Test
+  fun testGetBeaconById() = runBlocking {
+    // Arrange
+    val id = "beaconId"
+    val expectedBeacon =
+        Beacon(
+            id,
+            Location(46.519653, 6.632273, "Lausanne"),
+            profileAndTrack =
+                listOf(
+                    ProfileTrackAssociation(
+                        Profile(
+                            "Sample First Name",
+                            "Sample last name",
+                            "Sample desc",
+                            0,
+                            false,
+                            null,
+                            "Sample Profile ID",
+                            "Sample Track ID"),
+                        Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
+    val beaconFlow = flowOf(Result.success(expectedBeacon))
+
+    every { beaconRepository.getItem(id) } returns beaconFlow
+
+    // Act
+    viewModel.getBeaconById(id)
+
+    // Assert
+    val uiState = viewModel.uiState.value
+    assertEquals(expectedBeacon, uiState.beacon)
+    assertFalse(uiState.isLoading)
+    assertNull(uiState.error)
+
+    // fail case
+    val beaconFlowError = flowOf(Result.failure<Beacon>(Exception("Test Exception")))
+    every { beaconRepository.getItem(id) } returns beaconFlowError
+
+    viewModel.getBeaconById(id)
+
+    val uiStateError = viewModel.uiState.value
+    assertNull(uiStateError.beacon)
+    assertFalse(uiStateError.isLoading)
+    assertEquals("Test Exception", uiStateError.error)
+  }
+
+  @Test
+  fun emptyChildrenList_clearsChildrenPlaylistTrackList() = runBlockingTest {
+
+    // Act
+    viewModel.emptyChildrenList()
   }
 }

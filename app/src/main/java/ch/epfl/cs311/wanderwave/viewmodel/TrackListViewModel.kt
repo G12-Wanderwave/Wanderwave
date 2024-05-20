@@ -60,7 +60,9 @@ constructor(
       val trackRecords =
           appDatabase.trackRecordDao().getAllRecentlyAddedTracks().firstOrNull() ?: listOf()
       val trackDetails =
-          trackRecords.mapNotNull { repository.getTrackById(it.trackId).firstOrNull() }
+          trackRecords.mapNotNull {
+            repository.getItem(it.trackId).firstOrNull()?.getOrElse { null }
+          }
       _uiState.value = _uiState.value.copy(tracks = trackDetails, loading = false)
     }
   }
@@ -168,6 +170,10 @@ constructor(
   override fun getTracksFromPlaylist(playlistId: String) {
     getTracksFromSpotifyPlaylist(
         playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
+  }
+
+  override fun emptyChildrenList() {
+    _childrenPlaylistTrackList.value = (emptyList())
   }
 
   data class UiState(
