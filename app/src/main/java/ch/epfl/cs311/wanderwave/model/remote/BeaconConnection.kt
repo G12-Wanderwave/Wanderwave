@@ -83,7 +83,7 @@ class BeaconConnection(
             val tracksObject = document["tracks"]
 
             if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
-              val profileAndTrackRefs = tracksObject as? List<Map<String, DocumentReference>>
+              val profileAndTrackRefs = tracksObject as? List<Map<String, Any>>
 
               coroutineScope.launch {
                 val profileAndTracks =
@@ -171,34 +171,24 @@ class BeaconConnection(
 
           val profile: Profile? = Profile.from(transaction[profileRef])
 
-          beacon?.let {beaconNotNull ->
-            profile?.let {profileNotNull ->
+          beacon?.let { beaconNotNull ->
+            profile?.let { profileNotNull ->
               val newTracks =
-                ArrayList(associations).apply {
-                  add(
-                    ProfileTrackAssociation(
-                      profileNotNull,
-                      track
-                    )
-                  )
-                }
+                  ArrayList(associations).apply {
+                    add(ProfileTrackAssociation(profileNotNull, track))
+                  }
 
-              transaction.update(
-                beaconRef,
-                "tracks",
-                newTracks.map { it.toMap(db) })
+              transaction.update(beaconRef, "tracks", newTracks.map { it.toMap(db) })
 
               // After updating Firestore, save the track addition locally
               coroutineScope.launch {
                 appDatabase
-                  .trackRecordDao()
-                  .insertTrackRecord(
-                    TrackRecord(
-                      beaconId = beaconId,
-                      trackId = track.id,
-                      timestamp = System.currentTimeMillis()
-                    )
-                  )
+                    .trackRecordDao()
+                    .insertTrackRecord(
+                        TrackRecord(
+                            beaconId = beaconId,
+                            trackId = track.id,
+                            timestamp = System.currentTimeMillis()))
               }
             } ?: Log.e("Firestore", "Error getting profile")
           } ?: Log.e("Firestore", "Error getting beacon")

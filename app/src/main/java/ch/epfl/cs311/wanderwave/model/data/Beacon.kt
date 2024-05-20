@@ -19,11 +19,11 @@ data class Beacon(
 ) {
 
   fun toMap(db: FirebaseFirestore): HashMap<String, Any> =
-    hashMapOf(
-      "id" to id,
-      "location" to location.toMap(),
-      "likes" to likes,
-      "tracks" to profileAndTrack.map { it.toMap(db) })
+      hashMapOf(
+          "id" to id,
+          "location" to location.toMap(),
+          "likes" to likes,
+          "tracks" to profileAndTrack.map { it.toMap(db) })
 
   companion object {
     fun from(document: DocumentSnapshot): Beacon? {

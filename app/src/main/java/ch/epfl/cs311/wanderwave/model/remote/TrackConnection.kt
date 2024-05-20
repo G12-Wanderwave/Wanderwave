@@ -83,10 +83,16 @@ class TrackConnection(private val database: FirebaseFirestore) :
               trySend(
                   Result.failure(Exception("Error fetching the track, firebase format is wrong")))
             } else {
-              trySend(Result.success(ProfileTrackAssociation(profile = profile, track = track, likes = likes)))
+              trySend(
+                  Result.success(
+                      ProfileTrackAssociation(profile = profile, track = track, likes = likes)))
             }
-          } ?: trySend(Result.failure(Exception("Error fetching the profile, firebase format is wrong")))
-        } ?: trySend(Result.failure(Exception("Error fetching the track, firebase format is wrong")))
+          }
+              ?: trySend(
+                  Result.failure(Exception("Error fetching the profile, firebase format is wrong")))
+        }
+            ?: trySend(
+                Result.failure(Exception("Error fetching the track, firebase format is wrong")))
       } catch (e: Exception) {
         // Handle exceptions
         Log.e("Firestore", "Error fetching profile and track:${e.message}")
