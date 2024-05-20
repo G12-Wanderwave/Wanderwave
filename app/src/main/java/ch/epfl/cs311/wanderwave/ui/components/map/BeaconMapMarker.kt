@@ -7,7 +7,6 @@ import com.google.maps.android.compose.GoogleMapComposable
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 
-
 @Composable
 @GoogleMapComposable
 fun BeaconMapMarker(
@@ -24,7 +23,5 @@ fun BeaconMapMarker(
         onClick()
         true
       },
-      icon = AppResources.beaconIcon ?: return
-
-  )
+      icon = AppResources.beaconIcon ?: return)
 }

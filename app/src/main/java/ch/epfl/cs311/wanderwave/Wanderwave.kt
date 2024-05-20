@@ -7,5 +7,5 @@ import dagger.hilt.android.HiltAndroidApp
 @HiltAndroidApp class Wanderwave : Application()
 
 object AppResources {
-    var beaconIcon: BitmapDescriptor? = null
+  var beaconIcon: BitmapDescriptor? = null
 }
