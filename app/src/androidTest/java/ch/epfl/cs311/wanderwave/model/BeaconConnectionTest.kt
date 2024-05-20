@@ -188,7 +188,6 @@ public class BeaconConnectionTest {
                               "Sample Track ID"),
                           Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
-
       every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap(firestore)
       every { mockDocumentSnapshot.exists() } returns true
       every { mockDocumentSnapshot.id } returns getTestBeacon.id
@@ -319,7 +318,6 @@ public class BeaconConnectionTest {
               id = "testBeacon",
               location = Location(1.0, 1.0, "Test Location"),
               profileAndTrack = listOf())
-
 
       val getTestBeaconList = listOf(getTestBeacon, getTestBeacon)
 

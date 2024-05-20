@@ -238,8 +238,7 @@ class DataClassesTest {
         hashMapOf(
             "profile" to firebaseFirestore.collection("users").document(profile.firebaseUid),
             "track" to firebaseFirestore.collection("tracks").document(track.id),
-            "likes" to 0
-            )
+            "likes" to 0)
 
     assertEquals(expectedMap, profileTrackAssociation.toMap(firebaseFirestore))
 
@@ -247,7 +246,9 @@ class DataClassesTest {
     val profileTrackAssociation2 = ProfileTrackAssociation(null, track)
     val expectedMap2 =
         hashMapOf(
-            "profile" to null, "track" to firebaseFirestore.collection("tracks").document(track.id), "likes" to 0)
+            "profile" to null,
+            "track" to firebaseFirestore.collection("tracks").document(track.id),
+            "likes" to 0)
 
     assertEquals(expectedMap2, profileTrackAssociation2.toMap(firebaseFirestore))
   }
