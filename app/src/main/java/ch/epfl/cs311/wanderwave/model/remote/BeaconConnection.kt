@@ -196,7 +196,8 @@ class BeaconConnection(
                               null,
                               "sample spotify uid",
                               profileUid),
-                          track))
+                          track,
+                          0))
                 }
             transaction.update(
                 beaconRef,
