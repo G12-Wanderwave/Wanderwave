@@ -162,11 +162,12 @@ class BeaconConnection(
               tracks.mapNotNull {
                 val creatorRef = it["creator"]
                 val trackRef = it["track"]
+                val likes = it["likes"] as? Int ?: 0
 
                 val creator = creatorRef?.let { Profile.from(transaction[it]) }
                 val track = trackRef?.let { Track.from(transaction[it]) }
 
-                track?.let { ProfileTrackAssociation(creator, it) }
+                track?.let { ProfileTrackAssociation(creator, it, likes) }
               }
 
           val profile: Profile? = Profile.from(transaction[profileRef])
