@@ -14,7 +14,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -26,7 +25,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -151,16 +149,6 @@ class TrackListViewModelTest {
     val trackWithoutPrefix = Track("1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
     viewModel.addTrackToList(ListType.TOP_SONGS, trackWithoutPrefix)
     assertTrue(viewModel.uiState.value.tracks.contains(track))
-  }
-
-  @Test
-  fun toggleTrackSourceTest() = run {
-    every { mockSpotifyController.recentlyPlayedTracks } returns
-        MutableStateFlow(emptyList<Track>())
-    val initial = viewModel.uiState.value.showRecentlyAdded
-    viewModel.toggleTrackSource()
-    val toggled = viewModel.uiState.value.showRecentlyAdded
-    assertNotEquals(initial, toggled)
   }
 
   @Test

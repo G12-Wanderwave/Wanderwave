@@ -47,7 +47,7 @@ fun TrackList(
         horizontalArrangement = Arrangement.SpaceBetween) {
           if (title != null) {
             Text(
-                text = title.lowercase().replace("_", " "),
+                text = title,
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.testTag("trackListTitle"))
           }

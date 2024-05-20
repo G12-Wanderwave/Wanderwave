@@ -49,7 +49,9 @@ fun TrackListScreen(
               selectedTabIndex = index
               viewModel.loadTracksBasedOnSource(selectedTabIndex)
             },
-            text = { Text(text = title, fontSize = 10.sp) })
+            text = { Text(text = title, fontSize = 10.sp) },
+            modifier = Modifier.testTag("tab$index") // Adding a test tag for the tabs
+            )
       }
     }
     TabContent1(navActions, viewModel, selectedTabIndex)
