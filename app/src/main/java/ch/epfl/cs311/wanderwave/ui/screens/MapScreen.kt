@@ -52,56 +52,52 @@ fun needToRequestPermissions(permissionState: MultiplePermissionsState): Boolean
 @SuppressLint("MissingPermission")
 @Composable
 fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel) {
-    val context = LocalContext.current
-    val cameraPositionState: CameraPositionState = rememberCameraPositionState {}
-    val mapIsLoaded = remember { mutableStateOf(false) }
-    val locationState = remember { mutableStateOf<Location?>(null) }
-    val song = viewModel.retrievedSongs.collectAsStateWithLifecycle()
+  val context = LocalContext.current
+  val cameraPositionState: CameraPositionState = rememberCameraPositionState {}
+  val mapIsLoaded = remember { mutableStateOf(false) }
+  val locationState = remember { mutableStateOf<Location?>(null) }
+  val song = viewModel.retrievedSongs.collectAsStateWithLifecycle()
 
-    val permissionState = rememberMultiplePermissionsState(
-        listOf(
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.FOREGROUND_SERVICE,
-            Manifest.permission.POST_NOTIFICATIONS
-        )
-    )
+  val permissionState =
+      rememberMultiplePermissionsState(
+          listOf(
+              Manifest.permission.ACCESS_COARSE_LOCATION,
+              Manifest.permission.ACCESS_FINE_LOCATION,
+              Manifest.permission.FOREGROUND_SERVICE,
+              Manifest.permission.POST_NOTIFICATIONS))
 
-    WanderwaveGoogleMap(
-        cameraPositionState = cameraPositionState,
-        locationEnabled = permissionState.allPermissionsGranted,
-        locationSource = viewModel.locationSource,
-        modifier = Modifier.testTag("mapScreen"),
-        onMapLoaded = { mapIsLoaded.value = true }
-    ) {
+  WanderwaveGoogleMap(
+      cameraPositionState = cameraPositionState,
+      locationEnabled = permissionState.allPermissionsGranted,
+      locationSource = viewModel.locationSource,
+      modifier = Modifier.testTag("mapScreen"),
+      onMapLoaded = { mapIsLoaded.value = true }) {
         MapContent(navigationActions, viewModel)
+      }
+
+  if (needToRequestPermissions(permissionState)) {
+    AskForPermissions(permissionState)
+  } else {
+    LaunchedEffect(true) {
+      val intent = Intent(context, LocationUpdatesService::class.java)
+      context.startService(intent)
     }
 
-    if (needToRequestPermissions(permissionState)) {
-        AskForPermissions(permissionState)
-    } else {
-        LaunchedEffect(true) {
-            val intent = Intent(context, LocationUpdatesService::class.java)
-            context.startService(intent)
-        }
+    DisposableEffect(Unit) {
+      val receiver = createLocationReceiver(locationState, viewModel, song)
+      val filter = IntentFilter(LocationUpdatesService.ACTION_LOCATION_BROADCAST)
+      LocalBroadcastManager.getInstance(context).registerReceiver(receiver, filter)
 
-        DisposableEffect(Unit) {
-            val receiver = createLocationReceiver(locationState, viewModel, song)
-            val filter = IntentFilter(LocationUpdatesService.ACTION_LOCATION_BROADCAST)
-            LocalBroadcastManager.getInstance(context).registerReceiver(receiver, filter)
-
-            onDispose {
-                LocalBroadcastManager.getInstance(context).unregisterReceiver(receiver)
-            }
-        }
-
-        LaunchedEffect(mapIsLoaded.value) {
-            val location = viewModel.getLastKnownLocation(context)
-            if (location != null && mapIsLoaded.value) {
-                moveCamera(cameraPositionState, location, viewModel.cameraPosition.value)
-            }
-        }
+      onDispose { LocalBroadcastManager.getInstance(context).unregisterReceiver(receiver) }
     }
+
+    LaunchedEffect(mapIsLoaded.value) {
+      val location = viewModel.getLastKnownLocation(context)
+      if (location != null && mapIsLoaded.value) {
+        moveCamera(cameraPositionState, location, viewModel.cameraPosition.value)
+      }
+    }
+  }
 }
 
 fun createLocationReceiver(
@@ -109,39 +105,41 @@ fun createLocationReceiver(
     viewModel: MapViewModel,
     song: State<ProfileTrackAssociation>
 ): BroadcastReceiver {
-    return object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val latitude = intent?.getDoubleExtra(LocationUpdatesService.EXTRA_LATITUDE, 0.0)
-            val longitude = intent?.getDoubleExtra(LocationUpdatesService.EXTRA_LONGITUDE, 0.0)
-            if (latitude != null && longitude != null) {
-                locationState.value = Location(latitude, longitude)
-                if (context != null) {
-                    viewModel.loadBeacons(context, locationState.value!!)
-                }
-                val tempBeacon = findClosestBeacon(locationState.value!!, viewModel.beaconList.value)
-                if (tempBeacon != null) {
-                    viewModel.getRandomSong(tempBeacon.id)
-                    Log.d("MapScreen", "retrieved song: ${song.value}")
-                }
-            }
+  return object : BroadcastReceiver() {
+    override fun onReceive(context: Context?, intent: Intent?) {
+      val latitude = intent?.getDoubleExtra(LocationUpdatesService.EXTRA_LATITUDE, 0.0)
+      val longitude = intent?.getDoubleExtra(LocationUpdatesService.EXTRA_LONGITUDE, 0.0)
+      if (latitude != null && longitude != null) {
+        locationState.value = Location(latitude, longitude)
+        if (context != null) {
+          viewModel.loadBeacons(context, locationState.value!!)
         }
+        val tempBeacon = findClosestBeacon(locationState.value!!, viewModel.beaconList.value)
+        if (tempBeacon != null) {
+          viewModel.getRandomSong(tempBeacon.id)
+          Log.d("MapScreen", "retrieved song: ${song.value}")
+        }
+      }
     }
+  }
 }
+
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun AskForPermissions(permissionState: MultiplePermissionsState) {
-    if (!permissionState.allPermissionsGranted) {
-        AlertDialog(
-            title = { Text(stringResource(id = R.string.permission_request_title)) },
-            text = { Text(text = stringResource(id = R.string.permission_request_text_location)) },
-            onDismissRequest = { permissionState.launchMultiplePermissionRequest() },
-            confirmButton = {
-                TextButton(onClick = { permissionState.launchMultiplePermissionRequest() }) {
-                    Text(stringResource(id = R.string.permission_request_confirm_button))
-                }
-            })
-    }
+  if (!permissionState.allPermissionsGranted) {
+    AlertDialog(
+        title = { Text(stringResource(id = R.string.permission_request_title)) },
+        text = { Text(text = stringResource(id = R.string.permission_request_text_location)) },
+        onDismissRequest = { permissionState.launchMultiplePermissionRequest() },
+        confirmButton = {
+          TextButton(onClick = { permissionState.launchMultiplePermissionRequest() }) {
+            Text(stringResource(id = R.string.permission_request_confirm_button))
+          }
+        })
+  }
 }
+
 @Composable
 fun MapContent(navigationActions: NavigationActions, viewModel: MapViewModel) {
   val beacons: List<Beacon> = viewModel.uiState.collectAsStateWithLifecycle().value.beacons
