@@ -17,7 +17,6 @@ data class Profile(
     var topSongs: List<Track> = emptyList(),
     var chosenSongs: List<Track> = emptyList(),
     var bannedSongs: List<Track> = emptyList(),
-    var likedSongs: List<Track> = emptyList(),
 ) {
 
   fun toMap(db: FirebaseFirestore? = null): Map<String, Any> {
@@ -30,7 +29,6 @@ data class Profile(
     val topSongsReferences: List<DocumentReference> = mapTrackToDocumentReference(topSongs)
     val chosenSongsReferences: List<DocumentReference> = mapTrackToDocumentReference(chosenSongs)
     val bannedSongsReferences: List<DocumentReference> = mapTrackToDocumentReference(bannedSongs)
-    val likedSongsReferences: List<DocumentReference> = mapTrackToDocumentReference(likedSongs)
 
     return hashMapOf(
         "firstName" to firstName,
@@ -45,7 +43,6 @@ data class Profile(
         "topSongs" to topSongsReferences,
         "chosenSongs" to chosenSongsReferences,
         "bannedSongs" to bannedSongsReferences,
-        "likedSongs" to likedSongsReferences,
     )
   }
 

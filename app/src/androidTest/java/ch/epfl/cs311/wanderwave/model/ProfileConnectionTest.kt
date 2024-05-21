@@ -188,7 +188,6 @@ public class ProfileConnectionTest {
               "Sample ID",
               listOf(track),
               listOf(track, track),
-              listOf(track),
               listOf(track))
 
       every { mockDocumentSnapshot.getData() } returns getTestProfile.toMap(firebaseFirestore)
@@ -210,8 +209,6 @@ public class ProfileConnectionTest {
           getTestProfile.chosenSongs.map { trackDocumentReference }
       every { mockDocumentSnapshot.get("bannedSongs") } returns
           getTestProfile.bannedSongs.map { trackDocumentReference }
-      every { mockDocumentSnapshot.get("likedSongs") } returns
-          getTestProfile.likedSongs.map { trackDocumentReference }
 
       every { mockDocumentSnapshot.getString("title") } returns track.title
       every { mockDocumentSnapshot.getString("artist") } returns track.artist
@@ -281,7 +278,6 @@ public class ProfileConnectionTest {
               "Sample ID",
               listOf(),
               listOf(),
-              listOf(),
               listOf())
 
       val mockDocumentSnapshot = mockk<DocumentSnapshot>()
@@ -305,8 +301,6 @@ public class ProfileConnectionTest {
           getTestProfile.chosenSongs.map { trackDocumentReference }
       every { mockDocumentSnapshot.get("bannedSongs") } returns
           getTestProfile.bannedSongs.map { trackDocumentReference }
-      every { mockDocumentSnapshot.get("likedSongs") } returns
-          getTestProfile.likedSongs.map { trackDocumentReference }
 
       var result = profileConnection.documentTransform(mockDocumentSnapshot, null).first()
       assert(result.isSuccess)

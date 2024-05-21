@@ -64,7 +64,6 @@ class ProfileConnection(
           val topSongsObject = document["topSongs"]
           val chosenSongsObject = document["chosenSongs"]
           val bannedSongsObject = document["bannedSongs"]
-          val likedSongsObject = document["likedSongs"]
 
           val topSongRefs =
               topSongsObject.takeIf { isValidObject(it) } as? List<DocumentReference>
@@ -74,9 +73,6 @@ class ProfileConnection(
                   ?: emptyList<DocumentReference>()
           val bannedSongRefs =
               bannedSongsObject.takeIf { isValidObject(it) } as? List<DocumentReference>
-                  ?: emptyList<DocumentReference>()
-          val likedSongRefs =
-              likedSongsObject.takeIf { isValidObject(it) } as? List<DocumentReference>
                   ?: emptyList<DocumentReference>()
 
           coroutineScope.launch {
@@ -88,20 +84,15 @@ class ProfileConnection(
             val chosenSongs = documentReferencesToFlows(chosenSongRefs, trackConnection)
             val topSongs = documentReferencesToFlows(topSongRefs, trackConnection)
             val bannedSongs = documentReferencesToFlows(bannedSongRefs, trackConnection)
-            val likedSongs = documentReferencesToFlows(likedSongRefs, trackConnection)
 
             val updatedProfile =
                 topSongs
                     .combine(chosenSongs) { topSongs, chosenSongs -> Pair(topSongs, chosenSongs) }
                     .combine(bannedSongs) { pair, bannedSongs ->
-                      Triple(pair.first, pair.second, bannedSongs)
-                    }
-                    .combine(likedSongs) { triple, likedSongs ->
                       profile.copy(
-                          topSongs = triple.first.getOrNull() ?: profile.topSongs,
-                          chosenSongs = triple.second.getOrNull() ?: profile.chosenSongs,
-                          bannedSongs = triple.third.getOrNull() ?: profile.bannedSongs,
-                          likedSongs = likedSongs.getOrNull() ?: profile.likedSongs)
+                          topSongs = pair.first.getOrNull() ?: profile.topSongs,
+                          chosenSongs = pair.second.getOrNull() ?: profile.chosenSongs,
+                          bannedSongs = bannedSongs.getOrNull() ?: profile.bannedSongs)
                     }
 
             // would like to keep the flow without collecting it, but I don't know how to do
