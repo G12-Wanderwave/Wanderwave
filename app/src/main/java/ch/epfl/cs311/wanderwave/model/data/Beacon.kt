@@ -39,7 +39,11 @@ data class Beacon(
 
         val numberOfLikes = document.getLong("likes")?.toInt() ?: 0
 
-        Beacon(id = id, location = location, profileAndTrack = profileAndTrack, numberOfLikes = numberOfLikes)
+        Beacon(
+            id = id,
+            location = location,
+            profileAndTrack = profileAndTrack,
+            numberOfLikes = numberOfLikes)
       } else {
         null
       }

@@ -191,7 +191,6 @@ public class ProfileConnectionTest {
               listOf(track),
               listOf(track))
 
-
       every { mockDocumentSnapshot.getData() } returns getTestProfile.toMap(firebaseFirestore)
       every { mockDocumentSnapshot.exists() } returns true
       every { mockDocumentSnapshot.id } returns getTestProfile.firebaseUid

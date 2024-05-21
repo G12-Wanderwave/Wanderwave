@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.model.remote
 
-import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository

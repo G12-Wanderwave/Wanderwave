@@ -171,8 +171,7 @@ class DataClassesTest {
             "chosenSongs" to listOf<DocumentReference>(),
             "topSongs" to listOf<DocumentReference>(),
             "bannedSongs" to listOf<DocumentReference>(),
-            "likedSongs" to listOf<DocumentReference>()
-          )
+            "likedSongs" to listOf<DocumentReference>())
 
     assertEquals(expectedMap, profile.toMap())
   }
