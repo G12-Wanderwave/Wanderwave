@@ -77,53 +77,49 @@ class BeaconConnection(
         if (!document.exists()) {
           trySend(Result.failure(Exception("Document does not exist")))
         } else {
-          val beacon: Beacon? = item ?: Beacon.from(document)
+          val beacon: Beacon = item ?: Beacon.from(document)!!
 
-          beacon!!.let { beacon ->
-            val tracksObject = document["tracks"]
+          val tracksObject = document["tracks"]
 
-            if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
-              val profileAndTrackRefs = tracksObject as? List<Map<String, Any>>
+          if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
+            val profileAndTrackRefs = tracksObject as? List<Map<String, Any>>
 
-              coroutineScope.launch {
-                val profileAndTracks =
-                    profileAndTrackRefs
-                        // Fetch the profile and track from the references
-                        ?.mapNotNull { profileAndTrackRef ->
-                          trackConnection.fetchProfileAndTrack(profileAndTrackRef)
+            coroutineScope.launch {
+              val profileAndTracks =
+                  profileAndTrackRefs
+                      // Fetch the profile and track from the references
+                      ?.mapNotNull { profileAndTrackRef ->
+                        trackConnection.fetchProfileAndTrack(profileAndTrackRef)
+                      }
+                      // map the list of flow of Result<ProfileTrackAssociation> to a flow of
+                      // Result<List<ProfileTrackAssociation>>
+                      ?.mapNotNull { flow -> flow.mapNotNull { result -> result.getOrNull() } }
+                      // reduce the list of flow to a single flow that contains the list of
+                      // ProfileTrackAssociation
+                      ?.fold(flowOf(Result.success(listOf<ProfileTrackAssociation>()))) { acc, track
+                        ->
+                        acc.combine(track) { accTracks, track ->
+                          accTracks.map { tracks -> tracks + track }
                         }
-                        // map the list of flow of Result<ProfileTrackAssociation> to a flow of
-                        // Result<List<ProfileTrackAssociation>>
-                        ?.mapNotNull { flow -> flow.mapNotNull { result -> result.getOrNull() } }
-                        // reduce the list of flow to a single flow that contains the list of
-                        // ProfileTrackAssociation
-                        ?.fold(flowOf(Result.success(listOf<ProfileTrackAssociation>()))) {
-                            acc,
-                            track ->
-                          acc.combine(track) { accTracks, track ->
-                            accTracks.map { tracks -> tracks + track }
-                          }
-                        } ?: flowOf(Result.failure(Exception("Could not retrieve chosenSongs")))
+                      } ?: flowOf(Result.failure(Exception("Could not retrieve chosenSongs")))
 
-                // Update the beacon with the profile and track
-                profileAndTracks.collect { result ->
-                  result.onSuccess { profileAndTracks ->
-                    val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks)
-                    trySend(Result.success(updatedBeacon))
-                  }
-                  result.onFailure { exception ->
-                    trySend(Result.success(beacon))
-                    Log.e("Firestore", "Error getting profile and track: ", exception)
-                  }
+              // Update the beacon with the profile and track
+              profileAndTracks.collect { result ->
+                result.onSuccess { profileAndTracks ->
+                  val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks)
+                  trySend(Result.success(updatedBeacon))
+                }
+                result.onFailure { exception ->
+                  trySend(Result.success(beacon))
+                  Log.e("Firestore", "Error getting profile and track: ", exception)
                 }
               }
-            } else {
-              trySend(Result.success(beacon))
-              Log.e("Firestore", "Tracks are not in the correct format ")
             }
+          } else {
+            trySend(Result.success(beacon))
+            Log.e("Firestore", "Tracks are not in the correct format ")
           }
         }
-
         awaitClose {}
       }
 
