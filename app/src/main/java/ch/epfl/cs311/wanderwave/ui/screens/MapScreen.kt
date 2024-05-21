@@ -2,6 +2,7 @@ package ch.epfl.cs311.wanderwave.ui.screens
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -18,6 +19,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
+import ch.epfl.cs311.wanderwave.model.utils.LocationUpdatesService
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
 import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
@@ -41,68 +43,77 @@ fun needToRequestPermissions(permissionState: MultiplePermissionsState): Boolean
 @SuppressLint("MissingPermission")
 @Composable
 fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hiltViewModel()) {
-  val context = LocalContext.current
-  val cameraPositionState: CameraPositionState = rememberCameraPositionState {}
-  val mapIsLoaded = remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val cameraPositionState: CameraPositionState = rememberCameraPositionState {}
+    val mapIsLoaded = remember { mutableStateOf(false) }
 
-  val permissionState =
-      rememberMultiplePermissionsState(
-          listOf(
-              Manifest.permission.ACCESS_COARSE_LOCATION,
-              Manifest.permission.ACCESS_FINE_LOCATION,
-          ))
+    val permissionState =
+        rememberMultiplePermissionsState(
+            listOf(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.FOREGROUND_SERVICE,
+                Manifest.permission.POST_NOTIFICATIONS
+            ))
 
-  // remember the camera position when navigating away
-  DisposableEffect(Unit) {
-    onDispose { viewModel.cameraPosition.value = cameraPositionState.position }
-  }
-
-  WanderwaveGoogleMap(
-      cameraPositionState = cameraPositionState,
-      locationEnabled = permissionState.allPermissionsGranted,
-      locationSource = viewModel.locationSource,
-      modifier = Modifier.testTag("mapScreen"),
-      onMapLoaded = { mapIsLoaded.value = true }) {
-        MapContent(navigationActions, viewModel)
-      }
-
-  if (needToRequestPermissions(permissionState)) {
-    AskForPermissions(permissionState)
-  } else {
-    // if we have location permissions, move the camera to the last known location **once**
-    val location = viewModel.getLastKnownLocation(context)
-    viewModel.startLocationUpdates(context)
-
-    LaunchedEffect(location != null, mapIsLoaded.value) {
-      if (location != null && mapIsLoaded.value) {
-        moveCamera(cameraPositionState, location, viewModel.cameraPosition.value)
-      }
+    // remember the camera position when navigating away
+    DisposableEffect(Unit) {
+        onDispose { viewModel.cameraPosition.value = cameraPositionState.position }
     }
-  }
-}
 
-@Composable
-fun MapContent(navigationActions: NavigationActions, viewModel: MapViewModel) {
-  val beacons: List<Beacon> = viewModel.uiState.collectAsStateWithLifecycle().value.beacons
-  DisplayBeacons(navigationActions, beacons = beacons)
+    WanderwaveGoogleMap(
+        cameraPositionState = cameraPositionState,
+        locationEnabled = permissionState.allPermissionsGranted,
+        locationSource = viewModel.locationSource,
+        modifier = Modifier.testTag("mapScreen"),
+        onMapLoaded = { mapIsLoaded.value = true }) {
+        MapContent(navigationActions, viewModel)
+    }
+
+    if (needToRequestPermissions(permissionState)) {
+        AskForPermissions(permissionState)
+    } else {
+        // Start the foreground service for location updates
+        LaunchedEffect(true) {
+            val intent = Intent(context, LocationUpdatesService::class.java)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
+        }
+
+        // if we have location permissions, move the camera to the last known location **once**
+        val location = viewModel.getLastKnownLocation(context)
+        viewModel.startLocationUpdates(context)
+
+        LaunchedEffect(location != null, mapIsLoaded.value) {
+            if (location != null && mapIsLoaded.value) {
+                moveCamera(cameraPositionState, location, viewModel.cameraPosition.value)
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun AskForPermissions(permissionState: MultiplePermissionsState) {
-  fun onAlertDismissed() {
-    permissionState.launchMultiplePermissionRequest()
-  }
-
-  AlertDialog(
-      title = { Text(stringResource(id = R.string.permission_request_title)) },
-      text = { Text(text = stringResource(id = R.string.permission_request_text_location)) },
-      onDismissRequest = { onAlertDismissed() },
-      confirmButton = {
-        TextButton(onClick = { onAlertDismissed() }) {
-          Text(stringResource(id = R.string.permission_request_confirm_button))
-        }
-      })
+    if (!permissionState.allPermissionsGranted) {
+        AlertDialog(
+            title = { Text(stringResource(id = R.string.permission_request_title)) },
+            text = { Text(text = stringResource(id = R.string.permission_request_text_location)) },
+            onDismissRequest = { permissionState.launchMultiplePermissionRequest() },
+            confirmButton = {
+                TextButton(onClick = { permissionState.launchMultiplePermissionRequest() }) {
+                    Text(stringResource(id = R.string.permission_request_confirm_button))
+                }
+            })
+    }
+}
+@Composable
+fun MapContent(navigationActions: NavigationActions, viewModel: MapViewModel) {
+  val beacons: List<Beacon> = viewModel.uiState.collectAsStateWithLifecycle().value.beacons
+  DisplayBeacons(navigationActions, beacons = beacons)
 }
 
 fun moveCamera(

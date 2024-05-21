@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
 
     <application
         android:usesCleartextTraffic="false"
@@ -39,6 +41,10 @@
                     android:scheme="wanderwave-auth"/>
             </intent-filter>
         </activity>
+        <service
+            android:name="ch.epfl.cs311.wanderwave.model.utils.LocationUpdatesService"
+            android:foregroundServiceType="location"
+            android:exported="true" />
         <activity android:name=".ui.TestActivity" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"

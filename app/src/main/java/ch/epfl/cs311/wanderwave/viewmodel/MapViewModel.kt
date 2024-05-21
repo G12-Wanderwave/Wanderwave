@@ -16,10 +16,12 @@ import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location as Location1
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.utils.createNearbyBeacons
+import ch.epfl.cs311.wanderwave.model.utils.findClosestBeacon
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.LocationSource
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -92,22 +94,20 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
 
   fun startLocationUpdates(context: Context) {
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-    val locationRequest =
-        LocationRequest.create().apply {
-          interval = 600000 // Request location update every ten minute
-          fastestInterval = 30000 // Accept updates as fast as every 30 seconds
-          priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        }
-
+    val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 30000) // 10 minutes
+      .setMinUpdateIntervalMillis(30000) // 30 seconds
+      .build()
     val locationCallback =
         object : LocationCallback() {
           override fun onLocationResult(locationResult: LocationResult) {
             super.onLocationResult(locationResult)
-
             val location = locationResult.lastLocation
             location?.let {
               if (_areBeaconsLoaded.value) {
-                return
+                val beacon = findClosestBeacon(Location1(it.latitude, it.longitude), _beaconList.value)
+                Log.d("MapViewModel", "Closest beacon: $beacon" )
+
+                _uiState.value = BeaconListUiState(beacons = _uiState.value.beacons,closestBeacon = beacon)
               } else {
                 retrieveBeacons(Location1(it.latitude, it.longitude), context)
                 _areBeaconsLoaded.value = true
@@ -127,4 +127,4 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
   }
 }
 
-data class BeaconListUiState(val beacons: List<Beacon> = listOf(), val loading: Boolean = false)
+data class BeaconListUiState(val beacons: List<Beacon> = listOf(), val loading: Boolean = false, val closestBeacon: Beacon? = null)
