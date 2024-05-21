@@ -140,7 +140,7 @@ class TrackConnectionTest {
             "Test Spotify Uid",
             "Test Firebase Uid")
 
-    val mockProfileTrackAssociation = ProfileTrackAssociation(mockProfile, mockTrack)
+    val mockProfileTrackAssociation = ProfileTrackAssociation(mockProfile, mockTrack, 1)
 
     // Define behavior for the get() method on the DocumentReference to return the mock task
     coEvery { mockTrackDocumentReference.addSnapshotListener(any()) } answers
@@ -181,8 +181,11 @@ class TrackConnectionTest {
 
     var retrievedTrackAndProfile: ProfileTrackAssociation? = null
 
-    val mapOfDocumentReferences =
-        mapOf("creator" to mockProfileDocumentReference, "track" to mockTrackDocumentReference)
+    var mapOfDocumentReferences =
+        mapOf(
+            "creator" to mockProfileDocumentReference,
+            "track" to mockTrackDocumentReference,
+            "likes" to 1)
 
     // Call the function under test
     retrievedTrackAndProfile =
@@ -197,6 +200,11 @@ class TrackConnectionTest {
 
     // Assert that the retrieved track is the same as the mock track
     assertEquals(mockProfileTrackAssociation, retrievedTrackAndProfile)
+
+    // likes are not an int
+    mapOfDocumentReferences = mapOf("creator" to "12", "track" to "12", "likes" to "not an int")
+
+    assert(trackConnection.fetchProfileAndTrack(mapOfDocumentReferences).first().isFailure)
   }
 
   @Test
