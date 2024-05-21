@@ -14,10 +14,16 @@ import android.os.Looper
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import ch.epfl.cs311.wanderwave.MainActivity
 import com.google.android.gms.location.*
-
 class LocationUpdatesService : Service() {
+
+    companion object {
+        const val ACTION_LOCATION_BROADCAST = "ch.epfl.cs311.wanderwave.LOCATION_BROADCAST"
+        const val EXTRA_LATITUDE = "ch.epfl.cs311.wanderwave.LATITUDE"
+        const val EXTRA_LONGITUDE = "ch.epfl.cs311.wanderwave.LONGITUDE"
+    }
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
@@ -32,7 +38,7 @@ class LocationUpdatesService : Service() {
                 val location = locationResult.lastLocation
                 if (location != null) {
                     Log.d("LocationUpdatesService", "Location: ${location.latitude}, ${location.longitude}")
-                    // Handle the location update, you might want to send it to the ViewModel or repository
+                    sendLocationBroadcast(location.latitude, location.longitude)
                 }
             }
         }
@@ -47,6 +53,14 @@ class LocationUpdatesService : Service() {
         }
 
         startForegroundService()
+    }
+
+    private fun sendLocationBroadcast(latitude: Double, longitude: Double) {
+        val intent = Intent(ACTION_LOCATION_BROADCAST).apply {
+            putExtra(EXTRA_LATITUDE, latitude)
+            putExtra(EXTRA_LONGITUDE, longitude)
+        }
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
     }
 
     private fun startForegroundService() {
@@ -80,4 +94,3 @@ class LocationUpdatesService : Service() {
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 }
-

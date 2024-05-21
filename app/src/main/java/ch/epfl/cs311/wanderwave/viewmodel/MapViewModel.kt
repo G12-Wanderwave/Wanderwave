@@ -2,26 +2,19 @@ package ch.epfl.cs311.wanderwave.viewmodel
 
 import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
-import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresPermission
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Beacon
+import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
+import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.Location as Location1
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.utils.createNearbyBeacons
-import ch.epfl.cs311.wanderwave.model.utils.findClosestBeacon
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.LocationSource
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -30,6 +23,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 @HiltViewModel
 class MapViewModel
@@ -44,6 +38,9 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
   private var _beaconList = MutableStateFlow<List<Beacon>>(emptyList())
   val beaconList: StateFlow<List<Beacon>> = _beaconList
 
+  private var _retrievedSongs = MutableStateFlow<ProfileTrackAssociation>(ProfileTrackAssociation(null, Track("","","")))
+  val retrievedSongs: StateFlow<ProfileTrackAssociation> = _retrievedSongs
+
   private val _areBeaconsLoaded = MutableStateFlow(false)
 
   init {
@@ -54,7 +51,7 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
     viewModelScope.launch {
       beaconRepository.getAll().collect { beacons ->
         _beaconList.value = beacons // Ensure `beaconList` is updated
-        _uiState.value = BeaconListUiState(beacons = beacons, loading = false)
+        _uiState.value = _uiState.value.copy(beacons = beacons, loading = false)
       }
     }
   }
@@ -62,13 +59,13 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
   private fun retrieveBeacons(location: Location1, context: Context) {
     viewModelScope.launch {
       // Update _uiState to reflect a loading state
-      _uiState.value = BeaconListUiState(loading = true)
+      _uiState.value = _uiState.value.copy(loading = true)
 
       createNearbyBeacons(
           location, _beaconList, 10000.0, context, beaconRepository, viewModelScope) {
             val updatedBeacons = _beaconList.value
             // Update _uiState again once data is fetched
-            _uiState.value = BeaconListUiState(beacons = updatedBeacons, loading = false)
+            _uiState.value = _uiState.value.copy(beacons = updatedBeacons, loading = false)
           }
     }
   }
@@ -88,43 +85,31 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
         location = l
       }
     }
-    Log.d("MapViewModel", "Location: $location")
     return location?.let { LatLng(it.latitude, it.longitude) }
   }
 
-  fun startLocationUpdates(context: Context) {
-    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-    val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 30000) // 10 minutes
-      .setMinUpdateIntervalMillis(30000) // 30 seconds
-      .build()
-    val locationCallback =
-        object : LocationCallback() {
-          override fun onLocationResult(locationResult: LocationResult) {
-            super.onLocationResult(locationResult)
-            val location = locationResult.lastLocation
-            location?.let {
-              if (_areBeaconsLoaded.value) {
-                val beacon = findClosestBeacon(Location1(it.latitude, it.longitude), _beaconList.value)
-                Log.d("MapViewModel", "Closest beacon: $beacon" )
+  fun loadBeacons(context: Context, location: ch.epfl.cs311.wanderwave.model.data.Location) {
 
-                _uiState.value = BeaconListUiState(beacons = _uiState.value.beacons,closestBeacon = beacon)
-              } else {
-                retrieveBeacons(Location1(it.latitude, it.longitude), context)
-                _areBeaconsLoaded.value = true
-              }
-            }
-          }
+    if (!_areBeaconsLoaded.value) {
+      retrieveBeacons(Location1(location.latitude, location.longitude), context)
+      _areBeaconsLoaded.value = true
+    }
+
+
+  }
+  fun getRandomSong(id: String) {
+    viewModelScope.launch {
+      beaconRepository.getItem(id).collect { fetchedBeacon ->
+        fetchedBeacon.onSuccess { beacon ->
+          _retrievedSongs.value = beacon.profileAndTrack.random()
         }
-
-    // Check permissions before requesting updates
-    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
-        PackageManager.PERMISSION_GRANTED &&
-        ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
-            PackageManager.PERMISSION_GRANTED) {
-      fusedLocationClient.requestLocationUpdates(
-          locationRequest, locationCallback, Looper.getMainLooper())
+        fetchedBeacon.onFailure { exception ->
+          Log.e("No beacons found", "No beacons found for the given id")
+        }
+      }
     }
   }
+
 }
 
-data class BeaconListUiState(val beacons: List<Beacon> = listOf(), val loading: Boolean = false, val closestBeacon: Beacon? = null)
+data class BeaconListUiState(val beacons: List<Beacon> = listOf(), val loading: Boolean = false)

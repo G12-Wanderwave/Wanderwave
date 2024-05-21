@@ -39,6 +39,7 @@ import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import kotlinx.coroutines.launch
@@ -62,7 +63,8 @@ fun AppScaffold(navController: NavHostController) {
   val snackbarHostState = remember { SnackbarHostState() }
   val profileViewModel: ProfileViewModel = hiltViewModel()
   val trackListViewModel = hiltViewModel<TrackListViewModel>()
-  val beaconViewModel = hiltViewModel<BeaconViewModel>()
+    val beaconViewModel = hiltViewModel<BeaconViewModel>()
+    val mapViewModel = hiltViewModel<MapViewModel>()
 
   val scope = rememberCoroutineScope()
   val showSnackbar = { message: String ->
@@ -92,7 +94,7 @@ fun AppScaffold(navController: NavHostController) {
                 composable(Route.TRACK_LIST.routeString) {
                   TrackListScreen(navActions, showSnackbar, trackListViewModel)
                 }
-                composable(Route.MAP.routeString) { MapScreen(navActions) }
+                composable(Route.MAP.routeString) { MapScreen(navActions,mapViewModel) }
                 composable(Route.PROFILE.routeString) {
                   ProfileScreen(navActions, profileViewModel)
                 }
