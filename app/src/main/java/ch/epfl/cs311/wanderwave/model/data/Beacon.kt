@@ -15,14 +15,14 @@ data class Beacon(
     val profileAndTrack: List<ProfileTrackAssociation> = listOf<ProfileTrackAssociation>(),
 
     /** Number of likes the beacon has */
-    val likes: Int = 0
+    val numberOfLikes: Int = 0
 ) {
 
   fun toMap(db: FirebaseFirestore): HashMap<String, Any> =
       hashMapOf(
           "id" to id,
           "location" to location.toMap(),
-          "likes" to likes,
+          "numberOfLikes" to numberOfLikes,
           "tracks" to profileAndTrack.map { it.toMap(db) })
 
   companion object {
@@ -37,9 +37,9 @@ data class Beacon(
 
         val profileAndTrack = listOf<ProfileTrackAssociation>()
 
-        val likes = document.getLong("likes")?.toInt() ?: 0
+        val numberOfLikes = document.getLong("likes")?.toInt() ?: 0
 
-        Beacon(id = id, location = location, profileAndTrack = profileAndTrack, likes = likes)
+        Beacon(id = id, location = location, profileAndTrack = profileAndTrack, numberOfLikes = numberOfLikes)
       } else {
         null
       }

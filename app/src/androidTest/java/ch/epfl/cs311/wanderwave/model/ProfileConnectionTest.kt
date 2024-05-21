@@ -191,16 +191,8 @@ public class ProfileConnectionTest {
               listOf(track),
               listOf(track))
 
-      val mapOfTestProfile =
-          hashMapOf(
-              "id" to getTestProfile.firebaseUid,
-              "firstName" to getTestProfile.firstName,
-              "lastName" to getTestProfile.lastName,
-              "description" to getTestProfile.description,
-              "topSongs" to getTestProfile.topSongs.map { it.id },
-              "chosenSongs" to getTestProfile.chosenSongs.map { it.id })
 
-      every { mockDocumentSnapshot.getData() } returns mapOfTestProfile
+      every { mockDocumentSnapshot.getData() } returns getTestProfile.toMap(firebaseFirestore)
       every { mockDocumentSnapshot.exists() } returns true
       every { mockDocumentSnapshot.id } returns getTestProfile.firebaseUid
       every { mockDocumentSnapshot.getString("firstName") } returns getTestProfile.firstName

@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.model.remote
 
+import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
@@ -71,6 +72,7 @@ class ProfileConnection(
                 isValidObject(chosenSongsObject) ||
                 isValidObject(bannedSongsObject) ||
                 isValidObject(likedSongsObject)) {
+
               val topSongRefs = topSongsObject as? List<DocumentReference> ?: emptyList()
               val chosenSongRefs = chosenSongsObject as? List<DocumentReference> ?: emptyList()
               val bannedSongRefs = bannedSongsObject as? List<DocumentReference> ?: emptyList()
@@ -149,6 +151,6 @@ class ProfileConnection(
   }
 
   fun isValidObject(obj: Any?): Boolean {
-    return obj is List<*> && obj.all { it is Map<*, *> }
+    return obj is List<*> && obj.all { it is DocumentReference }
   }
 }

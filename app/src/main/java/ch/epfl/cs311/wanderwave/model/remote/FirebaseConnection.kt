@@ -95,6 +95,7 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
               documentToItem(document)?.let {
                 // The document transform function is used when references are inside and need to be
                 // fetched
+                Log.d("Firestore", "DocumentSnapshot data inside getItem: ${document.data}")
                 trySend(documentTransform(document, it))
               }
             } else trySend(flowOf(Result.failure(Exception("Document does not exist"))))

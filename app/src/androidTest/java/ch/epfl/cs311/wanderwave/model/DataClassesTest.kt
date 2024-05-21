@@ -142,7 +142,7 @@ class DataClassesTest {
     every { document.get("location") } returns
         mapOf("latitude" to null, "longitude" to null, "name" to null)
 
-    assertEquals(Location(0.0, 0.0), beacon!!.location)
+    assertEquals(Location(0.0, 0.0), beacon.location)
   }
 
   @Test
@@ -169,7 +169,10 @@ class DataClassesTest {
             "isPublic" to true,
             "profilePictureUri" to "https://example.com/image.jpg",
             "chosenSongs" to listOf<DocumentReference>(),
-            "topSongs" to listOf<DocumentReference>())
+            "topSongs" to listOf<DocumentReference>(),
+            "bannedSongs" to listOf<DocumentReference>(),
+            "likedSongs" to listOf<DocumentReference>()
+          )
 
     assertEquals(expectedMap, profile.toMap())
   }
