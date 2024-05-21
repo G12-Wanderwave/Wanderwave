@@ -65,15 +65,9 @@ class ProfileConnection(
           val chosenSongsObject = document["chosenSongs"]
           val bannedSongsObject = document["bannedSongs"]
 
-          val topSongRefs =
-              topSongsObject.takeIf { isValidObject(it) } as? List<DocumentReference>
-                  ?: emptyList<DocumentReference>()
-          val chosenSongRefs =
-              chosenSongsObject.takeIf { isValidObject(it) } as? List<DocumentReference>
-                  ?: emptyList<DocumentReference>()
-          val bannedSongRefs =
-              bannedSongsObject.takeIf { isValidObject(it) } as? List<DocumentReference>
-                  ?: emptyList<DocumentReference>()
+          val topSongRefs = castToListOfReferences(topSongsObject)
+          val chosenSongRefs = castToListOfReferences(chosenSongsObject)
+          val bannedSongRefs = castToListOfReferences(bannedSongsObject)
 
           coroutineScope.launch {
 
@@ -103,10 +97,6 @@ class ProfileConnection(
                   result.onSuccess { profile -> trySend(Result.success(profile)) }
                 }
           }
-          // } else {
-          //   Log.e("ProfileConnection", "Tracks have wrong firebase format")
-          //   trySend(Result.success(profile))
-          // }
         }
         awaitClose {}
       }
@@ -129,7 +119,11 @@ class ProfileConnection(
     // list of tracks
   }
 
-  fun isValidObject(obj: Any?): Boolean {
-    return obj is List<*> && obj.all { it is DocumentReference }
+  fun castToListOfReferences(obj: Any?): List<DocumentReference> {
+    return if(obj is List<*> && obj.all { it is DocumentReference }) {
+      obj as List<DocumentReference>
+    } else {
+      emptyList()
+    }
   }
 }
