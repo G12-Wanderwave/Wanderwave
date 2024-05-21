@@ -11,14 +11,22 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import ch.epfl.cs311.wanderwave.MainActivity
 import com.google.android.gms.location.*
 
-class LocationUpdatesService : Service() {
+class LocationServicesWrapper(private val context: Context) {
+  fun getFusedLocationProviderClient(): FusedLocationProviderClient {
+    return LocationServices.getFusedLocationProviderClient(context)
+  }
+}
+
+class LocationUpdatesService(
+    private val testContext: Context? = null,
+    private val locationServicesWrapper: LocationServicesWrapper? = null
+) : Service() {
 
   companion object {
     const val ACTION_LOCATION_BROADCAST = "ch.epfl.cs311.wanderwave.LOCATION_BROADCAST"
@@ -31,16 +39,16 @@ class LocationUpdatesService : Service() {
 
   override fun onCreate() {
     super.onCreate()
-
-    fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
+    val context = testContext ?: this
+    fusedLocationClient =
+        locationServicesWrapper?.getFusedLocationProviderClient()
+            ?: LocationServices.getFusedLocationProviderClient(context)
     locationCallback =
         object : LocationCallback() {
           override fun onLocationResult(locationResult: LocationResult) {
             val location = locationResult.lastLocation
             if (location != null) {
-              Log.d(
-                  "LocationUpdatesService", "Location: ${location.latitude}, ${location.longitude}")
+
               sendLocationBroadcast(location.latitude, location.longitude)
             }
           }
@@ -51,9 +59,9 @@ class LocationUpdatesService : Service() {
             .setMinUpdateIntervalMillis(30000)
             .build()
 
-    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
         PackageManager.PERMISSION_GRANTED &&
-        ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+        ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
             PackageManager.PERMISSION_GRANTED) {
       fusedLocationClient.requestLocationUpdates(
           locationRequest, locationCallback, Looper.getMainLooper())
@@ -62,7 +70,7 @@ class LocationUpdatesService : Service() {
     startForegroundService()
   }
 
-  private fun sendLocationBroadcast(latitude: Double, longitude: Double) {
+  fun sendLocationBroadcast(latitude: Double, longitude: Double) {
     val intent =
         Intent(ACTION_LOCATION_BROADCAST).apply {
           putExtra(EXTRA_LATITUDE, latitude)
@@ -71,7 +79,7 @@ class LocationUpdatesService : Service() {
     LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
   }
 
-  private fun startForegroundService() {
+  fun startForegroundService() {
     val channelId = "location_updates_channel"
     val channelName = "Location Updates"
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

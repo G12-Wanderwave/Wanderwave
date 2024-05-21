@@ -8,6 +8,10 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
 
+    <!-- Define custom permission -->
+    <permission android:name="ch.epfl.cs311.wanderwave.permission.LOCATION_UPDATES"
+        android:protectionLevel="signature" />
+
     <application
         android:usesCleartextTraffic="false"
         android:name=".Wanderwave"
@@ -44,6 +48,7 @@
         <service
             android:name="ch.epfl.cs311.wanderwave.model.utils.LocationUpdatesService"
             android:foregroundServiceType="location"
+            android:permission="ch.epfl.cs311.wanderwave.permission.LOCATION_UPDATES"
             android:exported="true" />
         <activity android:name=".ui.TestActivity" />
         <meta-data
