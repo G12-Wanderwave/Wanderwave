@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -23,9 +24,11 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import ch.epfl.cs311.wanderwave.AppResources
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
+import ch.epfl.cs311.wanderwave.ui.components.map.getIcon
 import ch.epfl.cs311.wanderwave.ui.components.player.SurroundWithMiniPlayer
 import ch.epfl.cs311.wanderwave.ui.screens.AboutScreen
 import ch.epfl.cs311.wanderwave.ui.screens.BeaconScreen
@@ -41,6 +44,8 @@ import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException
+import com.google.android.gms.maps.MapsInitializer
 import kotlinx.coroutines.launch
 
 @Composable
@@ -56,73 +61,88 @@ fun App(navController: NavHostController) {
 
 @Composable
 fun AppScaffold(navController: NavHostController) {
-  val navActions = remember { NavigationActions(navController) }
-  var showBottomBar by remember { mutableStateOf(false) }
-  val currentRouteState by navActions.currentRouteFlow.collectAsStateWithLifecycle()
-  val snackbarHostState = remember { SnackbarHostState() }
-  val profileViewModel: ProfileViewModel = hiltViewModel()
-  val trackListViewModel = hiltViewModel<TrackListViewModel>()
-  val beaconViewModel = hiltViewModel<BeaconViewModel>()
+    val navActions = remember { NavigationActions(navController) }
+    var showBottomBar by remember { mutableStateOf(false) }
+    val currentRouteState by navActions.currentRouteFlow.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val profileViewModel: ProfileViewModel = hiltViewModel()
+    val trackListViewModel = hiltViewModel<TrackListViewModel>()
+    val beaconViewModel = hiltViewModel<BeaconViewModel>()
 
-  val scope = rememberCoroutineScope()
-  val showSnackbar = { message: String ->
-    scope.launch { snackbarHostState.showSnackbar(message) }
-    Unit
-  }
+    createIcon()
 
-  LaunchedEffect(currentRouteState) { showBottomBar = currentRouteState?.showBottomBar ?: false }
+    val scope = rememberCoroutineScope()
+    val showSnackbar = { message: String ->
+        scope.launch { snackbarHostState.showSnackbar(message) }
+        Unit
+    }
 
-  Scaffold(
-      bottomBar = {
-        if (showBottomBar) {
-          AppBottomBar(
-              navActions = navActions,
-          )
-        }
-      }) { innerPadding ->
+    LaunchedEffect(currentRouteState) { showBottomBar = currentRouteState?.showBottomBar ?: false }
+
+    Scaffold(
+        bottomBar = {
+            if (showBottomBar) {
+                AppBottomBar(
+                    navActions = navActions,
+                )
+            }
+        }) { innerPadding ->
         SurroundWithMiniPlayer(displayPlayer = showBottomBar) {
-          NavHost(
-              navController = navController,
-              startDestination = Route.SPOTIFY_CONNECT.routeString,
-              modifier =
-                  Modifier.padding(innerPadding).background(MaterialTheme.colorScheme.background)) {
+            NavHost(
+                navController = navController,
+                startDestination = Route.SPOTIFY_CONNECT.routeString,
+                modifier =
+                Modifier.padding(innerPadding).background(MaterialTheme.colorScheme.background)
+            ) {
                 composable(Route.LOGIN.routeString) { LoginScreen(navActions, showSnackbar) }
                 composable(Route.SPOTIFY_CONNECT.routeString) { SpotifyConnectScreen(navActions) }
                 composable(Route.ABOUT.routeString) { AboutScreen(navActions) }
                 composable(Route.TRACK_LIST.routeString) {
-                  TrackListScreen(navActions, showSnackbar, trackListViewModel)
+                    TrackListScreen(navActions, showSnackbar, trackListViewModel)
                 }
                 composable(Route.MAP.routeString) { MapScreen(navActions) }
                 composable(Route.PROFILE.routeString) {
-                  ProfileScreen(navActions, profileViewModel)
+                    ProfileScreen(navActions, profileViewModel)
                 }
                 composable(Route.EDIT_PROFILE.routeString) {
-                  EditProfileScreen(navActions, profileViewModel)
+                    EditProfileScreen(navActions, profileViewModel)
                 }
                 composable(
                     route = "${Route.SELECT_SONG.routeString}/{viewModelType}",
                     arguments =
-                        listOf(navArgument("viewModelType") { type = NavType.StringType })) {
-                        backStackEntry ->
-                      val viewModelType = backStackEntry.arguments?.getString("viewModelType")
-                      val viewModel =
-                          when (viewModelType) {
+                    listOf(navArgument("viewModelType") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val viewModelType = backStackEntry.arguments?.getString("viewModelType")
+                    val viewModel =
+                        when (viewModelType) {
                             "profile" -> profileViewModel
                             "tracklist" -> trackListViewModel
                             "beacon" -> beaconViewModel
                             else -> error("Invalid ViewModel type for SelectSongScreen")
-                          }
+                        }
 
-                      SelectSongScreen(navActions, viewModel)
-                    }
+                    SelectSongScreen(navActions, viewModel)
+                }
                 composable("${Route.VIEW_PROFILE.routeString}/{profileId}") {
-                  ProfileViewOnlyScreen(it.arguments?.getString("profileId") ?: "", navActions)
+                    ProfileViewOnlyScreen(it.arguments?.getString("profileId") ?: "", navActions)
                 }
                 composable("${Route.BEACON.routeString}/{beaconId}") {
-                  BeaconScreen(
-                      it.arguments?.getString("beaconId") ?: "", navActions, beaconViewModel)
+                    BeaconScreen(
+                        it.arguments?.getString("beaconId") ?: "", navActions, beaconViewModel
+                    )
                 }
-              }
+            }
         }
-      }
+    }
+}
+
+@Composable
+private fun createIcon(){
+    val context = LocalContext.current
+    try {
+        MapsInitializer.initialize(context)
+        AppResources.beaconIcon = getIcon(context)
+    } catch (e: GooglePlayServicesNotAvailableException) {
+        e.printStackTrace()
+    }
 }

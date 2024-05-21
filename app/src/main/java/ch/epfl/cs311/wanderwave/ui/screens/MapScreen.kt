@@ -66,7 +66,6 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel = hi
       modifier = Modifier.testTag("mapScreen"),
       onMapLoaded = {
         mapIsLoaded.value = true
-        AppResources.beaconIcon = getIcon(context)
       }) {
         MapContent(navigationActions, viewModel)
       }
