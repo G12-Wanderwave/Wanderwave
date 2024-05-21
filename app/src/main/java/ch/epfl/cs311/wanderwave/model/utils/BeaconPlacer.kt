@@ -198,19 +198,20 @@ fun findRandomBeacon(
 
   newBeacons.add(newBeacon)
 }
+
 fun findClosestBeacon(userPosition: Location, beacons: List<Beacon>): Beacon? {
-    var closestBeacon: Beacon? = null
-    var smallestDistance = Double.MAX_VALUE
+  var closestBeacon: Beacon? = null
+  var smallestDistance = Double.MAX_VALUE
 
-    beacons.forEach { beacon ->
-        val distance = userPosition.distanceBetween(beacon.location)
-        if (distance < smallestDistance) {
-            smallestDistance = distance
-            closestBeacon = beacon
-        }
+  beacons.forEach { beacon ->
+    val distance = userPosition.distanceBetween(beacon.location)
+    if (distance < smallestDistance) {
+      smallestDistance = distance
+      closestBeacon = beacon
     }
+  }
 
-    return closestBeacon
+  return closestBeacon
 }
 /**
  * This function finds the beacons that are in the vicinity of the user's location. It computes the

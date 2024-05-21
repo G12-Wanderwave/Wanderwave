@@ -10,9 +10,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.data.Beacon
+import ch.epfl.cs311.wanderwave.model.data.Location as Location1
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
-import ch.epfl.cs311.wanderwave.model.data.Location as Location1
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.utils.createNearbyBeacons
 import com.google.android.gms.maps.LocationSource
@@ -23,7 +23,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 @HiltViewModel
 class MapViewModel
@@ -38,7 +37,8 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
   private var _beaconList = MutableStateFlow<List<Beacon>>(emptyList())
   val beaconList: StateFlow<List<Beacon>> = _beaconList
 
-  private var _retrievedSongs = MutableStateFlow<ProfileTrackAssociation>(ProfileTrackAssociation(null, Track("","","")))
+  private var _retrievedSongs =
+      MutableStateFlow<ProfileTrackAssociation>(ProfileTrackAssociation(null, Track("", "", "")))
   val retrievedSongs: StateFlow<ProfileTrackAssociation> = _retrievedSongs
 
   private val _areBeaconsLoaded = MutableStateFlow(false)
@@ -94,9 +94,8 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
       retrieveBeacons(Location1(location.latitude, location.longitude), context)
       _areBeaconsLoaded.value = true
     }
-
-
   }
+
   fun getRandomSong(id: String) {
     viewModelScope.launch {
       beaconRepository.getItem(id).collect { fetchedBeacon ->
@@ -109,7 +108,6 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
       }
     }
   }
-
 }
 
 data class BeaconListUiState(val beacons: List<Beacon> = listOf(), val loading: Boolean = false)
