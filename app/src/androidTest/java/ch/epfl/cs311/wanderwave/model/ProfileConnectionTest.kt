@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.model
 
 import android.net.Uri
+import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
@@ -263,6 +264,50 @@ public class ProfileConnectionTest {
 
       val result = profileConnection.documentTransform(documentSnapshot, null).first()
       assert(result.isFailure)
+    }
+  }
+
+  @Test
+  fun testDocumentTransformStringTracks() {
+    runBlocking {
+      val getTestProfile =
+          Profile(
+              "Sample First Name",
+              "Sample last name",
+              "Sample desc",
+              0,
+              false,
+              Uri.parse("https://example.com/image.jpg"),
+              "Sample Profile ID",
+              "Sample ID",
+              listOf(),
+              listOf(),
+              listOf(),
+              listOf())
+
+      val mockDocumentSnapshot = mockk<DocumentSnapshot>()
+      every { mockDocumentSnapshot.getData() } returns getTestProfile.toMap(firebaseFirestore)
+      every { mockDocumentSnapshot.exists() } returns true
+      every { mockDocumentSnapshot.id } returns getTestProfile.firebaseUid
+      every { mockDocumentSnapshot.getString("firstName") } returns getTestProfile.firstName
+      every { mockDocumentSnapshot.getString("lastName") } returns getTestProfile.lastName
+      every { mockDocumentSnapshot.getString("description") } returns getTestProfile.description
+      every { mockDocumentSnapshot.getLong("numberOfLikes") } returns
+          getTestProfile.numberOfLikes.toLong()
+      every { mockDocumentSnapshot.getBoolean("isPublic") } returns getTestProfile.isPublic
+      every { mockDocumentSnapshot.getString("profilePictureUri") } returns
+          getTestProfile.profilePictureUri.toString()
+      every { mockDocumentSnapshot.getString("spotifyUid") } returns getTestProfile.spotifyUid
+      every { mockDocumentSnapshot.getString("firebaseUid") } returns getTestProfile.firebaseUid
+      every { mockDocumentSnapshot.get("topSongs") } returns listOf("String")
+      every { mockDocumentSnapshot.get("chosenSongs") } returns listOf("String")
+      every { mockDocumentSnapshot.get("bannedSongs") } returns listOf("String")
+      every { mockDocumentSnapshot.get("likedSongs") } returns listOf("String")
+
+      val result = profileConnection.documentTransform(mockDocumentSnapshot, null).first()
+      Log.d("ProfileConnectionTest", result.toString())
+      assert(result.isSuccess)
+      assertEquals(result.getOrNull(), getTestProfile)
     }
   }
 }
