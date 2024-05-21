@@ -1,7 +1,6 @@
 package ch.epfl.cs311.wanderwave.model
 
 import android.net.Uri
-import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
@@ -299,13 +298,38 @@ public class ProfileConnectionTest {
           getTestProfile.profilePictureUri.toString()
       every { mockDocumentSnapshot.getString("spotifyUid") } returns getTestProfile.spotifyUid
       every { mockDocumentSnapshot.getString("firebaseUid") } returns getTestProfile.firebaseUid
-      every { mockDocumentSnapshot.get("topSongs") } returns listOf("String")
-      every { mockDocumentSnapshot.get("chosenSongs") } returns listOf("String")
-      every { mockDocumentSnapshot.get("bannedSongs") } returns listOf("String")
-      every { mockDocumentSnapshot.get("likedSongs") } returns listOf("String")
 
-      val result = profileConnection.documentTransform(mockDocumentSnapshot, null).first()
-      Log.d("ProfileConnectionTest", result.toString())
+      val trackDocumentReference = mockk<DocumentReference>(relaxed = true)
+      every { mockDocumentSnapshot.get("topSongs") } returns listOf("String")
+      every { mockDocumentSnapshot.get("chosenSongs") } returns
+          getTestProfile.chosenSongs.map { trackDocumentReference }
+      every { mockDocumentSnapshot.get("bannedSongs") } returns
+          getTestProfile.bannedSongs.map { trackDocumentReference }
+      every { mockDocumentSnapshot.get("likedSongs") } returns
+          getTestProfile.likedSongs.map { trackDocumentReference }
+
+      var result = profileConnection.documentTransform(mockDocumentSnapshot, null).first()
+      assert(result.isSuccess)
+      assertEquals(result.getOrNull(), getTestProfile)
+
+      every { mockDocumentSnapshot.get("topSongs") } returns
+          getTestProfile.topSongs.map { trackDocumentReference }
+      every { mockDocumentSnapshot.get("chosenSongs") } returns listOf("String")
+      result = profileConnection.documentTransform(mockDocumentSnapshot, null).first()
+      assert(result.isSuccess)
+      assertEquals(result.getOrNull(), getTestProfile)
+
+      every { mockDocumentSnapshot.get("chosenSongs") } returns
+          getTestProfile.chosenSongs.map { trackDocumentReference }
+      every { mockDocumentSnapshot.get("bannedSongs") } returns listOf("String")
+      result = profileConnection.documentTransform(mockDocumentSnapshot, null).first()
+      assert(result.isSuccess)
+      assertEquals(result.getOrNull(), getTestProfile)
+
+      every { mockDocumentSnapshot.get("bannedSongs") } returns
+          getTestProfile.bannedSongs.map { trackDocumentReference }
+      every { mockDocumentSnapshot.get("likedSongs") } returns listOf("String")
+      result = profileConnection.documentTransform(mockDocumentSnapshot, null).first()
       assert(result.isSuccess)
       assertEquals(result.getOrNull(), getTestProfile)
     }

@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.model.remote
 
-import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
@@ -67,54 +66,56 @@ class ProfileConnection(
           val bannedSongsObject = document["bannedSongs"]
           val likedSongsObject = document["likedSongs"]
 
-          if (isValidObject(topSongsObject) ||
-              isValidObject(chosenSongsObject) ||
-              isValidObject(bannedSongsObject) ||
-              isValidObject(likedSongsObject)) {
+          val topSongRefs =
+              topSongsObject.takeIf { isValidObject(it) } as? List<DocumentReference>
+                  ?: emptyList<DocumentReference>()
+          val chosenSongRefs =
+              chosenSongsObject.takeIf { isValidObject(it) } as? List<DocumentReference>
+                  ?: emptyList<DocumentReference>()
+          val bannedSongRefs =
+              bannedSongsObject.takeIf { isValidObject(it) } as? List<DocumentReference>
+                  ?: emptyList<DocumentReference>()
+          val likedSongRefs =
+              likedSongsObject.takeIf { isValidObject(it) } as? List<DocumentReference>
+                  ?: emptyList<DocumentReference>()
 
-            val topSongRefs = topSongsObject as? List<DocumentReference> ?: emptyList()
-            val chosenSongRefs = chosenSongsObject as? List<DocumentReference> ?: emptyList()
-            val bannedSongRefs = bannedSongsObject as? List<DocumentReference> ?: emptyList()
-            val likedSongRefs = likedSongsObject as? List<DocumentReference> ?: emptyList()
+          coroutineScope.launch {
 
-            coroutineScope.launch {
+            // The goal is to : map the references to the actual tracks by fetching, this gives
+            // a list of flow,
+            // then reduce the list of flow to a single flow that contains the list of tracks
+            // and then combine the two lists of tracks to update the profile
+            val chosenSongs = documentReferencesToFlows(chosenSongRefs, trackConnection)
+            val topSongs = documentReferencesToFlows(topSongRefs, trackConnection)
+            val bannedSongs = documentReferencesToFlows(bannedSongRefs, trackConnection)
+            val likedSongs = documentReferencesToFlows(likedSongRefs, trackConnection)
 
-              // The goal is to : map the references to the actual tracks by fetching, this gives
-              // a list of flow,
-              // then reduce the list of flow to a single flow that contains the list of tracks
-              // and then combine the two lists of tracks to update the profile
+            val updatedProfile =
+                topSongs
+                    .combine(chosenSongs) { topSongs, chosenSongs -> Pair(topSongs, chosenSongs) }
+                    .combine(bannedSongs) { pair, bannedSongs ->
+                      Triple(pair.first, pair.second, bannedSongs)
+                    }
+                    .combine(likedSongs) { triple, likedSongs ->
+                      profile.copy(
+                          topSongs = triple.first.getOrNull() ?: profile.topSongs,
+                          chosenSongs = triple.second.getOrNull() ?: profile.chosenSongs,
+                          bannedSongs = triple.third.getOrNull() ?: profile.bannedSongs,
+                          likedSongs = likedSongs.getOrNull() ?: profile.likedSongs)
+                    }
 
-              val chosenSongs = documentReferencesToFlows(chosenSongRefs, trackConnection)
-              val topSongs = documentReferencesToFlows(topSongRefs, trackConnection)
-              val bannedSongs = documentReferencesToFlows(bannedSongRefs, trackConnection)
-              val likedSongs = documentReferencesToFlows(likedSongRefs, trackConnection)
-
-              val updatedProfile =
-                  topSongs
-                      .combine(chosenSongs) { topSongs, chosenSongs -> Pair(topSongs, chosenSongs) }
-                      .combine(bannedSongs) { pair, bannedSongs ->
-                        Triple(pair.first, pair.second, bannedSongs)
-                      }
-                      .combine(likedSongs) { triple, likedSongs ->
-                        profile.copy(
-                            topSongs = triple.first.getOrNull() ?: profile.topSongs,
-                            chosenSongs = triple.second.getOrNull() ?: profile.chosenSongs,
-                            bannedSongs = triple.third.getOrNull() ?: profile.bannedSongs,
-                            likedSongs = likedSongs.getOrNull() ?: profile.likedSongs)
-                      }
-
-              // would like to keep the flow without collecting it, but I don't know how to do
-              // it...
-              updatedProfile
-                  .map { Result.success(it) }
-                  .collect { result ->
-                    result.onSuccess { profile -> trySend(Result.success(profile)) }
-                  }
-            }
-          } else {
-            Log.e("ProfileConnection", "Tracks have wrong firebase format")
-            trySend(Result.success(profile))
+            // would like to keep the flow without collecting it, but I don't know how to do
+            // it...
+            updatedProfile
+                .map { Result.success(it) }
+                .collect { result ->
+                  result.onSuccess { profile -> trySend(Result.success(profile)) }
+                }
           }
+          // } else {
+          //   Log.e("ProfileConnection", "Tracks have wrong firebase format")
+          //   trySend(Result.success(profile))
+          // }
         }
         awaitClose {}
       }
