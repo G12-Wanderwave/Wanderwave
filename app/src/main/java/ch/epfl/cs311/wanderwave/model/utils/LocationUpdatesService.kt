@@ -17,16 +17,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import ch.epfl.cs311.wanderwave.MainActivity
 import com.google.android.gms.location.*
 
-class LocationServicesWrapper(private val context: Context) {
-  fun getFusedLocationProviderClient(): FusedLocationProviderClient {
-    return LocationServices.getFusedLocationProviderClient(context)
-  }
-}
-
-class LocationUpdatesService(
-    private val testContext: Context? = null,
-    private val locationServicesWrapper: LocationServicesWrapper? = null
-) : Service() {
+class LocationUpdatesService(private val testContext: Context? = null) : Service() {
 
   companion object {
     const val ACTION_LOCATION_BROADCAST = "ch.epfl.cs311.wanderwave.LOCATION_BROADCAST"
@@ -40,15 +31,12 @@ class LocationUpdatesService(
   override fun onCreate() {
     super.onCreate()
     val context = testContext ?: this
-    fusedLocationClient =
-        locationServicesWrapper?.getFusedLocationProviderClient()
-            ?: LocationServices.getFusedLocationProviderClient(context)
+    fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     locationCallback =
         object : LocationCallback() {
           override fun onLocationResult(locationResult: LocationResult) {
             val location = locationResult.lastLocation
             if (location != null) {
-
               sendLocationBroadcast(location.latitude, location.longitude)
             }
           }
@@ -80,13 +68,14 @@ class LocationUpdatesService(
   }
 
   fun startForegroundService() {
-    val channelId = "location_updates_channel"
-    val channelName = "Location Updates"
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
       val channel =
-          NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
+          NotificationChannel(
+              "location_updates_channel",
+              "Location Updates",
+              NotificationManager.IMPORTANCE_DEFAULT)
       notificationManager.createNotificationChannel(channel)
     }
 
@@ -95,9 +84,7 @@ class LocationUpdatesService(
         PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
     val notification: Notification =
-        NotificationCompat.Builder(this, channelId)
-            .setContentTitle("Location Service")
-            .setContentText("Location service is running in the background")
+        NotificationCompat.Builder(this, "location_updates_channel")
             .setContentIntent(pendingIntent)
             .build()
 
