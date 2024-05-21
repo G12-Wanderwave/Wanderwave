@@ -199,6 +199,7 @@ public class BeaconConnectionTest {
                 "creator" to firestore.collection("users").document(it.profile?.firebaseUid ?: ""),
                 "track" to firestore.collection("tracks").document(it.track.id))
           })
+      every { mockDocumentSnapshot.getLong(any()) } returns 0
 
       // Define behavior for the addOnSuccessListener method
       every { documentReference.addSnapshotListener(any()) } answers
@@ -254,6 +255,7 @@ public class BeaconConnectionTest {
 
       // not a list of maps, doesn't pass the if
       every { mockDocumentSnapshot.get("tracks") } returns listOf("String1", "String2")
+      every { mockDocumentSnapshot.getLong(any()) } returns 0
 
       // Define behavior for the addOnSuccessListener method
       every { documentReference.addSnapshotListener(any()) } answers
@@ -327,6 +329,7 @@ public class BeaconConnectionTest {
       every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
       every { mockDocumentSnapshot.get("tracks") } returns
           getTestBeacon.profileAndTrack.map { it.toMap(firestore) }
+      every { mockDocumentSnapshot.getLong(any()) } returns 0
 
       every { mockQuerySnapshot.documents } returns
           listOf(mockDocumentSnapshot, mockDocumentSnapshot)

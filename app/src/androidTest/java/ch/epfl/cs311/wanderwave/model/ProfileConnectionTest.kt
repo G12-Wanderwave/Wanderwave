@@ -5,7 +5,6 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
-import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -18,13 +17,11 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
-import io.mockk.spyk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
@@ -112,7 +109,8 @@ public class ProfileConnectionTest {
             "profilePictureUri" to "https://example.com/image.jpg",
             "topSongs" to listOf<DocumentReference>(),
             "chosenSongs" to listOf<DocumentReference>(),
-        )
+            "bannedSongs" to listOf<DocumentReference>(),
+            "likedSongs" to listOf<DocumentReference>())
 
     assertEquals(expectedMap, profileConnection.itemToMap(profile))
   }
@@ -162,30 +160,6 @@ public class ProfileConnectionTest {
   }
 
   @Test
-  fun testGetItemCallsOtherGetItem() {
-    val itemId = "testItemId"
-
-    // mock the track connection
-    val trackConnection = mockk<TrackConnection>(relaxed = true)
-    val mockedDb = mockk<FirebaseFirestore>(relaxed = true)
-
-    // Mock the ProfileConnection
-    val profileConnection =
-        spyk(
-            ProfileConnection(mockedDb, trackConnection = trackConnection),
-            recordPrivateCalls = true)
-
-    // Define the behavior for the second getItem method
-    every { profileConnection.getItem(itemId) } returns flowOf<Result<Profile>>()
-
-    // Call the method under test
-    profileConnection.getItem(itemId)
-
-    // Verify that the second getItem method was called
-    verify { profileConnection.getItem(itemId) }
-  }
-
-  @Test
   fun testGetItem() = runBlocking {
     withTimeout(3000) {
       // Pass the mock Firestore instance to your BeaconConnection
@@ -200,7 +174,6 @@ public class ProfileConnectionTest {
           Track( // id, title, artist
               "Sample ID", "trackTitle", "trackArtist")
 
-      val mockTask = mockk<Task<DocumentSnapshot>>()
       val mockDocumentSnapshot = mockk<DocumentSnapshot>()
 
       val getTestProfile =
@@ -214,7 +187,9 @@ public class ProfileConnectionTest {
               "Sample Profile ID",
               "Sample ID",
               listOf(track),
-              listOf(track, track))
+              listOf(track, track),
+              listOf(track),
+              listOf(track))
 
       val mapOfTestProfile =
           hashMapOf(
@@ -242,6 +217,10 @@ public class ProfileConnectionTest {
           getTestProfile.topSongs.map { trackDocumentReference }
       every { mockDocumentSnapshot.get("chosenSongs") } returns
           getTestProfile.chosenSongs.map { trackDocumentReference }
+      every { mockDocumentSnapshot.get("bannedSongs") } returns
+          getTestProfile.bannedSongs.map { trackDocumentReference }
+      every { mockDocumentSnapshot.get("likedSongs") } returns
+          getTestProfile.likedSongs.map { trackDocumentReference }
 
       every { mockDocumentSnapshot.getString("title") } returns track.title
       every { mockDocumentSnapshot.getString("artist") } returns track.artist

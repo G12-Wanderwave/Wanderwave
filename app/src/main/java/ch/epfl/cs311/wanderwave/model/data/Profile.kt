@@ -41,6 +41,7 @@ data class Profile(
         "firebaseUid" to firebaseUid,
         "isPublic" to isPublic,
         "profilePictureUri" to (profilePictureUri?.toString() ?: ""),
+        "likes" to numberOfLikes,
         "topSongs" to topSongsReferences,
         "chosenSongs" to chosenSongsReferences,
         "bannedSongs" to bannedSongsReferences,
