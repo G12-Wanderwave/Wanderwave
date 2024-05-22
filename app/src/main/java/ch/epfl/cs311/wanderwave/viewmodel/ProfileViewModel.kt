@@ -72,6 +72,9 @@ constructor(
   private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
 
+  private val _wanderwaveLikedTracks = MutableStateFlow<List<Track>>(emptyList())
+  val wanderwaveLikedTracks: StateFlow<List<Track>> = _wanderwaveLikedTracks
+
   fun createSpecificSongList(listType: ListType) {
     val listName = listType // Check if the list already exists
     val existingList = _songLists.value.firstOrNull { it.name == listName }
@@ -227,6 +230,16 @@ constructor(
 
   override fun emptyChildrenList() {
     _childrenPlaylistTrackList.value = (emptyList())
+  }
+
+  fun likeTrack(track: Track) {
+    _wanderwaveLikedTracks.value += track
+    Log.d("ProfileViewModel", "Liked track: $track  " + _wanderwaveLikedTracks.value)
+  }
+
+  fun unlikeTrack(track: Track) {
+    _wanderwaveLikedTracks.value -= track
+    Log.d("ProfileViewModel", "Uniked track: $track  " + _wanderwaveLikedTracks.value)
   }
 
   data class UIState(

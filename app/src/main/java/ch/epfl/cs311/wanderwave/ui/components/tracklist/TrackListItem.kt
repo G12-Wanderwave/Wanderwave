@@ -39,12 +39,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -99,6 +99,7 @@ fun TrackListItem(track: Track, selected: Boolean, onClick: () -> Unit) {
 @Composable
 fun TrackListItemWithProfile(
     trackAndProfile: ProfileTrackAssociation,
+    profileViewModel: ProfileViewModel,
     selected: Boolean,
     onClick: () -> Unit,
     navigationActions: NavigationActions
@@ -113,17 +114,18 @@ fun TrackListItemWithProfile(
         verticalAlignment = Alignment.CenterVertically,
     ) {
       val isLiked = remember { mutableStateOf(false) }
-      val profile: Profile = trackAndProfile.profile!! // TODO replace by correct profile
       LikeButton(
           isLiked = isLiked,
           onLike = {
             trackAndProfile.likeTrack(
-                profile) // TODO: Update the value in the database and in the profile
+                profileViewModel.profile.value) // TODO: Update the value in the database
+            profileViewModel.likeTrack(trackAndProfile.track)
             isLiked.value = true
           },
           onUnlike = {
             trackAndProfile.unlikeTrack(
-                profile) // TODO: Update the value in the database and in the profile
+                profileViewModel.profile.value) // TODO: Update the value in the database
+            profileViewModel.unlikeTrack(trackAndProfile.track)
             isLiked.value = false
           })
       Box(

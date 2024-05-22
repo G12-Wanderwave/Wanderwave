@@ -120,7 +120,10 @@ fun AppScaffold(navController: NavHostController) {
                 }
                 composable("${Route.BEACON.routeString}/{beaconId}") {
                   BeaconScreen(
-                      it.arguments?.getString("beaconId") ?: "", navActions, beaconViewModel)
+                      it.arguments?.getString("beaconId") ?: "",
+                      profileViewModel,
+                      navActions,
+                      beaconViewModel)
                 }
               }
         }

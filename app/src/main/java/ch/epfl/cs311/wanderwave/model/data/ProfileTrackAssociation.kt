@@ -21,10 +21,12 @@ data class ProfileTrackAssociation(
   }
 
   fun likeTrack(profile: Profile): ProfileTrackAssociation {
+    this.profile?.numberOfLikes = this.profile?.numberOfLikes!! + 1
     return ProfileTrackAssociation(profile, track, likers + profile, likes + 1)
   }
 
   fun unlikeTrack(profile: Profile): ProfileTrackAssociation {
+    this.profile?.numberOfLikes = this.profile?.numberOfLikes!! - 1
     return ProfileTrackAssociation(profile, track, likers - profile, likes - 1)
   }
 }
