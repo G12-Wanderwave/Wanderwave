@@ -23,6 +23,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
@@ -82,7 +83,11 @@ class BeaconScreenTest {
 
     val viewModel =
         BeaconViewModel(
-            trackRepository, beaconConnection, mockSpotifyController, mockAuthenticationController)
+            trackRepository,
+            beaconConnection,
+            mockk(),
+            mockSpotifyController,
+            mockAuthenticationController)
 
     composeTestRule.setContent { BeaconScreen(beaconId, mockNavigationActions, viewModel) }
 

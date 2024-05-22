@@ -24,6 +24,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.just
+import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -71,7 +72,8 @@ class TrackListScreenTest : TestCase() {
                 Track("is 2", "Track 2", "Artist 2"),
             ))
 
-    viewModel = TrackListViewModel(mockSpotifyController, appDatabase, trackRepository)
+    viewModel =
+        TrackListViewModel(mockSpotifyController, appDatabase, trackRepository, mockk(), mockk())
 
     composeTestRule.setContent {
       TrackListScreen(mockNavigationActions, mockShowMessage, viewModel)

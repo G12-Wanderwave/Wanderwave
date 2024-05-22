@@ -1,8 +1,10 @@
 import android.util.Log
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.TrackRecord
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
@@ -41,6 +43,8 @@ class TrackListViewModelTest {
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
   @RelaxedMockK private lateinit var repository: TrackRepository
   @RelaxedMockK private lateinit var appDatabase: AppDatabase
+  @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
+  @RelaxedMockK private lateinit var mockProfileRepository: ProfileRepository
 
   private val testDispatcher = TestCoroutineDispatcher()
   private lateinit var track: Track
@@ -82,7 +86,13 @@ class TrackListViewModelTest {
 
     every { repository.getAll() } returns flowOf(trackList)
 
-    viewModel = TrackListViewModel(mockSpotifyController, appDatabase, repository)
+    viewModel =
+        TrackListViewModel(
+            mockSpotifyController,
+            appDatabase,
+            repository,
+            mockProfileRepository,
+            mockAuthenticationController)
 
     runBlocking { viewModel.uiState.first { !it.loading } }
   }
