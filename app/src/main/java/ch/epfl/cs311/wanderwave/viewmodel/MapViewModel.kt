@@ -100,6 +100,10 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
     viewModelScope.launch {
       beaconRepository.getItem(id).collect { fetchedBeacon ->
         fetchedBeacon.onSuccess { beacon ->
+          if (beacon.profileAndTrack.isEmpty()) {
+            Log.e("No songs found", "No songs found for the given id")
+            return@onSuccess
+          }
           _retrievedSongs.value = beacon.profileAndTrack.random()
         }
         fetchedBeacon.onFailure { exception ->
