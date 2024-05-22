@@ -167,6 +167,14 @@ constructor(
     appRemote.value.let { SpotifyAppRemote.disconnect(it) }
     appRemote.value = null
   }
+    fun getTrackAsListItem(trackId: String): ListItem {
+        //TODO: Implement this
+        return ListItem("", "", ImageUri(""), "", "", false, false)
+    }
+  fun isTrackPlayable(trackId: String): Boolean {
+
+      return false
+  }
 
   fun playTrack(track: Track, onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
     appRemote.value?.let {
