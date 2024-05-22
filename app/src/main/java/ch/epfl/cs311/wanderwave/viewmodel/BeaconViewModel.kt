@@ -11,6 +11,7 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
@@ -31,6 +32,7 @@ class BeaconViewModel
 constructor(
     private val trackRepository: TrackRepository,
     private val beaconRepository: BeaconRepository,
+    private val profileRepository: ProfileRepository,
     private val spotifyController: SpotifyController,
     private val authenticationController: AuthenticationController
 ) : ViewModel(), SpotifySongsActions {
@@ -75,6 +77,15 @@ constructor(
                         Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
     _uiState.value = UIState(beacon = sampleBeacon, isLoading = false)
+
+    viewModelScope.launch {
+      val profileId = authenticationController.getUserData()!!.id
+      profileRepository.getItem(profileId).collect { fetchedProfile ->
+        fetchedProfile.onSuccess { profile ->
+          _uiState.value = uiState.value.copy(bannedTracks = profile.bannedSongs)
+        }
+      }
+    }
   }
 
   fun getBeaconById(id: String) {
@@ -82,11 +93,12 @@ constructor(
       beaconRepository.getItem(id).collect { fetchedBeacon ->
         // the fetched beacon has a result
         fetchedBeacon.onSuccess { beacon ->
-          _uiState.value = UIState(beacon = beacon, isLoading = false)
+          _uiState.value = uiState.value.copy(beacon = beacon, isLoading = false)
         }
 
         fetchedBeacon.onFailure { exception ->
-          _uiState.value = UIState(error = exception.message, isLoading = false, beacon = null)
+          _uiState.value =
+              uiState.value.copy(error = exception.message, isLoading = false, beacon = null)
           Log.e("BeaconViewModel", "Failed to get beacon by id: $id", exception)
         }
       }
@@ -162,6 +174,7 @@ constructor(
 
   data class UIState(
       val beacon: Beacon? = null,
+      val bannedTracks: List<Track> = emptyList(),
       val isLoading: Boolean = true,
       val error: String? = null
   )
