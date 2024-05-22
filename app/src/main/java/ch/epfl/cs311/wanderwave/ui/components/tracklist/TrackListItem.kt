@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -112,14 +113,17 @@ fun TrackListItemWithProfile(
         verticalAlignment = Alignment.CenterVertically,
     ) {
       val isLiked = remember { mutableStateOf(false) }
+      val profile: Profile = trackAndProfile.profile!! // TODO replace by correct profile
       LikeButton(
           isLiked = isLiked,
           onLike = {
-            trackAndProfile.likeTrack() //TODO: Update the value in the database and in the profile
+            trackAndProfile.likeTrack(
+                profile) // TODO: Update the value in the database and in the profile
             isLiked.value = true
           },
           onUnlike = {
-            trackAndProfile.unlikeTrack() //TODO: Update the value in the database and in the profile
+            trackAndProfile.unlikeTrack(
+                profile) // TODO: Update the value in the database and in the profile
             isLiked.value = false
           })
       Box(

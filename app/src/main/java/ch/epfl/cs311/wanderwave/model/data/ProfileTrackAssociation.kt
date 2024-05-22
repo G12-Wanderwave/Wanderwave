@@ -12,6 +12,7 @@ package ch.epfl.cs311.wanderwave.model.data
 data class ProfileTrackAssociation(
     val profile: Profile? = null,
     val track: Track,
+    val likers: List<Profile> = emptyList(),
     val likes: Int = 0
 ) {
 
@@ -19,11 +20,11 @@ data class ProfileTrackAssociation(
     return hashMapOf("profile" to profile?.toMap(), "track" to track.toMap())
   }
 
-  fun likeTrack(): ProfileTrackAssociation {
-    return ProfileTrackAssociation(profile, track, likes + 1)
+  fun likeTrack(profile: Profile): ProfileTrackAssociation {
+    return ProfileTrackAssociation(profile, track, likers + profile, likes + 1)
   }
 
-  fun unlikeTrack(): ProfileTrackAssociation {
-    return ProfileTrackAssociation(profile, track, likes - 1)
+  fun unlikeTrack(profile: Profile): ProfileTrackAssociation {
+    return ProfileTrackAssociation(profile, track, likers - profile, likes - 1)
   }
 }
