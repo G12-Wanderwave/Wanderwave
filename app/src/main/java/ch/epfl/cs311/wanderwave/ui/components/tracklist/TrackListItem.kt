@@ -113,20 +113,18 @@ fun TrackListItemWithProfile(
     Row(
         verticalAlignment = Alignment.CenterVertically,
     ) {
-      val isLiked = remember { mutableStateOf(false) }
+      val isLiked = remember { mutableStateOf(trackAndProfile.isLiked(profileViewModel.profile.value)) }
       LikeButton(
           isLiked = isLiked,
           onLike = {
             trackAndProfile.likeTrack(
                 profileViewModel.profile.value) // TODO: Update the value in the database
             profileViewModel.likeTrack(trackAndProfile.track)
-            isLiked.value = true
           },
           onUnlike = {
             trackAndProfile.unlikeTrack(
                 profileViewModel.profile.value) // TODO: Update the value in the database
             profileViewModel.unlikeTrack(trackAndProfile.track)
-            isLiked.value = false
           })
       Box(
           modifier = Modifier.fillMaxHeight().aspectRatio(1f),

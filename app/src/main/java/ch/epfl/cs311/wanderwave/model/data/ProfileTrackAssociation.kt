@@ -20,6 +20,10 @@ data class ProfileTrackAssociation(
     return hashMapOf("profile" to profile?.toMap(), "track" to track.toMap())
   }
 
+  fun isLiked(profile: Profile): Boolean {
+    return likers.contains(profile)
+  }
+
   fun likeTrack(profile: Profile): ProfileTrackAssociation {
     this.profile?.numberOfLikes = this.profile?.numberOfLikes!! + 1
     return ProfileTrackAssociation(profile, track, likers + profile, likes + 1)
