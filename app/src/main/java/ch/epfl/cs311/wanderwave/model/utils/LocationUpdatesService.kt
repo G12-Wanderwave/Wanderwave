@@ -11,7 +11,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -29,7 +28,8 @@ class LocationUpdatesService(private val testContext: Context? = null) : Service
   private lateinit var fusedLocationClient: FusedLocationProviderClient
   private lateinit var locationCallback: LocationCallback
 
-    val context = testContext ?: this
+  val context = testContext ?: this
+
   override fun onCreate() {
     super.onCreate()
     fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
@@ -69,14 +69,14 @@ class LocationUpdatesService(private val testContext: Context? = null) : Service
   }
 
   fun startForegroundService() {
-    if (context==testContext) {
+    if (context == testContext) {
       return
     }
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
 
-        val channel =
+      val channel =
           NotificationChannel(
               "location_updates_channel",
               "Location Updates",
