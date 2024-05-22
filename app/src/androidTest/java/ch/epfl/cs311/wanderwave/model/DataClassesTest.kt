@@ -249,6 +249,34 @@ class DataClassesTest {
   }
 
   @Test
+  fun testProfileTrackLikeTrack() {
+    val mockProfile =
+        Profile("firstname", "lastname", "description", 0, true, null, "spotifyUid", "firebaseUid")
+    val mockTrack = mockk<Track>()
+    val association = ProfileTrackAssociation(mockProfile, mockTrack)
+
+    val likedAssociation = association.likeTrack(mockProfile)
+
+    assertEquals(1, likedAssociation.likes)
+    assertEquals(1, likedAssociation.likers.size)
+    assertEquals(mockProfile, likedAssociation.likers[0])
+  }
+
+  @Test
+  fun testProfileTrackUnlikeTrack() {
+    val mockProfile =
+        Profile("firstname", "lastname", "description", 0, true, null, "spotifyUid", "firebaseUid")
+    val mockTrack = mockk<Track>()
+    val association = ProfileTrackAssociation(mockProfile, mockTrack)
+
+    val likedAssociation = association.likeTrack(mockProfile)
+    val unlikedAssociation = likedAssociation.unlikeTrack(mockProfile)
+
+    assertEquals(0, unlikedAssociation.likes)
+    assertEquals(0, unlikedAssociation.likers.size)
+  }
+
+  @Test
   fun noArgumentConstructorCreatesEmptyTrack() {
     val track = Track()
     assertEquals("", track.id)
