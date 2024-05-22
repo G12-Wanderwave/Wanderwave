@@ -57,7 +57,15 @@ fun TrackListScreen(
     TabContent1(navActions, viewModel, selectedTabIndex)
   }
 }
-
+/**
+ * This function is responsible for displaying the content of the tabs in the TrackListScreen.
+ * 
+ * @param navActions: NavigationActions
+ * @param viewModel: TrackListViewModel
+ * @param selectedTabIndex: Int
+ * @author Menzo Bouaissi
+ * @since 4.0
+ */
 @Composable
 fun TabContent1(
     navActions: NavigationActions,
