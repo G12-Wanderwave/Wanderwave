@@ -1,6 +1,8 @@
 import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.data.TrackRecord
+import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
@@ -21,7 +23,9 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -34,6 +38,7 @@ class TrackListViewModelTest {
 
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
   @RelaxedMockK private lateinit var repository: TrackRepository
+  @RelaxedMockK private lateinit var appDatabase: AppDatabase
 
   private val testDispatcher = TestCoroutineDispatcher()
   private lateinit var track: Track
@@ -75,7 +80,7 @@ class TrackListViewModelTest {
 
     every { repository.getAll() } returns flowOf(trackList)
 
-    viewModel = TrackListViewModel(mockSpotifyController, repository)
+    viewModel = TrackListViewModel(mockSpotifyController, appDatabase, repository)
 
     runBlocking { viewModel.uiState.first { !it.loading } }
   }
@@ -145,6 +150,40 @@ class TrackListViewModelTest {
     viewModel.addTrackToList(ListType.TOP_SONGS, trackWithoutPrefix)
     assertTrue(viewModel.uiState.value.tracks.contains(track))
   }
-}
 
-// for the CI rerun to be removed
+  @Test
+  fun testLoadRecentlyAddedTracks() = runBlockingTest {
+    // Arrange
+    val testTrackRecord = TrackRecord(0, "testTitle", "testArtist", 0.1.toLong())
+    val testTrack = Track("testId", "testTitle", "testArtist")
+    val testTrackRecords = listOf(testTrackRecord)
+    val testTrackDetails = listOf(testTrack)
+
+    every { appDatabase.trackRecordDao().getAllRecentlyAddedTracks() } returns
+        flowOf(testTrackRecords)
+    every { repository.getItem(testTrackRecord.trackId) } returns flowOf(Result.success(testTrack))
+
+    // Act
+    viewModel.loadRecentlyAddedTracks()
+
+    // Assert
+    assertEquals(testTrackDetails, viewModel.uiState.value.tracks)
+    assertEquals(false, viewModel.uiState.value.loading)
+
+    // null case of repository
+    every { repository.getItem(testTrackRecord.trackId) } returns
+        flowOf(Result.failure(Exception()))
+    viewModel.loadRecentlyAddedTracks()
+
+    // Assert
+    assertEquals(emptyList<Track>(), viewModel.uiState.value.tracks)
+    assertEquals(false, viewModel.uiState.value.loading)
+  }
+
+  @Test
+  fun emptyChildrenList_clearsChildrenPlaylistTrackList() = runBlockingTest {
+
+    // Act
+    viewModel.emptyChildrenList()
+  }
+}

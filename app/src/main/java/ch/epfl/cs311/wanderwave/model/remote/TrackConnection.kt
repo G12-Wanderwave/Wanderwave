@@ -8,11 +8,10 @@ import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.callbackFlow
 
 class TrackConnection(private val database: FirebaseFirestore) :
     FirebaseConnection<Track, Track>(database), TrackRepository {
@@ -65,44 +64,55 @@ class TrackConnection(private val database: FirebaseFirestore) :
   }
 
   // Fetch a track from a DocumentReference asynchronously
-  suspend fun fetchProfileAndTrack(
+  fun fetchProfileAndTrack(
       profileAndTrackRef: Map<String, DocumentReference>?
-  ): ProfileTrackAssociation? {
-    if (profileAndTrackRef == null) return null
-    return withContext(Dispatchers.IO) {
+  ): Flow<Result<ProfileTrackAssociation>> = callbackFlow {
+    Log.d("Firestore", "Fetching profile and track ${profileAndTrackRef.toString()}")
+    if (profileAndTrackRef == null) {
+      trySend(Result.failure(Exception("Profile and Track reference is null")))
+    } else {
       try {
-        var profile: Profile? = null
-        var track: Track? = null
-        val trackDocument = profileAndTrackRef["track"]?.get()?.await()
-        trackDocument?.let { track = Track.from(it) }
-        val profileDocument = profileAndTrackRef["creator"]?.get()?.await()
-        profileDocument?.let { profile = Profile.from(it) }
-        if (profile == null) {
-          Log.e("Firestore", "Error fetching the track, firebase format is wrong")
-          return@withContext null
+        profileAndTrackRef["track"]?.addSnapshotListener { trackDocument, error ->
+          val track = trackDocument?.let { Track.from(it) }
+          profileAndTrackRef["creator"]?.addSnapshotListener { profileDocument, error ->
+            val profile = profileDocument?.let { Profile.from(it) }
+            if (track == null) {
+              trySend(
+                  Result.failure(Exception("Error fetching the track, firebase format is wrong")))
+            } else {
+              trySend(Result.success(ProfileTrackAssociation(profile = profile, track = track)))
+            }
+          }
         }
-
-        ProfileTrackAssociation(profile = profile ?: null, track = track!!)
       } catch (e: Exception) {
         // Handle exceptions
-        Log.e("Firestore", "Error fetching track:${e.message}")
-        null
+        Log.e("Firestore", "Error fetching profile and track:${e.message}")
+        trySend(Result.failure(e))
       }
     }
+    awaitClose { close() }
   }
 
   // Fetch a track from a DocumentReference asynchronously
-  suspend fun fetchTrack(TrackRef: DocumentReference?): Track? {
-    if (TrackRef == null) return null
-    return withContext(Dispatchers.IO) {
+  fun fetchTrack(TrackRef: DocumentReference?): Flow<Result<Track>> = callbackFlow {
+    if (TrackRef == null) {
+      trySend(Result.failure(Exception("Track reference is null")))
+    } else {
       try {
-        val trackDocument = TrackRef.get().await()
-        trackDocument?.let { Track.from(it) }
+        TrackRef.addSnapshotListener { trackDocument, error ->
+          val track = trackDocument?.let { Track.from(it) }
+          if (track != null) {
+            trySend(Result.success(track))
+          } else {
+            trySend(Result.failure(Exception("Track could not be fetched")))
+          }
+        }
       } catch (e: Exception) {
         // Handle exceptions
         Log.e("Firestore", "Error fetching track:${e.message}")
-        null
+        trySend(Result.failure(e))
       }
     }
+    awaitClose {}
   }
 }

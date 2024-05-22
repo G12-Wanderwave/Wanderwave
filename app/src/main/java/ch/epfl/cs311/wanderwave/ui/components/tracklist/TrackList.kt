@@ -47,7 +47,7 @@ fun TrackList(
         horizontalArrangement = Arrangement.SpaceBetween) {
           if (title != null) {
             Text(
-                text = title.lowercase().replace("_", " "),
+                text = title,
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.testTag("trackListTitle"))
           }
@@ -62,8 +62,9 @@ fun TrackList(
                 }
           }
         }
+
     var selectedTrack by remember { mutableStateOf<Track?>(null) }
-    LazyColumn {
+    LazyColumn(Modifier.padding(bottom = 63.dp)) {
       items(tracks) { track ->
         TrackListItem(
             track,

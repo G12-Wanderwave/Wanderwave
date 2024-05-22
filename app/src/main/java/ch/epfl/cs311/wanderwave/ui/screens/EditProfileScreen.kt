@@ -6,15 +6,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,11 +27,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.profile.ImageSelection
-import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_error
+import ch.epfl.cs311.wanderwave.ui.theme.md_theme_dark_error
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_primary
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
@@ -50,9 +55,11 @@ fun EditProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel
   var lastName by remember { mutableStateOf(profile2.lastName) }
   var description by remember { mutableStateOf(profile2.description) }
 
+  LaunchedEffect(Unit) { viewModel.getProfileOfCurrentUser(true) }
+
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier.testTag("editProfileScreen")) {
+      modifier = Modifier.testTag("editProfileScreen").fillMaxHeight()) {
         ImageSelection(
             profile = profile2, onImageChange = { uri -> profile2.profilePictureUri = uri })
         EditableTextFields(
@@ -165,24 +172,27 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit, onDelete: () -> Unit
         Button(
             onClick = onSave,
             colors = ButtonDefaults.buttonColors(containerColor = md_theme_light_primary),
-            modifier = Modifier.width(100.dp).testTag("saveButton")) {
-              Text("Save")
+            modifier = Modifier.width(100.dp).testTag("saveButton"),
+            shape = RoundedCornerShape(size = 10.dp)) {
+              Text(stringResource(id = R.string.save))
             }
         Spacer(modifier = Modifier.width(8.dp))
         Button(
             onClick = onCancel,
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-            border = BorderStroke(1.dp, md_theme_light_error),
+            border = BorderStroke(1.dp, md_theme_dark_error),
+            shape = RoundedCornerShape(size = 10.dp),
             modifier = Modifier.width(100.dp).testTag("cancelButton")) {
-              Text(text = "Cancel", color = md_theme_light_error)
+              Text(text = stringResource(id = R.string.cancel), color = md_theme_dark_error)
             }
         Spacer(Modifier.padding(8.dp))
         Button(
             onClick = onDelete,
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-            border = BorderStroke(1.dp, md_theme_light_error),
+            border = BorderStroke(1.dp, md_theme_dark_error),
+            shape = RoundedCornerShape(size = 10.dp),
             modifier = Modifier.width(200.dp).testTag("deleteButton")) {
-              Text(text = "Delete profile", color = md_theme_light_error)
+              Text(text = stringResource(id = R.string.deleteProfile), color = md_theme_dark_error)
             }
       }
 }

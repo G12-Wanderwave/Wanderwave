@@ -1,0 +1,78 @@
+Title	URL	Assignees	Status	Sprint	Task Type	Nature	Epic	Time estimate	Actual time
+As a user, I want to be able to like a song in an efficient manner to listen to it later again when I'm close to a beacon	https://github.com/G12-Wanderwave/Wanderwave/issues/306		Sprint Backlog						
+As a user with a peculiar taste, I want to flag a song that is recommended to me to ban it from being recommended in the future, even from other beacons, so that I don't see it again. I also want a screen where I can remove them from my blacklist	https://github.com/G12-Wanderwave/Wanderwave/issues/307		Sprint Backlog						
+As a privacy conscious person, I want to be able to know that my data is private and that other people can't access it	https://github.com/G12-Wanderwave/Wanderwave/issues/66	KlaKalma, yzueger	Sprint Backlog		Backend			25h	
+As a user, I want to be able to share my music taste with others by adding a song to a beacon, so that others can see it.	https://github.com/G12-Wanderwave/Wanderwave/issues/68	aymanbakiri, KlaKalma, mbouaissi	Sprint Backlog	Sprint 3	Backend			25h	
+End-to-end tests	https://github.com/G12-Wanderwave/Wanderwave/issues/155	aymanbakiri, IB-12, joriba, KlaKalma, mbouaissi, tsogtb, yzueger	Sprint Backlog						
+As a curious user, I want the ability to see who has shared a particular song with me, enhancing my understanding of local listeners' tastes.	https://github.com/G12-Wanderwave/Wanderwave/issues/241		Product Backlog						
+As a user, I want to recover the album cover, so that I can see which album im selecting			Product Backlog						
+As a user, i want to recover songs from my playlist, so that i can add them to a beacon			Product Backlog						
+As a user, I want to customize beacons that I created with custom names and colors	https://github.com/G12-Wanderwave/Wanderwave/issues/101		Product Backlog		Frontend	User Story			
+As a casual user, I want the process of ending my interaction with the app to be straightforward, so that I can stop the experience and exit the app with ease after my walk.			Product Backlog						
+As a user viewing others beacons, I don't want someone polluting my environmen by spamming beacons or songs, so that everyone has a chance to be seen. Something should prevent that.			Product Backlog						
+As a tourist utilizing WanderWave, I aim for an enriched and immersive exploration experience, so that upon my arrival in a new country, I can simultaneously discover its landmarks and immerse myself in its culture by accessing playlists featuring the country's best songs.			Product Backlog						
+As a user living in the countryside, I want to create a beacon, so that I can still interact with beacons in places where few people are			Product Backlog						
+Store the liked songs on the profile	https://github.com/G12-Wanderwave/Wanderwave/issues/308	aymanbakiri	Tasks for next Sprint						
+Have a like counter on firebase for tracks in beacons	https://github.com/G12-Wanderwave/Wanderwave/issues/310	KlaKalma	Tasks for next Sprint					3h	
+Adapt the UI so it adds a liked songs and adds it to the list of liked songs	https://github.com/G12-Wanderwave/Wanderwave/issues/311	joriba	Tasks for next Sprint					4h	
+The list of banned songs impacts the songs you can listen	https://github.com/G12-Wanderwave/Wanderwave/issues/314	yzueger	Tasks for next Sprint					6h	
+The profile contains a list of banned songs (local and firebase)	https://github.com/G12-Wanderwave/Wanderwave/issues/312	KlaKalma	Tasks for next Sprint					3h	
+Make the media player disappear when no songs is playing	https://github.com/G12-Wanderwave/Wanderwave/issues/331	tsogtb	Tasks for next Sprint						
+End-to-end test 3	https://github.com/G12-Wanderwave/Wanderwave/issues/171	tsogtb	Tasks for next Sprint					4h	
+End-to-end test 7	https://github.com/G12-Wanderwave/Wanderwave/issues/175	KlaKalma	Tasks for next Sprint					4h	
+End-to-end test 1	https://github.com/G12-Wanderwave/Wanderwave/issues/169	joriba	Tasks for next Sprint					4h	
+Integrate the song select "screen" with the track lists	https://github.com/G12-Wanderwave/Wanderwave/issues/247	mbouaissi	Done in Sprint #7					4	6
+End-to-end test: Login then log out	https://github.com/G12-Wanderwave/Wanderwave/issues/170	yzueger	Done in Sprint #7					4h	Actual: 7h
+firebase can store the tracks of a user	https://github.com/G12-Wanderwave/Wanderwave/issues/250	KlaKalma	Done in Sprint #7					6h	Actual : 7h
+Drop song near a beacon	https://github.com/G12-Wanderwave/Wanderwave/issues/227	IB-12	Done in Sprint #7	Sprint 6	Backend			6h	12h
+End-to-end test 5: Login to using media player	https://github.com/G12-Wanderwave/Wanderwave/issues/173	IB-12	Done in Sprint #7	Sprint 5		Sprint Task		5h	6h
+Edit the flacky track screen test	https://github.com/G12-Wanderwave/Wanderwave/issues/218	KlaKalma	Done in Sprint #7					5h	Actual : 3h
+As a WanderWave user, I want the beacons to be well distributed so that I can always find a beacon nearby	https://github.com/G12-Wanderwave/Wanderwave/issues/200	KlaKalma	Done in Sprint #7						
+Connect authentication to current user profile	https://github.com/G12-Wanderwave/Wanderwave/issues/199	yzueger	Done in Sprint #7					5h	S7: 4h
+Solve the bug where when we change the picture it doesn't update immidiatly	https://github.com/G12-Wanderwave/Wanderwave/issues/275	mbouaissi	Done in Sprint #7					4	4
+Use the track list to display songs recently added to a beacon	https://github.com/G12-Wanderwave/Wanderwave/issues/246	aymanbakiri	Done in Sprint #7	Sprint 7				estimated: 6h	actual: 8h
+Setup permissions on firebase for users to only be able to access their own data	https://github.com/G12-Wanderwave/Wanderwave/issues/74	yzueger	In Review					3h	
+Connect the auth to firebase, and retrieve the profile	https://github.com/G12-Wanderwave/Wanderwave/issues/262	yzueger	In Review					10h	5h
+Adapt firebase to use flow of result and continuous flows	https://github.com/G12-Wanderwave/Wanderwave/issues/304	KlaKalma	In Review					3h	10h
+As a Wanderwave user, I want to have a screen where I can see what songs I sent and received recently, so I can like and save them for later.	https://github.com/G12-Wanderwave/Wanderwave/issues/244	aymanbakiri, joriba	In Review						
+overview	https://github.com/G12-Wanderwave/Wanderwave/issues/320	mbouaissi	In Review					2	
+As a user, I want to be able to play a song when I click it	https://github.com/G12-Wanderwave/Wanderwave/issues/261	joriba	Done in Sprint #8						
+PRD	https://github.com/G12-Wanderwave/Wanderwave/issues/274	mbouaissi	Done in Sprint #8					2	
+Bugfix: SelectSongScreen	https://github.com/G12-Wanderwave/Wanderwave/issues/300	mbouaissi	Done in Sprint #8		Backend	Sprint Task		2h	1
+Add missing UI tests	https://github.com/G12-Wanderwave/Wanderwave/issues/165	tsogtb	Done in Sprint #8					5h	
+Dependency-inject Firebase	https://github.com/G12-Wanderwave/Wanderwave/issues/271	KlaKalma	Done in Sprint #8					5h	3h
+create a profile screen	https://github.com/G12-Wanderwave/Wanderwave/issues/263	aymanbakiri	Done in Sprint #8					5h	actual: 8h
+Add beacons arround the user	https://github.com/G12-Wanderwave/Wanderwave/issues/273	mbouaissi	Done in Sprint #8					6	8
+Make the tracks on all track lists playable	https://github.com/G12-Wanderwave/Wanderwave/issues/233	joriba	Done in Sprint #8	Sprint 6				4 more hours	Total: 20h
+Use the track list screen to display recently viewed songs	https://github.com/G12-Wanderwave/Wanderwave/issues/245	joriba	Done in Sprint #8					6h	6h
+connect to spotify web api	https://github.com/G12-Wanderwave/Wanderwave/issues/265	IB-12	Done in Sprint #8		Backend	Sprint Task		5h	5h
+function to recover the image of an album	https://github.com/G12-Wanderwave/Wanderwave/issues/268	aymanbakiri	Done in Sprint #8					5h	actual: 12h
+Media Controller End-to-end test fix	https://github.com/G12-Wanderwave/Wanderwave/issues/282	IB-12	Done in Sprint #8	Sprint 7	Backend	Sprint Task		3h	4h
+Bugfix: sync timing bar with Spotify	https://github.com/G12-Wanderwave/Wanderwave/issues/272	IB-12	Done in Sprint #8		Frontend	Sprint Task		4h	2.5h
+function to recover songs from a playlist	https://github.com/G12-Wanderwave/Wanderwave/issues/266	IB-12	Done in Sprint #8		Backend	Sprint Task		5h	6h
+Adapt the "Add Track" button in the BeaconScreen	https://github.com/G12-Wanderwave/Wanderwave/issues/305	IB-12	Done in Sprint #8		Backend	Sprint Task		4h	8h
+Add item and get id for beacon now add tracks as well	https://github.com/G12-Wanderwave/Wanderwave/issues/288	KlaKalma	Done in Sprint #8					1h	2h
+delete addProfilesIfNotExist	https://github.com/G12-Wanderwave/Wanderwave/issues/270	KlaKalma	Done in Sprint #8					1h	1h
+Clear sonarcloud issues	https://github.com/G12-Wanderwave/Wanderwave/issues/276	KlaKalma	Done in Sprint #8					6h	5h
+Get CI logs as artifact	https://github.com/G12-Wanderwave/Wanderwave/issues/242	KlaKalma	Done in Sprint #8					2h	2h
+function to recover the liked songs	https://github.com/G12-Wanderwave/Wanderwave/issues/267	mbouaissi	Done in Sprint #8					2	3
+Refactor the end-to-end test	https://github.com/G12-Wanderwave/Wanderwave/issues/277	mbouaissi	Done in Sprint #8					2	2
+function to recover from which album a song come from	https://github.com/G12-Wanderwave/Wanderwave/issues/269	tsogtb	In Development					3h	
+The track list can show banned songs with a different tab	https://github.com/G12-Wanderwave/Wanderwave/issues/313	mbouaissi	In Development					4	
+The user can access the banned songs screen from its profile	https://github.com/G12-Wanderwave/Wanderwave/issues/317	mbouaissi	In Development					3h	
+End-to-end profile screen : the user log in , edit his profile and save it	https://github.com/G12-Wanderwave/Wanderwave/issues/172	aymanbakiri	Tasks for next Sprint					4h	
+Have a like counter on the track profile association	https://github.com/G12-Wanderwave/Wanderwave/issues/309	IB-12	Sprint Tasks					2h	
+PRD 	https://github.com/G12-Wanderwave/Wanderwave/issues/319	aymanbakiri, IB-12, joriba, KlaKalma, mbouaissi, tsogtb, yzueger	Sprint Tasks						
+[PRD] User Analytics	https://github.com/G12-Wanderwave/Wanderwave/issues/326	IB-12	Sprint Tasks						
+[PRD] Monetization	https://github.com/G12-Wanderwave/Wanderwave/issues/328	IB-12	Sprint Tasks						
+Users can add songs to the banned songs list in the profile	https://github.com/G12-Wanderwave/Wanderwave/issues/315	joriba	Tasks for next Sprint					4h	
+Users can remove songs from the banned songs list in the profile	https://github.com/G12-Wanderwave/Wanderwave/issues/316	joriba	Tasks for next Sprint					2h	
+[BUGFIX] Fix the lag issues	https://github.com/G12-Wanderwave/Wanderwave/issues/330	yzueger	Tasks for next Sprint					4h	
+value proposition	https://github.com/G12-Wanderwave/Wanderwave/issues/323	yzueger	Tasks for next Sprint					5h	
+timeline	https://github.com/G12-Wanderwave/Wanderwave/issues/329	KlaKalma	Tasks for next Sprint					4h	
+designs	https://github.com/G12-Wanderwave/Wanderwave/issues/327	KlaKalma	Tasks for next Sprint					4h	
+non functional requirements	https://github.com/G12-Wanderwave/Wanderwave/issues/325		Tasks for next Sprint						
+mvp	https://github.com/G12-Wanderwave/Wanderwave/issues/324		Tasks for next Sprint						
+analysys	https://github.com/G12-Wanderwave/Wanderwave/issues/322		Tasks for next Sprint						
+history	https://github.com/G12-Wanderwave/Wanderwave/issues/321	aymanbakiri	Tasks for next Sprint						
+[BUGFIX] going back closes the media player before going back a screen	https://github.com/G12-Wanderwave/Wanderwave/issues/332	tsogtb	Tasks for next Sprint					2h	
