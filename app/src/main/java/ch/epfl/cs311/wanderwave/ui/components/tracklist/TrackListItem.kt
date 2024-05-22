@@ -120,11 +120,13 @@ fun TrackListItemWithProfile(
             trackAndProfile.likeTrack(
                 profileViewModel.profile.value) // TODO: Update the value in the database
             profileViewModel.likeTrack(trackAndProfile.track)
+            isLiked.value = true
           },
           onUnlike = {
             trackAndProfile.unlikeTrack(
                 profileViewModel.profile.value) // TODO: Update the value in the database
             profileViewModel.unlikeTrack(trackAndProfile.track)
+            isLiked.value = false
           })
       Box(
           modifier = Modifier.fillMaxHeight().aspectRatio(1f),

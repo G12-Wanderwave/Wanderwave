@@ -233,13 +233,13 @@ constructor(
   }
 
   fun likeTrack(track: Track) {
-    _wanderwaveLikedTracks.value += track
-    Log.d("ProfileViewModel", "Liked track: $track  " + _wanderwaveLikedTracks.value)
+    //Check if song is already liked
+    if(!wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value += track
   }
 
   fun unlikeTrack(track: Track) {
-    _wanderwaveLikedTracks.value -= track
-    Log.d("ProfileViewModel", "Uniked track: $track  " + _wanderwaveLikedTracks.value)
+    //Check if song was not liked
+    if(wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value -= track
   }
 
   data class UIState(
