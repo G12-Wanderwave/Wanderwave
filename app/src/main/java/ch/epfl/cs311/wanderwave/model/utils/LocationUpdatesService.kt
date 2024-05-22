@@ -69,9 +69,8 @@ class LocationUpdatesService(private val testContext: Context? = null) : Service
   }
 
   fun startForegroundService() {
-    if (context == testContext) {
-      return
-    }
+    if (context == testContext) return
+
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {

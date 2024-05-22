@@ -71,26 +71,4 @@ class LocationUpdatesServiceTest {
     // Verify interactions
     verify { service.startForegroundService() }
   }
-
-  //
-  //    @Test
-  //    fun test2() = runBlocking {
-  //        val context: Context = ApplicationProvider.getApplicationContext() // Use real context
-  //        val localBroadcastManager: LocalBroadcastManager = mockk(relaxed = true)
-  //
-  //        mockkStatic(LocalBroadcastManager::class)
-  //        every { LocalBroadcastManager.getInstance(any()) } returns localBroadcastManager
-  //
-  //        val service = spyk(LocationUpdatesService(context))
-  //        val locationCallbackSlot = slot<LocationCallback>()
-  //        val locationResult: LocationResult = mockk()
-  //        val location: android.location.Location = mockk()
-  //
-  //        every { location.latitude } returns 46.519653
-  //        every { location.longitude } returns 6.632273
-  //        every { locationResult.lastLocation } returns location
-  //
-  //        service.onCreate()
-  //        locationCallbackSlot.captured.onLocationResult(locationResult)
-  //    }
 }

@@ -96,6 +96,13 @@ constructor(val locationSource: LocationSource, private val beaconRepository: Be
     }
   }
 
+  /**
+   * Fetches a random song from the list of songs associated with the given beacon id
+   *
+   * @param id The id of the beacon
+   * @author Menzo Bouaissi
+   * @since 4.0
+   */
   fun getRandomSong(id: String) {
     viewModelScope.launch {
       beaconRepository.getItem(id).collect { fetchedBeacon ->
