@@ -69,7 +69,7 @@ fun BeaconScreen(
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
-        if (!uiState.isLoading) {
+        if (!uiState.isLoading && uiState.error == null && uiState.beacon != null) {
           //   BeaconScreen(beacon = uiState.beacon!!, navigationActions = navigationActions)
           BeaconScreen(
               beacon = uiState.beacon!!,

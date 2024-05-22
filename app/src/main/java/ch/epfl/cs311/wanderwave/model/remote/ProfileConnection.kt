@@ -59,80 +59,71 @@ class ProfileConnection(
         if (!document.exists()) {
           trySend(Result.failure<Profile>(Exception("Document does not exist")))
         } else {
-          val profile: Profile? = item ?: Profile.from(document)
+          val profile: Profile = item ?: Profile.from(document)!!
 
-          profile!!.let { profile ->
-            val topSongsObject = document["topSongs"]
-            val chosenSongsObject = document["chosenSongs"]
+          val topSongsObject = document["topSongs"]
+          val chosenSongsObject = document["chosenSongs"]
+          val bannedSongsObject = document["bannedSongs"]
 
-            if (topSongsObject is List<*> &&
-                topSongsObject.all { it is DocumentReference } &&
-                chosenSongsObject is List<*> &&
-                chosenSongsObject.all { it is DocumentReference }) {
-              val topSongRefs = topSongsObject as? List<DocumentReference>
-              val chosenSongRefs = chosenSongsObject as? List<DocumentReference>
+          val topSongRefs = castToListOfReferences(topSongsObject)
+          val chosenSongRefs = castToListOfReferences(chosenSongsObject)
+          val bannedSongRefs = castToListOfReferences(bannedSongsObject)
 
-              coroutineScope.launch {
+          coroutineScope.launch {
 
-                // The goal is to : map the references to the actual tracks by fetching, this gives
-                // a
-                // list of flow,
-                // then reduce the list of flow to a single flow that contains the list of tracks
-                // and then combine the two lists of tracks to update the profile
+            // The goal is to : map the references to the actual tracks by fetching, this gives
+            // a list of flow,
+            // then reduce the list of flow to a single flow that contains the list of tracks
+            // and then combine the two lists of tracks to update the profile
+            val chosenSongs = documentReferencesToFlows(chosenSongRefs, trackConnection)
+            val topSongs = documentReferencesToFlows(topSongRefs, trackConnection)
+            val bannedSongs = documentReferencesToFlows(bannedSongRefs, trackConnection)
 
-                val chosenSongs =
-                    chosenSongRefs
-                        ?.map { trackRef -> trackConnection.fetchTrack(trackRef) }
-                        ?.map { flow -> flow.mapNotNull { result -> result.getOrNull() } }
-                        ?.fold(flowOf(Result.success(listOf<Track>()))) { acc, track ->
-                          acc.combine(track) { accTracks, track ->
-                            accTracks.map { tracks -> tracks + track }
-                          }
-                        } ?: flowOf(Result.failure(Exception("Could not retrieve chosenSongs")))
-
-                val topSongs =
-                    topSongRefs
-                        // map to a list of flow
-                        ?.map { trackRef -> trackConnection.fetchTrack(trackRef) }
-                        // Extract the track from Result or return null if it's a failure
-                        ?.map { flow -> flow.mapNotNull { result -> result.getOrNull() } }
-                        // map to a list of track
-                        ?.fold(flowOf(Result.success(listOf<Track>()))) { acc, track ->
-                          acc.combine(track) { accTracks, track ->
-                            accTracks.map { tracks -> tracks + track }
-                          }
-                        } ?: flowOf(Result.failure(Exception("Could not retrieve topSongs")))
-                // reduce the list of flow to a
-                // single flow that contains the
-                // list of tracks
-
-                val updatedProfile =
-                    topSongs.combine(chosenSongs) { topSongs, chosenSongs ->
-                      // if one of the two or the two have a success value, we update the profile,
-                      // else we return the profile as is
-                      if (topSongs.isSuccess || chosenSongs.isSuccess) {
-                        profile.copy(
-                            topSongs = topSongs.getOrNull() ?: profile.topSongs,
-                            chosenSongs = chosenSongs.getOrNull() ?: profile.chosenSongs)
-                      } else {
-                        profile
-                      }
+            val updatedProfile =
+                topSongs
+                    .combine(chosenSongs) { topSongs, chosenSongs -> Pair(topSongs, chosenSongs) }
+                    .combine(bannedSongs) { pair, bannedSongs ->
+                      profile.copy(
+                          topSongs = pair.first.getOrNull() ?: profile.topSongs,
+                          chosenSongs = pair.second.getOrNull() ?: profile.chosenSongs,
+                          bannedSongs = bannedSongs.getOrNull() ?: profile.bannedSongs)
                     }
 
-                // would like to keep the flow without collecting it, but I don't know how to do
-                // it...
-                updatedProfile
-                    .map { Result.success(it) }
-                    .collect { result ->
-                      result.onSuccess { profile -> trySend(Result.success(profile)) }
-                    }
-              }
-            } else {
-              trySend(
-                  Result.failure<Profile>(Exception("Songs lists have a Wrong Firebase Format")))
-            }
+            // would like to keep the flow without collecting it, but I don't know how to do
+            // it...
+            updatedProfile
+                .map { Result.success(it) }
+                .collect { result ->
+                  result.onSuccess { profile -> trySend(Result.success(profile)) }
+                }
           }
         }
         awaitClose {}
       }
+
+  private fun documentReferencesToFlows(
+      documentReferences: List<DocumentReference>?,
+      trackConnection: TrackConnection
+  ): Flow<Result<List<Track>>> {
+    return documentReferences
+        // map to a list of flow
+        ?.map { trackRef -> trackConnection.fetchTrack(trackRef) }
+        // Extract the track from Result or return null if it's a failure
+        ?.map { flow -> flow.mapNotNull { result -> result.getOrNull() } }
+        // map to a list of track
+        ?.fold(flowOf(Result.success(listOf<Track>()))) { acc, track ->
+          acc.combine(track) { accTracks, track -> accTracks.map { tracks -> tracks + track } }
+        } ?: flowOf(Result.failure(Exception("Could not retrieve topSongs")))
+    // reduce the lists of flows to a
+    // single flows that contains the
+    // list of tracks
+  }
+
+  fun castToListOfReferences(obj: Any?): List<DocumentReference> {
+    return if (obj is List<*> && obj.all { it is DocumentReference }) {
+      obj as List<DocumentReference>
+    } else {
+      emptyList()
+    }
+  }
 }
