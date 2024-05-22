@@ -125,6 +125,12 @@ constructor(
     _childrenPlaylistTrackList.value = (emptyList())
   }
 
+  fun removeTrackFromBanList(track: Track) {
+    // TODO: only update the Ban List and make it update on firebase @Ayman
+    val updatedTracks = _uiState.value.tracks - track
+    _uiState.value = _uiState.value.copy(tracks = updatedTracks)
+  }
+
   /**
    * Get all the element of the main screen and add them to the top list
    *

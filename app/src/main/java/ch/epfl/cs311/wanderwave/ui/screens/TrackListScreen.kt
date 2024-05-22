@@ -24,7 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
+import ch.epfl.cs311.wanderwave.ui.components.tracklist.RemovableTrackList
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
 @Composable
@@ -80,7 +80,7 @@ fun TabContent1(
                 .padding(16.dp)
                 .testTag("searchBar") // Adding a test tag for the search bar
         )
-    TrackList(
+    RemovableTrackList(
         tracks = uiState.tracks,
         title =
             when (selectedTabIndex) {
@@ -89,9 +89,10 @@ fun TabContent1(
               2 -> stringResource(R.string.banned_tracks)
               else -> stringResource(R.string.recently_added_tracks)
             },
-        onAddTrack = {},
+        onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
         onSelectTrack = viewModel::playTrack,
-        navActions = navActions,
-        viewModelName = viewModelType.TRACKLIST)
+        // TODO: make more generic, not only for banned tracks
+        onRemoveTrack = viewModel::removeTrackFromBanList,
+    )
   }
 }
