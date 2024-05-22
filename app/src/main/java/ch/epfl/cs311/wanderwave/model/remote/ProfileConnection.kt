@@ -120,7 +120,7 @@ class ProfileConnection(
   }
 
   fun castToListOfReferences(obj: Any?): List<DocumentReference> {
-    return if(obj is List<*> && obj.all { it is DocumentReference }) {
+    return if (obj is List<*> && obj.all { it is DocumentReference }) {
       obj as List<DocumentReference>
     } else {
       emptyList()
