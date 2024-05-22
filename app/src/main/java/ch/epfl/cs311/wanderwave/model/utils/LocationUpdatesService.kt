@@ -19,88 +19,95 @@ import com.google.android.gms.location.*
 
 class LocationUpdatesService(private val testContext: Context? = null) : Service() {
 
-  companion object {
-    const val ACTION_LOCATION_BROADCAST = "ch.epfl.cs311.wanderwave.LOCATION_BROADCAST"
-    const val EXTRA_LATITUDE = "ch.epfl.cs311.wanderwave.LATITUDE"
-    const val EXTRA_LONGITUDE = "ch.epfl.cs311.wanderwave.LONGITUDE"
-  }
+    companion object {
+        const val ACTION_LOCATION_BROADCAST = "ch.epfl.cs311.wanderwave.LOCATION_BROADCAST"
+        const val EXTRA_LATITUDE = "ch.epfl.cs311.wanderwave.LATITUDE"
+        const val EXTRA_LONGITUDE = "ch.epfl.cs311.wanderwave.LONGITUDE"
+    }
 
-  private lateinit var fusedLocationClient: FusedLocationProviderClient
-  private lateinit var locationCallback: LocationCallback
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationCallback: LocationCallback
 
-  val context = testContext ?: this
+    val context = testContext ?: this
 
-  override fun onCreate() {
-    super.onCreate()
-    fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-    locationCallback =
-        object : LocationCallback() {
-          override fun onLocationResult(locationResult: LocationResult) {
-            val location = locationResult.lastLocation
-            if (location != null) {
-              sendLocationBroadcast(location.latitude, location.longitude)
+    override fun onCreate() {
+        super.onCreate()
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+        locationCallback =
+            object : LocationCallback() {
+                override fun onLocationResult(locationResult: LocationResult) {
+                    val location = locationResult.lastLocation
+                    if (location != null) {
+                        sendLocationBroadcast(location.latitude, location.longitude)
+                    }
+                }
             }
-          }
-        }
 
-    val locationRequest =
-        LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 600000)
-            .setMinUpdateIntervalMillis(30000)
-            .build()
+        val locationRequest =
+            LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 600000)
+                .setMinUpdateIntervalMillis(30000)
+                .build()
 
-    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
-        PackageManager.PERMISSION_GRANTED &&
-        ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
             PackageManager.PERMISSION_GRANTED) {
-      fusedLocationClient.requestLocationUpdates(
-          locationRequest, locationCallback, Looper.getMainLooper())
-    }
-
-    startForegroundService()
-  }
-
-  fun sendLocationBroadcast(latitude: Double, longitude: Double) {
-    val intent =
-        Intent(ACTION_LOCATION_BROADCAST).apply {
-          putExtra(EXTRA_LATITUDE, latitude)
-          putExtra(EXTRA_LONGITUDE, longitude)
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest, locationCallback, Looper.getMainLooper())
         }
-    LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
-  }
 
-  fun startForegroundService() {
-    if (context == testContext) return
-
-    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-
-      val channel =
-          NotificationChannel(
-              "location_updates_channel",
-              "Location Updates",
-              NotificationManager.IMPORTANCE_DEFAULT)
-      notificationManager.createNotificationChannel(channel)
+        startForegroundService()
     }
 
-    val notificationIntent = Intent(this, MainActivity::class.java)
-    val pendingIntent =
-        PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+    fun sendLocationBroadcast(latitude: Double, longitude: Double) {
+        val intent =
+            Intent(ACTION_LOCATION_BROADCAST).apply {
+                putExtra(EXTRA_LATITUDE, latitude)
+                putExtra(EXTRA_LONGITUDE, longitude)
+            }
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+    }
 
-    val notification: Notification =
-        NotificationCompat.Builder(this, "location_updates_channel")
-            .setContentIntent(pendingIntent)
-            .build()
+    fun startForegroundService() {
+        if (context == testContext) return
 
-    startForeground(1, notification)
-  }
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-  override fun onBind(intent: Intent?): IBinder? {
-    return null
-  }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
 
-  override fun onDestroy() {
-    super.onDestroy()
-    fusedLocationClient.removeLocationUpdates(locationCallback)
-  }
+            val channel =
+                NotificationChannel(
+                    "location_updates_channel",
+                    "Location Updates",
+                    NotificationManager.IMPORTANCE_DEFAULT)
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent =
+            PendingIntent.getActivity(
+                this,
+                0,
+                notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+        val notification: Notification =
+            NotificationCompat.Builder(this, "location_updates_channel")
+                .setContentIntent(pendingIntent)
+                .setContentTitle("Location Service")
+                .setContentText("Location service is running")
+                .build()
+
+        startForeground(1, notification)
+    }
+
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        fusedLocationClient.removeLocationUpdates(locationCallback)
+    }
 }
