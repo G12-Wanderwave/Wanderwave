@@ -1,6 +1,8 @@
 import android.util.Log
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationUserData
 import ch.epfl.cs311.wanderwave.model.data.ListType
+import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.TrackRecord
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
@@ -85,6 +87,15 @@ class TrackListViewModelTest {
         )
 
     every { repository.getAll() } returns flowOf(trackList)
+
+    every { mockAuthenticationController.isSignedIn() } returns true
+    every { mockAuthenticationController.getUserData() } returns
+        AuthenticationUserData("uid", "email", "name", "http://photoUrl/img.jpg")
+
+    val bannedSongs = listOf(track5)
+    val mockProfile = mockk<Profile>()
+    every { mockProfileRepository.getItem(any()) } returns flowOf(Result.success(mockProfile))
+    every { mockProfile.bannedSongs } returns bannedSongs
 
     viewModel =
         TrackListViewModel(
@@ -207,5 +218,10 @@ class TrackListViewModelTest {
 
     // Act
     viewModel.emptyChildrenList()
+  }
+
+  @Test
+  fun bannedTracksAreInUiState() = runBlocking {
+    assertTrue(viewModel.uiState.value.bannedTracks.size == 1)
   }
 }
