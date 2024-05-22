@@ -59,7 +59,7 @@ fun TrackListScreen(
 }
 /**
  * This function is responsible for displaying the content of the tabs in the TrackListScreen.
- * 
+ *
  * @param navActions: NavigationActions
  * @param viewModel: TrackListViewModel
  * @param selectedTabIndex: Int
