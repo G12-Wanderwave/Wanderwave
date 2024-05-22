@@ -77,53 +77,49 @@ class BeaconConnection(
         if (!document.exists()) {
           trySend(Result.failure(Exception("Document does not exist")))
         } else {
-          val beacon: Beacon? = item ?: Beacon.from(document)
+          val beacon: Beacon = item ?: Beacon.from(document)!!
 
-          beacon!!.let { beacon ->
-            val tracksObject = document["tracks"]
+          val tracksObject = document["tracks"]
 
-            if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
-              val profileAndTrackRefs = tracksObject as? List<Map<String, DocumentReference>>
+          if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
+            val profileAndTrackRefs = tracksObject as? List<Map<String, Any>>
 
-              coroutineScope.launch {
-                val profileAndTracks =
-                    profileAndTrackRefs
-                        // Fetch the profile and track from the references
-                        ?.mapNotNull { profileAndTrackRef ->
-                          trackConnection.fetchProfileAndTrack(profileAndTrackRef)
+            coroutineScope.launch {
+              val profileAndTracks =
+                  profileAndTrackRefs
+                      // Fetch the profile and track from the references
+                      ?.mapNotNull { profileAndTrackRef ->
+                        trackConnection.fetchProfileAndTrack(profileAndTrackRef)
+                      }
+                      // map the list of flow of Result<ProfileTrackAssociation> to a flow of
+                      // Result<List<ProfileTrackAssociation>>
+                      ?.mapNotNull { flow -> flow.mapNotNull { result -> result.getOrNull() } }
+                      // reduce the list of flow to a single flow that contains the list of
+                      // ProfileTrackAssociation
+                      ?.fold(flowOf(Result.success(listOf<ProfileTrackAssociation>()))) { acc, track
+                        ->
+                        acc.combine(track) { accTracks, track ->
+                          accTracks.map { tracks -> tracks + track }
                         }
-                        // map the list of flow of Result<ProfileTrackAssociation> to a flow of
-                        // Result<List<ProfileTrackAssociation>>
-                        ?.mapNotNull { flow -> flow.mapNotNull { result -> result.getOrNull() } }
-                        // reduce the list of flow to a single flow that contains the list of
-                        // ProfileTrackAssociation
-                        ?.fold(flowOf(Result.success(listOf<ProfileTrackAssociation>()))) {
-                            acc,
-                            track ->
-                          acc.combine(track) { accTracks, track ->
-                            accTracks.map { tracks -> tracks + track }
-                          }
-                        } ?: flowOf(Result.failure(Exception("Could not retrieve chosenSongs")))
+                      } ?: flowOf(Result.failure(Exception("Could not retrieve chosenSongs")))
 
-                // Update the beacon with the profile and track
-                profileAndTracks.collect { result ->
-                  result.onSuccess { profileAndTracks ->
-                    val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks)
-                    trySend(Result.success(updatedBeacon))
-                  }
-                  result.onFailure { exception ->
-                    trySend(Result.success(beacon))
-                    Log.e("Firestore", "Error getting profile and track: ", exception)
-                  }
+              // Update the beacon with the profile and track
+              profileAndTracks.collect { result ->
+                result.onSuccess { profileAndTracks ->
+                  val updatedBeacon = beacon.copy(profileAndTrack = profileAndTracks)
+                  trySend(Result.success(updatedBeacon))
+                }
+                result.onFailure { exception ->
+                  trySend(Result.success(beacon))
+                  Log.e("Firestore", "Error getting profile and track: ", exception)
                 }
               }
-            } else {
-              trySend(Result.success(beacon))
-              Log.e("Firestore", "Tracks are not in the correct format ")
             }
+          } else {
+            trySend(Result.success(beacon))
+            Log.e("Firestore", "Tracks are not in the correct format ")
           }
         }
-
         awaitClose {}
       }
 
@@ -144,21 +140,7 @@ class BeaconConnection(
     return dataFlow.filterNotNull()
   }
 
-  override fun itemToMap(beacon: Beacon): Map<String, Any> {
-    val beaconMap: HashMap<String, Any> =
-        hashMapOf(
-            "id" to beacon.id,
-            "location" to beacon.location.toMap(),
-            "tracks" to
-                beacon.profileAndTrack.map { profileAndTrack ->
-                  hashMapOf(
-                      "creator" to
-                          db.collection("users")
-                              .document(profileAndTrack.profile?.firebaseUid ?: ""),
-                      "track" to db.collection("tracks").document(profileAndTrack.track.id))
-                })
-    return beaconMap
-  }
+  override fun itemToMap(beacon: Beacon): Map<String, Any> = beacon.toMap(db)
 
   override fun addTrackToBeacon(
       beaconId: String,
@@ -166,7 +148,8 @@ class BeaconConnection(
       profileUid: String,
       onComplete: (Boolean) -> Unit
   ) {
-    val beaconRef = db.collection("beacons").document(beaconId)
+    val beaconRef = db.collection(collectionName).document(beaconId)
+    val profileRef = db.collection(profileConnection.collectionName).document(profileUid)
     db.runTransaction { transaction ->
           val snapshot: DocumentSnapshot = transaction[beaconRef]
           val beacon = Beacon.from(snapshot)
@@ -175,42 +158,29 @@ class BeaconConnection(
               tracks.mapNotNull {
                 val creatorRef = it["creator"]
                 val trackRef = it["track"]
+                val numberOfLikes = it["numberOfLikes"] as? Int ?: 0
 
                 val creator = creatorRef?.let { Profile.from(transaction[it]) }
                 val track = trackRef?.let { Track.from(transaction[it]) }
 
-                track?.let { ProfileTrackAssociation(creator, it) }
+                track?.let { ProfileTrackAssociation(creator, it, numberOfLikes) }
               }
 
-          beacon?.let {
+          beacon?.let { beaconNotNull ->
             val newTracks =
-                ArrayList(associations).apply {
-                  add(
-                      ProfileTrackAssociation(
-                          Profile(
-                              "Sample First Name",
-                              "Sample last name",
-                              "Sample desc",
-                              0,
-                              false,
-                              null,
-                              "sample spotify uid",
-                              profileUid),
-                          track))
-                }
-            transaction.update(
-                beaconRef,
-                "tracks",
-                newTracks.map { profileAndTrack ->
-                  if (profileAndTrack.profile == null) {
-                    hashMapOf("track" to db.collection("tracks").document(profileAndTrack.track.id))
-                  } else {
-                    hashMapOf(
-                        "creator" to
-                            db.collection("users").document(profileAndTrack.profile.firebaseUid),
-                        "track" to db.collection("tracks").document(profileAndTrack.track.id))
-                  }
-                })
+                associations
+                    .map { it.toMap(db) }
+                    .toMutableList()
+                    .apply {
+                      val trackRef =
+                          db.collection(trackConnection.collectionName).document(track.id)
+                      add(
+                          hashMapOf(
+                              "profile" to profileRef, "track" to trackRef, "numberOfLikes" to 0))
+                    }
+
+            transaction.update(beaconRef, "tracks", newTracks)
+
             // After updating Firestore, save the track addition locally
             coroutineScope.launch {
               appDatabase
@@ -221,7 +191,7 @@ class BeaconConnection(
                           trackId = track.id,
                           timestamp = System.currentTimeMillis()))
             }
-          }
+          } ?: Log.e("Firestore", "Error getting profile")
         }
         .addOnSuccessListener { onComplete(true) }
         .addOnFailureListener { onComplete(false) }

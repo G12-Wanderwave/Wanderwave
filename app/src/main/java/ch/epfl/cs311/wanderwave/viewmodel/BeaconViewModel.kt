@@ -86,7 +86,8 @@ constructor(
         }
 
         fetchedBeacon.onFailure { exception ->
-          _uiState.value = UIState(error = exception.message, isLoading = false)
+          _uiState.value = UIState(error = exception.message, isLoading = false, beacon = null)
+          Log.e("BeaconViewModel", "Failed to get beacon by id: $id", exception)
         }
       }
     }
