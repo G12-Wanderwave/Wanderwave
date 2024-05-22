@@ -55,7 +55,8 @@ fun TrackListScreen(
     }
 
     TrackList(
-        tracks = uiState.tracks,
+        tracks =
+            uiState.tracks.filter { track -> uiState.bannedTracks.any { it.id == track.id }.not() },
         title =
             if (uiState.showRecentlyAdded) stringResource(R.string.recently_added_tracks)
             else stringResource(R.string.recently_viewed_tracks),

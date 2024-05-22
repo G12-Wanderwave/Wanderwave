@@ -5,9 +5,11 @@ import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
@@ -31,7 +33,9 @@ class TrackListViewModel
 constructor(
     private val spotifyController: SpotifyController,
     private val appDatabase: AppDatabase,
-    private val repository: TrackRepository
+    private val repository: TrackRepository,
+    private val profileRepository: ProfileRepository,
+    private val authenticationController: AuthenticationController
 ) : ViewModel(), SpotifySongsActions {
 
   private val _uiState = MutableStateFlow(UiState(loading = true))
@@ -85,6 +89,7 @@ constructor(
 
   init {
     observeTracks()
+    observeBannedTracks()
   }
 
   private fun observeTracks() {
@@ -97,6 +102,17 @@ constructor(
                 progress = spotifyController.trackProgress)
       }
       // deal with the flow
+    }
+  }
+
+  private fun observeBannedTracks() {
+    viewModelScope.launch {
+      val profileId = authenticationController.getUserData()!!.id
+      profileRepository.getItem(profileId).collect { fetchedProfile ->
+        fetchedProfile.onSuccess { profile ->
+          _uiState.value = uiState.value.copy(bannedTracks = profile.bannedSongs)
+        }
+      }
     }
   }
 
@@ -185,6 +201,7 @@ constructor(
 
   data class UiState(
       val tracks: List<Track> = listOf(),
+      val bannedTracks: List<Track> = emptyList(),
       val loading: Boolean = false,
       val expanded: Boolean = false,
       val progress: MutableFloatState = mutableFloatStateOf(0f),
