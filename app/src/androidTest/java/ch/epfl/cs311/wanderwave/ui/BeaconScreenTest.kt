@@ -11,12 +11,14 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.screens.BeaconScreen
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.kakaocup.compose.node.element.ComposeScreen
 import io.mockk.coEvery
@@ -44,6 +46,8 @@ class BeaconScreenTest {
   @RelaxedMockK private lateinit var mockNavController: NavHostController
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
   @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
+  @RelaxedMockK private lateinit var profileViewModel: ProfileViewModel
+  @RelaxedMockK private lateinit var profileRepository: ProfileRepository
 
   @Before
   fun setup() {
@@ -84,7 +88,12 @@ class BeaconScreenTest {
         BeaconViewModel(
             trackRepository, beaconConnection, mockSpotifyController, mockAuthenticationController)
 
-    composeTestRule.setContent { BeaconScreen(beaconId, mockNavigationActions, viewModel) }
+    val profileViewModel =
+        ProfileViewModel(profileRepository, mockSpotifyController, mockAuthenticationController)
+
+    composeTestRule.setContent {
+      BeaconScreen(beaconId, profileViewModel, mockNavigationActions, viewModel)
+    }
 
     every { mockNavController.navigate(any<String>()) } returns Unit
     mockNavigationActions = NavigationActions(mockNavController)

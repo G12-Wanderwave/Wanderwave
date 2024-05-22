@@ -113,7 +113,9 @@ fun TrackListItemWithProfile(
     Row(
         verticalAlignment = Alignment.CenterVertically,
     ) {
-      val isLiked = remember { mutableStateOf(trackAndProfile.isLiked(profileViewModel.profile.value)) }
+      val isLiked = remember {
+        mutableStateOf(trackAndProfile.isLiked(profileViewModel.profile.value))
+      }
       LikeButton(
           isLiked = isLiked,
           onLike = {

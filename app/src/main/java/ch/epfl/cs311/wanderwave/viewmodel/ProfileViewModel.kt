@@ -233,13 +233,13 @@ constructor(
   }
 
   fun likeTrack(track: Track) {
-    //Check if song is already liked
-    if(!wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value += track
+    // Check if song is already liked
+    if (!wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value += track
   }
 
   fun unlikeTrack(track: Track) {
-    //Check if song was not liked
-    if(wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value -= track
+    // Check if song was not liked
+    if (wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value -= track
   }
 
   data class UIState(
