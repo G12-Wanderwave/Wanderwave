@@ -42,12 +42,14 @@ public class ProfileConnectionTest {
   @RelaxedMockK private lateinit var querySnapshot: QuerySnapshot
 
   lateinit var testDispatcher: CoroutineDispatcher
+
   @Before
   fun setup() {
     MockKAnnotations.init(this)
     testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
     val trackConnection = TrackConnection(firebaseFirestore, testDispatcher)
-    profileConnection = ProfileConnection(firebaseFirestore, testDispatcher, trackConnection = trackConnection)
+    profileConnection =
+        ProfileConnection(firebaseFirestore, testDispatcher, trackConnection = trackConnection)
   }
 
   @Test
@@ -133,7 +135,8 @@ public class ProfileConnectionTest {
             firebaseUid = "firebase123")
 
     val trackConnection = mockk<TrackConnection>(relaxed = true)
-    val profileConnection = ProfileConnection(firebaseFirestore, testDispatcher, trackConnection = trackConnection)
+    val profileConnection =
+        ProfileConnection(firebaseFirestore, testDispatcher, trackConnection = trackConnection)
 
     profileConnection.addItem(profile)
 
@@ -155,7 +158,8 @@ public class ProfileConnectionTest {
             firebaseUid = "firebase123")
 
     val trackConnection = mockk<TrackConnection>(relaxed = true)
-    val profileConnection = ProfileConnection(firebaseFirestore, testDispatcher, trackConnection = trackConnection)
+    val profileConnection =
+        ProfileConnection(firebaseFirestore, testDispatcher, trackConnection = trackConnection)
 
     profileConnection.addItemWithId(profile)
 

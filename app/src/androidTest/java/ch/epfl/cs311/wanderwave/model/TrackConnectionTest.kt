@@ -42,6 +42,7 @@ class TrackConnectionTest {
   lateinit var track: Track
 
   lateinit var testDispatcher: CoroutineDispatcher
+
   @Before
   fun setup() {
     // Create the mocks
