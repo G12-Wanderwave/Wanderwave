@@ -20,9 +20,12 @@ import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
@@ -38,6 +41,7 @@ class TrackConnectionTest {
 
   lateinit var track: Track
 
+  lateinit var testDispatcher: CoroutineDispatcher
   @Before
   fun setup() {
     // Create the mocks
@@ -53,7 +57,8 @@ class TrackConnectionTest {
     every { firestore.collection(any()) } returns collectionReference
 
     // Pass the mock Firestore instance to your TrackConnection
-    trackConnection = TrackConnection(firestore)
+    testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
+    trackConnection = TrackConnection(firestore, testDispatcher)
   }
 
   @Test

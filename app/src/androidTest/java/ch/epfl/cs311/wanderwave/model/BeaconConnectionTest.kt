@@ -93,7 +93,7 @@ public class BeaconConnectionTest {
     // Pass the mock Firestore instance to your BeaconConnection
     val testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
     beaconConnection =
-        BeaconConnection(firestore, trackConnection, profileConnection, appDatabase, testDispatcher)
+        BeaconConnection(firestore, testDispatcher, trackConnection, profileConnection, appDatabase)
   }
 
   @Test
