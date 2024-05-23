@@ -320,10 +320,10 @@ public class ProfileConnectionTest {
     assertEquals(expectedProfile.likedSongs, combinedProfile.likedSongs)
     assertEquals(expectedProfile, combinedProfile)
 
-    val topSongsFlowNull = flowOf(Result.failure<List<Track>>(Exception("Error")))
-    val chosenSongsFlowNull = flowOf(Result.failure<List<Track>>(Exception("Error")))
-    val bannedSongsFlowNull = flowOf(Result.failure<List<Track>>(Exception("Error")))
-    val likedSongsFlowNull = flowOf(Result.failure<List<Track>>(Exception("Error")))
+    val topSongsFlowNull = flowOf<Result<List<Track>>?>(null)
+    val chosenSongsFlowNull = flowOf<Result<List<Track>>?>(null)
+    val bannedSongsFlowNull = flowOf<Result<List<Track>>?>(null)
+    val likedSongsFlowNull = flowOf<Result<List<Track>>?>(null)
 
     val combinedProfileFlowNull =
         combine(topSongsFlowNull, chosenSongsFlowNull, bannedSongsFlowNull, likedSongsFlowNull) {
@@ -332,10 +332,10 @@ public class ProfileConnectionTest {
             bannedSongsResult,
             likedSongsResult ->
           initialProfile.copy(
-              topSongs = topSongsResult.getOrNull() ?: initialProfile.topSongs,
-              chosenSongs = chosenSongsResult.getOrNull() ?: initialProfile.chosenSongs,
-              bannedSongs = bannedSongsResult.getOrNull() ?: initialProfile.bannedSongs,
-              likedSongs = likedSongsResult.getOrNull() ?: initialProfile.likedSongs)
+              topSongs = topSongsResult?.getOrNull() ?: initialProfile.topSongs,
+              chosenSongs = chosenSongsResult?.getOrNull() ?: initialProfile.chosenSongs,
+              bannedSongs = bannedSongsResult?.getOrNull() ?: initialProfile.bannedSongs,
+              likedSongs = likedSongsResult?.getOrNull() ?: initialProfile.likedSongs)
         }
 
     val combinedProfileNull = combinedProfileFlowNull.first()
@@ -347,9 +347,9 @@ public class ProfileConnectionTest {
     assertEquals(initialProfile, combinedProfileNull)
 
     val topSongsFlowMixed = flowOf(Result.success(listOf(track1, track2)))
-    val chosenSongsFlowMixed = flowOf(Result.failure<List<Track>>(Exception("Error")))
+    val chosenSongsFlowMixed = flowOf<Result<List<Track>>?>(null)
     val bannedSongsFlowMixed = flowOf(Result.success(listOf(track1, track2)))
-    val likedSongsFlowMixed = flowOf(Result.failure<List<Track>>(Exception("Error")))
+    val likedSongsFlowMixed = flowOf<Result<List<Track>>?>(null)
 
     val combinedProfileFlowMixed =
         combine(
@@ -359,10 +359,10 @@ public class ProfileConnectionTest {
                 bannedSongsResult,
                 likedSongsResult ->
               initialProfile.copy(
-                  topSongs = topSongsResult.getOrNull() ?: initialProfile.topSongs,
-                  chosenSongs = chosenSongsResult.getOrNull() ?: initialProfile.chosenSongs,
-                  bannedSongs = bannedSongsResult.getOrNull() ?: initialProfile.bannedSongs,
-                  likedSongs = likedSongsResult.getOrNull() ?: initialProfile.likedSongs)
+                  topSongs = topSongsResult?.getOrNull() ?: initialProfile.topSongs,
+                  chosenSongs = chosenSongsResult?.getOrNull() ?: initialProfile.chosenSongs,
+                  bannedSongs = bannedSongsResult?.getOrNull() ?: initialProfile.bannedSongs,
+                  likedSongs = likedSongsResult?.getOrNull() ?: initialProfile.likedSongs)
             }
 
     val combinedProfileMixed = combinedProfileFlowMixed.first()
