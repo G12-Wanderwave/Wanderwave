@@ -1,5 +1,8 @@
 package ch.epfl.cs311.wanderwave.model.data
 
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
+
 /**
  * This class represents the association between a profile and a track.
  *
@@ -16,8 +19,12 @@ data class ProfileTrackAssociation(
     val likes: Int = 0
 ) {
 
-  fun toMap(): Map<String, Any?> {
-    return hashMapOf("profile" to profile?.toMap(), "track" to track.toMap())
+  fun toMap(db: FirebaseFirestore): Map<String, Any?> {
+    return hashMapOf(
+        "creator" to profile?.firebaseUid?.let { db.collection("users").document(it) },
+        "track" to db.collection("tracks").document(track.id),
+        "likersId" to likersId,
+        "likes" to likes)
   }
 
   fun isLiked(profile: Profile): Boolean {
@@ -38,5 +45,24 @@ data class ProfileTrackAssociation(
       return ProfileTrackAssociation(profile, track, likersId - profile.firebaseUid, likes - 1)
     }
     return this
+  }
+
+  companion object {
+    fun from(
+        mainDocumentSnapshot: Map<String, Any>,
+        profileDocumentSnapshot: DocumentSnapshot?,
+        trackDocumentSnapshot: DocumentSnapshot
+    ): ProfileTrackAssociation? {
+      return if (trackDocumentSnapshot.exists()) {
+        val profile: Profile? = profileDocumentSnapshot?.let { Profile.from(it) }
+        val track: Track? = Track.from(trackDocumentSnapshot)
+        val likersId = mainDocumentSnapshot["likersId"] as? List<String> ?: emptyList()
+        val likes = (mainDocumentSnapshot["likes"] as? Long)?.toInt() ?: 0
+
+        track?.let { track: Track -> ProfileTrackAssociation(profile, track, likersId, likes) }
+      } else {
+        null
+      }
+    }
   }
 }

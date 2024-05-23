@@ -11,6 +11,7 @@ import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -170,7 +171,8 @@ class DataClassesTest {
             "chosenSongs" to listOf<DocumentReference>(),
             "topSongs" to listOf<DocumentReference>())
 
-    assertEquals(expectedMap, profile.toMap())
+    val mockFirebaseFirestore = mockk<FirebaseFirestore>()
+    assertEquals(expectedMap, profile.toMap(mockFirebaseFirestore))
   }
 
   @Test
@@ -231,21 +233,31 @@ class DataClassesTest {
 
     val profileTrackAssociation = ProfileTrackAssociation(profile, track)
 
+    val mockFirebaseFirestore = mockk<FirebaseFirestore>()
+    val mockDocumentReference = mockk<DocumentReference>()
+
+    every { mockFirebaseFirestore.collection(any()) } returns
+        mockk { every { document(any()) } returns mockDocumentReference }
+
     val expectedMap =
         hashMapOf(
-            "profile" to profile.toMap(),
-            "track" to track.toMap() // Assuming Track has a toMap function
-            )
+            "creator" to
+                profile.firebaseUid.let { mockFirebaseFirestore.collection("users").document(it) },
+            "track" to mockFirebaseFirestore.collection("tracks").document(track.id),
+            "likersId" to emptyList<String>(),
+            "likes" to 0)
 
-    assertEquals(expectedMap, profileTrackAssociation.toMap())
+    assertEquals(expectedMap, profileTrackAssociation.toMap(mockFirebaseFirestore))
 
     // test if the profile is null
     val profileTrackAssociation2 = ProfileTrackAssociation(null, track)
     val expectedMap2 =
         hashMapOf(
-            "profile" to null, "track" to track.toMap() // Assuming Track has a toMap function
-            )
-    assertEquals(expectedMap2, profileTrackAssociation2.toMap())
+            "creator" to null,
+            "track" to mockFirebaseFirestore.collection("tracks").document(track.id),
+            "likersId" to emptyList<String>(),
+            "likes" to 0)
+    assertEquals(expectedMap2, profileTrackAssociation2.toMap(mockFirebaseFirestore))
   }
 
   @Test
