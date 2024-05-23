@@ -258,8 +258,8 @@ class DataClassesTest {
     val likedAssociation = association.likeTrack(mockProfile)
 
     assertEquals(1, likedAssociation.likes)
-    assertEquals(1, likedAssociation.likers.size)
-    assertEquals(mockProfile, likedAssociation.likers[0])
+    assertEquals(1, likedAssociation.likersId.size)
+    assertEquals(mockProfile.firebaseUid, likedAssociation.likersId[0])
   }
 
   @Test
@@ -273,7 +273,7 @@ class DataClassesTest {
     val unlikedAssociation = likedAssociation.unlikeTrack(mockProfile)
 
     assertEquals(0, unlikedAssociation.likes)
-    assertEquals(0, unlikedAssociation.likers.size)
+    assertEquals(0, unlikedAssociation.likersId.size)
   }
 
   @Test
