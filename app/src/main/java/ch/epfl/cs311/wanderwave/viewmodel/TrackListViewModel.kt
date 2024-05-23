@@ -89,7 +89,6 @@ constructor(
 
   init {
     observeTracks()
-    observeBannedTracks()
   }
 
   private fun observeTracks() {
@@ -105,7 +104,7 @@ constructor(
     }
   }
 
-  private fun observeBannedTracks() {
+  fun updateBannedSongs() {
     viewModelScope.launch {
       val profileId = authenticationController.getUserData()!!.id
       profileRepository.getItem(profileId).collect { fetchedProfile ->

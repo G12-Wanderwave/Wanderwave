@@ -6,9 +6,6 @@ import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.ListType
-import ch.epfl.cs311.wanderwave.model.data.Location
-import ch.epfl.cs311.wanderwave.model.data.Profile
-import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
@@ -57,38 +54,20 @@ constructor(
 
   var beaconId: String = ""
 
-  init {
-    val sampleBeacon =
-        Beacon(
-            id = "Sample ID",
-            location = Location(0.0, 0.0, "Sample Location"),
-            profileAndTrack =
-                listOf(
-                    ProfileTrackAssociation(
-                        Profile(
-                            "Sample First Name",
-                            "Sample last name",
-                            "Sample desc",
-                            0,
-                            false,
-                            null,
-                            "Sample Profile ID",
-                            "Sample Track ID"),
-                        Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
-
-    _uiState.value = UIState(beacon = sampleBeacon, isLoading = false)
-
+  fun getBeaconById(id: String) {
     viewModelScope.launch {
       val profileId = authenticationController.getUserData()!!.id
       profileRepository.getItem(profileId).collect { fetchedProfile ->
         fetchedProfile.onSuccess { profile ->
           _uiState.value = uiState.value.copy(bannedTracks = profile.bannedSongs)
         }
+        fetchedProfile.onFailure { exception ->
+          _uiState.value = uiState.value.copy(error = exception.message, isLoading = false)
+          Log.e("BeaconViewModel", "Failed to get profile by id: $profileId", exception)
+        }
       }
     }
-  }
 
-  fun getBeaconById(id: String) {
     viewModelScope.launch {
       beaconRepository.getItem(id).collect { fetchedBeacon ->
         // the fetched beacon has a result
