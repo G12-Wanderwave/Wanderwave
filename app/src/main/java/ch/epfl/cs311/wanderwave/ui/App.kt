@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -23,9 +24,11 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import ch.epfl.cs311.wanderwave.AppResources
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.AppBottomBar
+import ch.epfl.cs311.wanderwave.ui.components.map.getIcon
 import ch.epfl.cs311.wanderwave.ui.components.player.SurroundWithMiniPlayer
 import ch.epfl.cs311.wanderwave.ui.screens.AboutScreen
 import ch.epfl.cs311.wanderwave.ui.screens.BeaconScreen
@@ -39,8 +42,11 @@ import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException
+import com.google.android.gms.maps.MapsInitializer
 import kotlinx.coroutines.launch
 
 @Composable
@@ -63,6 +69,9 @@ fun AppScaffold(navController: NavHostController) {
   val profileViewModel: ProfileViewModel = hiltViewModel()
   val trackListViewModel = hiltViewModel<TrackListViewModel>()
   val beaconViewModel = hiltViewModel<BeaconViewModel>()
+  val mapViewModel = hiltViewModel<MapViewModel>()
+
+  createIcon()
 
   val scope = rememberCoroutineScope()
   val showSnackbar = { message: String ->
@@ -92,7 +101,7 @@ fun AppScaffold(navController: NavHostController) {
                 composable(Route.TRACK_LIST.routeString) {
                   TrackListScreen(navActions, trackListViewModel)
                 }
-                composable(Route.MAP.routeString) { MapScreen(navActions) }
+                composable(Route.MAP.routeString) { MapScreen(navActions, mapViewModel) }
                 composable(Route.PROFILE.routeString) {
                   ProfileScreen(navActions, profileViewModel)
                 }
@@ -125,4 +134,15 @@ fun AppScaffold(navController: NavHostController) {
               }
         }
       }
+}
+
+@Composable
+private fun createIcon() {
+  val context = LocalContext.current
+  try {
+    MapsInitializer.initialize(context)
+    AppResources.beaconIcon = getIcon(context)
+  } catch (e: GooglePlayServicesNotAvailableException) {
+    e.printStackTrace()
+  }
 }
