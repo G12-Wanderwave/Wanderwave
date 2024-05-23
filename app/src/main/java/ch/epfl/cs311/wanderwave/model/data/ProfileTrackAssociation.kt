@@ -25,18 +25,18 @@ data class ProfileTrackAssociation(
   }
 
   fun likeTrack(profile: Profile): ProfileTrackAssociation {
-    if (likersId.contains(profile.firebaseUid)) return this
-    if (this.profile != null) {
+    if (this.profile != null && !likersId.contains(profile.firebaseUid)) {
       this.profile.numberOfLikes += 1
+      return ProfileTrackAssociation(profile, track, likersId + profile.firebaseUid, likes + 1)
     }
-    return ProfileTrackAssociation(profile, track, likersId + profile.firebaseUid, likes + 1)
+    return this
   }
 
   fun unlikeTrack(profile: Profile): ProfileTrackAssociation {
-    if (!likersId.contains(profile.firebaseUid)) return this
-    if (this.profile != null) {
+    if (this.profile != null && likersId.contains(profile.firebaseUid)) {
       this.profile.numberOfLikes -= 1
+      return ProfileTrackAssociation(profile, track, likersId - profile.firebaseUid, likes - 1)
     }
-    return ProfileTrackAssociation(profile, track, likersId - profile.firebaseUid, likes - 1)
+    return this
   }
 }
