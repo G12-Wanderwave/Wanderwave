@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -41,6 +40,7 @@ import ch.epfl.cs311.wanderwave.ui.components.map.WanderwaveGoogleMap
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackListWithProfiles
 import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
@@ -50,6 +50,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun BeaconScreen(
     beaconId: String?,
+    profileViewModel: ProfileViewModel,
     navigationActions: NavigationActions,
     viewModel: BeaconViewModel = hiltViewModel()
 ) {
@@ -73,6 +74,7 @@ fun BeaconScreen(
           //   BeaconScreen(beacon = uiState.beacon!!, navigationActions = navigationActions)
           BeaconScreen(
               beacon = uiState.beacon!!,
+              profileViewModel,
               viewModel::addTrackToBeacon,
               viewModel::selectTrack,
               navigationActions,
@@ -86,6 +88,7 @@ fun BeaconScreen(
 @Composable
 private fun BeaconScreen(
     beacon: Beacon,
+    profileViewModel: ProfileViewModel,
     addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit = { _, _, _ -> },
     onSelectTrack: (Track) -> Unit = {},
     navigationActions: NavigationActions,
@@ -96,7 +99,7 @@ private fun BeaconScreen(
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
         AddTrack(beacon, navigationActions, viewModel)
-        SongList(beacon, addTrackToBeacon, onSelectTrack, navigationActions)
+        SongList(beacon, profileViewModel, addTrackToBeacon, onSelectTrack, navigationActions)
       }
 }
 
@@ -165,12 +168,14 @@ fun AddTrack(beacon: Beacon, navigationActions: NavigationActions, viewModel: Be
 @Composable
 fun SongList(
     beacon: Beacon,
+    profileViewModel: ProfileViewModel,
     addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit,
     onSelectTrack: (Track) -> Unit,
     navigationActions: NavigationActions
 ) {
   TrackListWithProfiles(
       tracks = beacon.profileAndTrack,
+      profileViewModel,
       title = stringResource(R.string.beaconTracksTitle),
       onAddTrack = { track: Track ->
         addTrackToBeacon(beacon.id, track) { success ->

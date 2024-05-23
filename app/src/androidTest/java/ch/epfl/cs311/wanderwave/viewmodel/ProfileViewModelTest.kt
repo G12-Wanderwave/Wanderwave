@@ -70,14 +70,31 @@ class ProfileViewModelTest {
     clearAllMocks() // Clear all MockK mocks
   }
 
-  //  override fun getTracksFromPlaylist(
-  //    playlistId: String,
-  //    playlist: MutableStateFlow<List<ListItem>>
-  //  ) {
-  //    viewModelScope.launch {
-  //      getTracksFromSpotifyPlaylist(playlistId, playlist, spotifyController, viewModelScope)
-  //    }
-  //  }
+  //
+  // fun likeTrack(track: Track) {
+  //  // Check if song is already liked
+  //  if (!wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value += track
+  // }
+  @Test
+  fun testLikeTrack() = runBlockingTest {
+    val track = Track("id", "title", "artist")
+    assertTrue(viewModel.wanderwaveLikedTracks.value.isEmpty())
+    viewModel.likeTrack(track)
+    assertFalse(viewModel.wanderwaveLikedTracks.value.isEmpty())
+    viewModel.likeTrack(track)
+    assertFalse(viewModel.wanderwaveLikedTracks.value.isEmpty())
+  }
+
+  @Test
+  fun testUnlikeTrack() = runBlockingTest {
+    val track = Track("id", "title", "artist")
+    viewModel.likeTrack(track)
+    assertFalse(viewModel.wanderwaveLikedTracks.value.isEmpty())
+    viewModel.unlikeTrack(track)
+    assertTrue(viewModel.wanderwaveLikedTracks.value.isEmpty())
+    viewModel.unlikeTrack(track)
+    assertTrue(viewModel.wanderwaveLikedTracks.value.isEmpty())
+  }
 
   @Test
   fun testGetTracksFromPlaylist() = runBlockingTest {
