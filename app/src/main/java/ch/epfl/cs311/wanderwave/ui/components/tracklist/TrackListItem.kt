@@ -1,10 +1,12 @@
 package ch.epfl.cs311.wanderwave.ui.components.tracklist
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,14 +16,19 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -33,6 +40,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.wear.compose.material.ExperimentalWearMaterialApi
+import androidx.wear.compose.material.rememberSwipeableState
+import androidx.wear.compose.material.swipeable
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -147,6 +157,50 @@ fun TrackListItemWithProfile(
             imageUri = trackAndProfile.profile.profilePictureUri,
         )
       }
+    }
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalWearMaterialApi::class)
+@Composable
+fun RemovableTrackListItem(
+    track: Track,
+    selected: Boolean,
+    onClick: () -> Unit,
+    onRemove: () -> Unit
+) {
+  val scope = rememberCoroutineScope()
+  val scrollState = rememberScrollState()
+  TrackListItemLaunchedEffect(scope = scope, scrollState = scrollState)
+
+  val swipeState = rememberSwipeableState(0)
+  val swipeDistance = 100f
+
+  Box(
+      contentAlignment = Alignment.CenterEnd,
+  ) {
+    Box(
+        modifier =
+            Modifier.swipeable(
+                    state = swipeState,
+                    anchors = mapOf(-swipeDistance to 1, 0f to 0),
+                    orientation = Orientation.Horizontal,
+                )
+                .offset(x = swipeState.offset.value.dp)) {
+          TrackListItem(track = track, selected = selected, onClick = onClick)
+        }
+    AnimatedVisibility(visible = swipeState.offset.value <= -swipeDistance) {
+      IconButton(
+          onClick = {
+            scope.launch { swipeState.snapTo(0) }
+            onRemove()
+          },
+          modifier = Modifier.padding(8.dp)) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete",
+                tint = MaterialTheme.colorScheme.error)
+          }
     }
   }
 }

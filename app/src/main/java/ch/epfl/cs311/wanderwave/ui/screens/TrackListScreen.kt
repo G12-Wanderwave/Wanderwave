@@ -24,6 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.ui.components.tracklist.RemovableTrackList
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
@@ -88,18 +89,36 @@ fun TabContent1(
                 .padding(16.dp)
                 .testTag("searchBar") // Adding a test tag for the search bar
         )
-    TrackList(
-        tracks = uiState.tracks,
-        title =
-            when (selectedTabIndex) {
-              0 -> stringResource(R.string.recently_added_tracks)
-              1 -> stringResource(R.string.liked_tracks)
-              2 -> stringResource(R.string.banned_tracks)
-              else -> stringResource(R.string.recently_added_tracks)
-            },
-        onAddTrack = {},
-        onSelectTrack = viewModel::playTrack,
-        navActions = navActions,
-        viewModelName = viewModelType.TRACKLIST)
+    when (selectedTabIndex) {
+      0 -> {
+        TrackList(
+            tracks = uiState.tracks,
+            title = stringResource(R.string.recently_added_tracks),
+            onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
+            onSelectTrack = viewModel::playTrack,
+            navActions = navActions,
+            viewModelName = viewModelType.TRACKLIST,
+        )
+      }
+      1 -> {
+        TrackList(
+            tracks = uiState.tracks,
+            title = stringResource(R.string.liked_tracks),
+            onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
+            onSelectTrack = viewModel::playTrack,
+            navActions = navActions,
+            viewModelName = viewModelType.TRACKLIST,
+        )
+      }
+      2 -> {
+        RemovableTrackList(
+            tracks = uiState.tracks,
+            title = stringResource(R.string.banned_tracks),
+            onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
+            onSelectTrack = viewModel::playTrack,
+            onRemoveTrack = viewModel::removeTrackFromBanList,
+        )
+      }
+    }
   }
 }
