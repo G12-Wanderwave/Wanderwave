@@ -18,13 +18,12 @@ data class Profile(
     var chosenSongs: List<Track> = emptyList(),
 ) {
 
-  fun toMap(db: FirebaseFirestore? = null): Map<String, Any> {
+  fun toMap(db: FirebaseFirestore): Map<String, Any> {
     val topSongsReferences: List<DocumentReference> =
-        db?.let { nonNulldb -> topSongs.map { nonNulldb.collection("tracks").document(it.id) } }
-            ?: emptyList()
+        topSongs.map { db.collection("tracks").document(it.id) }
+
     val chosenSongsReferences: List<DocumentReference> =
-        db?.let { nonNulldb -> chosenSongs.map { nonNulldb.collection("tracks").document(it.id) } }
-            ?: emptyList()
+        chosenSongs.map { db.collection("tracks").document(it.id) }
 
     return hashMapOf(
         "firstName" to firstName,

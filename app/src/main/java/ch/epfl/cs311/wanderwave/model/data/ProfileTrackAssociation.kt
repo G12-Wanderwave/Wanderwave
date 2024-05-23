@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.model.data
 
-import android.net.Uri
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -20,17 +19,12 @@ data class ProfileTrackAssociation(
     val likes: Int = 0
 ) {
 
-  fun toMap(db: FirebaseFirestore? = null): Map<String, Any?> {
-    return if (db != null) {
-      hashMapOf(
-        "creator" to profile?.firebaseUid?.let{db.collection("users").document(it)},
+  fun toMap(db: FirebaseFirestore): Map<String, Any?> {
+    return hashMapOf(
+        "creator" to profile?.firebaseUid?.let { db.collection("users").document(it) },
         "track" to db.collection("tracks").document(track.id),
         "likersId" to likersId,
-        "likes" to likes
-      )
-    } else {
-      emptyMap()
-    }
+        "likes" to likes)
   }
 
   fun isLiked(profile: Profile): Boolean {
@@ -54,16 +48,18 @@ data class ProfileTrackAssociation(
   }
 
   companion object {
-    fun from(mainDocumentSnapshot: Map<String, Any>, profileDocumentSnapshot: DocumentSnapshot?, trackDocumentSnapshot: DocumentSnapshot): ProfileTrackAssociation? {
+    fun from(
+        mainDocumentSnapshot: Map<String, Any>,
+        profileDocumentSnapshot: DocumentSnapshot?,
+        trackDocumentSnapshot: DocumentSnapshot
+    ): ProfileTrackAssociation? {
       return if (trackDocumentSnapshot.exists()) {
-        val profile:Profile? = profileDocumentSnapshot?.let { Profile.from(it) }
-        val track:Track? = Track.from(trackDocumentSnapshot)
+        val profile: Profile? = profileDocumentSnapshot?.let { Profile.from(it) }
+        val track: Track? = Track.from(trackDocumentSnapshot)
         val likersId = mainDocumentSnapshot["likersId"] as? List<String> ?: emptyList()
         val likes = (mainDocumentSnapshot["likes"] as? Long)?.toInt() ?: 0
 
-        track?.let { track: Track ->
-          ProfileTrackAssociation(profile, track, likersId, likes)
-        }
+        track?.let { track: Track -> ProfileTrackAssociation(profile, track, likersId, likes) }
       } else {
         null
       }

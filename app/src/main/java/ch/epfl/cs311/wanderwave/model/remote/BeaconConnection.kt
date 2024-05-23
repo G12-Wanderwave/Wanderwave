@@ -149,9 +149,7 @@ class BeaconConnection(
         hashMapOf(
             "id" to beacon.id,
             "location" to beacon.location.toMap(),
-            "tracks" to
-                beacon.profileAndTrack.map { it.toMap(db)
-                })
+            "tracks" to beacon.profileAndTrack.map { it.toMap(db) })
     return beaconMap
   }
 
@@ -171,14 +169,15 @@ class BeaconConnection(
                 val creatorRef = it["creator"] as? DocumentReference
                 val trackRef = it["track"] as? DocumentReference
 
-
                 val creatorSnapshot = creatorRef?.let { transaction[it] }
                 val trackSnapshot = trackRef?.let { transaction[it] }
 
-                trackSnapshot?.let {trackSnapshot ->
-                  ProfileTrackAssociation.from(it, profileDocumentSnapshot = creatorSnapshot, trackDocumentSnapshot = trackSnapshot)
+                trackSnapshot?.let { trackSnapshot ->
+                  ProfileTrackAssociation.from(
+                      it,
+                      profileDocumentSnapshot = creatorSnapshot,
+                      trackDocumentSnapshot = trackSnapshot)
                 } ?: null
-
               }
 
           beacon?.let {
@@ -198,11 +197,7 @@ class BeaconConnection(
                           track,
                       ))
                 }
-            transaction.update(
-                beaconRef,
-                "tracks",
-                newTracks.map { it.toMap(db)}
-                )
+            transaction.update(beaconRef, "tracks", newTracks.map { it.toMap(db) })
             // After updating Firestore, save the track addition locally
             coroutineScope.launch {
               appDatabase
