@@ -107,7 +107,7 @@ class ProfileConnection(
         awaitClose {}
       }
 
-  private fun documentReferencesToFlows(
+  fun documentReferencesToFlows(
       documentReferences: List<DocumentReference>?,
       trackConnection: TrackConnection
   ): Flow<Result<List<Track>>> {
