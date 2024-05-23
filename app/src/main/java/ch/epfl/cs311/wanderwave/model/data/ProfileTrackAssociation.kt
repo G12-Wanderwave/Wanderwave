@@ -1,5 +1,7 @@
 package ch.epfl.cs311.wanderwave.model.data
 
+import com.google.firebase.firestore.FirebaseFirestore
+
 /**
  * This class represents the association between a profile and a track.
  *
@@ -16,8 +18,17 @@ data class ProfileTrackAssociation(
     val likes: Int = 0
 ) {
 
-  fun toMap(): Map<String, Any?> {
-    return hashMapOf("profile" to profile?.toMap(), "track" to track.toMap())
+  fun toMap(db: FirebaseFirestore? = null): Map<String, Any?> {
+    return if (db != null) {
+      hashMapOf(
+        "creator" to profile?.firebaseUid?.let{db.collection("users").document(it)},
+        "track" to db.collection("tracks").document(track.id),
+        "likersId" to likersId,
+        "likes" to likes
+      )
+    } else {
+      emptyMap()
+    }
   }
 
   fun isLiked(profile: Profile): Boolean {

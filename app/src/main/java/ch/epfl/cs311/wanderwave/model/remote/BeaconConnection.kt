@@ -150,12 +150,7 @@ class BeaconConnection(
             "id" to beacon.id,
             "location" to beacon.location.toMap(),
             "tracks" to
-                beacon.profileAndTrack.map { profileAndTrack ->
-                  hashMapOf(
-                      "creator" to
-                          db.collection("users")
-                              .document(profileAndTrack.profile?.firebaseUid ?: ""),
-                      "track" to db.collection("tracks").document(profileAndTrack.track.id))
+                beacon.profileAndTrack.map { it.toMap(db)
                 })
     return beaconMap
   }

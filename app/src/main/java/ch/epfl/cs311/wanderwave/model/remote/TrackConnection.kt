@@ -65,22 +65,22 @@ class TrackConnection(private val database: FirebaseFirestore) :
 
   // Fetch a track from a DocumentReference asynchronously
   fun fetchProfileAndTrack(
-      profileAndTrackRef: Map<String, DocumentReference>?
+      profileAndTrackRef: Map<String, Any>?
   ): Flow<Result<ProfileTrackAssociation>> = callbackFlow {
-    Log.d("Firestore", "Fetching profile and track ${profileAndTrackRef.toString()}")
     if (profileAndTrackRef == null) {
       trySend(Result.failure(Exception("Profile and Track reference is null")))
     } else {
       try {
-        profileAndTrackRef["track"]?.addSnapshotListener { trackDocument, error ->
+        (profileAndTrackRef["track"] as? DocumentReference)?.addSnapshotListener { trackDocument, error ->
           val track = trackDocument?.let { Track.from(it) }
-          profileAndTrackRef["creator"]?.addSnapshotListener { profileDocument, error ->
+          (profileAndTrackRef["creator"] as? DocumentReference)?.addSnapshotListener { profileDocument, error ->
             val profile = profileDocument?.let { Profile.from(it) }
             if (track == null) {
               trySend(
                   Result.failure(Exception("Error fetching the track, firebase format is wrong")))
             } else {
-              trySend(Result.success(ProfileTrackAssociation(profile = profile, track = track)))
+              trySend(Result.success(ProfileTrackAssociation(profile = profile, track = track, likersId = profileAndTrackRef["likersId"] as List<String>, likes = profileAndTrackRef["likes"] as Int))
+              )
             }
           }
         }
