@@ -1,5 +1,7 @@
 package ch.epfl.cs311.wanderwave.model.data
 
+import android.net.Uri
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
 /**
@@ -49,5 +51,22 @@ data class ProfileTrackAssociation(
       return ProfileTrackAssociation(profile, track, likersId - profile.firebaseUid, likes - 1)
     }
     return this
+  }
+
+  companion object {
+    fun from(mainDocumentSnapshot: Map<String, Any>, profileDocumentSnapshot: DocumentSnapshot?, trackDocumentSnapshot: DocumentSnapshot): ProfileTrackAssociation? {
+      return if (trackDocumentSnapshot.exists()) {
+        val profile:Profile? = profileDocumentSnapshot?.let { Profile.from(it) }
+        val track:Track? = Track.from(trackDocumentSnapshot)
+        val likersId = mainDocumentSnapshot["likersId"] as? List<String> ?: emptyList()
+        val likes = (mainDocumentSnapshot["likes"] as? Long)?.toInt() ?: 0
+
+        track?.let { track: Track ->
+          ProfileTrackAssociation(profile, track, likersId, likes)
+        }
+      } else {
+        null
+      }
+    }
   }
 }

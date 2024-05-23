@@ -71,17 +71,16 @@ class TrackConnection(private val database: FirebaseFirestore) :
       trySend(Result.failure(Exception("Profile and Track reference is null")))
     } else {
       try {
-        (profileAndTrackRef["track"] as? DocumentReference)?.addSnapshotListener { trackDocument, error ->
-          val track = trackDocument?.let { Track.from(it) }
-          (profileAndTrackRef["creator"] as? DocumentReference)?.addSnapshotListener { profileDocument, error ->
-            val profile = profileDocument?.let { Profile.from(it) }
-            if (track == null) {
-              trySend(
-                  Result.failure(Exception("Error fetching the track, firebase format is wrong")))
-            } else {
-              trySend(Result.success(ProfileTrackAssociation(profile = profile, track = track, likersId = profileAndTrackRef["likersId"] as List<String>, likes = profileAndTrackRef["likes"] as Int))
-              )
-            }
+        (profileAndTrackRef["track"] as? DocumentReference)?.addSnapshotListener { trackDocument, errorProfile ->
+          (profileAndTrackRef["creator"] as? DocumentReference)?.addSnapshotListener { profileDocument, errorTrack ->
+
+            trackDocument?.let {
+              ProfileTrackAssociation.from(profileAndTrackRef, profileDocumentSnapshot = profileDocument, trackDocumentSnapshot = trackDocument)?.let {
+                trySend(Result.success(it))
+              } ?: trySend(Result.failure(Exception("Error fetching the track, firebase format is wrong")))
+            } ?: trySend(
+              Result.failure(Exception("Error fetching the track, firebase error",errorTrack)))
+
           }
         }
       } catch (e: Exception) {

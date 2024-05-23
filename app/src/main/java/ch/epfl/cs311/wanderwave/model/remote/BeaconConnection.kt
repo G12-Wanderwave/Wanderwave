@@ -83,7 +83,7 @@ class BeaconConnection(
             val tracksObject = document["tracks"]
 
             if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
-              val profileAndTrackRefs = tracksObject as? List<Map<String, DocumentReference>>
+              val profileAndTrackRefs = tracksObject as? List<Map<String, Any>>
 
               coroutineScope.launch {
                 val profileAndTracks =
@@ -165,16 +165,20 @@ class BeaconConnection(
     db.runTransaction { transaction ->
           val snapshot: DocumentSnapshot = transaction[beaconRef]
           val beacon = Beacon.from(snapshot)
-          val tracks = snapshot.get("tracks") as? List<Map<String, DocumentReference>> ?: listOf()
+          val tracks = snapshot.get("tracks") as? List<Map<String, Any>> ?: listOf()
           val associations =
               tracks.mapNotNull {
-                val creatorRef = it["creator"]
-                val trackRef = it["track"]
+                val creatorRef = it["creator"] as? DocumentReference
+                val trackRef = it["track"] as? DocumentReference
 
-                val creator = creatorRef?.let { Profile.from(transaction[it]) }
-                val track = trackRef?.let { Track.from(transaction[it]) }
 
-                track?.let { ProfileTrackAssociation(creator, it) }
+                val creatorSnapshot = creatorRef?.let { transaction[it] }
+                val trackSnapshot = trackRef?.let { transaction[it] }
+
+                trackSnapshot?.let {trackSnapshot ->
+                  ProfileTrackAssociation.from(it, profileDocumentSnapshot = creatorSnapshot, trackDocumentSnapshot = trackSnapshot)
+                } ?: null
+
               }
 
           beacon?.let {
@@ -197,16 +201,8 @@ class BeaconConnection(
             transaction.update(
                 beaconRef,
                 "tracks",
-                newTracks.map { profileAndTrack ->
-                  if (profileAndTrack.profile == null) {
-                    hashMapOf("track" to db.collection("tracks").document(profileAndTrack.track.id))
-                  } else {
-                    hashMapOf(
-                        "creator" to
-                            db.collection("users").document(profileAndTrack.profile.firebaseUid),
-                        "track" to db.collection("tracks").document(profileAndTrack.track.id))
-                  }
-                })
+                newTracks.map { it.toMap(db)}
+                )
             // After updating Firestore, save the track addition locally
             coroutineScope.launch {
               appDatabase
