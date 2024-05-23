@@ -12,7 +12,7 @@ package ch.epfl.cs311.wanderwave.model.data
 data class ProfileTrackAssociation(
     val profile: Profile? = null,
     val track: Track,
-    val likers: List<Profile> = emptyList(),
+    val likersId: List<String> = emptyList(),
     val likes: Int = 0
 ) {
 
@@ -21,22 +21,22 @@ data class ProfileTrackAssociation(
   }
 
   fun isLiked(profile: Profile): Boolean {
-    return likers.contains(profile)
+    return likersId.contains(profile.firebaseUid)
   }
 
   fun likeTrack(profile: Profile): ProfileTrackAssociation {
-    if (likers.contains(profile)) return this
+    if (likersId.contains(profile.firebaseUid)) return this
     if (this.profile != null) {
       this.profile.numberOfLikes += 1
     }
-    return ProfileTrackAssociation(profile, track, likers + profile, likes + 1)
+    return ProfileTrackAssociation(profile, track, likersId + profile.firebaseUid, likes + 1)
   }
 
   fun unlikeTrack(profile: Profile): ProfileTrackAssociation {
-    if (!likers.contains(profile)) return this
+    if (!likersId.contains(profile.firebaseUid)) return this
     if (this.profile != null) {
       this.profile.numberOfLikes -= 1
     }
-    return ProfileTrackAssociation(profile, track, likers - profile, likes - 1)
+    return ProfileTrackAssociation(profile, track, likersId - profile.firebaseUid, likes - 1)
   }
 }
