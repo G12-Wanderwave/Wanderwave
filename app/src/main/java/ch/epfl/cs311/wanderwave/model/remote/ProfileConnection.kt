@@ -61,10 +61,12 @@ class ProfileConnection(
         } else {
           val profile: Profile = item ?: Profile.from(document)!!
 
+          val likedSongsObject = document["likedSongs"]
           val topSongsObject = document["topSongs"]
           val chosenSongsObject = document["chosenSongs"]
           val bannedSongsObject = document["bannedSongs"]
 
+          val likedSongRefs = castToListOfReferences(likedSongsObject)
           val topSongRefs = castToListOfReferences(topSongsObject)
           val chosenSongRefs = castToListOfReferences(chosenSongsObject)
           val bannedSongRefs = castToListOfReferences(bannedSongsObject)
@@ -78,15 +80,20 @@ class ProfileConnection(
             val chosenSongs = documentReferencesToFlows(chosenSongRefs, trackConnection)
             val topSongs = documentReferencesToFlows(topSongRefs, trackConnection)
             val bannedSongs = documentReferencesToFlows(bannedSongRefs, trackConnection)
+            val likedSongs = documentReferencesToFlows(likedSongRefs, trackConnection)
 
             val updatedProfile =
                 topSongs
                     .combine(chosenSongs) { topSongs, chosenSongs -> Pair(topSongs, chosenSongs) }
                     .combine(bannedSongs) { pair, bannedSongs ->
+                      Triple(pair.first, pair.second, bannedSongs)
+                    }
+                    .combine(likedSongs) { triple, likedSongs ->
                       profile.copy(
-                          topSongs = pair.first.getOrNull() ?: profile.topSongs,
-                          chosenSongs = pair.second.getOrNull() ?: profile.chosenSongs,
-                          bannedSongs = bannedSongs.getOrNull() ?: profile.bannedSongs)
+                          topSongs = triple.first.getOrNull() ?: profile.topSongs,
+                          chosenSongs = triple.second.getOrNull() ?: profile.chosenSongs,
+                          bannedSongs = triple.third.getOrNull() ?: profile.bannedSongs,
+                          likedSongs = likedSongs.getOrNull() ?: profile.likedSongs)
                     }
 
             // would like to keep the flow without collecting it, but I don't know how to do

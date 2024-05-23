@@ -14,6 +14,7 @@ data class Profile(
     var profilePictureUri: Uri? = null,
     var spotifyUid: String,
     var firebaseUid: String,
+    var likedSongs: List<Track> = emptyList(),
     var topSongs: List<Track> = emptyList(),
     var chosenSongs: List<Track> = emptyList(),
     var bannedSongs: List<Track> = emptyList(),
@@ -26,6 +27,7 @@ data class Profile(
           ?: emptyList()
     }
 
+    val likedSongsReferences: List<DocumentReference> = mapTrackToDocumentReference(likedSongs)
     val topSongsReferences: List<DocumentReference> = mapTrackToDocumentReference(topSongs)
     val chosenSongsReferences: List<DocumentReference> = mapTrackToDocumentReference(chosenSongs)
     val bannedSongsReferences: List<DocumentReference> = mapTrackToDocumentReference(bannedSongs)
@@ -41,9 +43,9 @@ data class Profile(
         "profilePictureUri" to (profilePictureUri?.toString() ?: ""),
         "numberOfLikes" to numberOfLikes,
         "topSongs" to topSongsReferences,
+        "likedSongs" to likedSongsReferences,
         "chosenSongs" to chosenSongsReferences,
-        "bannedSongs" to bannedSongsReferences,
-    )
+        "bannedSongs" to bannedSongsReferences)
   }
 
   companion object {

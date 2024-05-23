@@ -170,6 +170,7 @@ class DataClassesTest {
             "profilePictureUri" to "https://example.com/image.jpg",
             "chosenSongs" to listOf<DocumentReference>(),
             "topSongs" to listOf<DocumentReference>(),
+            "likedSongs" to listOf<DocumentReference>(),
             "bannedSongs" to listOf<DocumentReference>())
 
     assertEquals(expectedMap, profile.toMap())
