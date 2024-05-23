@@ -267,12 +267,13 @@ public class ProfileConnectionTest {
       assert(result.isFailure)
     }
   }
-    @Test
-    fun testCombineFunctionDirectly() = runBlocking {
-        // Mock data
-        val track1 = Track("trackId1", "Track Title 1", "Track Artist 1")
-        val track2 = Track("trackId2", "Track Title 2", "Track Artist 2")
-        val initialProfile = Profile(
+
+  @Test
+  fun testCombineFunctionDirectly() = runBlocking {
+    val track1 = Track("trackId1", "Track Title 1", "Track Artist 1")
+    val track2 = Track("trackId2", "Track Title 2", "Track Artist 2")
+    val initialProfile =
+        Profile(
             "Sample First Name",
             "Sample Last Name",
             "Sample Description",
@@ -284,44 +285,43 @@ public class ProfileConnectionTest {
             listOf(),
             listOf(),
             listOf(),
-            listOf()
-        )
+            listOf())
 
-        // Mock flows
-        val topSongsFlow = flowOf(Result.success(listOf(track1, track2)))
-        val chosenSongsFlow = flowOf(Result.success(listOf(track1, track2)))
-        val bannedSongsFlow = flowOf(Result.success(listOf(track1, track2)))
-        val likedSongsFlow = flowOf(Result.success(listOf(track1, track2)))
+    val topSongsFlow = flowOf(Result.success(listOf(track1, track2)))
+    val chosenSongsFlow = flowOf(Result.success(listOf(track1, track2)))
+    val bannedSongsFlow = flowOf(Result.success(listOf(track1, track2)))
+    val likedSongsFlow = flowOf(Result.success(listOf(track1, track2)))
 
-        // Test the combine block directly
-        val combinedProfileFlow = combine(topSongsFlow, chosenSongsFlow, bannedSongsFlow, likedSongsFlow) { topSongsResult, chosenSongsResult, bannedSongsResult, likedSongsResult ->
-            initialProfile.copy(
-                topSongs = topSongsResult.getOrNull() ?: initialProfile.topSongs,
-                chosenSongs = chosenSongsResult.getOrNull() ?: initialProfile.chosenSongs,
-                bannedSongs = bannedSongsResult.getOrNull() ?: initialProfile.bannedSongs,
-                likedSongs = likedSongsResult.getOrNull() ?: initialProfile.likedSongs
-            )
+    val combinedProfileFlow =
+        combine(topSongsFlow, chosenSongsFlow, bannedSongsFlow, likedSongsFlow) {
+            topSongsResult,
+            chosenSongsResult,
+            bannedSongsResult,
+            likedSongsResult ->
+          initialProfile.copy(
+              topSongs = topSongsResult.getOrNull() ?: initialProfile.topSongs,
+              chosenSongs = chosenSongsResult.getOrNull() ?: initialProfile.chosenSongs,
+              bannedSongs = bannedSongsResult.getOrNull() ?: initialProfile.bannedSongs,
+              likedSongs = likedSongsResult.getOrNull() ?: initialProfile.likedSongs)
         }
 
-        val combinedProfile = combinedProfileFlow.first()
+    val combinedProfile = combinedProfileFlow.first()
 
-        val expectedProfile = initialProfile.copy(
+    val expectedProfile =
+        initialProfile.copy(
             topSongs = listOf(track1, track2),
             chosenSongs = listOf(track1, track2),
             bannedSongs = listOf(track1, track2),
-            likedSongs = listOf(track1, track2)
-        )
+            likedSongs = listOf(track1, track2))
 
-        // Assertions
-        assertEquals(expectedProfile.topSongs, combinedProfile.topSongs)
-        assertEquals(expectedProfile.chosenSongs, combinedProfile.chosenSongs)
-        assertEquals(expectedProfile.bannedSongs, combinedProfile.bannedSongs)
-        assertEquals(expectedProfile.likedSongs, combinedProfile.likedSongs)
-        assertEquals(expectedProfile, combinedProfile)
-    }
+    assertEquals(expectedProfile.topSongs, combinedProfile.topSongs)
+    assertEquals(expectedProfile.chosenSongs, combinedProfile.chosenSongs)
+    assertEquals(expectedProfile.bannedSongs, combinedProfile.bannedSongs)
+    assertEquals(expectedProfile.likedSongs, combinedProfile.likedSongs)
+    assertEquals(expectedProfile, combinedProfile)
+  }
 
-
-    @Test
+  @Test
   fun testDocumentTransformStringTracks() {
     runBlocking {
       val getTestProfile =
