@@ -83,18 +83,17 @@ class ProfileConnection(
             val likedSongs = documentReferencesToFlows(likedSongRefs, trackConnection)
 
             val updatedProfile =
-                topSongs
-                    .combine(chosenSongs) { topSongs, chosenSongs -> Pair(topSongs, chosenSongs) }
-                    .combine(bannedSongs) { pair, bannedSongs ->
-                      Triple(pair.first, pair.second, bannedSongs)
-                    }
-                    .combine(likedSongs) { triple, likedSongs ->
-                      profile.copy(
-                          topSongs = triple.first.getOrNull() ?: profile.topSongs,
-                          chosenSongs = triple.second.getOrNull() ?: profile.chosenSongs,
-                          bannedSongs = triple.third.getOrNull() ?: profile.bannedSongs,
-                          likedSongs = likedSongs.getOrNull() ?: profile.likedSongs)
-                    }
+                combine(topSongs, chosenSongs, bannedSongs, likedSongs) {
+                    topSongs,
+                    chosenSongs,
+                    bannedSongs,
+                    likedSongs ->
+                  profile.copy(
+                      topSongs = topSongs.getOrNull() ?: profile.topSongs,
+                      chosenSongs = chosenSongs.getOrNull() ?: profile.chosenSongs,
+                      bannedSongs = bannedSongs.getOrNull() ?: profile.bannedSongs,
+                      likedSongs = likedSongs.getOrNull() ?: profile.likedSongs)
+                }
 
             // would like to keep the flow without collecting it, but I don't know how to do
             // it...
