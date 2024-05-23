@@ -195,7 +195,7 @@ fun RemovableTrackListItem(
             scope.launch { swipeState.snapTo(0) }
             onRemove()
           },
-          modifier = Modifier) {
+          modifier = Modifier.padding(8.dp)) {
             Icon(
                 imageVector = Icons.Default.Delete,
                 contentDescription = "Delete",
