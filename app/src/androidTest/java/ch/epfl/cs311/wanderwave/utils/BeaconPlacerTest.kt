@@ -10,6 +10,7 @@ import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.utils.computeDistanceBetweenBeacons
+import ch.epfl.cs311.wanderwave.model.utils.findClosestBeacon
 import ch.epfl.cs311.wanderwave.model.utils.findNearbyBeacons
 import ch.epfl.cs311.wanderwave.model.utils.findRandomBeacon
 import ch.epfl.cs311.wanderwave.model.utils.hasEnoughBeacons
@@ -272,6 +273,20 @@ class BeaconPlacerTest : TestCase() {
     val result = findNearbyBeacons(userPosition, beacons)
 
     assertTrue(result.isEmpty())
+  }
+
+  @Test
+  fun findClosestBeaconReturnsClosestBeacon() {
+    val userPosition = Location(46.5196, 6.6323)
+    val beacons =
+        listOf(
+            Beacon("Beacon1", Location(46.5197, 6.6324)),
+            Beacon("Beacon2", Location(46.5198, 6.6325)),
+            Beacon("Beacon3", Location(46.5199, 6.6326)))
+
+    val closestBeacon = findClosestBeacon(userPosition, beacons)
+
+    assertEquals("Beacon1", closestBeacon?.id)
   }
 
   @Test
