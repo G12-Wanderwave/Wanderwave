@@ -92,31 +92,31 @@ fun TabContent1(
     when (selectedTabIndex) {
       0 -> {
         TrackList(
-          tracks = uiState.tracks,
-          title = stringResource(R.string.recently_added_tracks),
-          onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
-          onSelectTrack = viewModel::playTrack,
-          navActions = navActions,
-          viewModelName = viewModelType.TRACKLIST,
+            tracks = uiState.tracks,
+            title = stringResource(R.string.recently_added_tracks),
+            onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
+            onSelectTrack = viewModel::playTrack,
+            navActions = navActions,
+            viewModelName = viewModelType.TRACKLIST,
         )
       }
       1 -> {
         TrackList(
-          tracks = uiState.tracks,
-          title = stringResource(R.string.liked_tracks),
-          onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
-          onSelectTrack = viewModel::playTrack,
-          navActions = navActions,
-          viewModelName = viewModelType.TRACKLIST,
+            tracks = uiState.tracks,
+            title = stringResource(R.string.liked_tracks),
+            onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
+            onSelectTrack = viewModel::playTrack,
+            navActions = navActions,
+            viewModelName = viewModelType.TRACKLIST,
         )
       }
       2 -> {
         RemovableTrackList(
-          tracks = uiState.tracks,
-          title = stringResource(R.string.banned_tracks),
-          onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
-          onSelectTrack = viewModel::playTrack,
-          onRemoveTrack = viewModel::removeTrackFromBanList,
+            tracks = uiState.tracks,
+            title = stringResource(R.string.banned_tracks),
+            onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
+            onSelectTrack = viewModel::playTrack,
+            onRemoveTrack = viewModel::removeTrackFromBanList,
         )
       }
     }

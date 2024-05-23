@@ -190,12 +190,15 @@ class TrackListViewModelTest {
 
   @Test
   fun removeTrackFromBanList() = runTest {
-    val tracks = listOf(
-      Track("spotify:track:1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams"),
-      Track("spotify:track:6ImuyUQYhJKEKFtlrstHCD", "Main Title", "John Williams"),
-      Track("spotify:track:0HLQFjnwq0FHpNVxormx60", "The Nightingale", "Percival Schuttenbach"),
-      Track("spotify:track:2NZhNbfb1rD1aRj3hZaoqk", "The Imperial Suite", "Michael Giacchino"),
-    )
+    val tracks =
+        listOf(
+            Track("spotify:track:1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams"),
+            Track("spotify:track:6ImuyUQYhJKEKFtlrstHCD", "Main Title", "John Williams"),
+            Track(
+                "spotify:track:0HLQFjnwq0FHpNVxormx60", "The Nightingale", "Percival Schuttenbach"),
+            Track(
+                "spotify:track:2NZhNbfb1rD1aRj3hZaoqk", "The Imperial Suite", "Michael Giacchino"),
+        )
     tracks.forEach { viewModel.addTrackToList(ListType.TOP_SONGS, it) }
     tracks.forEach { viewModel.addTrackToList(ListType.LIKED_SONGS, it) }
     tracks.forEach { viewModel.addTrackToList(ListType.BANNED_SONGS, it) }
