@@ -47,7 +47,7 @@ public class ProfileConnectionTest {
     profileConnection = ProfileConnection(firebaseFirestore, trackConnection = trackConnection)
   }
 
-    @Test
+  @Test
   fun testDocumentToItem() {
     // Mock document snapshot data
     val firstName = "John"
@@ -267,69 +267,77 @@ public class ProfileConnectionTest {
       assert(result.isFailure)
     }
   }
-    @Test
-    fun testDocumentTransformCombineFunction() {
-        runBlocking {
-            val track1 = Track("trackId1", "Track Title 1", "Track Artist 1")
-            val track2 = Track("trackId2", "Track Title 2", "Track Artist 2")
 
-            val getTestProfile = Profile(
-                "Sample First Name",
-                "Sample Last Name",
-                "Sample Description",
-                0,
-                false,
-                Uri.parse("https://example.com/image.jpg"),
-                "Sample Profile ID",
-                "Sample Firebase ID",
-                listOf(),
-                listOf(),
-                listOf(),
-                listOf()
-            )
+  @Test
+  fun testDocumentTransformCombineFunction() {
+    // ktfmt
+    runBlocking {
+      val track1 = Track("trackId1", "Track Title 1", "Track Artist 1")
+      val track2 = Track("trackId2", "Track Title 2", "Track Artist 2")
 
-            val mockDocumentSnapshot = mockk<DocumentSnapshot>()
-            every { mockDocumentSnapshot.exists() } returns true
-            every { mockDocumentSnapshot.id } returns getTestProfile.firebaseUid
-            every { mockDocumentSnapshot.getString("firstName") } returns getTestProfile.firstName
-            every { mockDocumentSnapshot.getString("lastName") } returns getTestProfile.lastName
-            every { mockDocumentSnapshot.getString("description") } returns getTestProfile.description
-            every { mockDocumentSnapshot.getLong("numberOfLikes") } returns getTestProfile.numberOfLikes.toLong()
-            every { mockDocumentSnapshot.getBoolean("isPublic") } returns getTestProfile.isPublic
-            every { mockDocumentSnapshot.getString("profilePictureUri") } returns getTestProfile.profilePictureUri.toString()
-            every { mockDocumentSnapshot.getString("spotifyUid") } returns getTestProfile.spotifyUid
-            every { mockDocumentSnapshot.getString("firebaseUid") } returns getTestProfile.firebaseUid
+      val getTestProfile =
+          Profile(
+              "Sample First Name",
+              "Sample Last Name",
+              "Sample Description",
+              0,
+              false,
+              Uri.parse("https://example.com/image.jpg"),
+              "Sample Profile ID",
+              "Sample Firebase ID",
+              listOf(),
+              listOf(),
+              listOf(),
+              listOf())
 
-            val trackDocumentReference1 = mockk<DocumentReference>(relaxed = true)
-            val trackDocumentReference2 = mockk<DocumentReference>(relaxed = true)
-            every { mockDocumentSnapshot.get("topSongs") } returns listOf(trackDocumentReference1, trackDocumentReference2)
-            every { mockDocumentSnapshot.get("chosenSongs") } returns listOf(trackDocumentReference1, trackDocumentReference2)
-            every { mockDocumentSnapshot.get("bannedSongs") } returns listOf(trackDocumentReference1, trackDocumentReference2)
-            every { mockDocumentSnapshot.get("likedSongs") } returns listOf(trackDocumentReference1, trackDocumentReference2)
+      val mockDocumentSnapshot = mockk<DocumentSnapshot>()
+      every { mockDocumentSnapshot.exists() } returns true
+      every { mockDocumentSnapshot.id } returns getTestProfile.firebaseUid
+      every { mockDocumentSnapshot.getString("firstName") } returns getTestProfile.firstName
+      every { mockDocumentSnapshot.getString("lastName") } returns getTestProfile.lastName
+      every { mockDocumentSnapshot.getString("description") } returns getTestProfile.description
+      every { mockDocumentSnapshot.getLong("numberOfLikes") } returns
+          getTestProfile.numberOfLikes.toLong()
+      every { mockDocumentSnapshot.getBoolean("isPublic") } returns getTestProfile.isPublic
+      every { mockDocumentSnapshot.getString("profilePictureUri") } returns
+          getTestProfile.profilePictureUri.toString()
+      every { mockDocumentSnapshot.getString("spotifyUid") } returns getTestProfile.spotifyUid
+      every { mockDocumentSnapshot.getString("firebaseUid") } returns getTestProfile.firebaseUid
 
-            val trackConnection = mockk<TrackConnection>()
-            coEvery { trackConnection.fetchTrack(trackDocumentReference1) } returns flowOf(Result.success(track1))
-            coEvery { trackConnection.fetchTrack(trackDocumentReference2) } returns flowOf(Result.success(track2))
+      val trackDocumentReference1 = mockk<DocumentReference>(relaxed = true)
+      val trackDocumentReference2 = mockk<DocumentReference>(relaxed = true)
+      every { mockDocumentSnapshot.get("topSongs") } returns
+          listOf(trackDocumentReference1, trackDocumentReference2)
+      every { mockDocumentSnapshot.get("chosenSongs") } returns
+          listOf(trackDocumentReference1, trackDocumentReference2)
+      every { mockDocumentSnapshot.get("bannedSongs") } returns
+          listOf(trackDocumentReference1, trackDocumentReference2)
+      every { mockDocumentSnapshot.get("likedSongs") } returns
+          listOf(trackDocumentReference1, trackDocumentReference2)
 
-            profileConnection = ProfileConnection(firebaseFirestore, trackConnection)
+      val trackConnection = mockk<TrackConnection>()
+      coEvery { trackConnection.fetchTrack(trackDocumentReference1) } returns
+          flowOf(Result.success(track1))
+      coEvery { trackConnection.fetchTrack(trackDocumentReference2) } returns
+          flowOf(Result.success(track2))
 
-            val result = profileConnection.documentTransform(mockDocumentSnapshot, getTestProfile).first()
+      profileConnection = ProfileConnection(firebaseFirestore, trackConnection)
 
-            val expectedProfile = getTestProfile.copy(
-                topSongs = listOf(track1, track2),
-                chosenSongs = listOf(track1, track2),
-                bannedSongs = listOf(track1, track2),
-                likedSongs = listOf(track1, track2)
-            )
+      val result = profileConnection.documentTransform(mockDocumentSnapshot, getTestProfile).first()
 
-            assert(result.isSuccess)
-            assertEquals(expectedProfile, result.getOrNull())
-        }
+      val expectedProfile =
+          getTestProfile.copy(
+              topSongs = listOf(track1, track2),
+              chosenSongs = listOf(track1, track2),
+              bannedSongs = listOf(track1, track2),
+              likedSongs = listOf(track1, track2))
+
+      assert(result.isSuccess)
+      assertEquals(expectedProfile, result.getOrNull())
     }
+  }
 
-
-
-    @Test
+  @Test
   fun testDocumentTransformStringTracks() {
     runBlocking {
       val getTestProfile =
