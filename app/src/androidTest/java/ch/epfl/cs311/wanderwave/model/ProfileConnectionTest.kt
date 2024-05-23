@@ -19,6 +19,7 @@ import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
