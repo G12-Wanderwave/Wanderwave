@@ -40,6 +40,7 @@ uiTestAndroid = "1.6.5"
 firebaseFirestoreKtx = "24.11.0"
 navigationTesting = "2.7.7"
 places = "3.4.0"
+core = "1.43.0"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -91,6 +92,7 @@ androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lif
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
+core = { group = "com.google.ar", name = "core", version.ref = "core" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
