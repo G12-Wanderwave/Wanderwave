@@ -97,7 +97,7 @@ fun AppScaffold(navController: NavHostController) {
                 composable(Route.SPOTIFY_CONNECT.routeString) { SpotifyConnectScreen(navActions) }
                 composable(Route.ABOUT.routeString) { AboutScreen(navActions) }
                 composable(Route.TRACK_LIST.routeString) {
-                  TrackListScreen(navActions, showSnackbar, trackListViewModel)
+                  TrackListScreen(navActions, trackListViewModel)
                 }
                 composable(Route.MAP.routeString) { MapScreen(navActions) }
                 composable(Route.PROFILE.routeString) {

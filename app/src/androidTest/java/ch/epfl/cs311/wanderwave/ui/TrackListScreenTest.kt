@@ -1,6 +1,10 @@
 package ch.epfl.cs311.wanderwave.ui
 
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -17,9 +21,7 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
-import io.mockk.Called
 import io.mockk.Runs
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -27,7 +29,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -61,7 +62,7 @@ class TrackListScreenTest : TestCase() {
     mockNavigationActions = NavigationActions(mockNavController)
   }
 
-  private fun setupViewModel(result: Boolean) {
+  private fun setupViewModel() {
 
     flowOf(listOf(Track("id1", "title1", "artist1")))
     every { mockSpotifyController.playTrack(any()) } just Runs
@@ -74,23 +75,28 @@ class TrackListScreenTest : TestCase() {
 
     viewModel =
         TrackListViewModel(mockSpotifyController, appDatabase, trackRepository, mockk(), mockk())
-
-    composeTestRule.setContent {
-      TrackListScreen(mockNavigationActions, mockShowMessage, viewModel)
-    }
+    every { mockSpotifyController.recentlyPlayedTracks.value } returns
+        listOf(Track("id1", "title1", "artist1"))
+    composeTestRule.setContent { TrackListScreen(mockNavigationActions, viewModel) }
   }
 
   @Test
   fun tappingTrackSelectssIt() = runTest {
-    setupViewModel(true)
+    setupViewModel()
 
     onComposeScreen<TrackListScreen>(composeTestRule) {
-      trackButton {
-        assertIsDisplayed()
-        performClick()
-      }
-      advanceUntilIdle()
-      coVerify { mockShowMessage wasNot Called }
+      assertIsDisplayed()
+      composeTestRule.onNodeWithTag("tab0").performClick()
+      composeTestRule.onNodeWithTag("trackListTitle").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("trackListTitle").assertTextEquals("Recently Added Tracks")
+
+      composeTestRule.onNodeWithTag("tab1").performClick()
+      composeTestRule.onNodeWithTag("trackListTitle").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("trackListTitle").assertTextEquals("Liked Tracks")
+
+      composeTestRule.onNodeWithTag("tab2").performClick()
+      composeTestRule.onNodeWithTag("trackListTitle").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("trackListTitle").assertTextEquals("Banned Tracks")
     }
   }
 

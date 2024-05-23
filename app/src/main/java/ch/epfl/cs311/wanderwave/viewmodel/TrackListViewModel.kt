@@ -46,22 +46,18 @@ constructor(
 
   private var _searchQuery = MutableStateFlow("")
 
-  fun recentTracks(): StateFlow<List<Track>> {
-    return spotifyController.recentlyPlayedTracks
-  }
-
-  fun toggleTrackSource() {
-    _uiState.value = _uiState.value.copy(showRecentlyAdded = !_uiState.value.showRecentlyAdded)
-    loadTracksBasedOnSource()
-  }
-
-  fun loadTracksBasedOnSource() {
+  fun loadTracksBasedOnSource(index: Int) {
     viewModelScope.launch {
       _uiState.value = _uiState.value.copy(loading = true)
-      if (_uiState.value.showRecentlyAdded) {
-        loadRecentlyAddedTracks()
-      } else {
-        _uiState.value = _uiState.value.copy(tracks = spotifyController.recentlyPlayedTracks.value)
+      when (index) {
+        0 ->
+            _uiState.value =
+                _uiState.value.copy(
+                    tracks =
+                        spotifyController.recentlyPlayedTracks
+                            .value) // TODO:modify for the recnetly played tracks
+        1 -> loadRecentlyAddedTracks() // TODO: modify here for the liked tracks
+        2 -> loadRecentlyAddedTracks() // TODO: modify here for the banned tracks
       }
     }
   }
@@ -205,8 +201,6 @@ constructor(
       val expanded: Boolean = false,
       val progress: MutableFloatState = mutableFloatStateOf(0f),
       val isShuffled: Boolean = false,
-      val loopMode: SpotifyController.RepeatMode = SpotifyController.RepeatMode.OFF,
-      val showRecentlyAdded: Boolean =
-          true // New state to toggle between recently added and recently viewed
+      val loopMode: SpotifyController.RepeatMode = SpotifyController.RepeatMode.OFF
   )
 }
