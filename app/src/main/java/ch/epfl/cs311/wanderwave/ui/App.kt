@@ -1,5 +1,7 @@
 package ch.epfl.cs311.wanderwave.ui
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -92,6 +94,10 @@ fun AppScaffold(navController: NavHostController) {
         SurroundWithMiniPlayer(displayPlayer = showBottomBar) {
           NavHost(
               navController = navController,
+              enterTransition = { EnterTransition.None },
+              exitTransition = { ExitTransition.None },
+              popEnterTransition = { EnterTransition.None },
+              popExitTransition = { ExitTransition.None },
               startDestination = Route.SPOTIFY_CONNECT.routeString,
               modifier =
                   Modifier.padding(innerPadding).background(MaterialTheme.colorScheme.background)) {

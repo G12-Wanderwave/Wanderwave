@@ -55,7 +55,7 @@ object RepositoryModule {
       appDatabase: AppDatabase
   ): BeaconRepository {
     return BeaconConnection(
-        database = db,
+        db = db,
         trackConnection = trackRepository as TrackConnection,
         profileConnection = profileRepository as ProfileConnection,
         appDatabase = appDatabase,
@@ -68,7 +68,7 @@ object RepositoryModule {
       @ApplicationContext context: Context,
       db: FirebaseFirestore
   ): TrackRepository {
-    return TrackConnection(database = db)
+    return TrackConnection(db = db, ioDispatcher = Dispatchers.IO)
   }
 
   @Provides
@@ -78,7 +78,10 @@ object RepositoryModule {
       db: FirebaseFirestore,
       trackRepository: TrackRepository
   ): ProfileRepository {
-    return ProfileConnection(database = db, trackConnection = trackRepository as TrackConnection)
+    return ProfileConnection(
+        db = db,
+        ioDispatcher = Dispatchers.IO,
+        trackConnection = trackRepository as TrackConnection)
   }
 
   @Provides
