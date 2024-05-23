@@ -3,14 +3,21 @@ package ch.epfl.cs311.wanderwave.model.remote
 import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flattenMerge
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
-abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
+abstract class FirebaseConnection<T, U>(
+    private val db: FirebaseFirestore,
+    private val ioDispatcher: CoroutineDispatcher
+) {
 
   abstract val collectionName: String
 
@@ -27,28 +34,32 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
   }
 
   open fun addItem(item: T) {
-    val itemMap = itemToMap(item)
-    db.collection(collectionName)
-        .add(itemMap)
-        .addOnFailureListener { e -> Log.e("Firestore", ADD_FAILURE_LOG_MESSAGE, e) }
-        .addOnSuccessListener { Log.d("Firestore", ADD_SUCCESS_LOG_MESSAGE) }
+    CoroutineScope(ioDispatcher).launch {
+      val itemMap = itemToMap(item)
+      db.collection(collectionName)
+          .add(itemMap)
+          .addOnFailureListener { e -> Log.e("Firestore", ADD_FAILURE_LOG_MESSAGE, e) }
+          .addOnSuccessListener { Log.d("Firestore", ADD_SUCCESS_LOG_MESSAGE) }
+    }
   }
 
   open suspend fun addItemAndGetId(item: T): String? {
-    val itemMap = itemToMap(item)
-    var documentId: String? = null
+    return withContext(ioDispatcher) {
+      val itemMap = itemToMap(item)
+      var documentId: String? = null
 
-    try {
-      val documentReference = db.collection(collectionName).add(itemMap).await()
+      try {
+        val documentReference = db.collection(collectionName).add(itemMap).await()
 
-      Log.d("Firestore", ADD_SUCCESS_LOG_MESSAGE)
+        Log.d("Firestore", ADD_SUCCESS_LOG_MESSAGE)
 
-      documentId = documentReference.id
-    } catch (e: Exception) {
-      Log.e("Firestore", ADD_FAILURE_LOG_MESSAGE, e)
+        documentId = documentReference.id
+      } catch (e: Exception) {
+        Log.e("Firestore", ADD_FAILURE_LOG_MESSAGE, e)
+      }
+
+      documentId
     }
-
-    return documentId
   }
 
   open fun addItemWithId(item: T) {
@@ -57,14 +68,16 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
   }
 
   open fun updateItem(item: T) {
-    val itemId = getItemId(item)
-    val itemMap = itemToMap(item)
+    CoroutineScope(ioDispatcher).launch {
+      val itemId = getItemId(item)
+      val itemMap = itemToMap(item)
 
-    db.collection(collectionName)
-        .document(itemId)
-        .set(itemMap) // Use set to update the document
-        .addOnFailureListener { e -> Log.e("Firestore", ADD_FAILURE_LOG_MESSAGE, e) }
-        .addOnSuccessListener { Log.d("Firestore", ADD_SUCCESS_LOG_MESSAGE) }
+      db.collection(collectionName)
+          .document(itemId)
+          .set(itemMap) // Use set to update the document
+          .addOnFailureListener { e -> Log.e("Firestore", ADD_FAILURE_LOG_MESSAGE, e) }
+          .addOnSuccessListener { Log.d("Firestore", ADD_SUCCESS_LOG_MESSAGE) }
+    }
   }
 
   open fun deleteItem(item: T) {
@@ -73,31 +86,36 @@ abstract class FirebaseConnection<T, U>(open val db: FirebaseFirestore) {
   }
 
   open fun deleteItem(itemId: String) {
-    db.collection(collectionName)
-        .document(itemId)
-        .delete()
-        .addOnFailureListener { e -> Log.e("Firestore", ADD_FAILURE_LOG_MESSAGE, e) }
-        .addOnSuccessListener { Log.d("Firestore", ADD_SUCCESS_LOG_MESSAGE) }
+    CoroutineScope(ioDispatcher).launch {
+      db.collection(collectionName)
+          .document(itemId)
+          .delete()
+          .addOnFailureListener { e -> Log.e("Firestore", ADD_FAILURE_LOG_MESSAGE, e) }
+          .addOnSuccessListener { Log.d("Firestore", ADD_SUCCESS_LOG_MESSAGE) }
+    }
   }
 
   open fun getItem(itemId: String): Flow<Result<T>> {
     val callbackFlow =
         callbackFlow<Flow<Result<T>>> {
-          db.collection(collectionName).document(itemId).addSnapshotListener { document, error ->
-            if (error != null) {
-              Log.e("Firestore", "Error getting document: ", error)
-              // return failure result
-              trySend(flowOf(Result.failure(error)))
-            }
-
-            if (document != null && document.data != null) {
-
-              documentToItem(document)?.let {
-                // The document transform function is used when references are inside and need to be
-                // fetched
-                trySend(documentTransform(document, it))
+          withContext(ioDispatcher) {
+            db.collection(collectionName).document(itemId).addSnapshotListener { document, error ->
+              if (error != null) {
+                Log.e("Firestore", "Error getting document: ", error)
+                // return failure result
+                trySend(flowOf(Result.failure(error)))
               }
-            } else trySend(flowOf(Result.failure(Exception("Document does not exist"))))
+
+              if (document != null && document.data != null) {
+
+                documentToItem(document)?.let {
+                  // The document transform function is used when references are inside and need to
+                  // be
+                  // fetched
+                  trySend(documentTransform(document, it))
+                }
+              } else trySend(flowOf(Result.failure(Exception("Document does not exist"))))
+            }
           }
           awaitClose {}
         }

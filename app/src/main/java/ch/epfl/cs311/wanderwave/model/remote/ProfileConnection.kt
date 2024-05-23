@@ -6,6 +6,7 @@ import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -19,15 +20,15 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 
 class ProfileConnection(
-    private val database: FirebaseFirestore,
+    private val db: FirebaseFirestore,
+    private val ioDispatcher: CoroutineDispatcher,
     val trackConnection: TrackConnection
-) : FirebaseConnection<Profile, Profile>(database), ProfileRepository {
+) : FirebaseConnection<Profile, Profile>(db, ioDispatcher), ProfileRepository {
 
   override val collectionName: String = "users"
 
   override val getItemId = { profile: Profile -> profile.firebaseUid }
 
-  override val db = database
   private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
   override fun documentToItem(document: DocumentSnapshot): Profile? {

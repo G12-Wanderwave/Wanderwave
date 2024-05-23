@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
@@ -40,11 +42,15 @@ public class ProfileConnectionTest {
   @RelaxedMockK private lateinit var firebaseFirestore: FirebaseFirestore
   @RelaxedMockK private lateinit var querySnapshot: QuerySnapshot
 
+  lateinit var testDispatcher: CoroutineDispatcher
+
   @Before
   fun setup() {
     MockKAnnotations.init(this)
-    val trackConnection = TrackConnection(firebaseFirestore)
-    profileConnection = ProfileConnection(firebaseFirestore, trackConnection = trackConnection)
+    testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
+    val trackConnection = TrackConnection(firebaseFirestore, testDispatcher)
+    profileConnection =
+        ProfileConnection(firebaseFirestore, testDispatcher, trackConnection = trackConnection)
   }
 
   @Test
@@ -131,7 +137,8 @@ public class ProfileConnectionTest {
             firebaseUid = "firebase123")
 
     val trackConnection = mockk<TrackConnection>(relaxed = true)
-    val profileConnection = ProfileConnection(firebaseFirestore, trackConnection = trackConnection)
+    val profileConnection =
+        ProfileConnection(firebaseFirestore, testDispatcher, trackConnection = trackConnection)
 
     profileConnection.addItem(profile)
 
@@ -153,7 +160,8 @@ public class ProfileConnectionTest {
             firebaseUid = "firebase123")
 
     val trackConnection = mockk<TrackConnection>(relaxed = true)
-    val profileConnection = ProfileConnection(firebaseFirestore, trackConnection = trackConnection)
+    val profileConnection =
+        ProfileConnection(firebaseFirestore, testDispatcher, trackConnection = trackConnection)
 
     profileConnection.addItemWithId(profile)
 
