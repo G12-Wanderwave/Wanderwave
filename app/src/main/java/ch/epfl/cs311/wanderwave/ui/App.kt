@@ -42,6 +42,7 @@ import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException
@@ -68,6 +69,7 @@ fun AppScaffold(navController: NavHostController) {
   val profileViewModel: ProfileViewModel = hiltViewModel()
   val trackListViewModel = hiltViewModel<TrackListViewModel>()
   val beaconViewModel = hiltViewModel<BeaconViewModel>()
+  val mapViewModel = hiltViewModel<MapViewModel>()
 
   createIcon()
 
@@ -99,7 +101,7 @@ fun AppScaffold(navController: NavHostController) {
                 composable(Route.TRACK_LIST.routeString) {
                   TrackListScreen(navActions, trackListViewModel)
                 }
-                composable(Route.MAP.routeString) { MapScreen(navActions) }
+                composable(Route.MAP.routeString) { MapScreen(navActions, mapViewModel) }
                 composable(Route.PROFILE.routeString) {
                   ProfileScreen(navActions, profileViewModel)
                 }
