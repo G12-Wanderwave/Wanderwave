@@ -65,7 +65,7 @@ constructor(
               profilePictureUri = null))
   val profile: StateFlow<Profile> = _profile
   private var _profileUI = MutableStateFlow(ProfileViewModel.UIState())
-  private val profileUI: StateFlow<ProfileViewModel.UIState> = _profileUI
+  val profileUI: StateFlow<ProfileViewModel.UIState> = _profileUI
 
   init {
     observeBeacons()
@@ -131,15 +131,13 @@ constructor(
     viewModelScope.launch {
       beaconRepository.getItem(beaconId).collect { fetchedBeacon ->
         fetchedBeacon.onSuccess { beacon ->
-          if (beacon.profileAndTrack.isEmpty()) {
-            Log.e("No songs found", "No songs found for the given id")
-            return@onSuccess
+          if (beacon.profileAndTrack.isNotEmpty()) {
+            _retrievedSongs.value = beacon.profileAndTrack.random()
+            trackRepository.addItemsIfNotExist(listOf(_retrievedSongs.value.track))
           }
-          _retrievedSongs.value = beacon.profileAndTrack.random()
-          trackRepository.addItemsIfNotExist(listOf(_retrievedSongs.value.track))
         }
         fetchedBeacon.onFailure { exception ->
-          Log.e("No beacons found", "No beacons found for the given id")
+          Log.e("No beacons found", "No beacons found for the given id $exception")
         }
       }
     }
@@ -147,28 +145,16 @@ constructor(
 
   fun retrieveSongFromProfileAndAddToBeacon(beaconId: String) {
 
-    Log.d("ProfileViewModel", "addTrackToListnewTrack ")
     viewModelScope.launch {
-      Log.d("ProfileViewModel", "addTrackToListnewTrack ${_profileUI.value}")
-
       _profileUI.value.profile?.let {
-        Log.d("ProfileViewModel", "addTrackToListnewTrack ${_profileUI.value}")
         profileRepository.getItem(it.firebaseUid).collect { fetchedProfile ->
           fetchedProfile.onSuccess { profile ->
-            if (profile.topSongs.isEmpty()) {
-              Log.e("No songs found", "No songs found for the given id")
-              return@onSuccess
-            }
-            addTrackToBeacon(beaconId, profile.topSongs.random()) { success ->
-              if (success) {
-                Log.i("BeaconViewModel", "Track added to beacon")
-              } else {
-                Log.e("BeaconViewModel", "Failed to add track to beacon")
-              }
+            if (profile.topSongs.isNotEmpty()) {
+              addTrackToBeacon(beaconId, profile.topSongs.random()) {}
             }
           }
-          fetchedProfile.onFailure { _ ->
-            Log.e("No profile found", "No profile found for the given id")
+          fetchedProfile.onFailure { exception ->
+            Log.e("Profile not found", "Profile not found for the given id $exception")
           }
         }
       }
@@ -187,12 +173,10 @@ constructor(
 
     viewModelScope.launch {
       val currentUserId = authenticationController.getUserData()!!.id
-      Log.d("ProfileViewModel", "getProfileOfCurrentUser $currentUserId")
       profileRepository.getItem(currentUserId).collect { fetchedProfile ->
         fetchedProfile.onSuccess { profile ->
           _profile.value = profile
           _profileUI.value = ProfileViewModel.UIState(profile = profile, isLoading = false)
-          Log.d("ProfileViewModel", "getProfileOfCurrentUser $profile")
         }
         fetchedProfile.onFailure { exception ->
           Log.e("Profile not found", "Profile not found for the given id $exception")
