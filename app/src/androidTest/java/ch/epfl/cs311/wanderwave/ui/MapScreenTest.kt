@@ -11,12 +11,16 @@ import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationUserData
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
+import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.screens.MapScreen
@@ -54,7 +58,9 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   @RelaxedMockK private lateinit var mockMapViewModel: MapViewModel
 
   @RelaxedMockK private lateinit var mockBeaconConnection: BeaconConnection
+  @RelaxedMockK private lateinit var trackRepository: TrackRepository
 
+  @RelaxedMockK private lateinit var profileRepository: ProfileConnection
   @get:Rule
   val permissionRule: GrantPermissionRule =
       GrantPermissionRule.grant(
@@ -67,6 +73,7 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   private val locationManager =
       context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
+  @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
   val location =
       Location(LocationManager.GPS_PROVIDER).apply {
         latitude = 46.519962
@@ -78,6 +85,33 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   @Before
   fun setup() {
     MockKAnnotations.init(this)
+    every { mockAuthenticationController.isSignedIn() } returns true
+    every { mockAuthenticationController.getUserData() } returns
+        AuthenticationUserData("uid", "email", "name", "http://photoUrl/img.jpg")
+    trackRepository = mockk()
+    val track1 = Track("spotify:track:6ImuyUQYhJKEKFtlrstHCD", "Main Title", "John Williams")
+    val track2 =
+        Track("spotify:track:0HLQFjnwq0FHpNVxormx60", "The Nightingale", "Percival Schuttenbach")
+    val track3 =
+        Track("spotify:track:2NZhNbfb1rD1aRj3hZaoqk", "The Imperial Suite", "Michael Giacchino")
+    val track4 = Track("spotify:track:5EWPGh7jbTNO2wakv8LjUI", "Free Bird", "Lynyrd Skynyrd")
+    val track5 = Track("spotify:track:4rTlPsga6T8yiHGOvZAPhJ", "Godzilla", "Eminem")
+
+    val trackA = Track("spotify:track:5PbMSJZcNA3p2LZv7C56cm", "Yeah", "Queen")
+    val trackB = Track("spotify:track:3C7RbG9Co0zjO7CsuEOqRa", "Sing for the Moment", "Eminem")
+
+    val trackList =
+        listOf(
+            trackA,
+            trackB,
+            track1,
+            track2,
+            track3,
+            track4,
+            track5,
+        )
+
+    every { trackRepository.getAll() } returns flowOf(trackList)
 
     coEvery { mockBeaconConnection.getAll() } returns
         flowOf(
@@ -103,7 +137,12 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
                                     "Sample Artist Name"))))))
 
     mockMapViewModel =
-        MapViewModel(locationSource = mockLocationSource, beaconRepository = mockBeaconConnection)
+        MapViewModel(
+            locationSource = mockLocationSource,
+            beaconRepository = mockBeaconConnection,
+            authenticationController = mockAuthenticationController,
+            trackRepository = trackRepository,
+            profileRepository = profileRepository)
     every { mockNavController.navigate(any<String>()) } returns Unit
     mockNavigationActions = NavigationActions(mockNavController)
 
