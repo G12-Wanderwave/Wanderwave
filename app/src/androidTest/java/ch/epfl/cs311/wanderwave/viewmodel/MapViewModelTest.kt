@@ -122,5 +122,4 @@ class MapViewModelTest {
     viewModel.loadBeacons(
         context, ch.epfl.cs311.wanderwave.model.data.Location(46.519653, 6.632273, "Lausanne"))
   }
-  // @Test fun testGetRandomSong() = runTest { viewModel.getRandomSong("UAn8OUadgrUOKYagf8a2") }
 }
