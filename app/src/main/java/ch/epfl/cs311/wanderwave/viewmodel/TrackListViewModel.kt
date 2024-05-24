@@ -88,6 +88,8 @@ constructor(
   }
 
   private fun observeTracks() {
+    // Filter only songs already cached/downloaded in Spotify
+
     viewModelScope.launch {
       repository.getAll().collect { tracks ->
         _uiState.value =

@@ -59,7 +59,7 @@ class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSup
     mockDependencies()
     viewModel = ProfileViewModel(profileRepository, spotifyController, authenticationController)
 
-    composeTestRule.setContent { ProfileScreen(mockNavigationActions, viewModel) }
+    composeTestRule.setContent { ProfileScreen(mockNavigationActions, viewModel, true) }
   }
 
   @After

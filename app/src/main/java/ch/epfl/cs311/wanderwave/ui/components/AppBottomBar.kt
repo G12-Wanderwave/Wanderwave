@@ -48,7 +48,7 @@ val mapIcon: ImageVector = Icons.Default.LocationOn
  * @last update 1.0
  */
 @Composable
-fun AppBottomBar(navActions: NavigationActions) {
+fun AppBottomBar(navActions: NavigationActions, online: Boolean) {
   BottomAppBar(
       modifier =
           Modifier.fillMaxWidth()
@@ -75,15 +75,18 @@ fun AppBottomBar(navActions: NavigationActions) {
                   }
             }
 
-        IconButton(
-            onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[1].route) },
-            modifier = Modifier.weight(1f).testTag("bottomAppBarButton" + Route.MAP.routeString)) {
-              Image(
-                  modifier = Modifier.padding(top = 5.dp, bottom = 5.dp),
-                  painter = painterResource(id = R.drawable.beaconlogo),
-                  contentDescription = "Beacon icon",
-              )
-            }
+        if (online) {
+          IconButton(
+              onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[1].route) },
+              modifier =
+                  Modifier.weight(1f).testTag("bottomAppBarButton" + Route.MAP.routeString)) {
+                Image(
+                    modifier = Modifier.padding(top = 5.dp, bottom = 5.dp),
+                    painter = painterResource(id = R.drawable.beaconlogo),
+                    contentDescription = "Beacon icon",
+                )
+              }
+        }
 
         IconButton(
             onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[2].route) },
