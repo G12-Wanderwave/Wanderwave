@@ -31,7 +31,8 @@ import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 @Composable
 fun TrackListScreen(
     navActions: NavigationActions,
-    viewModel: TrackListViewModel = hiltViewModel()
+    viewModel: TrackListViewModel = hiltViewModel(),
+    online: Boolean
 ) {
 
   var selectedTabIndex by remember { mutableIntStateOf(0) }
