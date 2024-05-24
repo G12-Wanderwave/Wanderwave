@@ -20,9 +20,12 @@ import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
@@ -37,6 +40,8 @@ class TrackConnectionTest {
   private lateinit var collectionReference: CollectionReference
 
   lateinit var track: Track
+
+  lateinit var testDispatcher: CoroutineDispatcher
 
   @Before
   fun setup() {
@@ -53,7 +58,8 @@ class TrackConnectionTest {
     every { firestore.collection(any()) } returns collectionReference
 
     // Pass the mock Firestore instance to your TrackConnection
-    trackConnection = TrackConnection(firestore)
+    testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
+    trackConnection = TrackConnection(firestore, testDispatcher)
   }
 
   @Test
@@ -140,7 +146,7 @@ class TrackConnectionTest {
             "Test Spotify Uid",
             "Test Firebase Uid")
 
-    val mockProfileTrackAssociation = ProfileTrackAssociation(mockProfile, mockTrack)
+    val mockProfileTrackAssociation = ProfileTrackAssociation(mockProfile, mockTrack, 1)
 
     // Define behavior for the get() method on the DocumentReference to return the mock task
     coEvery { mockTrackDocumentReference.addSnapshotListener(any()) } answers
@@ -181,8 +187,11 @@ class TrackConnectionTest {
 
     var retrievedTrackAndProfile: ProfileTrackAssociation? = null
 
-    val mapOfDocumentReferences =
-        mapOf("creator" to mockProfileDocumentReference, "track" to mockTrackDocumentReference)
+    var mapOfDocumentReferences =
+        mapOf(
+            "creator" to mockProfileDocumentReference,
+            "track" to mockTrackDocumentReference,
+            "likes" to 1)
 
     // Call the function under test
     retrievedTrackAndProfile =
@@ -197,6 +206,11 @@ class TrackConnectionTest {
 
     // Assert that the retrieved track is the same as the mock track
     assertEquals(mockProfileTrackAssociation, retrievedTrackAndProfile)
+
+    // likes are not an int
+    mapOfDocumentReferences = mapOf("creator" to "12", "track" to "12", "likes" to "not an int")
+
+    assert(trackConnection.fetchProfileAndTrack(mapOfDocumentReferences).first().isFailure)
   }
 
   @Test

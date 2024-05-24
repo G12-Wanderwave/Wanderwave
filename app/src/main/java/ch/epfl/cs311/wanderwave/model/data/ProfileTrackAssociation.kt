@@ -1,6 +1,9 @@
 package ch.epfl.cs311.wanderwave.model.data
 
+
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.DocumentReference
+
 import com.google.firebase.firestore.FirebaseFirestore
 
 /**
@@ -8,9 +11,9 @@ import com.google.firebase.firestore.FirebaseFirestore
  *
  * @param profile The profile associated with the track.
  * @param track The track associated with the profile.
- * @author Menzo Bouaissi
- * @since 2.0
- * @last update 2.0
+ * @author Clarence LINDEN
+ * @since 3.0
+ * @last update 3.0
  */
 data class ProfileTrackAssociation(
     val profile: Profile? = null,
@@ -64,5 +67,6 @@ data class ProfileTrackAssociation(
         null
       }
     }
+
   }
 }

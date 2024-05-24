@@ -7,21 +7,25 @@ import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class TrackConnection(private val database: FirebaseFirestore) :
-    FirebaseConnection<Track, Track>(database), TrackRepository {
+class TrackConnection(
+    private val db: FirebaseFirestore,
+    private val ioDispatcher: CoroutineDispatcher
+) : FirebaseConnection<Track, Track>(db, ioDispatcher), TrackRepository {
 
   // THe goal is to have the Id of the firebase document to match the id of the spotify track
 
   override val collectionName: String = "tracks"
 
   override val getItemId = { track: Track -> track.id }
-
-  override val db = database
 
   // Document to Track
   override fun documentToItem(document: DocumentSnapshot): Track? {
@@ -35,29 +39,33 @@ class TrackConnection(private val database: FirebaseFirestore) :
   override fun addItemsIfNotExist(tracks: List<Track>) {
     // The goal of this function is to add only if the spotify id of the track is not already in the
     // database, for now I just check the normal ID
-    tracks.forEach { track ->
-      val trackId =
-          if (track.id.contains("spotify:track:")) track.id else "spotify:track:" + track.id
-      val correctTrack = track.copy(id = trackId)
-      db.collection(collectionName)
-          .whereEqualTo("id", correctTrack.id)
-          .get()
-          .addOnSuccessListener { documentSnapshot ->
-            if (documentSnapshot.isEmpty) {
-              addItemWithId(correctTrack)
+    CoroutineScope(ioDispatcher).launch {
+      tracks.forEach { track ->
+        val trackId =
+            if (track.id.contains("spotify:track:")) track.id else "spotify:track:" + track.id
+        val correctTrack = track.copy(id = trackId)
+        db.collection(collectionName)
+            .whereEqualTo("id", correctTrack.id)
+            .get()
+            .addOnSuccessListener { documentSnapshot ->
+              if (documentSnapshot.isEmpty) {
+                addItemWithId(correctTrack)
+              }
             }
-          }
+      }
     }
   }
 
   override fun getAll(): Flow<List<Track>> {
     val stateFlow = MutableStateFlow<List<Track>>(listOf())
-    db.collection(collectionName).addSnapshotListener { value, error ->
-      if (error != null) {
-        return@addSnapshotListener
+    CoroutineScope(ioDispatcher).launch {
+      db.collection(collectionName).addSnapshotListener { value, error ->
+        if (error != null) {
+          return@addSnapshotListener
+        }
+        val tracks = value?.documents?.mapNotNull { documentToItem(it) } ?: listOf()
+        stateFlow.value = tracks
       }
-      val tracks = value?.documents?.mapNotNull { documentToItem(it) } ?: listOf()
-      stateFlow.value = tracks
     }
     return stateFlow
   }
@@ -89,12 +97,15 @@ class TrackConnection(private val database: FirebaseFirestore) :
                 ?: trySend(
                     Result.failure(
                         Exception("Error fetching the track, firebase error", errorTrack)))
+
           }
+              ?: trySend(
+                  Result.failure(Exception("Error fetching the track, firebase format is wrong")))
+        } catch (e: Exception) {
+          // Handle exceptions
+          Log.e("Firestore", "Error fetching profile and track:${e.message}")
+          trySend(Result.failure(e))
         }
-      } catch (e: Exception) {
-        // Handle exceptions
-        Log.e("Firestore", "Error fetching profile and track:${e.message}")
-        trySend(Result.failure(e))
       }
     }
     awaitClose { close() }
@@ -102,22 +113,24 @@ class TrackConnection(private val database: FirebaseFirestore) :
 
   // Fetch a track from a DocumentReference asynchronously
   fun fetchTrack(TrackRef: DocumentReference?): Flow<Result<Track>> = callbackFlow {
-    if (TrackRef == null) {
-      trySend(Result.failure(Exception("Track reference is null")))
-    } else {
-      try {
-        TrackRef.addSnapshotListener { trackDocument, error ->
-          val track = trackDocument?.let { Track.from(it) }
-          if (track != null) {
-            trySend(Result.success(track))
-          } else {
-            trySend(Result.failure(Exception("Track could not be fetched")))
+    withContext(ioDispatcher) {
+      if (TrackRef == null) {
+        trySend(Result.failure(Exception("Track reference is null")))
+      } else {
+        try {
+          TrackRef.addSnapshotListener { trackDocument, error ->
+            val track = trackDocument?.let { Track.from(it) }
+            if (track != null) {
+              trySend(Result.success(track))
+            } else {
+              trySend(Result.failure(Exception("Track could not be fetched")))
+            }
           }
+        } catch (e: Exception) {
+          // Handle exceptions
+          Log.e("Firestore", "Error fetching track:${e.message}")
+          trySend(Result.failure(e))
         }
-      } catch (e: Exception) {
-        // Handle exceptions
-        Log.e("Firestore", "Error fetching track:${e.message}")
-        trySend(Result.failure(e))
       }
     }
     awaitClose {}

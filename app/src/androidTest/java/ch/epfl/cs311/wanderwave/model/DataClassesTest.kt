@@ -142,7 +142,7 @@ class DataClassesTest {
     every { document.get("location") } returns
         mapOf("latitude" to null, "longitude" to null, "name" to null)
 
-    assertEquals(Location(0.0, 0.0), beacon!!.location)
+    assertEquals(Location(0.0, 0.0), beacon.location)
   }
 
   @Test
@@ -169,7 +169,8 @@ class DataClassesTest {
             "isPublic" to true,
             "profilePictureUri" to "https://example.com/image.jpg",
             "chosenSongs" to listOf<DocumentReference>(),
-            "topSongs" to listOf<DocumentReference>())
+            "topSongs" to listOf<DocumentReference>(),
+            "bannedSongs" to listOf<DocumentReference>())
 
     val mockFirebaseFirestore = mockk<FirebaseFirestore>()
     assertEquals(expectedMap, profile.toMap(mockFirebaseFirestore))
@@ -233,6 +234,7 @@ class DataClassesTest {
 
     val profileTrackAssociation = ProfileTrackAssociation(profile, track)
 
+
     val mockFirebaseFirestore = mockk<FirebaseFirestore>()
     val mockDocumentReference = mockk<DocumentReference>()
 
@@ -248,6 +250,7 @@ class DataClassesTest {
             "likes" to 0)
 
     assertEquals(expectedMap, profileTrackAssociation.toMap(mockFirebaseFirestore))
+
 
     // test if the profile is null
     val profileTrackAssociation2 = ProfileTrackAssociation(null, track)
@@ -286,6 +289,7 @@ class DataClassesTest {
 
     assertEquals(0, unlikedAssociation.likes)
     assertEquals(0, unlikedAssociation.likersId.size)
+
   }
 
   @Test

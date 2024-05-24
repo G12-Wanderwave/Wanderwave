@@ -59,16 +59,13 @@ class ProfileTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSup
     mockDependencies()
     viewModel = ProfileViewModel(profileRepository, spotifyController, authenticationController)
 
-    composeTestRule.setContent { ProfileScreen(mockNavigationActions, viewModel) }
+    composeTestRule.setContent { ProfileScreen(mockNavigationActions, viewModel, true) }
   }
 
   @After
   fun tearDown() {
     try {
-      // Cancel any ongoing coroutines started by the ViewModel
       viewModel.viewModelScope.cancel()
-      // Cleanup test coroutines to avoid leaking them
-      //      testDispatcher.cleanupTestCoroutines()
     } finally {
       Dispatchers.resetMain() // Reset the main dispatcher to the original one
     }

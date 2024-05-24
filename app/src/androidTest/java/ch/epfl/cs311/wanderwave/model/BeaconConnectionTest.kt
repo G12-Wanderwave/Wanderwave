@@ -93,7 +93,7 @@ public class BeaconConnectionTest {
     // Pass the mock Firestore instance to your BeaconConnection
     val testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
     beaconConnection =
-        BeaconConnection(firestore, trackConnection, profileConnection, appDatabase, testDispatcher)
+        BeaconConnection(firestore, testDispatcher, trackConnection, profileConnection, appDatabase)
   }
 
   @Test
@@ -188,22 +188,7 @@ public class BeaconConnectionTest {
                               "Sample Track ID"),
                           Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
-      val mapOfTestBeacon =
-          hashMapOf(
-              "id" to getTestBeacon.id,
-              "location" to getTestBeacon.location.toMap(),
-              "tracks" to
-                  getTestBeacon.profileAndTrack.map { profileAndTrack ->
-                    hashMapOf(
-                        "creator" to
-                            firestore
-                                .collection("users")
-                                .document(profileAndTrack.profile?.firebaseUid ?: ""),
-                        "track" to
-                            firestore.collection("tracks").document(profileAndTrack.track.id))
-                  })
-
-      every { mockDocumentSnapshot.getData() } returns mapOfTestBeacon
+      every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap(firestore)
       every { mockDocumentSnapshot.exists() } returns true
       every { mockDocumentSnapshot.id } returns getTestBeacon.id
       every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
@@ -214,6 +199,7 @@ public class BeaconConnectionTest {
                 "creator" to firestore.collection("users").document(it.profile?.firebaseUid ?: ""),
                 "track" to firestore.collection("tracks").document(it.track.id))
           })
+      every { mockDocumentSnapshot.getLong(any()) } returns 0
 
       // Define behavior for the addOnSuccessListener method
       every { documentReference.addSnapshotListener(any()) } answers
@@ -262,18 +248,16 @@ public class BeaconConnectionTest {
               location = Location(1.0, 1.0, "Test Location"),
               profileAndTrack = listOf())
 
-      val mapOfTestBeacon =
-          hashMapOf(
-              "id" to getTestBeacon.id,
-              "location" to getTestBeacon.location.toMap(),
-              "tracks" to getTestBeacon.profileAndTrack.map { it.toMap(firestore) })
-      every { mockDocumentSnapshot.getData() } returns mapOfTestBeacon
+
+      every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap(firestore)
+
       every { mockDocumentSnapshot.exists() } returns true
       every { mockDocumentSnapshot.id } returns getTestBeacon.id
       every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
 
       // not a list of maps, doesn't pass the if
       every { mockDocumentSnapshot.get("tracks") } returns listOf("String1", "String2")
+      every { mockDocumentSnapshot.getLong(any()) } returns 0
 
       // Define behavior for the addOnSuccessListener method
       every { documentReference.addSnapshotListener(any()) } answers
@@ -339,20 +323,16 @@ public class BeaconConnectionTest {
               location = Location(1.0, 1.0, "Test Location"),
               profileAndTrack = listOf())
 
-      val mapOfTestBeacon =
-          hashMapOf(
-              "id" to getTestBeacon.id,
-              "location" to getTestBeacon.location.toMap(),
-              "tracks" to getTestBeacon.profileAndTrack.map { it.toMap(firestore) })
 
       val getTestBeaconList = listOf(getTestBeacon, getTestBeacon)
 
-      every { mockDocumentSnapshot.getData() } returns mapOfTestBeacon
+      every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap(firestore)
       every { mockDocumentSnapshot.exists() } returns true
       every { mockDocumentSnapshot.id } returns getTestBeacon.id
       every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
       every { mockDocumentSnapshot.get("tracks") } returns
           getTestBeacon.profileAndTrack.map { it.toMap(firestore) }
+
 
       every { mockQuerySnapshot.documents } returns
           listOf(mockDocumentSnapshot, mockDocumentSnapshot)
@@ -568,11 +548,6 @@ public class BeaconConnectionTest {
             Location(1.0, 1.0, "Test Location"),
             listOf(ProfileTrackAssociation(profile, track)))
 
-    val mapOfTestBeacon =
-        hashMapOf(
-            "id" to beacon.id,
-            "location" to beacon.location.toMap(),
-            "tracks" to beacon.profileAndTrack.map { it.toMap(firestore) })
 
     // Mock the Task
     val mockTask = mockk<Task<Transaction>>()
@@ -585,7 +560,7 @@ public class BeaconConnectionTest {
             location = Location(1.0, 1.0, "Test Location"),
             profileAndTrack = listOf(ProfileTrackAssociation(profile, track)))
 
-    every { mockDocumentSnapshot.getData() } returns mapOfTestBeacon
+    every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap(firestore)
     every { mockDocumentSnapshot.exists() } returns false
 
     every { mockTransaction.get(any<DocumentReference>()) } returns mockDocumentSnapshot
