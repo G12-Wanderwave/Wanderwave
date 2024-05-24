@@ -13,9 +13,11 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import io.mockk.MockKAnnotations
+import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.just
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotSame
@@ -355,5 +357,129 @@ class DataClassesTest {
 
     val initialHashCode = association.hashCode()
     assertEquals(initialHashCode, association.hashCode())
+  }
+
+  //  Beacon.kt
+  //  fun updateProfileAndTrackElement(newTrackProfile: ProfileTrackAssociation): Beacon {
+  //    val newProfileAndTrack = profileAndTrack.toMutableList()
+  //    newProfileAndTrack.removeIf { it.track.id == newTrackProfile.track.id }
+  //    newProfileAndTrack.add(newTrackProfile)
+  //    return Beacon(id, location, newProfileAndTrack)
+  //  }
+  @Test
+  fun testUpdateProfileAndTrackElement() {
+    val mockProfile1 = mockk<Profile>()
+    val mockProfile2 = mockk<Profile>()
+    val mockTrack1 = mockk<Track>()
+    val mockTrack2 = mockk<Track>()
+    val mockTrack3 = mockk<Track>()
+    val mockTrack4 = mockk<Track>()
+    every { mockTrack1.id } returns "someId1"
+    every { mockTrack2.id } returns "someId2"
+    every { mockTrack3.id } returns "someId3"
+    every { mockTrack4.id } returns "someId4"
+    val mockProfileTrackAssociation1 = ProfileTrackAssociation(mockProfile1, mockTrack1)
+    val mockProfileTrackAssociation2 = ProfileTrackAssociation(mockProfile2, mockTrack2)
+    val mockProfileTrackAssociation3 = ProfileTrackAssociation(mockProfile1, mockTrack3)
+    val mockProfileTrackAssociation4 = ProfileTrackAssociation(mockProfile2, mockTrack4)
+    val beacon =
+        Beacon(
+            "id",
+            Location(0.0, 0.0),
+            mutableListOf(mockProfileTrackAssociation1, mockProfileTrackAssociation2))
+    val newBeacon = beacon.updateProfileAndTrackElement(mockProfileTrackAssociation3)
+    assertEquals(3, newBeacon.profileAndTrack.size)
+    assertEquals(mockProfileTrackAssociation1, newBeacon.profileAndTrack[0])
+    assertEquals(mockProfileTrackAssociation2, newBeacon.profileAndTrack[1])
+    val newBeacon2 = newBeacon.updateProfileAndTrackElement(mockProfileTrackAssociation4)
+    assertEquals(4, newBeacon2.profileAndTrack.size)
+  }
+
+  @Test
+  fun testProfileTrackToMap() {
+    val mockProfile = mockk<Profile>()
+    val mockTrack = mockk<Track>()
+    val mockFirebaseFirestore = mockk<FirebaseFirestore>()
+    val mockDocumentReference = mockk<DocumentReference>()
+    every { mockProfile.firebaseUid } returns "firebaseUid"
+    every { mockTrack.id } returns "trackId"
+    every { mockFirebaseFirestore.collection("users").document("firebaseUid") } returns
+        mockDocumentReference
+    every { mockFirebaseFirestore.collection("tracks").document("trackId") } returns
+        mockDocumentReference
+    val profileTrackAssociation = ProfileTrackAssociation(mockProfile, mockTrack)
+    val expectedMap =
+        hashMapOf(
+            "creator" to mockDocumentReference,
+            "track" to mockDocumentReference,
+            "likersId" to emptyList<String>(),
+            "likes" to 0)
+    assertEquals(expectedMap, profileTrackAssociation.toMap(mockFirebaseFirestore))
+  }
+
+  @Test
+  fun testProfileTrackIsLiked() = run {
+    val mockProfile = mockk<Profile>()
+    every { mockProfile.firebaseUid } returns "firebaseUid"
+    every { mockProfile.numberOfLikes } returns 0
+    val mockTrack = mockk<Track>()
+    val profileTrackAssociation = ProfileTrackAssociation(mockProfile, mockTrack)
+    every { mockTrack.id } returns "trackId"
+    val likedAssociation = profileTrackAssociation.likeTrack(mockProfile)
+    every { mockProfile.numberOfLikes } returns 1
+    assert(likedAssociation.isLiked(mockProfile))
+  }
+
+  @Test
+  fun testProfileTrackLikeTrack2() = run {
+    val mockProfile = mockk<Profile>(relaxed = true)
+    every { mockProfile.numberOfLikes = 1 } just Runs
+    every { mockProfile.firebaseUid } returns "firebaseUid"
+    val mockTrack = mockk<Track>()
+    val profileTrackAssociation = ProfileTrackAssociation(mockProfile, mockTrack)
+    every { mockTrack.id } returns "trackId"
+    val likedAssociation = profileTrackAssociation.likeTrack(mockProfile)
+    assertEquals(1, likedAssociation.likes)
+    assertEquals(1, likedAssociation.likersId.size)
+    assertEquals("firebaseUid", likedAssociation.likersId[0])
+  }
+
+  @Test
+  fun testProfileTrackUnlikeTrack2() = run {
+    val mockProfile = mockk<Profile>(relaxed = true)
+    every { mockProfile.numberOfLikes = 0 } just Runs
+    every { mockProfile.firebaseUid } returns "firebaseUid"
+    val mockTrack = mockk<Track>()
+    val profileTrackAssociation = ProfileTrackAssociation(mockProfile, mockTrack)
+    every { mockTrack.id } returns "trackId"
+    val unlikedAssociation = profileTrackAssociation.unlikeTrack(mockProfile)
+    assertEquals(0, unlikedAssociation.likes)
+    assertEquals(0, unlikedAssociation.likersId.size)
+  }
+
+  @Test
+  fun testProfileTrackFrom() = run {
+    val mockProfile = mockk<Profile>()
+    val mockTrack = mockk<Track>()
+    val mockDocumentSnapshot = mockk<DocumentSnapshot>()
+    every { mockDocumentSnapshot.exists() } returns true
+    every { mockDocumentSnapshot.getString("firstName") } returns "firstName"
+    every { mockDocumentSnapshot.getString("lastName") } returns "lastName"
+    every { mockDocumentSnapshot.getString("description") } returns "description"
+    every { mockDocumentSnapshot.getLong("numberOfLikes") } returns 0
+    every { mockDocumentSnapshot.getBoolean("isPublic") } returns true
+    every { mockDocumentSnapshot.getString("profilePictureUri") } returns "profilePictureUri"
+    every { mockDocumentSnapshot.getString("spotifyUid") } returns "spotifyUid"
+    every { mockDocumentSnapshot.getString("firebaseUid") } returns "firebaseUid"
+    every { mockDocumentSnapshot["likersId"] } returns emptyList<String>()
+    every { mockDocumentSnapshot["likes"] } returns 0
+    every { mockDocumentSnapshot.id } returns "mockDocumentSnapshotID"
+    every { mockDocumentSnapshot["title"] } returns "mockDocumentSnapshotID"
+    every { mockDocumentSnapshot.getString("title") } returns "someTitle"
+    every { mockDocumentSnapshot.getString("artist") } returns "someTitle"
+    every { mockDocumentSnapshot.exists() } returns true
+    val profileTrackAssociation =
+        ProfileTrackAssociation.from(mapOf(), mockDocumentSnapshot, mockDocumentSnapshot)
+    assert(profileTrackAssociation != null)
   }
 }
