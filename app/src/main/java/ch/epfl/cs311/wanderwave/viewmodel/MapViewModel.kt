@@ -11,8 +11,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Beacon
-import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Location as Location1
+import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
@@ -31,12 +31,13 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class MapViewModel
 @Inject
-constructor(val locationSource: LocationSource,
-            private val beaconRepository: BeaconRepository,
-            private val authenticationController: AuthenticationController,
-            private val trackRepository: TrackRepository,
-            private val profileRepository: ProfileRepository) :
-    ViewModel() {
+constructor(
+    val locationSource: LocationSource,
+    private val beaconRepository: BeaconRepository,
+    private val authenticationController: AuthenticationController,
+    private val trackRepository: TrackRepository,
+    private val profileRepository: ProfileRepository
+) : ViewModel() {
   val cameraPosition = MutableLiveData<CameraPosition?>()
 
   private val _uiState = MutableStateFlow(BeaconListUiState(loading = true))
@@ -52,20 +53,20 @@ constructor(val locationSource: LocationSource,
   private val _areBeaconsLoaded = MutableStateFlow(false)
 
   private val _profile =
-    MutableStateFlow(
-      Profile(
-        firstName = "My FirstName",
-        lastName = "My LastName",
-        description = "My Description",
-        numberOfLikes = 0,
-        isPublic = true,
-        spotifyUid = "My Spotify UID",
-        firebaseUid = "My Firebase UID",
-        profilePictureUri = null)
-    )
+      MutableStateFlow(
+          Profile(
+              firstName = "My FirstName",
+              lastName = "My LastName",
+              description = "My Description",
+              numberOfLikes = 0,
+              isPublic = true,
+              spotifyUid = "My Spotify UID",
+              firebaseUid = "My Firebase UID",
+              profilePictureUri = null))
   val profile: StateFlow<Profile> = _profile
   private var _profileUI = MutableStateFlow(ProfileViewModel.UIState())
   private val profileUI: StateFlow<ProfileViewModel.UIState> = _profileUI
+
   init {
     observeBeacons()
     getProfileOfCurrentUser()
@@ -159,7 +160,7 @@ constructor(val locationSource: LocationSource,
               Log.e("No songs found", "No songs found for the given id")
               return@onSuccess
             }
-            addTrackToBeacon(beaconId,  profile.topSongs.random()) { success ->
+            addTrackToBeacon(beaconId, profile.topSongs.random()) { success ->
               if (success) {
                 Log.i("BeaconViewModel", "Track added to beacon")
               } else {
@@ -183,8 +184,6 @@ constructor(val locationSource: LocationSource,
         beaconId, correctTrack, authenticationController.getUserData()!!.id, onComplete)
   }
 
-
-
   fun getProfileOfCurrentUser() {
 
     val currentUserId = authenticationController.getUserData()!!.id
@@ -202,8 +201,6 @@ constructor(val locationSource: LocationSource,
       }
     }
   }
-
 }
-
 
 data class BeaconListUiState(val beacons: List<Beacon> = listOf(), val loading: Boolean = false)
