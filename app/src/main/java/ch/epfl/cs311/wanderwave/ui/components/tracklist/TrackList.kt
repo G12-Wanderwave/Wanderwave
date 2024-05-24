@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
+import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
@@ -83,6 +84,7 @@ fun TrackList(
 fun TrackListWithProfiles(
     tracks: List<ProfileTrackAssociation>,
     profileViewModel: ProfileViewModel,
+    beacon: Beacon,
     title: String? = null,
     canAddSong: Boolean = true,
     onAddTrack: (Track) -> Unit,
@@ -116,7 +118,8 @@ fun TrackListWithProfiles(
         TrackListItemWithProfile(
             trackAndProfile,
             profileViewModel,
-            trackAndProfile.track == selectedTrack,
+            beacon,
+            selected = trackAndProfile.track == selectedTrack,
             navigationActions = navigationActions,
             onClick = {
               selectedTrack = trackAndProfile.track

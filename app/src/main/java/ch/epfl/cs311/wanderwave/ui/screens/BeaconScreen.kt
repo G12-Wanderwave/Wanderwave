@@ -188,6 +188,7 @@ fun SongList(
       },
       navigationActions = navigationActions,
       canAddSong = false,
+      beacon = beacon,
       onSelectTrack = onSelectTrack,
   )
 }

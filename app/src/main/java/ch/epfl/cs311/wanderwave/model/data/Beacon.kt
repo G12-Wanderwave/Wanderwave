@@ -13,6 +13,12 @@ data class Beacon(
     /** List of tracks that are broadcast from the beacon */
     val profileAndTrack: List<ProfileTrackAssociation> = listOf<ProfileTrackAssociation>(),
 ) {
+  fun updateProfileAndTrackElement(newTrackProfile: ProfileTrackAssociation): Beacon {
+    val newProfileAndTrack = profileAndTrack.toMutableList()
+    newProfileAndTrack.removeIf { it.track.id == newTrackProfile.track.id }
+    newProfileAndTrack.add(newTrackProfile)
+    return Beacon(id, location, newProfileAndTrack)
+  }
 
   companion object {
     fun from(document: DocumentSnapshot): Beacon? {

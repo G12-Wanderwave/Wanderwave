@@ -39,11 +39,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
+import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -100,6 +103,8 @@ fun TrackListItem(track: Track, selected: Boolean, onClick: () -> Unit) {
 fun TrackListItemWithProfile(
     trackAndProfile: ProfileTrackAssociation,
     profileViewModel: ProfileViewModel,
+    beacon: Beacon,
+    beaconViewModel: BeaconViewModel = hiltViewModel(),
     selected: Boolean,
     onClick: () -> Unit,
     navigationActions: NavigationActions
@@ -119,15 +124,35 @@ fun TrackListItemWithProfile(
       LikeButton(
           isLiked = isLiked,
           onLike = {
-            trackAndProfile.likeTrack(
-                profileViewModel.profile.value) // TODO: Update the value in the database
+            // Update the profile and track association
+            val newTrackProfile = trackAndProfile.likeTrack(profileViewModel.profile.value)
+            // Update it in the beacon
+            val newBeacon = beacon.updateProfileAndTrackElement(newTrackProfile)
+            // Update it on Firebase
+            beaconViewModel.updateBeacon(newBeacon)
+
+            // Add liked track to the profile
             profileViewModel.likeTrack(trackAndProfile.track)
+            // Update it on Firebase
+            profileViewModel.updateProfile(profileViewModel.profile.value)
+
+            // Update UI
             isLiked.value = true
           },
           onUnlike = {
-            trackAndProfile.unlikeTrack(
-                profileViewModel.profile.value) // TODO: Update the value in the database
+            // Update the profile and track association
+            val newTrackProfile = trackAndProfile.unlikeTrack(profileViewModel.profile.value)
+            // Update it in the beacon
+            val newBeacon = beacon.updateProfileAndTrackElement(newTrackProfile)
+            // Update it on Firebase
+            beaconViewModel.updateBeacon(newBeacon)
+
+            // Add liked track to the profile
             profileViewModel.unlikeTrack(trackAndProfile.track)
+            // Update it on Firebase
+            profileViewModel.updateProfile(profileViewModel.profile.value)
+
+            // Update UI
             isLiked.value = false
           })
       Box(
