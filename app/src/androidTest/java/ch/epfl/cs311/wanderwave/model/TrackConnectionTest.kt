@@ -146,7 +146,7 @@ class TrackConnectionTest {
             "Test Spotify Uid",
             "Test Firebase Uid")
 
-    val mockProfileTrackAssociation = ProfileTrackAssociation(mockProfile, mockTrack, 1)
+    val mockProfileTrackAssociation = ProfileTrackAssociation(mockProfile, mockTrack, listOf("RandomID"),1)
 
     // Define behavior for the get() method on the DocumentReference to return the mock task
     coEvery { mockTrackDocumentReference.addSnapshotListener(any()) } answers
