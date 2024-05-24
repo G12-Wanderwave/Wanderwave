@@ -68,7 +68,7 @@ constructor(val locationSource: LocationSource,
   private val profileUI: StateFlow<ProfileViewModel.UIState> = _profileUI
   init {
     observeBeacons()
-    //getProfileOfCurrentUser()
+    getProfileOfCurrentUser()
   }
 
   private fun observeBeacons() {
@@ -167,7 +167,7 @@ constructor(val locationSource: LocationSource,
               }
             }
           }
-          fetchedProfile.onFailure { exception ->
+          fetchedProfile.onFailure { _ ->
             Log.e("No profile found", "No profile found for the given id")
           }
         }
