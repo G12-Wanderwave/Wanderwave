@@ -31,7 +31,8 @@ import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 fun TrackListScreen(
     navActions: NavigationActions,
     showMessage: (String) -> Unit,
-    viewModel: TrackListViewModel = hiltViewModel()
+    viewModel: TrackListViewModel = hiltViewModel(),
+    online: Boolean
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   var searchQuery by remember { mutableStateOf("") }

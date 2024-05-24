@@ -30,7 +30,7 @@ class AppBottomBarTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
 
   @Before
   fun setup() {
-    composeTestRule.setContent { AppBottomBar(mockNavigationActions) }
+    composeTestRule.setContent { AppBottomBar(mockNavigationActions, true) }
   }
 
   @Test
