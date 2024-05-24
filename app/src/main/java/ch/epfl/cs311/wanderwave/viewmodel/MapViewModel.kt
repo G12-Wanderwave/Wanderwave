@@ -69,7 +69,6 @@ constructor(
 
   init {
     observeBeacons()
-    getProfileOfCurrentUser()
   }
 
   private fun observeBeacons() {
@@ -186,9 +185,9 @@ constructor(
 
   fun getProfileOfCurrentUser() {
 
-    val currentUserId = authenticationController.getUserData()!!.id
-    Log.d("ProfileViewModel", "getProfileOfCurrentUser $currentUserId")
     viewModelScope.launch {
+      val currentUserId = authenticationController.getUserData()!!.id
+      Log.d("ProfileViewModel", "getProfileOfCurrentUser $currentUserId")
       profileRepository.getItem(currentUserId).collect { fetchedProfile ->
         fetchedProfile.onSuccess { profile ->
           _profile.value = profile
