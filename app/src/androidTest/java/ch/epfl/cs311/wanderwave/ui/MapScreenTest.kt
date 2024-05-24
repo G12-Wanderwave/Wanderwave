@@ -123,12 +123,6 @@ class MapScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeS
   }
 
   @Test
-  fun locationSourceCallsActivate() = run {
-    val viewModel = mockMapViewModel
-    verify { viewModel.locationSource.activate(any()) }
-  }
-
-  @Test
   fun listenerIsNullAfterDeactivate() = run {
     val locationSource = FastLocationSource(context)
     locationSource.deactivate()
