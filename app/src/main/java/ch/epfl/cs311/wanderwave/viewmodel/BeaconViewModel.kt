@@ -56,19 +56,6 @@ constructor(
 
   fun getBeaconById(id: String) {
     viewModelScope.launch {
-      val profileId = authenticationController.getUserData()!!.id
-      profileRepository.getItem(profileId).collect { fetchedProfile ->
-        fetchedProfile.onSuccess { profile ->
-          _uiState.value = uiState.value.copy(bannedTracks = profile.bannedSongs)
-        }
-        fetchedProfile.onFailure { exception ->
-          _uiState.value = uiState.value.copy(error = exception.message, isLoading = false)
-          Log.e("BeaconViewModel", "Failed to get profile by id: $profileId", exception)
-        }
-      }
-    }
-
-    viewModelScope.launch {
       beaconRepository.getItem(id).collect { fetchedBeacon ->
         // the fetched beacon has a result
         fetchedBeacon.onSuccess { beacon ->
@@ -79,6 +66,19 @@ constructor(
           _uiState.value =
               uiState.value.copy(error = exception.message, isLoading = false, beacon = null)
           Log.e("BeaconViewModel", "Failed to get beacon by id: $id", exception)
+        }
+      }
+    }
+
+    viewModelScope.launch {
+      val profileId = authenticationController.getUserData()!!.id
+      profileRepository.getItem(profileId).collect { fetchedProfile ->
+        fetchedProfile.onSuccess { profile ->
+          _uiState.value = uiState.value.copy(bannedTracks = profile.bannedSongs)
+        }
+        fetchedProfile.onFailure { exception ->
+          _uiState.value = uiState.value.copy(error = exception.message, isLoading = false)
+          Log.e("BeaconViewModel", "Failed to get profile by id: $profileId", exception)
         }
       }
     }

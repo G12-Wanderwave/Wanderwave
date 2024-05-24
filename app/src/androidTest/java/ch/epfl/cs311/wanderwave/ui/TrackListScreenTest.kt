@@ -7,9 +7,13 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationUserData
+import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -73,8 +77,22 @@ class TrackListScreenTest : TestCase() {
                 Track("is 2", "Track 2", "Artist 2"),
             ))
 
+    val authenticationController = mockk<AuthenticationController>()
+
+    every { authenticationController.getUserData() } returns
+        AuthenticationUserData("id", "email", "name", "image")
+
+    val profile = mockk<Profile>(relaxed = true)
+    val profileRepository = mockk<ProfileRepository>(relaxed = true)
+    every { profileRepository.getItem(any()) } returns flowOf(Result.success(profile))
+
     viewModel =
-        TrackListViewModel(mockSpotifyController, appDatabase, trackRepository, mockk(), mockk())
+        TrackListViewModel(
+            mockSpotifyController,
+            appDatabase,
+            trackRepository,
+            profileRepository,
+            authenticationController)
     every { mockSpotifyController.recentlyPlayedTracks.value } returns
         listOf(Track("id1", "title1", "artist1"))
     composeTestRule.setContent { TrackListScreen(mockNavigationActions, viewModel) }
