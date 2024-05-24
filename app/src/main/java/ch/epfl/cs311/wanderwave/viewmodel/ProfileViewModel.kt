@@ -179,7 +179,7 @@ constructor(
     }
   }
 
-  suspend fun getProfileOfCurrentUser(create: Boolean) {
+  fun getProfileOfCurrentUser(create: Boolean) {
     val currentUserId = authenticationController.getUserData()!!.id
     getProfileByID(currentUserId, create)
   }
