@@ -194,6 +194,9 @@ class MapViewModelTest {
           callback.invoke(true)
         }
 
+    viewModel.getProfileOfCurrentUser()
+
+    // Then
     // When
     viewModel.retrieveSongFromProfileAndAddToBeacon(beaconId)
   }
@@ -215,6 +218,7 @@ class MapViewModelTest {
             topSongs = emptyList())
     coEvery { profileRepository.getItem(any()) } returns
         flowOf(Result.failure(Exception("Profile not found")))
+    viewModel.getProfileOfCurrentUser()
 
     // When
     viewModel.retrieveSongFromProfileAndAddToBeacon(beaconId)
