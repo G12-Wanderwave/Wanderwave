@@ -234,7 +234,6 @@ class DataClassesTest {
 
     val profileTrackAssociation = ProfileTrackAssociation(profile, track)
 
-
     val mockFirebaseFirestore = mockk<FirebaseFirestore>()
     val mockDocumentReference = mockk<DocumentReference>()
 
@@ -250,7 +249,6 @@ class DataClassesTest {
             "likes" to 0)
 
     assertEquals(expectedMap, profileTrackAssociation.toMap(mockFirebaseFirestore))
-
 
     // test if the profile is null
     val profileTrackAssociation2 = ProfileTrackAssociation(null, track)
@@ -289,7 +287,6 @@ class DataClassesTest {
 
     assertEquals(0, unlikedAssociation.likes)
     assertEquals(0, unlikedAssociation.likersId.size)
-
   }
 
   @Test

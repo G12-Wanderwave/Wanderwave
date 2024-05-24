@@ -1,9 +1,6 @@
 package ch.epfl.cs311.wanderwave.model.data
 
-
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.DocumentReference
-
 import com.google.firebase.firestore.FirebaseFirestore
 
 /**
@@ -67,6 +64,5 @@ data class ProfileTrackAssociation(
         null
       }
     }
-
   }
 }

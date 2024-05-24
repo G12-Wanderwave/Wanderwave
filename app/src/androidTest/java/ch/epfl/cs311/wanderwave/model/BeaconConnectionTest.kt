@@ -248,7 +248,6 @@ public class BeaconConnectionTest {
               location = Location(1.0, 1.0, "Test Location"),
               profileAndTrack = listOf())
 
-
       every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap(firestore)
 
       every { mockDocumentSnapshot.exists() } returns true
@@ -323,7 +322,6 @@ public class BeaconConnectionTest {
               location = Location(1.0, 1.0, "Test Location"),
               profileAndTrack = listOf())
 
-
       val getTestBeaconList = listOf(getTestBeacon, getTestBeacon)
 
       every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap(firestore)
@@ -332,7 +330,6 @@ public class BeaconConnectionTest {
       every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
       every { mockDocumentSnapshot.get("tracks") } returns
           getTestBeacon.profileAndTrack.map { it.toMap(firestore) }
-
 
       every { mockQuerySnapshot.documents } returns
           listOf(mockDocumentSnapshot, mockDocumentSnapshot)
@@ -547,7 +544,6 @@ public class BeaconConnectionTest {
             "testBeaconId",
             Location(1.0, 1.0, "Test Location"),
             listOf(ProfileTrackAssociation(profile, track)))
-
 
     // Mock the Task
     val mockTask = mockk<Task<Transaction>>()

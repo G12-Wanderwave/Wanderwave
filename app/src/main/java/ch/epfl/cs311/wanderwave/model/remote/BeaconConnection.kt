@@ -2,7 +2,6 @@ package ch.epfl.cs311.wanderwave.model.remote
 
 import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Beacon
-import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.TrackRecord
@@ -79,9 +78,8 @@ class BeaconConnection(
 
           val tracksObject = document["tracks"]
 
-
-            if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
-              val profileAndTrackRefs = tracksObject as? List<Map<String, Any>>
+          if (tracksObject is List<*> && tracksObject.all { it is Map<*, *> }) {
+            val profileAndTrackRefs = tracksObject as? List<Map<String, Any>>
 
             coroutineScope.launch {
               val profileAndTracks =
@@ -143,7 +141,6 @@ class BeaconConnection(
 
   override fun itemToMap(beacon: Beacon): Map<String, Any> = beacon.toMap(db)
 
-
   override fun addTrackToBeacon(
       beaconId: String,
       track: Track,
@@ -174,7 +171,6 @@ class BeaconConnection(
 
           beacon?.let { beaconNotNull ->
             val newTracks =
-
                 associations
                     .map { it.toMap(db) }
                     .toMutableList()

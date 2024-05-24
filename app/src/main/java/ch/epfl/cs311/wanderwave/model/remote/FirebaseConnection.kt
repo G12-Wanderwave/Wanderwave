@@ -48,14 +48,13 @@ abstract class FirebaseConnection<T, U>(
       val itemMap = itemToMap(item)
       var documentId: String? = null
 
-    try {
-      val documentReference = db.collection(collectionName).add(itemMap).await()
-      Log.d("Firestore", ADD_SUCCESS_LOG_MESSAGE)
-      documentId = documentReference.id
-    } catch (e: Exception) {
-      Log.e("Firestore", ADD_FAILURE_LOG_MESSAGE, e)
-    }
-
+      try {
+        val documentReference = db.collection(collectionName).add(itemMap).await()
+        Log.d("Firestore", ADD_SUCCESS_LOG_MESSAGE)
+        documentId = documentReference.id
+      } catch (e: Exception) {
+        Log.e("Firestore", ADD_FAILURE_LOG_MESSAGE, e)
+      }
 
       documentId
     }

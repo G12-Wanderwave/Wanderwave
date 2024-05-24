@@ -19,7 +19,6 @@ data class Profile(
     var bannedSongs: List<Track> = emptyList(),
 ) {
 
-
   fun toMap(db: FirebaseFirestore): Map<String, Any> {
 
     fun mapTrackToDocumentReference(tracks: List<Track>): List<DocumentReference> {
@@ -30,7 +29,6 @@ data class Profile(
     val topSongsReferences: List<DocumentReference> = mapTrackToDocumentReference(topSongs)
     val chosenSongsReferences: List<DocumentReference> = mapTrackToDocumentReference(chosenSongs)
     val bannedSongsReferences: List<DocumentReference> = mapTrackToDocumentReference(bannedSongs)
-
 
     return hashMapOf(
         "firstName" to firstName,

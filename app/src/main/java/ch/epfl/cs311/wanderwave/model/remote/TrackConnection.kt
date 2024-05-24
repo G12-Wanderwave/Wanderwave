@@ -97,15 +97,14 @@ class TrackConnection(
                 ?: trySend(
                     Result.failure(
                         Exception("Error fetching the track, firebase error", errorTrack)))
-
           }
               ?: trySend(
                   Result.failure(Exception("Error fetching the track, firebase format is wrong")))
-        } catch (e: Exception) {
-          // Handle exceptions
-          Log.e("Firestore", "Error fetching profile and track:${e.message}")
-          trySend(Result.failure(e))
         }
+      } catch (e: Exception) {
+        // Handle exceptions
+        Log.e("Firestore", "Error fetching profile and track:${e.message}")
+        trySend(Result.failure(e))
       }
     }
     awaitClose { close() }
