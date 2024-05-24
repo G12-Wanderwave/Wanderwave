@@ -70,29 +70,31 @@ class ProfileViewModelTest {
     clearAllMocks() // Clear all MockK mocks
   }
 
-  //
-  // fun likeTrack(track: Track) {
-  //  // Check if song is already liked
-  //  if (!wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value += track
-  // }
   @Test
   fun testLikeTrack() = runBlockingTest {
     val track = Track("id", "title", "artist")
+    val track2 = Track("id2", "title2", "artist2")
     assertTrue(viewModel.wanderwaveLikedTracks.value.isEmpty())
     viewModel.likeTrack(track)
+    viewModel.likeTrack(track2)
     assertFalse(viewModel.wanderwaveLikedTracks.value.isEmpty())
     viewModel.likeTrack(track)
+    viewModel.likeTrack(track2)
     assertFalse(viewModel.wanderwaveLikedTracks.value.isEmpty())
   }
 
   @Test
   fun testUnlikeTrack() = runBlockingTest {
     val track = Track("id", "title", "artist")
+    val track2 = Track("id2", "title2", "artist2")
     viewModel.likeTrack(track)
+    viewModel.likeTrack(track2)
     assertFalse(viewModel.wanderwaveLikedTracks.value.isEmpty())
     viewModel.unlikeTrack(track)
+    viewModel.unlikeTrack(track2)
     assertTrue(viewModel.wanderwaveLikedTracks.value.isEmpty())
     viewModel.unlikeTrack(track)
+    viewModel.unlikeTrack(track2)
     assertTrue(viewModel.wanderwaveLikedTracks.value.isEmpty())
   }
 
