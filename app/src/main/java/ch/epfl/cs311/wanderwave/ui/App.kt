@@ -3,6 +3,8 @@ package ch.epfl.cs311.wanderwave.ui
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -45,6 +47,7 @@ import ch.epfl.cs311.wanderwave.ui.screens.SpotifyConnectScreen
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
 import ch.epfl.cs311.wanderwave.ui.theme.WanderwaveTheme
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.MapViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException
@@ -71,6 +74,7 @@ fun AppScaffold(navController: NavHostController) {
   val profileViewModel: ProfileViewModel = hiltViewModel()
   val trackListViewModel = hiltViewModel<TrackListViewModel>()
   val beaconViewModel = hiltViewModel<BeaconViewModel>()
+  val mapViewModel = hiltViewModel<MapViewModel>()
 
   CreateIcon()
 
@@ -93,6 +97,10 @@ fun AppScaffold(navController: NavHostController) {
         SurroundWithMiniPlayer(displayPlayer = showBottomBar) {
           NavHost(
               navController = navController,
+              enterTransition = { EnterTransition.None },
+              exitTransition = { ExitTransition.None },
+              popEnterTransition = { EnterTransition.None },
+              popExitTransition = { ExitTransition.None },
               startDestination =
                   if (online) Route.SPOTIFY_CONNECT.routeString else Route.TRACK_LIST.routeString,
               modifier =
@@ -107,7 +115,7 @@ fun AppScaffold(navController: NavHostController) {
                 composable(Route.TRACK_LIST.routeString) {
                   TrackListScreen(navActions, showSnackbar, trackListViewModel, online)
                 }
-                if (online) composable(Route.MAP.routeString) { MapScreen(navActions) }
+                if (online) composable(Route.MAP.routeString) { MapScreen(navActions, mapViewModel) }
                 composable(Route.PROFILE.routeString) {
                   ProfileScreen(navActions, profileViewModel, online)
                 }

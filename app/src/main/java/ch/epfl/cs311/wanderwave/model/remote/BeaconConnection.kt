@@ -26,18 +26,16 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 
 class BeaconConnection(
-    private val database: FirebaseFirestore,
+    private val db: FirebaseFirestore,
+    private val ioDispatcher: CoroutineDispatcher,
     val trackConnection: TrackConnection,
     val profileConnection: ProfileConnection,
     private val appDatabase: AppDatabase,
-    private val ioDispatcher: CoroutineDispatcher
-) : FirebaseConnection<Beacon, Beacon>(database), BeaconRepository {
+) : FirebaseConnection<Beacon, Beacon>(db, ioDispatcher), BeaconRepository {
 
   override val collectionName: String = "beacons"
 
   override val getItemId = { beacon: Beacon -> beacon.id }
-
-  override val db = database
 
   // You can create a CoroutineScope instance
   private val coroutineScope = CoroutineScope(Dispatchers.Main)
@@ -126,16 +124,18 @@ class BeaconConnection(
   override fun getAll(): Flow<List<Beacon>> {
     val dataFlow = MutableStateFlow<List<Beacon>?>(null)
 
-    db.collection(collectionName)
-        .get()
-        .addOnSuccessListener { documents ->
-          val beacons = documents.mapNotNull { documentToItem(it) }
-          dataFlow.value = beacons
-        }
-        .addOnFailureListener { e ->
-          dataFlow.value = null
-          Log.e("Firestore", "Error getting documents: ", e)
-        }
+    CoroutineScope(ioDispatcher).launch {
+      db.collection(collectionName)
+          .get()
+          .addOnSuccessListener { documents ->
+            val beacons = documents.mapNotNull { documentToItem(it) }
+            dataFlow.value = beacons
+          }
+          .addOnFailureListener { e ->
+            dataFlow.value = null
+            Log.e("Firestore", "Error getting documents: ", e)
+          }
+    }
 
     return dataFlow.filterNotNull()
   }
