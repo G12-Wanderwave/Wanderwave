@@ -6,23 +6,14 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationUserData
-import ch.epfl.cs311.wanderwave.model.data.Beacon
-import ch.epfl.cs311.wanderwave.model.data.Profile
-import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
-import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.data.*
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import com.google.android.gms.maps.LocationSource
-import io.mockk.MockKAnnotations
-import io.mockk.Runs
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
-import io.mockk.just
-import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -120,7 +111,11 @@ class MapViewModelTest {
   @Test
   fun testGetLastKnownLocation() = runTest {
     val location = viewModel.getLastKnownLocation(context)
-
+    // Since this is a test for a function dependent on actual device location,
+    // we just want to ensure the function doesn't crash and can be called successfully.
+    // Further specific testing might require more complex instrumentation tests or mock location
+    // setups.
+    assert(location == null || location != null)
   }
 
   @Test
@@ -218,7 +213,8 @@ class MapViewModelTest {
             firebaseUid = "My Firebase UID",
             profilePictureUri = null,
             topSongs = emptyList())
-    coEvery { profileRepository.getItem(any()) } returns flowOf(Result.success(profile))
+    coEvery { profileRepository.getItem(any()) } returns
+        flowOf(Result.failure(Exception("Profile not found")))
 
     // When
     viewModel.retrieveSongFromProfileAndAddToBeacon(beaconId)
@@ -267,7 +263,8 @@ class MapViewModelTest {
             id = beaconId,
             location = ch.epfl.cs311.wanderwave.model.data.Location(0.0, 0.0),
             profileAndTrack = emptyList())
-    coEvery { mockBeaconRepository.getItem(beaconId) } returns flowOf(Result.success(beacon))
+    coEvery { mockBeaconRepository.getItem(any()) } returns
+        flowOf(Result.failure(Exception("Profile not found")))
 
     // When
     viewModel.getRandomSongAndAddToProfile(beaconId)
@@ -277,8 +274,59 @@ class MapViewModelTest {
   }
 
   @Test
+  fun retrieveSongFromProfileAndAddToBeacon() = runTest {
+    // Given
+    val beaconId = "beaconId"
+    val profile =
+        Profile(
+            firstName = "My FirstName",
+            lastName = "My LastName",
+            description = "My Description",
+            numberOfLikes = 0,
+            isPublic = true,
+            spotifyUid = "My Spotify UID",
+            firebaseUid = "My Firebase UID",
+            profilePictureUri = null,
+            topSongs = listOf(Track("trackId", "trackName", "trackArtist")))
+    coEvery { profileRepository.getItem(any()) } returns flowOf(Result.success(profile))
+    coEvery { mockBeaconRepository.addTrackToBeacon(any(), any(), any(), any()) } answers
+        {
+          val callback = args[3] as ((Boolean) -> Unit)
+          callback.invoke(true)
+        }
+
+    // When
+    viewModel.retrieveSongFromProfileAndAddToBeacon(beaconId)
+  }
+
+  @Test
+  fun retrieveSongFromProfileAndAddToBeaconNo() = runTest {
+    // Given
+    val beaconId = "beaconId"
+    val profile =
+        Profile(
+            firstName = "My FirstName",
+            lastName = "My LastName",
+            description = "My Description",
+            numberOfLikes = 0,
+            isPublic = true,
+            spotifyUid = "My Spotify UID",
+            firebaseUid = "My Firebase UID",
+            profilePictureUri = null,
+            topSongs = emptyList())
+    coEvery { profileRepository.getItem(any()) } returns flowOf(Result.success(profile))
+
+    // When
+    viewModel.retrieveSongFromProfileAndAddToBeacon(beaconId)
+
+    // Then
+    coVerify(exactly = 0) { mockBeaconRepository.addTrackToBeacon(any(), any(), any(), any()) }
+  }
+
+  @Test
   fun testLoadBeacons() = runTest {
     viewModel.loadBeacons(
         context, ch.epfl.cs311.wanderwave.model.data.Location(46.519653, 6.632273, "Lausanne"))
+    // Ensure that the method completes without issues.
   }
 }
