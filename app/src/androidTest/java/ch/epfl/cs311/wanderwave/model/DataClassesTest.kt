@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.model
 
-import android.net.Uri
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
@@ -52,7 +51,6 @@ class DataClassesTest {
     every { document.getString("description") } returns "TestDescription"
     every { document.getLong("numberOfLikes") } returns 10L
     every { document.getBoolean("isPublic") } returns true
-    every { document.getString("profilePictureUri") } returns "https://example.com/profile.jpg"
     every { document.getString("spotifyUid") } returns "TestSpotifyUid"
     every { document.getString("firebaseUid") } returns "TestFirebaseUid"
   }
@@ -80,7 +78,6 @@ class DataClassesTest {
     every { document.getString("description") } returns null
     every { document.getLong("numberOfLikes") } returns null
     every { document.getBoolean("isPublic") } returns null
-    every { document.getString("profilePictureUri") } returns null
     every { document.getString("spotifyUid") } returns null
     every { document.getString("firebaseUid") } returns null
 
@@ -93,7 +90,6 @@ class DataClassesTest {
     assertEquals("", profile.description)
     assertEquals(0, profile.numberOfLikes)
     assertEquals(false, profile.isPublic)
-    assertEquals(null, profile.profilePictureUri)
     assertEquals("", profile.spotifyUid)
     assertEquals("", profile.firebaseUid)
   }
@@ -154,7 +150,6 @@ class DataClassesTest {
             description = "Test description",
             numberOfLikes = 10,
             isPublic = true,
-            profilePictureUri = Uri.parse("https://example.com/image.jpg"),
             spotifyUid = "spotify123",
             firebaseUid = "firebase123")
 
@@ -167,7 +162,6 @@ class DataClassesTest {
             "spotifyUid" to "spotify123",
             "firebaseUid" to "firebase123",
             "isPublic" to true,
-            "profilePictureUri" to "https://example.com/image.jpg",
             "chosenSongs" to listOf<DocumentReference>(),
             "topSongs" to listOf<DocumentReference>(),
             "bannedSongs" to listOf<DocumentReference>())
@@ -225,7 +219,6 @@ class DataClassesTest {
             description = "Test description",
             numberOfLikes = 10,
             isPublic = true,
-            profilePictureUri = Uri.parse("https://example.com/image.jpg"),
             spotifyUid = "spotify123",
             firebaseUid = "firebase123")
 
