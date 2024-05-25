@@ -38,18 +38,6 @@ constructor(
   private var _uiState = MutableStateFlow(UIState())
   val uiState: StateFlow<UIState> = _uiState
 
-  private var _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
-  override val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
-
-  private var _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
-  override val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
-
-  private val _songLists = MutableStateFlow<List<SongList>>(emptyList())
-  val songLists: StateFlow<List<SongList>> = _songLists
-
-  private val _isTopSongsListVisible = MutableStateFlow(false)
-  override val isTopSongsListVisible: StateFlow<Boolean> = _isTopSongsListVisible
-
   private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
 
@@ -102,57 +90,23 @@ constructor(
   }
 
   // Function to add a track to a song list
-  override fun addTrackToList(listName: ListType, track: Track) {
+  override fun addTrackToList(track: Track) {
     addTrackToBeacon(
         beaconId,
-        track,
-        { success ->
-          if (success) {
+        track
+    ) { success ->
+        if (success) {
             getBeaconById(beaconId)
             Log.i("BeaconViewModel", "Track added to beacon")
-          } else {
+        } else {
             Log.e("BeaconViewModel", "Failed to add track to beacon")
-          }
-        })
+        }
+    }
   }
-  /**
-   * Get all the element of the main screen and add them to the top list
-   *
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 3.0
-   */
-  override fun retrieveAndAddSubsection() {
-    retrieveAndAddSubsectionFromSpotify(_spotifySubsectionList, spotifyController, viewModelScope)
-  }
-  /**
-   * Get all the element of the main screen and add them to the top list
-   *
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 3.0
-   */
-  override fun retrieveChild(item: ListItem) {
-    Log.d("BeaconViewModel", "retrieveChild: $item")
-    retrieveChildFromSpotify(
-        item, this._childrenPlaylistTrackList, spotifyController, viewModelScope)
-  }
+
 
   override suspend fun getLikedTracks() {
     getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
-  }
-
-  override fun getTracksFromPlaylist(playlistId: String) {
-    getTracksFromSpotifyPlaylist(
-        playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
-  }
-
-  override fun emptyChildrenList() {
-    _childrenPlaylistTrackList.value = (emptyList())
-  }
-
-  fun changeChosenSongs() {
-    _isTopSongsListVisible.value = !_isTopSongsListVisible.value
   }
 
   fun selectTrack(track: Track) {

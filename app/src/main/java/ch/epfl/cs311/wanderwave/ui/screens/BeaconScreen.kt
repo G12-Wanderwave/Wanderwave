@@ -134,9 +134,6 @@ fun BeaconInformation(location: Location) {
 
 @Composable
 fun AddTrack(beacon: Beacon, navigationActions: NavigationActions, viewModel: BeaconViewModel) {
-  val chosenList = remember {
-    mutableStateOf(if (viewModel.isTopSongsListVisible.value) " Top Songs " else "Liked Songs")
-  }
   viewModel.beaconId = beacon.id
   Log.d("AddTrack", "Adding track to beacon ${beacon.id}")
 
@@ -145,19 +142,9 @@ fun AddTrack(beacon: Beacon, navigationActions: NavigationActions, viewModel: Be
       horizontalArrangement = Arrangement.Center) {
         Button(
             onClick = {
-              viewModel.changeChosenSongs()
-              chosenList.value =
-                  if (viewModel.isTopSongsListVisible.value) " Top Songs " else "Liked Songs"
+                navigationActions.navigateToSelectSongScreen(viewModelType.BEACON)
             }) {
-              Text(text = chosenList.value)
-            }
-        IconButton(
-            onClick = {
-              navigationActions.navigateToSelectSongScreen(viewModelType.BEACON)
-            }) { // Toggle dialog visibility
-              Icon(
-                  imageVector = Icons.Filled.Add,
-                  contentDescription = stringResource(R.string.beaconTitle))
+              Text(text = "Add a song")
             }
       }
 }

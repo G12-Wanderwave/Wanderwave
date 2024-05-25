@@ -72,14 +72,10 @@ val INPUT_BOX_NAM_SIZE = 150.dp
 fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel, online: Boolean) {
   val currentProfileState by viewModel.profile.collectAsState()
   val songLists by viewModel.songLists.collectAsState()
-  val dialogListType by remember { mutableStateOf(ListType.TOP_SONGS) }
-  val isTopSongsListVisible by viewModel.isTopSongsListVisible.collectAsState(false)
 
   val currentProfile: Profile = currentProfileState
   LaunchedEffect(Unit) {
     viewModel.getProfileOfCurrentUser(true)
-    viewModel.createSpecificSongList(ListType.TOP_SONGS)
-    viewModel.createSpecificSongList(ListType.LIKED_SONGS)
   }
 
   Column(
@@ -99,32 +95,13 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel, on
                 onClick = { navActions.navigateTo(Route.EDIT_PROFILE) })
           }
         }
-        // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
-        Button(
-            onClick = { viewModel.changeChosenSongs() },
-            modifier = Modifier.testTag("toggleSongList"),
-            colors =
-                ButtonColors(
-                    contentColor = Color.Black,
-                    containerColor =
-                        if (isTopSongsListVisible) MaterialTheme.colorScheme.primary
-                        else spotify_green,
-                    disabledContentColor = Color.Gray,
-                    disabledContainerColor = Color.Black),
-            shape = RoundedCornerShape(size = 10.dp)) {
-              Text(
-                  if (isTopSongsListVisible) stringResource(id = R.string.showChosenSongs)
-                  else stringResource(id = R.string.showLikedSongs))
-            }
         SongsListDisplay(
             navigationActions = navActions,
             songLists = songLists,
-            isTopSongsListVisible = isTopSongsListVisible,
             onAddTrack = { track ->
-              viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
-              viewModel.addTrackToList(dialogListType, track)
+              viewModel.addTrackToList(track)
             },
-            onSelectTrack = { track -> viewModel.selectTrack(track, dialogListType.name) },
+            onSelectTrack = { track -> viewModel.selectTrack(track) },
             viewModelName = viewModelType.PROFILE,
         )
       }

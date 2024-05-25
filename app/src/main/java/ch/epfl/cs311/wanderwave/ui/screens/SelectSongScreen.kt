@@ -46,18 +46,13 @@ import com.spotify.protocol.types.ListItem
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectSongScreen(navActions: NavigationActions, viewModel: SpotifySongsActions) {
-  val subsectionList by viewModel.spotifySubsectionList.collectAsState()
   val likedSongsList by viewModel.likedSongsTrackList.collectAsState()
-  val childrenPlaylistTrackList by viewModel.childrenPlaylistTrackList.collectAsState()
-  val isTopSongsListVisible by viewModel.isTopSongsListVisible.collectAsState(false)
 
   initSongScreen(viewModel)
 
-  val displayedList =
-      determineDisplayedList(
-          isTopSongsListVisible, subsectionList, likedSongsList, childrenPlaylistTrackList)
+  val displayedList =likedSongsList
 
-  SongScreenScaffold(navActions, displayedList, viewModel, isTopSongsListVisible)
+  SongScreenScaffold(navActions, displayedList, viewModel)
 }
 
 /**
@@ -71,34 +66,7 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: SpotifySongsActio
 @Composable
 fun initSongScreen(viewModel: SpotifySongsActions) {
   LaunchedEffect(Unit) {
-    viewModel.retrieveAndAddSubsection()
     viewModel.getLikedTracks()
-  }
-}
-
-/**
- * Determine which list to display
- *
- * @param isTopSongsListVisible Boolean indicating if the top songs list is visible
- * @param subsectionList List of subsections
- * @param likedSongsList List of liked songs
- * @param childrenPlaylistTrackList List of children playlist tracks
- * @return List of ListItem to display
- * @author Menzo Bouaissi
- * @since 3.0
- * @last update 3.0
- */
-@Composable
-fun determineDisplayedList(
-    isTopSongsListVisible: Boolean,
-    subsectionList: List<ListItem>,
-    likedSongsList: List<ListItem>,
-    childrenPlaylistTrackList: List<ListItem>
-): List<ListItem> {
-  return when {
-    isTopSongsListVisible ->
-        if (childrenPlaylistTrackList.isNotEmpty()) childrenPlaylistTrackList else subsectionList
-    else -> likedSongsList
   }
 }
 
@@ -108,7 +76,6 @@ fun determineDisplayedList(
  * @param navActions Navigation actions
  * @param displayedList List of ListItem to display
  * @param viewModel ProfileViewModel
- * @param isTopSongsListVisible Boolean indicating if the top songs list is visible
  * @author Menzo Bouaissi
  * @since 3.0
  * @last update 3.0
@@ -118,8 +85,7 @@ fun determineDisplayedList(
 fun SongScreenScaffold(
     navActions: NavigationActions,
     displayedList: List<ListItem>,
-    viewModel: SpotifySongsActions,
-    isTopSongsListVisible: Boolean
+    viewModel: SpotifySongsActions
 ) {
   Scaffold(
       topBar = {
@@ -131,7 +97,7 @@ fun SongScreenScaffold(
               }
             })
       }) { innerPadding ->
-        SongList(innerPadding, displayedList, navActions, viewModel, isTopSongsListVisible)
+        SongList(innerPadding, displayedList, navActions, viewModel)
       }
 }
 
@@ -173,12 +139,11 @@ fun SongList(
     items: List<ListItem>,
     navActions: NavigationActions,
     viewModel: SpotifySongsActions,
-    isTopSongsListVisible: Boolean
 ) {
   LazyColumn(contentPadding = paddingValues, modifier = Modifier.padding(all = 16.dp)) {
     items(items, key = { it.id }) { item ->
       TrackItem(
-          item, onClick = { handleItemClick(item, navActions, viewModel, isTopSongsListVisible) })
+          item, onClick = { handleItemClick(item, navActions, viewModel) })
     }
   }
 }
@@ -197,38 +162,10 @@ fun SongList(
 fun handleItemClick(
     listItem: ListItem,
     navActions: NavigationActions,
-    viewModel: SpotifySongsActions,
-    isTopSongsListVisible: Boolean
+    viewModel: SpotifySongsActions
 ) {
-  Log.d("SelectSongScreen", "Adding track to list${viewModel.childrenPlaylistTrackList.value}")
 
-  if (listItem.id.contains("spotify:track:")) {
-    viewModel.addTrackToList(
-        if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS,
-        Track(listItem.id, listItem.title, listItem.subtitle))
-    navActions.goBack()
-    return
-  }
 
-  val playlistHeader = "spotify:playlist:"
-  if (listItem.id.contains(playlistHeader)) {
-    viewModel.getTracksFromPlaylist(listItem.id.substring(playlistHeader.length))
-    return
-  }
-
-  if (listItem.hasChildren) {
-    viewModel.retrieveChild(listItem)
-    return
-  }
-  if (listItem.id.contains("spotify:") ||
-      listItem.id.isBlank()) { // TODO: create an issue for handling this
-    viewModel.emptyChildrenList()
-    navActions.goBack()
-    return
-  }
-
-  viewModel.addTrackToList(
-      if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS,
-      Track(listItem.id, listItem.title, listItem.subtitle))
+  viewModel.addTrackToList(       Track(listItem.id, listItem.title, listItem.subtitle))
   navActions.goBack()
 }

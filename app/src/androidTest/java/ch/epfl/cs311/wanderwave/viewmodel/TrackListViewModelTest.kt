@@ -112,36 +112,12 @@ class TrackListViewModelTest {
     verify { mockSpotifyController.playTrackList(any(), track) }
   }
 
-  @Test
-  fun testRetrieveSubsectionAndChildrenFlow() =
-      testDispatcher.runBlockingTest {
-        val expectedListItem = ListItem("id", "title", null, "subtitle", "", false, true)
-        every { mockSpotifyController.getAllElementFromSpotify() } returns
-            flowOf(listOf(expectedListItem))
-        every {
-          mockSpotifyController.getAllChildren(
-              ListItem("id", "title", null, "subtitle", "", false, true))
-        } returns flowOf(listOf(expectedListItem))
 
-        viewModel.retrieveAndAddSubsection()
-        viewModel.retrieveChild(expectedListItem)
-
-        advanceUntilIdle() // This replaces advanceTimeBy and ensures all coroutines are completed
-
-        val result = viewModel.spotifySubsectionList.first() // Safely access the first item
-        val result2 = viewModel.childrenPlaylistTrackList.first() // Safely access the first item
-        Log.d(
-            "TrackListViewModel23",
-            "retrieveAndAddSubsection: ${viewModel.spotifySubsectionList.value}")
-
-        assertEquals(listOf(expectedListItem), result)
-        assertEquals(listOf(expectedListItem), result2)
-      }
 
   @Test
   fun testAddTrackToList() = runBlocking {
     val track = Track("spotify:track:1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
-    viewModel.addTrackToList(ListType.TOP_SONGS, track)
+    viewModel.addTrackToList(track)
     assertTrue(viewModel.uiState.value.tracks.contains(track))
   }
 
@@ -149,7 +125,7 @@ class TrackListViewModelTest {
   fun testAddTrackToListWithoutPrefix() = runBlocking {
     val track = Track("spotify:track:1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
     val trackWithoutPrefix = Track("1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
-    viewModel.addTrackToList(ListType.TOP_SONGS, trackWithoutPrefix)
+    viewModel.addTrackToList( trackWithoutPrefix)
     assertTrue(viewModel.uiState.value.tracks.contains(track))
   }
 
@@ -192,10 +168,4 @@ class TrackListViewModelTest {
     assertEquals(false, viewModel.uiState.value.loading)
   }
 
-  @Test
-  fun emptyChildrenList_clearsChildrenPlaylistTrackList() = runBlockingTest {
-
-    // Act
-    viewModel.emptyChildrenList()
-  }
 }

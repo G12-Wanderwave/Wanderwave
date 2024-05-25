@@ -28,21 +28,11 @@ class SpotifySongsActionsTest {
 
   @Test
   fun addTrackToListAddsTrack() {
-    spotifySongsActions.addTrackToList(ListType.TOP_SONGS, mockTrack)
-    verify { spotifySongsActions.addTrackToList(ListType.TOP_SONGS, mockTrack) }
+    spotifySongsActions.addTrackToList(mockTrack)
+    verify { spotifySongsActions.addTrackToList(mockTrack) }
   }
 
-  @Test
-  fun retrieveAndAddSubsectionRetrievesAndAddsSubsection() {
-    spotifySongsActions.retrieveAndAddSubsection()
-    verify { spotifySongsActions.retrieveAndAddSubsection() }
-  }
 
-  @Test
-  fun retrieveChildRetrievesChild() {
-    spotifySongsActions.retrieveChild(mockListItem)
-    verify { spotifySongsActions.retrieveChild(mockListItem) }
-  }
 
   @Test
   fun getLikedTracksGetsLikedTracks() = runBlockingTest {

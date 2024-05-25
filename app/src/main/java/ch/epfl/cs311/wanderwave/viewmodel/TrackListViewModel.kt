@@ -37,8 +37,6 @@ constructor(
   private val _uiState = MutableStateFlow(UiState(loading = true))
   val uiState: StateFlow<UiState> = _uiState
 
-  private val _isTopSongsListVisible = MutableStateFlow(true)
-  override val isTopSongsListVisible: StateFlow<Boolean> = _isTopSongsListVisible
 
   private var _searchQuery = MutableStateFlow("")
 
@@ -74,11 +72,6 @@ constructor(
     }
   }
 
-  private var _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
-  override val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
-
-  private var _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
-  override val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
 
   private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
@@ -119,41 +112,20 @@ constructor(
         }
   }
 
-  override fun addTrackToList(listName: ListType, track: Track) {
-    Log.d("ProfileViewModel", "addTrackToList $track")
-    val newTrack =
-        if (!track.id.contains("spotify:track:")) {
-          Track("spotify:track:" + track.id, track.title, track.artist)
-        } else {
-          track
+    override fun addTrackToList( track: Track) {
+        val newTrack =
+            if (!track.id.contains("spotify:track:")) {
+                Track("spotify:track:" + track.id, track.title, track.artist)
+            } else {
+                track
+            }
+        if (!_uiState.value.tracks.contains(newTrack)) {
+            val updatedTracks = _uiState.value.tracks + newTrack
+            _uiState.value = _uiState.value.copy(tracks = updatedTracks)
         }
-    Log.d("ProfileViewModel", "addTrackToListnewTrack $newTrack")
+    }
 
-    val updatedTracks = _uiState.value.tracks + newTrack
-    _uiState.value = _uiState.value.copy(tracks = updatedTracks)
-    _childrenPlaylistTrackList.value = (emptyList())
-  }
 
-  /**
-   * Get all the element of the main screen and add them to the top list
-   *
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 3.0
-   */
-  override fun retrieveAndAddSubsection() {
-    retrieveAndAddSubsectionFromSpotify(_spotifySubsectionList, spotifyController, viewModelScope)
-  }
-  /**
-   * Get all the element of the main screen and add them to the top list
-   *
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 3.0
-   */
-  override fun retrieveChild(item: ListItem) {
-    retrieveChildFromSpotify(item, _childrenPlaylistTrackList, spotifyController, viewModelScope)
-  }
 
   /**
    * Plays the given track using the SpotifyController.
@@ -174,15 +146,6 @@ constructor(
 
   override suspend fun getLikedTracks() {
     getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
-  }
-
-  override fun getTracksFromPlaylist(playlistId: String) {
-    getTracksFromSpotifyPlaylist(
-        playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
-  }
-
-  override fun emptyChildrenList() {
-    _childrenPlaylistTrackList.value = (emptyList())
   }
 
   data class UiState(

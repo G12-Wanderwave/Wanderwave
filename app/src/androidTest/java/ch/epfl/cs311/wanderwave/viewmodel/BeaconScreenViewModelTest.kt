@@ -104,49 +104,12 @@ class BeaconScreenViewModelTest {
     verify { beaconConnection.addTrackToBeacon(any(), any(), any(), any()) }
   }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
-  @Test
-  fun testAddTrackToList() = runBlockingTest {
-    val newTrack = Track("Some Track ID", "Track Title", "Artist Name")
-    Assert.assertTrue(viewModel.songLists.value.isEmpty())
-    viewModel.addTrackToList(ListType.TOP_SONGS, newTrack)
-    Assert.assertEquals(0, viewModel.songLists.value.size)
-  }
 
-  @Test
-  fun testRetrieveSubsectionAndChildrenFlow() = runBlockingTest {
-    val expectedListItem = ListItem("id", "title", null, "subtitle", "", false, true)
-    every { mockSpotifyController.getAllElementFromSpotify() } returns
-        flowOf(listOf(expectedListItem))
-    every {
-      mockSpotifyController.getAllChildren(
-          ListItem("id", "title", null, "subtitle", "", false, true))
-    } returns flowOf(listOf(expectedListItem))
-    viewModel.retrieveAndAddSubsection()
-    viewModel.retrieveChild(expectedListItem)
-    advanceUntilIdle() // Ensure all coroutines are completed
 
-    // val result = viewModel.spotifySubsectionList.first()  // Safely access the first item
-    val flow = viewModel.spotifySubsectionList
-    val flow2 = viewModel.childrenPlaylistTrackList
-    val result = flow.timeout(2.seconds).catch {}.firstOrNull()
-    val result2 = flow2.timeout(2.seconds).catch {}.firstOrNull()
-
-    Assert.assertEquals(expectedListItem, result?.get(0))
-    Assert.assertEquals(expectedListItem, result2?.get(0))
-  }
 
   @Test fun testGetLikedTracks() = runBlocking { viewModel.getLikedTracks() }
 
-  @Test
-  fun testGetTracksFromPlaylist() = runBlocking { viewModel.getTracksFromPlaylist("playlistId") }
 
-  @Test
-  fun testChangeChosenSongs() = runBlocking {
-    val t = viewModel.isTopSongsListVisible.value
-    viewModel.changeChosenSongs()
-    assertNotEquals(t, viewModel.isTopSongsListVisible.value)
-  }
 
   @Test
   fun canSelectTracks() {
@@ -205,10 +168,5 @@ class BeaconScreenViewModelTest {
     assertEquals("Test Exception", uiStateError.error)
   }
 
-  @Test
-  fun emptyChildrenList_clearsChildrenPlaylistTrackList() = runBlockingTest {
 
-    // Act
-    viewModel.emptyChildrenList()
-  }
 }
