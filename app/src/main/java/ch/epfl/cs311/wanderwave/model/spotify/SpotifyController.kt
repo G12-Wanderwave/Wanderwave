@@ -487,8 +487,7 @@ suspend fun getLikedTracksFromSpotify(
   scope.launch {
     val url = "https://api.spotify.com/v1/me/tracks"
     try {
-      val jsonResponse =
-          spotifyController.spotifyGetFromURL("$url?limit=50") // TODO : revoir la limite
+      val jsonResponse = spotifyController.spotifyGetFromURL("$url?limit=50")
       parseTracks(jsonResponse, likedSongsTrackList)
     } catch (e: Exception) {
       e.printStackTrace()
@@ -502,6 +501,7 @@ fun getTracksFromSpotifyPlaylist(
     spotifyController: SpotifyController,
     scope: CoroutineScope
 ) {
+
   scope.launch {
     val url = "https://api.spotify.com/v1/playlists/$playlistId/tracks"
     try {

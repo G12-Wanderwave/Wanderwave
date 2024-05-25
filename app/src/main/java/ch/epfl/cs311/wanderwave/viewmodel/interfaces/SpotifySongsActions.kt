@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.viewmodel.interfaces
 
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import com.spotify.protocol.types.ListItem
 import kotlinx.coroutines.flow.StateFlow
@@ -20,8 +19,6 @@ interface SpotifySongsActions {
    */
   fun addTrackToList(track: Track)
 
-
-
   /**
    * Get all the liked tracks of the user and add them to the likedSongs list.
    *
@@ -30,6 +27,4 @@ interface SpotifySongsActions {
    * @last update 3.0
    */
   suspend fun getLikedTracks()
-
-
 }

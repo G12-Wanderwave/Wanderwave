@@ -27,8 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,7 +38,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -49,7 +46,6 @@ import ch.epfl.cs311.wanderwave.ui.components.profile.ClickableIcon
 import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
 import ch.epfl.cs311.wanderwave.ui.components.profile.SongsListDisplay
 import ch.epfl.cs311.wanderwave.ui.components.profile.VisitCard
-import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
 const val SCALE_X = 0.5f
@@ -74,9 +70,7 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel, on
   val songLists by viewModel.songLists.collectAsState()
 
   val currentProfile: Profile = currentProfileState
-  LaunchedEffect(Unit) {
-    viewModel.getProfileOfCurrentUser(true)
-  }
+  LaunchedEffect(Unit) { viewModel.getProfileOfCurrentUser(true) }
 
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
@@ -98,9 +92,7 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel, on
         SongsListDisplay(
             navigationActions = navActions,
             songLists = songLists,
-            onAddTrack = { track ->
-              viewModel.addTrackToList(track)
-            },
+            onAddTrack = { track -> viewModel.addTrackToList(track) },
             onSelectTrack = { track -> viewModel.selectTrack(track) },
             viewModelName = viewModelType.PROFILE,
         )

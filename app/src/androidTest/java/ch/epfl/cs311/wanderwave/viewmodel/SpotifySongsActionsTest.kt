@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 import com.google.common.base.Verify.verify
@@ -31,8 +30,6 @@ class SpotifySongsActionsTest {
     spotifySongsActions.addTrackToList(mockTrack)
     verify { spotifySongsActions.addTrackToList(mockTrack) }
   }
-
-
 
   @Test
   fun getLikedTracksGetsLikedTracks() = runBlockingTest {

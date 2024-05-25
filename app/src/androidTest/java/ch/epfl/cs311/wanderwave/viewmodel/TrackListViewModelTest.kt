@@ -1,12 +1,9 @@
-import android.util.Log
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.TrackRecord
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
-import com.spotify.protocol.types.ListItem
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -19,7 +16,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
@@ -112,8 +108,6 @@ class TrackListViewModelTest {
     verify { mockSpotifyController.playTrackList(any(), track) }
   }
 
-
-
   @Test
   fun testAddTrackToList() = runBlocking {
     val track = Track("spotify:track:1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
@@ -125,7 +119,7 @@ class TrackListViewModelTest {
   fun testAddTrackToListWithoutPrefix() = runBlocking {
     val track = Track("spotify:track:1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
     val trackWithoutPrefix = Track("1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
-    viewModel.addTrackToList( trackWithoutPrefix)
+    viewModel.addTrackToList(trackWithoutPrefix)
     assertTrue(viewModel.uiState.value.tracks.contains(track))
   }
 
@@ -167,5 +161,4 @@ class TrackListViewModelTest {
     assertEquals(emptyList<Track>(), viewModel.uiState.value.tracks)
     assertEquals(false, viewModel.uiState.value.loading)
   }
-
 }

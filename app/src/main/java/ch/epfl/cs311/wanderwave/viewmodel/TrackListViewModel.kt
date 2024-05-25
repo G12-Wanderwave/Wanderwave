@@ -1,19 +1,14 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import android.util.Log
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
-import ch.epfl.cs311.wanderwave.model.spotify.getTracksFromSpotifyPlaylist
-import ch.epfl.cs311.wanderwave.model.spotify.retrieveAndAddSubsectionFromSpotify
-import ch.epfl.cs311.wanderwave.model.spotify.retrieveChildFromSpotify
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,7 +31,6 @@ constructor(
 
   private val _uiState = MutableStateFlow(UiState(loading = true))
   val uiState: StateFlow<UiState> = _uiState
-
 
   private var _searchQuery = MutableStateFlow("")
 
@@ -71,7 +65,6 @@ constructor(
       _uiState.value = _uiState.value.copy(tracks = trackDetails, loading = false)
     }
   }
-
 
   private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
@@ -112,20 +105,18 @@ constructor(
         }
   }
 
-    override fun addTrackToList( track: Track) {
-        val newTrack =
-            if (!track.id.contains("spotify:track:")) {
-                Track("spotify:track:" + track.id, track.title, track.artist)
-            } else {
-                track
-            }
-        if (!_uiState.value.tracks.contains(newTrack)) {
-            val updatedTracks = _uiState.value.tracks + newTrack
-            _uiState.value = _uiState.value.copy(tracks = updatedTracks)
+  override fun addTrackToList(track: Track) {
+    val newTrack =
+        if (!track.id.contains("spotify:track:")) {
+          Track("spotify:track:" + track.id, track.title, track.artist)
+        } else {
+          track
         }
+    if (!_uiState.value.tracks.contains(newTrack)) {
+      val updatedTracks = _uiState.value.tracks + newTrack
+      _uiState.value = _uiState.value.copy(tracks = updatedTracks)
     }
-
-
+  }
 
   /**
    * Plays the given track using the SpotifyController.

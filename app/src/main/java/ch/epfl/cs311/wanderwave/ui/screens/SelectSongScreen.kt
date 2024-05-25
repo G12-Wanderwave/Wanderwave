@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -28,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
@@ -50,7 +48,7 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: SpotifySongsActio
 
   initSongScreen(viewModel)
 
-  val displayedList =likedSongsList
+  val displayedList = likedSongsList
 
   SongScreenScaffold(navActions, displayedList, viewModel)
 }
@@ -65,9 +63,7 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: SpotifySongsActio
  */
 @Composable
 fun initSongScreen(viewModel: SpotifySongsActions) {
-  LaunchedEffect(Unit) {
-    viewModel.getLikedTracks()
-  }
+  LaunchedEffect(Unit) { viewModel.getLikedTracks() }
 }
 
 /**
@@ -142,8 +138,7 @@ fun SongList(
 ) {
   LazyColumn(contentPadding = paddingValues, modifier = Modifier.padding(all = 16.dp)) {
     items(items, key = { it.id }) { item ->
-      TrackItem(
-          item, onClick = { handleItemClick(item, navActions, viewModel) })
+      TrackItem(item, onClick = { handleItemClick(item, navActions, viewModel) })
     }
   }
 }
@@ -165,7 +160,6 @@ fun handleItemClick(
     viewModel: SpotifySongsActions
 ) {
 
-
-  viewModel.addTrackToList(       Track(listItem.id, listItem.title, listItem.subtitle))
+  viewModel.addTrackToList(Track(listItem.id, listItem.title, listItem.subtitle))
   navActions.goBack()
 }

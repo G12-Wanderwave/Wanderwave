@@ -3,7 +3,6 @@ package ch.epfl.cs311.wanderwave.viewmodel
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationUserData
 import ch.epfl.cs311.wanderwave.model.data.Beacon
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
@@ -12,30 +11,21 @@ import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
-import com.spotify.protocol.types.ListItem
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.verify
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
@@ -104,12 +94,7 @@ class BeaconScreenViewModelTest {
     verify { beaconConnection.addTrackToBeacon(any(), any(), any(), any()) }
   }
 
-
-
-
   @Test fun testGetLikedTracks() = runBlocking { viewModel.getLikedTracks() }
-
-
 
   @Test
   fun canSelectTracks() {
@@ -167,6 +152,4 @@ class BeaconScreenViewModelTest {
     assertFalse(uiStateError.isLoading)
     assertEquals("Test Exception", uiStateError.error)
   }
-
-
 }

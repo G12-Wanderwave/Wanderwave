@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Beacon
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
@@ -14,9 +13,6 @@ import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
-import ch.epfl.cs311.wanderwave.model.spotify.getTracksFromSpotifyPlaylist
-import ch.epfl.cs311.wanderwave.model.spotify.retrieveAndAddSubsectionFromSpotify
-import ch.epfl.cs311.wanderwave.model.spotify.retrieveChildFromSpotify
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -91,19 +87,15 @@ constructor(
 
   // Function to add a track to a song list
   override fun addTrackToList(track: Track) {
-    addTrackToBeacon(
-        beaconId,
-        track
-    ) { success ->
-        if (success) {
-            getBeaconById(beaconId)
-            Log.i("BeaconViewModel", "Track added to beacon")
-        } else {
-            Log.e("BeaconViewModel", "Failed to add track to beacon")
-        }
+    addTrackToBeacon(beaconId, track) { success ->
+      if (success) {
+        getBeaconById(beaconId)
+        Log.i("BeaconViewModel", "Track added to beacon")
+      } else {
+        Log.e("BeaconViewModel", "Failed to add track to beacon")
+      }
     }
   }
-
 
   override suspend fun getLikedTracks() {
     getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)

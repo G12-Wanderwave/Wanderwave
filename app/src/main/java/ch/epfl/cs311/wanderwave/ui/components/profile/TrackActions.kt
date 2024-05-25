@@ -17,6 +17,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
+
 /**
  * Dialog composable that allows the user to add a new track by entering the track ID, title, and
  * artist. On confirming, the track is added via the onAddTrack callback.
@@ -110,15 +111,14 @@ fun SongsListDisplay(
     canAddSong: Boolean = true,
     viewModelName: viewModelType = viewModelType.NULL
 ) {
-  songLists
-      ?.let { songList ->
-        TrackList(
-            tracks = songList,
-            title = ListType.LIKED_SONGS.name,
-            onSelectTrack = onSelectTrack,
-            onAddTrack = onAddTrack,
-            canAddSong = canAddSong,
-            navActions = navigationActions,
-            viewModelName = viewModelName)
-      }
+  songLists?.let { songList ->
+    TrackList(
+        tracks = songList,
+        title = ListType.LIKED_SONGS.name,
+        onSelectTrack = onSelectTrack,
+        onAddTrack = onAddTrack,
+        canAddSong = canAddSong,
+        navActions = navigationActions,
+        viewModelName = viewModelName)
+  }
 }

@@ -1,27 +1,19 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import android.graphics.Insets.add
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
-import ch.epfl.cs311.wanderwave.model.spotify.getTracksFromSpotifyPlaylist
-import ch.epfl.cs311.wanderwave.model.spotify.retrieveAndAddSubsectionFromSpotify
-import ch.epfl.cs311.wanderwave.model.spotify.retrieveChildFromSpotify
-import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 // Define a simple class for a song list
@@ -48,7 +40,6 @@ constructor(
               profilePictureUri = null))
   val profile: StateFlow<Profile> = _profile
 
-
   private val _isInPublicMode = MutableStateFlow(false)
   val isInPublicMode: StateFlow<Boolean> = _isInPublicMode
 
@@ -62,17 +53,15 @@ constructor(
   private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
 
-
   // Function to add a track to a song list
-  override fun addTrackToList( track: Track) {
+  override fun addTrackToList(track: Track) {
     val newTrack =
         if (!track.id.contains("spotify:track:")) {
           Track("spotify:track:" + track.id, track.title, track.artist)
         } else {
           track
         }
-    if (!_songLists.value.contains(newTrack))
-    _songLists.value += mutableListOf(newTrack)
+    if (!_songLists.value.contains(newTrack)) _songLists.value += mutableListOf(newTrack)
   }
 
   fun updateProfile(updatedProfile: Profile) {
@@ -88,12 +77,9 @@ constructor(
     _isInPublicMode.value = !_isInPublicMode.value
   }
 
-
   fun selectTrack(track: Track) {
-      spotifyController.playTrack(track)
-
+    spotifyController.playTrack(track)
   }
-
 
   fun getProfileByID(id: String, create: Boolean) {
     viewModelScope.launch {
@@ -120,8 +106,6 @@ constructor(
     getProfileByID(currentUserId, create)
   }
 
-
-
   /**
    * Get all the liked tracks of the user and add them to the likedSongs list.
    *
@@ -132,8 +116,6 @@ constructor(
   override suspend fun getLikedTracks() {
     getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
   }
-
-
 
   data class UIState(
       val profile: Profile? = null,
