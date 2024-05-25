@@ -39,7 +39,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
@@ -104,7 +103,7 @@ fun TrackListItemWithProfile(
     trackAndProfile: ProfileTrackAssociation,
     profileViewModel: ProfileViewModel,
     beacon: Beacon,
-    beaconViewModel: BeaconViewModel = hiltViewModel(),
+    beaconViewModel: BeaconViewModel,
     selected: Boolean,
     onClick: () -> Unit,
     navigationActions: NavigationActions

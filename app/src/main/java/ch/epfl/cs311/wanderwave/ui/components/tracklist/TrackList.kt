@@ -30,6 +30,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
+import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
 @Composable
@@ -85,6 +86,7 @@ fun TrackListWithProfiles(
     tracks: List<ProfileTrackAssociation>,
     profileViewModel: ProfileViewModel,
     beacon: Beacon,
+    beaconViewModel: BeaconViewModel,
     title: String? = null,
     canAddSong: Boolean = true,
     onAddTrack: (Track) -> Unit,
@@ -119,6 +121,7 @@ fun TrackListWithProfiles(
             trackAndProfile,
             profileViewModel,
             beacon,
+            beaconViewModel,
             selected = trackAndProfile.track == selectedTrack,
             navigationActions = navigationActions,
             onClick = {

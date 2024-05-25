@@ -425,8 +425,8 @@ class DataClassesTest {
     val mockTrack = mockk<Track>()
     val profileTrackAssociation = ProfileTrackAssociation(mockProfile, mockTrack)
     every { mockTrack.id } returns "trackId"
+    every { mockProfile.numberOfLikes = 1 } just Runs
     val likedAssociation = profileTrackAssociation.likeTrack(mockProfile)
-    every { mockProfile.numberOfLikes } returns 1
     assert(likedAssociation.isLiked(mockProfile))
   }
 

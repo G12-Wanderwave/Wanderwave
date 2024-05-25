@@ -336,6 +336,8 @@ public class BeaconConnectionTest {
       every { mockQuerySnapshot.iterator() } returns
           mutableListOf(mockDocumentSnapshot, mockDocumentSnapshot).iterator()
 
+      every { mockDocumentSnapshot.getLong("likes") } returns 0L
+
       // Define behavior for the addOnSuccessListener method
       every { mockTask.addOnSuccessListener(any<OnSuccessListener<QuerySnapshot>>()) } answers
           {

@@ -74,6 +74,7 @@ fun BeaconScreen(
           //   BeaconScreen(beacon = uiState.beacon!!, navigationActions = navigationActions)
           BeaconScreen(
               beacon = uiState.beacon!!,
+              beaconViewModel = viewModel,
               profileViewModel,
               viewModel::addTrackToBeacon,
               viewModel::selectTrack,
@@ -88,6 +89,7 @@ fun BeaconScreen(
 @Composable
 private fun BeaconScreen(
     beacon: Beacon,
+    beaconViewModel: BeaconViewModel,
     profileViewModel: ProfileViewModel,
     addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit = { _, _, _ -> },
     onSelectTrack: (Track) -> Unit = {},
@@ -99,7 +101,13 @@ private fun BeaconScreen(
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
         AddTrack(beacon, navigationActions, viewModel)
-        SongList(beacon, profileViewModel, addTrackToBeacon, onSelectTrack, navigationActions)
+        SongList(
+            beacon,
+            beaconViewModel,
+            profileViewModel,
+            addTrackToBeacon,
+            onSelectTrack,
+            navigationActions)
       }
 }
 
@@ -168,6 +176,7 @@ fun AddTrack(beacon: Beacon, navigationActions: NavigationActions, viewModel: Be
 @Composable
 fun SongList(
     beacon: Beacon,
+    beaconViewModel: BeaconViewModel,
     profileViewModel: ProfileViewModel,
     addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit,
     onSelectTrack: (Track) -> Unit,
@@ -189,6 +198,7 @@ fun SongList(
       navigationActions = navigationActions,
       canAddSong = false,
       beacon = beacon,
+      beaconViewModel = beaconViewModel,
       onSelectTrack = onSelectTrack,
   )
 }
