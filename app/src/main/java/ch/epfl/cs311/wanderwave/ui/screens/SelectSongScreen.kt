@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,7 +42,6 @@ import ch.epfl.cs311.wanderwave.ui.components.utils.WanderWaveButton
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_dark_error
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 import com.spotify.protocol.types.ListItem
-import okhttp3.internal.ignoreIoExceptions
 
 /**
  * Screen to select a song from Spotify
@@ -64,7 +61,7 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: SpotifySongsActio
 
   val displayedList = likedSongsList
 
-  SongScreenScaffold(navActions, displayedList, viewModel,nbrLikedSongs)
+  SongScreenScaffold(navActions, displayedList, viewModel, nbrLikedSongs)
 }
 
 /**
@@ -78,11 +75,10 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: SpotifySongsActio
 @Composable
 fun initSongScreen(viewModel: SpotifySongsActions) {
   LaunchedEffect(Unit) {
-      viewModel.clearLikedSongs()
-      viewModel.getLikedTracks()
-        viewModel.getTotalLikedTracks()
+    viewModel.clearLikedSongs()
+    viewModel.getLikedTracks()
+    viewModel.getTotalLikedTracks()
   }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,73 +89,68 @@ fun SongScreenScaffold(
     viewModel: SpotifySongsActions,
     nbrLikedSongs: Int
 ) {
-    // Manage the page state
-    var page by remember { mutableStateOf(0) }
+  // Manage the page state
+  var page by remember { mutableStateOf(0) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Select Song") },
-                navigationIcon = {
-                    IconButton(onClick = { navActions.goBack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Go back")
-                    }
-                })
-        },
-        bottomBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
+  Scaffold(
+      topBar = {
+        TopAppBar(
+            title = { Text("Select Song") },
+            navigationIcon = {
+              IconButton(onClick = { navActions.goBack() }) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = "Go back")
+              }
+            })
+      },
+      bottomBar = {
+        Row(
+            modifier =
+                Modifier.fillMaxWidth()
                     .padding(horizontal = 16.dp), // Consistent padding on both sides
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Box(modifier = Modifier.weight(1f, false)) {
-                    WanderWaveButton(
-                        id = R.string.previous,
-                        onClick = { if (page > 0) page -= 1 },
-                        modifier = Modifier.fillMaxWidth(),
-                        textColor = md_theme_dark_error
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp)) // Adjust this value to reduce space between buttons
-                Box(modifier = Modifier.weight(1f, false)) {
-                    WanderWaveButton(
-                        id = R.string.next,
-                        onClick = {
-                            if ((page + 1) * 50 < nbrLikedSongs) {
-                                Log.d("SelectSongScreen", "Next")
-                                page += 1
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        textColor = md_theme_dark_error
-                    )
-                }
+            horizontalArrangement = Arrangement.SpaceBetween) {
+              Box(modifier = Modifier.weight(1f, false)) {
+                WanderWaveButton(
+                    id = R.string.previous,
+                    onClick = { if (page > 0) page -= 1 },
+                    modifier = Modifier.fillMaxWidth(),
+                    textColor = md_theme_dark_error)
+              }
+              Spacer(
+                  modifier =
+                      Modifier.width(8.dp)) // Adjust this value to reduce space between buttons
+              Box(modifier = Modifier.weight(1f, false)) {
+                WanderWaveButton(
+                    id = R.string.next,
+                    onClick = {
+                      if ((page + 1) * 50 < nbrLikedSongs) {
+                        Log.d("SelectSongScreen", "Next")
+                        page += 1
+                      }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    textColor = md_theme_dark_error)
+              }
             }
-        }) { innerPadding ->
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            SongList(
-                paddingValues = innerPadding,
-                items = displayedList,
-                navActions = navActions,
-                viewModel = viewModel
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+      }) { innerPadding ->
+        Column(modifier = Modifier.fillMaxSize()) {
+          SongList(
+              paddingValues = innerPadding,
+              items = displayedList,
+              navActions = navActions,
+              viewModel = viewModel)
+          Spacer(modifier = Modifier.height(16.dp))
         }
-    }
+      }
 
-    // Load the next songs based on the current page
-    loadNextSongs(viewModel = viewModel, page = page)
+  // Load the next songs based on the current page
+  loadNextSongs(viewModel = viewModel, page = page)
 }
 
 @Composable
 fun loadNextSongs(viewModel: SpotifySongsActions, page: Int) {
-    LaunchedEffect(page) {
-        viewModel.getLikedTracks(page)
-    }
+  LaunchedEffect(page) { viewModel.getLikedTracks(page) }
 }
+
 @Composable
 fun TrackItem(listItem: ListItem, onClick: () -> Unit) {
   Card(
@@ -170,11 +161,7 @@ fun TrackItem(listItem: ListItem, onClick: () -> Unit) {
               disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariant,
               disabledContentColor = MaterialTheme.colorScheme.error // Example color
               ),
-      modifier = Modifier
-          .height(80.dp)
-          .fillMaxWidth()
-          .padding(4.dp)
-          .clickable(onClick = onClick)) {
+      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).clickable(onClick = onClick)) {
         Row {
           Column(modifier = Modifier.padding(8.dp)) {
             Text(text = listItem.title, style = MaterialTheme.typography.titleMedium)

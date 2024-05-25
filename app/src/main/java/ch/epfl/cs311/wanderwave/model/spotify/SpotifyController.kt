@@ -417,24 +417,24 @@ constructor(
     ONE
   }
 }
+
 var totalLikes = -1
 
 fun com.spotify.protocol.types.Track.toWanderwaveTrack(): Track {
   return Track(this.uri, this.name, this.artist.name)
 }
-suspend fun getTotalLikedTracksFromSpotity(
-    spotifyController: SpotifyController
-): Int {
-    val url = "https://api.spotify.com/v1/me/tracks"
-    return try {
-        val jsonResponse = spotifyController.spotifyGetFromURL("$url?limit=1")
-        val jsonObject = JSONObject(jsonResponse)
-        Log.d("SpotifyController", "Total liked tracks: ${jsonObject.getInt("total")}")
-        jsonObject.getInt("total")
-    } catch (e: Exception) {
-        e.printStackTrace()
-        0
-    }
+
+suspend fun getTotalLikedTracksFromSpotity(spotifyController: SpotifyController): Int {
+  val url = "https://api.spotify.com/v1/me/tracks"
+  return try {
+    val jsonResponse = spotifyController.spotifyGetFromURL("$url?limit=1")
+    val jsonObject = JSONObject(jsonResponse)
+    Log.d("SpotifyController", "Total liked tracks: ${jsonObject.getInt("total")}")
+    jsonObject.getInt("total")
+  } catch (e: Exception) {
+    e.printStackTrace()
+    0
+  }
 }
 /**
  * Get all the liked tracks of the user and add them to the likedSongs list.
@@ -455,8 +455,8 @@ suspend fun getLikedTracksFromSpotify(
   scope.launch {
     val url = "https://api.spotify.com/v1/me/tracks"
     try {
-    if (totalLikes==-1) totalLikes= getTotalLikedTracksFromSpotity(spotifyController)
-    val limit = (totalLikes - 50 * page).coerceAtMost(50)
+      if (totalLikes == -1) totalLikes = getTotalLikedTracksFromSpotity(spotifyController)
+      val limit = (totalLikes - 50 * page).coerceAtMost(50)
       val jsonResponse = spotifyController.spotifyGetFromURL("$url?limit=$limit&offset=${page* 50}")
       parseTracks(jsonResponse, likedSongsTrackList)
     } catch (e: Exception) {
@@ -477,13 +477,11 @@ fun getTracksFromSpotifyPlaylist(
     try {
       val json = spotifyController.spotifyGetFromURL(url)
       parseTracks(json, playlist)
-
     } catch (e: Exception) {
       Log.e("SpotifyController", "Failed to get songs from playlist")
       e.printStackTrace()
     }
   }
-
 }
 
 /**

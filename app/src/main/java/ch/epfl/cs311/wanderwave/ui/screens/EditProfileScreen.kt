@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -11,9 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -60,9 +55,7 @@ fun EditProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel
 
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier
-          .testTag("editProfileScreen")
-          .fillMaxHeight()) {
+      modifier = Modifier.testTag("editProfileScreen").fillMaxHeight()) {
         ImageSelection(
             profile = profile2, onImageChange = { uri -> profile2.profilePictureUri = uri })
         EditableTextFields(
@@ -130,32 +123,29 @@ fun EditableTextFields(
           OutlinedTextField(
               value = firstName,
               modifier =
-              Modifier
-                  .height(IntrinsicSize.Min)
-                  .padding(horizontal = 8.dp)
-                  .width(INPUT_BOX_NAM_SIZE)
-                  .testTag("firstName"),
+                  Modifier.height(IntrinsicSize.Min)
+                      .padding(horizontal = 8.dp)
+                      .width(INPUT_BOX_NAM_SIZE)
+                      .testTag("firstName"),
               onValueChange = onFirstNameChange,
               label = { Text("First Name") })
           OutlinedTextField(
               value = lastName,
               modifier =
-              Modifier
-                  .height(IntrinsicSize.Min)
-                  .padding(horizontal = 8.dp)
-                  .width(INPUT_BOX_NAM_SIZE)
-                  .testTag("lastName"),
+                  Modifier.height(IntrinsicSize.Min)
+                      .padding(horizontal = 8.dp)
+                      .width(INPUT_BOX_NAM_SIZE)
+                      .testTag("lastName"),
               onValueChange = onLastNameChange,
               label = { Text("Last Name") })
         }
         OutlinedTextField(
             value = description,
             modifier =
-            Modifier
-                .height(IntrinsicSize.Min)
-                .width(338.dp)
-                .padding(horizontal = 8.dp)
-                .testTag("description"),
+                Modifier.height(IntrinsicSize.Min)
+                    .width(338.dp)
+                    .padding(horizontal = 8.dp)
+                    .testTag("description"),
             onValueChange = onDescriptionChange,
             label = { Text("Description") })
       }
@@ -175,28 +165,30 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit, onDelete: () -> Unit
   Column(
       verticalArrangement = Arrangement.spacedBy(2.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
-      WanderWaveButton(id = R.string.save, onClick = onSave , modifier = Modifier
-          .width(100.dp)
-          .testTag("saveButton"),
-          textColor =md_theme_light_primary , borderColor =  md_theme_light_primary,
-          containerColor = Color.Transparent
-      )
+        WanderWaveButton(
+            id = R.string.save,
+            onClick = onSave,
+            modifier = Modifier.width(100.dp).testTag("saveButton"),
+            textColor = md_theme_light_primary,
+            borderColor = md_theme_light_primary,
+            containerColor = Color.Transparent)
 
         Spacer(modifier = Modifier.width(8.dp))
-      WanderWaveButton(id = R.string.cancel, onClick = onCancel , modifier = Modifier
-          .width(100.dp)
-          .testTag("cancelButton"),
-          textColor = md_theme_dark_error, borderColor = md_theme_dark_error,
-          containerColor = Color.Transparent
-          )
+        WanderWaveButton(
+            id = R.string.cancel,
+            onClick = onCancel,
+            modifier = Modifier.width(100.dp).testTag("cancelButton"),
+            textColor = md_theme_dark_error,
+            borderColor = md_theme_dark_error,
+            containerColor = Color.Transparent)
 
         Spacer(Modifier.padding(8.dp))
-      WanderWaveButton(id = R.string.deleteProfile, onClick = onDelete , modifier = Modifier
-          .width(200.dp)
-          .testTag("deleteButton"),
-          textColor = md_theme_dark_error, borderColor = md_theme_dark_error,
-          containerColor = Color.Transparent
-      )
-
+        WanderWaveButton(
+            id = R.string.deleteProfile,
+            onClick = onDelete,
+            modifier = Modifier.width(200.dp).testTag("deleteButton"),
+            textColor = md_theme_dark_error,
+            borderColor = md_theme_dark_error,
+            containerColor = Color.Transparent)
       }
 }
