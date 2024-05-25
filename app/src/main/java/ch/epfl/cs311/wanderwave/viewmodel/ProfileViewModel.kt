@@ -163,6 +163,7 @@ constructor(
     viewModelScope.launch {
       repository.getItem(id).collect { fetchedProfile ->
         fetchedProfile.onSuccess { profile ->
+          profile.profilePictureUri = null // TODO : @Clarence, pls can you do it more properly
           _profile.value = profile
           _uiState.value = UIState(profile = profile, isLoading = false)
         }

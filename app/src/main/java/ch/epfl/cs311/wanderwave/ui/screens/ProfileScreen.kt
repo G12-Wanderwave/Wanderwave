@@ -192,7 +192,8 @@ fun ProfileButton(
         if (navActions.getCurrentRoute() == Route.MAIN) {
           SelectImage(
               modifier = Modifier.clip(CircleShape).size(50.dp),
-              imageUri = currentProfile.profilePictureUri)
+              imageUri = currentProfile.profilePictureUri,
+              profile = currentProfile)
         }
       }
 }
