@@ -18,6 +18,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
+import ch.epfl.cs311.wanderwave.model.utils.addTrackToBeacon
 import ch.epfl.cs311.wanderwave.model.utils.createNearbyBeacons
 import com.google.android.gms.maps.LocationSource
 import com.google.android.gms.maps.model.CameraPosition
@@ -64,6 +65,7 @@ constructor(
               firebaseUid = "My Firebase UID",
               profilePictureUri = null))
   val profile: StateFlow<Profile> = _profile
+
   init {
     observeBeacons()
   }
@@ -132,7 +134,6 @@ constructor(
             _retrievedSongs.value = beacon.profileAndTrack.random()
             Log.d("Retrieved song", "Retrieved song ${_retrievedSongs.value.track}")
             trackRepository.addItemsIfNotExist(listOf(_retrievedSongs.value.track))
-
           }
         }
         fetchedBeacon.onFailure { exception ->
@@ -149,7 +150,12 @@ constructor(
           fetchedProfile.onSuccess { profile ->
             Log.d("Profile", "Profile fetched successfully${profile}")
             if (profile.topSongs.isNotEmpty()) {
-              addTrackToBeacon(beaconId, profile.topSongs.random()) {}
+              addTrackToBeacon(
+                  beaconId,
+                  profile.topSongs.random(),
+                  trackRepository,
+                  beaconRepository,
+                  authenticationController) {}
             }
           }
           fetchedProfile.onFailure { exception ->
@@ -160,22 +166,12 @@ constructor(
     }
   }
 
-  fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
-    // Call the BeaconConnection's addTrackToBeacon with the provided beaconId and track
-    val correctTrack = track.copy(id = "spotify:track:" + track.id)
-    trackRepository.addItemsIfNotExist(listOf(correctTrack))
-    beaconRepository.addTrackToBeacon(
-        beaconId, correctTrack, authenticationController.getUserData()!!.id, onComplete)
-  }
-
   fun getProfileOfCurrentUser() {
 
     viewModelScope.launch {
       val currentUserId = authenticationController.getUserData()!!.id
       profileRepository.getItem(currentUserId).collect { fetchedProfile ->
-        fetchedProfile.onSuccess { fetchedProfile ->
-          _profile.value = fetchedProfile
-        }
+        fetchedProfile.onSuccess { fetchedProfile -> _profile.value = fetchedProfile }
         fetchedProfile.onFailure { exception ->
           Log.e("Profile not found", "Profile not found for the given id $exception")
         }

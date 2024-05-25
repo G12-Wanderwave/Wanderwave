@@ -10,6 +10,7 @@ import ch.epfl.cs311.wanderwave.model.data.*
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
+import ch.epfl.cs311.wanderwave.model.utils.addTrackToBeacon
 import com.google.android.gms.maps.LocationSource
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
@@ -24,7 +25,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import kotlin.math.exp
 
 @RunWith(JUnit4::class)
 class MapViewModelTest {
@@ -138,7 +138,7 @@ class MapViewModelTest {
     // When
     viewModel.getProfileOfCurrentUser()
 
-      Assert.assertEquals(expectedProfile, viewModel.profile.value)
+    Assert.assertEquals(expectedProfile, viewModel.profile.value)
   }
 
   @Test
@@ -161,7 +161,8 @@ class MapViewModelTest {
         }
 
     // When
-    viewModel.addTrackToBeacon(beaconId, track) {}
+    addTrackToBeacon(
+        beaconId, track, trackRepository, mockBeaconRepository, mockAuthenticationController) {}
 
     // Then
     coVerify {

@@ -119,9 +119,7 @@ fun createLocationReceiver(
         if (tempBeacon != null) {
           viewModel.getRandomSongAndAddToProfile(tempBeacon.id)
           viewModel.retrieveRandomSongFromProfileAndAddToBeacon(tempBeacon.id)
-          Log.d(
-              "MapScreen",
-              "retrieved song: ${song.value}")
+          Log.d("MapScreen", "retrieved song: ${song.value}")
         }
       }
     }
