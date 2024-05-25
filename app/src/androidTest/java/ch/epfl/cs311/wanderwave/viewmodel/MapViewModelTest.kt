@@ -18,11 +18,13 @@ import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import kotlin.math.exp
 
 @RunWith(JUnit4::class)
 class MapViewModelTest {
@@ -136,8 +138,7 @@ class MapViewModelTest {
     // When
     viewModel.getProfileOfCurrentUser()
 
-    // Then
-    assertEquals(expectedProfile, viewModel.profile.value)
+      Assert.assertEquals(expectedProfile, viewModel.profile.value)
   }
 
   @Test
@@ -198,7 +199,7 @@ class MapViewModelTest {
 
     // Then
     // When
-    viewModel.retrieveSongFromProfileAndAddToBeacon(beaconId)
+    viewModel.retrieveRandomSongFromProfileAndAddToBeacon(beaconId)
   }
 
   @Test
@@ -221,7 +222,7 @@ class MapViewModelTest {
     viewModel.getProfileOfCurrentUser()
 
     // When
-    viewModel.retrieveSongFromProfileAndAddToBeacon(beaconId)
+    viewModel.retrieveRandomSongFromProfileAndAddToBeacon(beaconId)
 
     // Then
     coVerify(exactly = 0) { mockBeaconRepository.addTrackToBeacon(any(), any(), any(), any()) }
@@ -300,7 +301,7 @@ class MapViewModelTest {
         }
 
     // When
-    viewModel.retrieveSongFromProfileAndAddToBeacon(beaconId)
+    viewModel.retrieveRandomSongFromProfileAndAddToBeacon(beaconId)
   }
 
   @Test
@@ -321,7 +322,7 @@ class MapViewModelTest {
     coEvery { profileRepository.getItem(any()) } returns flowOf(Result.success(profile))
 
     // When
-    viewModel.retrieveSongFromProfileAndAddToBeacon(beaconId)
+    viewModel.retrieveRandomSongFromProfileAndAddToBeacon(beaconId)
 
     // Then
     coVerify(exactly = 0) { mockBeaconRepository.addTrackToBeacon(any(), any(), any(), any()) }

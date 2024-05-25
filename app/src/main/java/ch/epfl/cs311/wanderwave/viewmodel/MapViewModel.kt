@@ -64,9 +64,6 @@ constructor(
               firebaseUid = "My Firebase UID",
               profilePictureUri = null))
   val profile: StateFlow<Profile> = _profile
-  private var _profileUI = MutableStateFlow(ProfileViewModel.UIState())
-  val profileUI: StateFlow<ProfileViewModel.UIState> = _profileUI
-
   init {
     observeBeacons()
   }
@@ -133,7 +130,9 @@ constructor(
         fetchedBeacon.onSuccess { beacon ->
           if (beacon.profileAndTrack.isNotEmpty()) {
             _retrievedSongs.value = beacon.profileAndTrack.random()
+            Log.d("Retrieved song", "Retrieved song ${_retrievedSongs.value.track}")
             trackRepository.addItemsIfNotExist(listOf(_retrievedSongs.value.track))
+
           }
         }
         fetchedBeacon.onFailure { exception ->
@@ -143,12 +142,12 @@ constructor(
     }
   }
 
-  fun retrieveSongFromProfileAndAddToBeacon(beaconId: String) {
-
+  fun retrieveRandomSongFromProfileAndAddToBeacon(beaconId: String) {
     viewModelScope.launch {
-      _profileUI.value.profile?.let {
+      profile.value?.let {
         profileRepository.getItem(it.firebaseUid).collect { fetchedProfile ->
           fetchedProfile.onSuccess { profile ->
+            Log.d("Profile", "Profile fetched successfully${profile}")
             if (profile.topSongs.isNotEmpty()) {
               addTrackToBeacon(beaconId, profile.topSongs.random()) {}
             }
@@ -174,9 +173,8 @@ constructor(
     viewModelScope.launch {
       val currentUserId = authenticationController.getUserData()!!.id
       profileRepository.getItem(currentUserId).collect { fetchedProfile ->
-        fetchedProfile.onSuccess { profile ->
-          _profile.value = profile
-          _profileUI.value = ProfileViewModel.UIState(profile = profile, isLoading = false)
+        fetchedProfile.onSuccess { fetchedProfile ->
+          _profile.value = fetchedProfile
         }
         fetchedProfile.onFailure { exception ->
           Log.e("Profile not found", "Profile not found for the given id $exception")
