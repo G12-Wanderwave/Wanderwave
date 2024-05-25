@@ -33,6 +33,7 @@ import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.profile.ImageSelection
+import ch.epfl.cs311.wanderwave.ui.components.utils.WanderWaveButton
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_dark_error
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_primary
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
@@ -59,7 +60,9 @@ fun EditProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel
 
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier.testTag("editProfileScreen").fillMaxHeight()) {
+      modifier = Modifier
+          .testTag("editProfileScreen")
+          .fillMaxHeight()) {
         ImageSelection(
             profile = profile2, onImageChange = { uri -> profile2.profilePictureUri = uri })
         EditableTextFields(
@@ -127,29 +130,32 @@ fun EditableTextFields(
           OutlinedTextField(
               value = firstName,
               modifier =
-                  Modifier.height(IntrinsicSize.Min)
-                      .padding(horizontal = 8.dp)
-                      .width(INPUT_BOX_NAM_SIZE)
-                      .testTag("firstName"),
+              Modifier
+                  .height(IntrinsicSize.Min)
+                  .padding(horizontal = 8.dp)
+                  .width(INPUT_BOX_NAM_SIZE)
+                  .testTag("firstName"),
               onValueChange = onFirstNameChange,
               label = { Text("First Name") })
           OutlinedTextField(
               value = lastName,
               modifier =
-                  Modifier.height(IntrinsicSize.Min)
-                      .padding(horizontal = 8.dp)
-                      .width(INPUT_BOX_NAM_SIZE)
-                      .testTag("lastName"),
+              Modifier
+                  .height(IntrinsicSize.Min)
+                  .padding(horizontal = 8.dp)
+                  .width(INPUT_BOX_NAM_SIZE)
+                  .testTag("lastName"),
               onValueChange = onLastNameChange,
               label = { Text("Last Name") })
         }
         OutlinedTextField(
             value = description,
             modifier =
-                Modifier.height(IntrinsicSize.Min)
-                    .width(338.dp)
-                    .padding(horizontal = 8.dp)
-                    .testTag("description"),
+            Modifier
+                .height(IntrinsicSize.Min)
+                .width(338.dp)
+                .padding(horizontal = 8.dp)
+                .testTag("description"),
             onValueChange = onDescriptionChange,
             label = { Text("Description") })
       }
@@ -169,30 +175,28 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit, onDelete: () -> Unit
   Column(
       verticalArrangement = Arrangement.spacedBy(2.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
-        Button(
-            onClick = onSave,
-            colors = ButtonDefaults.buttonColors(containerColor = md_theme_light_primary),
-            modifier = Modifier.width(100.dp).testTag("saveButton"),
-            shape = RoundedCornerShape(size = 10.dp)) {
-              Text(stringResource(id = R.string.save))
-            }
+      WanderWaveButton(id = R.string.save, onClick = onSave , modifier = Modifier
+          .width(100.dp)
+          .testTag("saveButton"),
+          textColor =md_theme_light_primary , borderColor =  md_theme_light_primary,
+          containerColor = Color.Transparent
+      )
+
         Spacer(modifier = Modifier.width(8.dp))
-        Button(
-            onClick = onCancel,
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-            border = BorderStroke(1.dp, md_theme_dark_error),
-            shape = RoundedCornerShape(size = 10.dp),
-            modifier = Modifier.width(100.dp).testTag("cancelButton")) {
-              Text(text = stringResource(id = R.string.cancel), color = md_theme_dark_error)
-            }
+      WanderWaveButton(id = R.string.cancel, onClick = onCancel , modifier = Modifier
+          .width(100.dp)
+          .testTag("cancelButton"),
+          textColor = md_theme_dark_error, borderColor = md_theme_dark_error,
+          containerColor = Color.Transparent
+          )
+
         Spacer(Modifier.padding(8.dp))
-        Button(
-            onClick = onDelete,
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-            border = BorderStroke(1.dp, md_theme_dark_error),
-            shape = RoundedCornerShape(size = 10.dp),
-            modifier = Modifier.width(200.dp).testTag("deleteButton")) {
-              Text(text = stringResource(id = R.string.deleteProfile), color = md_theme_dark_error)
-            }
+      WanderWaveButton(id = R.string.deleteProfile, onClick = onDelete , modifier = Modifier
+          .width(200.dp)
+          .testTag("deleteButton"),
+          textColor = md_theme_dark_error, borderColor = md_theme_dark_error,
+          containerColor = Color.Transparent
+      )
+
       }
 }

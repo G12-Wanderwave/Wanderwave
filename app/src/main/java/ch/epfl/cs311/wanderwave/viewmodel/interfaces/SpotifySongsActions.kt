@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 interface SpotifySongsActions {
 
   val likedSongsTrackList: StateFlow<List<ListItem>>
-
+  val nbrLikedSongs: StateFlow<Int>
   /**
    * Add a track to the list of the user's list. The list is specified by the listName parameter.
    *
@@ -26,5 +26,12 @@ interface SpotifySongsActions {
    * @since 3.0
    * @last update 3.0
    */
-  suspend fun getLikedTracks()
+  suspend fun getLikedTracks(page: Int = 0)
+
+  /**
+   * Get the total number of liked tracks of the user.
+   */
+  suspend fun getTotalLikedTracks()
+
+  fun clearLikedSongs()
 }

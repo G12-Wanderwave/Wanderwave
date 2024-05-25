@@ -417,58 +417,25 @@ constructor(
     ONE
   }
 }
-/**
- * Get all the element of the main screen and add them to the top list
- *
- * @author Menzo Bouaissi
- * @since 2.0
- * @last update 3.0
- */
-fun retrieveAndAddSubsectionFromSpotify(
-    spotifySubsectionList: MutableStateFlow<List<ListItem>>,
-    spotifyController: SpotifyController,
-    scope: CoroutineScope
-) {
-  val track = spotifyController.getAllElementFromSpotify()
-  checkIfNullAndAddToAList(track, spotifySubsectionList, scope)
-}
-
-/**
- * Get all the element of the main screen and add them to the top list
- *
- * @author Menzo Bouaissi
- * @since 2.0
- * @last update 3.0
- */
-fun retrieveChildFromSpotify(
-    item: ListItem,
-    childrenPlaylistTrackList: MutableStateFlow<List<ListItem>>,
-    spotifyController: SpotifyController,
-    scope: CoroutineScope
-) {
-  val children = spotifyController.getAllChildren(item)
-  checkIfNullAndAddToAList(children, childrenPlaylistTrackList, scope)
-}
-
-fun checkIfNullAndAddToAList(
-    items: Flow<List<ListItem>>,
-    list: MutableStateFlow<List<ListItem>>,
-    scope: CoroutineScope
-) {
-  scope.launch {
-    val value = items.firstOrNull()
-    if (value != null) {
-      for (child in value) {
-        list.value += child
-      }
-    }
-  }
-}
+var totalLikes = -1
 
 fun com.spotify.protocol.types.Track.toWanderwaveTrack(): Track {
   return Track(this.uri, this.name, this.artist.name)
 }
-
+suspend fun getTotalLikedTracksFromSpotity(
+    spotifyController: SpotifyController
+): Int {
+    val url = "https://api.spotify.com/v1/me/tracks"
+    return try {
+        val jsonResponse = spotifyController.spotifyGetFromURL("$url?limit=1")
+        val jsonObject = JSONObject(jsonResponse)
+        Log.d("SpotifyController", "Total liked tracks: ${jsonObject.getInt("total")}")
+        jsonObject.getInt("total")
+    } catch (e: Exception) {
+        e.printStackTrace()
+        0
+    }
+}
 /**
  * Get all the liked tracks of the user and add them to the likedSongs list.
  *
@@ -482,12 +449,15 @@ fun com.spotify.protocol.types.Track.toWanderwaveTrack(): Track {
 suspend fun getLikedTracksFromSpotify(
     likedSongsTrackList: MutableStateFlow<List<ListItem>>,
     spotifyController: SpotifyController,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    page: Int = 0
 ) {
   scope.launch {
     val url = "https://api.spotify.com/v1/me/tracks"
     try {
-      val jsonResponse = spotifyController.spotifyGetFromURL("$url?limit=50")
+    if (totalLikes==-1) totalLikes= getTotalLikedTracksFromSpotity(spotifyController)
+    val limit = (totalLikes - 50 * page).coerceAtMost(50)
+      val jsonResponse = spotifyController.spotifyGetFromURL("$url?limit=$limit&offset=${page* 50}")
       parseTracks(jsonResponse, likedSongsTrackList)
     } catch (e: Exception) {
       e.printStackTrace()
@@ -507,11 +477,13 @@ fun getTracksFromSpotifyPlaylist(
     try {
       val json = spotifyController.spotifyGetFromURL(url)
       parseTracks(json, playlist)
+
     } catch (e: Exception) {
       Log.e("SpotifyController", "Failed to get songs from playlist")
       e.printStackTrace()
     }
   }
+
 }
 
 /**
