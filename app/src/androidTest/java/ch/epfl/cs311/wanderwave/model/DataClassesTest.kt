@@ -482,4 +482,15 @@ class DataClassesTest {
         ProfileTrackAssociation.from(mapOf(), mockDocumentSnapshot, mockDocumentSnapshot)
     assert(profileTrackAssociation != null)
   }
+
+  @Test
+  fun testProfileTrackFromNull() = run {
+    val mockProfile = mockk<Profile>()
+    val mockTrack = mockk<Track>()
+    val mockDocumentSnapshot = mockk<DocumentSnapshot>()
+    every { mockDocumentSnapshot.exists() } returns false
+    val profileTrackAssociation =
+        ProfileTrackAssociation.from(mapOf(), mockDocumentSnapshot, mockDocumentSnapshot)
+    assert(profileTrackAssociation == null)
+  }
 }
