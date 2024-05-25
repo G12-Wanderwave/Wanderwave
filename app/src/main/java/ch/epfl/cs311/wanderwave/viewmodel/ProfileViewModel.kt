@@ -51,11 +51,11 @@ constructor(
   private var _uiState = MutableStateFlow(UIState())
   val uiState: StateFlow<UIState> = _uiState
 
-    private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
-    override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
+  private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
+  override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
 
-    private val _nbrLikedSongs = MutableStateFlow(0)
-    override val nbrLikedSongs: StateFlow<Int> = _nbrLikedSongs
+  private val _nbrLikedSongs = MutableStateFlow(0)
+  override val nbrLikedSongs: StateFlow<Int> = _nbrLikedSongs
 
   // Function to add a track to a song list
   override fun addTrackToList(track: Track) {
@@ -104,9 +104,11 @@ constructor(
       }
     }
   }
-    override fun clearLikedSongs() {
-        _likedSongsTrackList.value = emptyList()
-    }
+
+  override fun clearLikedSongs() {
+    _likedSongsTrackList.value = emptyList()
+  }
+
   fun getProfileOfCurrentUser(create: Boolean) {
     val currentUserId = authenticationController.getUserData()!!.id
     getProfileByID(currentUserId, create)
@@ -119,16 +121,15 @@ constructor(
    * @since 3.0
    * @last update 3.0
    */
-  override suspend fun getLikedTracks(page:Int) {
-    getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope,page)
+  override suspend fun getLikedTracks(page: Int) {
+    getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope, page)
   }
 
-    /**
-     * Get the total number of liked tracks of the user.
-     */
-override suspend fun getTotalLikedTracks() {
+  /** Get the total number of liked tracks of the user. */
+  override suspend fun getTotalLikedTracks() {
     _nbrLikedSongs.value = getTotalLikedTracksFromSpotity(spotifyController)
   }
+
   data class UIState(
       val profile: Profile? = null,
       val isLoading: Boolean = true,

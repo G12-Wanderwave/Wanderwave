@@ -28,9 +28,7 @@ interface SpotifySongsActions {
    */
   suspend fun getLikedTracks(page: Int = 0)
 
-  /**
-   * Get the total number of liked tracks of the user.
-   */
+  /** Get the total number of liked tracks of the user. */
   suspend fun getTotalLikedTracks()
 
   fun clearLikedSongs()

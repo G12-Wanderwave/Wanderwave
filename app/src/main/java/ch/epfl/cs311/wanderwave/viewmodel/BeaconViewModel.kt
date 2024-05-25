@@ -38,8 +38,8 @@ constructor(
   private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
 
-    private val _nbrLikedSongs = MutableStateFlow(0)
-    override val nbrLikedSongs: StateFlow<Int> = _nbrLikedSongs
+  private val _nbrLikedSongs = MutableStateFlow(0)
+  override val nbrLikedSongs: StateFlow<Int> = _nbrLikedSongs
   var beaconId: String = ""
 
   init {
@@ -100,20 +100,23 @@ constructor(
     }
   }
 
-  override suspend fun getLikedTracks(page:Int) {
-    getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope,page)
+  override suspend fun getLikedTracks(page: Int) {
+    getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope, page)
   }
 
   fun selectTrack(track: Track) {
     val tracks = uiState.value.beacon?.profileAndTrack?.map { it.track }
     tracks?.let { spotifyController.playTrackList(it, track) }
   }
-    override suspend fun getTotalLikedTracks() {
-        _nbrLikedSongs.value = getTotalLikedTracksFromSpotity(spotifyController)
-    }
-    override fun clearLikedSongs() {
-        _likedSongsTrackList.value = emptyList()
-    }
+
+  override suspend fun getTotalLikedTracks() {
+    _nbrLikedSongs.value = getTotalLikedTracksFromSpotity(spotifyController)
+  }
+
+  override fun clearLikedSongs() {
+    _likedSongsTrackList.value = emptyList()
+  }
+
   data class UIState(
       val beacon: Beacon? = null,
       val isLoading: Boolean = true,

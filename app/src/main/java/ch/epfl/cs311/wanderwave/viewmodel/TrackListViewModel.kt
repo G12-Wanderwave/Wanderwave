@@ -35,8 +35,9 @@ constructor(
 
   private var _searchQuery = MutableStateFlow("")
 
-    private val _nbrLikedSongs = MutableStateFlow(0)
-    override val nbrLikedSongs: StateFlow<Int> = _nbrLikedSongs
+  private val _nbrLikedSongs = MutableStateFlow(0)
+  override val nbrLikedSongs: StateFlow<Int> = _nbrLikedSongs
+
   fun recentTracks(): StateFlow<List<Track>> {
     return spotifyController.recentlyPlayedTracks
   }
@@ -138,16 +139,18 @@ constructor(
     _uiState.value = _uiState.value.copy(expanded = true)
   }
 
-  override suspend fun getLikedTracks(page:Int) {
-    getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope,page)
+  override suspend fun getLikedTracks(page: Int) {
+    getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope, page)
   }
-    override suspend fun getTotalLikedTracks() {
-        _nbrLikedSongs.value = getTotalLikedTracksFromSpotity(spotifyController)
-    }
 
-    override fun clearLikedSongs() {
-        _likedSongsTrackList.value = emptyList()
-    }
+  override suspend fun getTotalLikedTracks() {
+    _nbrLikedSongs.value = getTotalLikedTracksFromSpotity(spotifyController)
+  }
+
+  override fun clearLikedSongs() {
+    _likedSongsTrackList.value = emptyList()
+  }
+
   data class UiState(
       val tracks: List<Track> = listOf(),
       val loading: Boolean = false,
