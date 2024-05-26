@@ -494,7 +494,8 @@ class DataClassesTest {
     every { mockDocumentSnapshotMain["likersId"] } returns null
     every { mockDocumentSnapshotMain["likes"] } returns null
     val profileTrackAssociation =
-        ProfileTrackAssociation.from(mapOf(), mockDocumentSnapshotProfile, mockDocumentSnapshotTrack)
+        ProfileTrackAssociation.from(
+            mapOf(), mockDocumentSnapshotProfile, mockDocumentSnapshotTrack)
     assert(profileTrackAssociation == null)
   }
 }
