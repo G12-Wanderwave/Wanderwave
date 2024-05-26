@@ -130,6 +130,7 @@ public class ProfileConnectionTest {
             description = "Test description",
             numberOfLikes = 10,
             isPublic = true,
+            profilePictureUri = Uri.parse("https://example.com/image.jpg"),
             spotifyUid = "spotify123",
             firebaseUid = "firebase123")
 

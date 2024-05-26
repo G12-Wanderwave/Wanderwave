@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -44,7 +43,6 @@ import ch.epfl.cs311.wanderwave.ui.theme.ProfileBackground6
 import ch.epfl.cs311.wanderwave.ui.theme.ProfileBackground7
 import ch.epfl.cs311.wanderwave.ui.theme.ProfileBackground8
 import ch.epfl.cs311.wanderwave.ui.theme.ProfileBackground9
-import coil.compose.AsyncImage
 import kotlin.math.abs
 
 /**
@@ -59,16 +57,16 @@ import kotlin.math.abs
  */
 @Composable
 fun SelectImage(modifier: Modifier, imageUri: Uri?, profile: Profile) {
-  if (imageUri != null) {
-    AsyncImage(model = imageUri, contentDescription = "Profile picture", modifier = modifier)
-  } else {
-    PlaceholderProfilePicture(
-        name = profile.firstName,
-        modifier =
-            modifier
-                .size(48.dp) // Ensure the placeholder is circular
-                .background(MaterialTheme.colorScheme.primary, CircleShape))
-  }
+  // if (imageUri != null) {
+  // AsyncImage(model = imageUri, contentDescription = "Profile picture", modifier = modifier)
+  // } else {
+  PlaceholderProfilePicture(
+      name = profile.firstName,
+      modifier =
+          modifier
+              .size(48.dp) // Ensure the placeholder is circular
+              .background(MaterialTheme.colorScheme.primary, CircleShape))
+  // }
 }
 
 /**
@@ -97,7 +95,7 @@ fun ImageSelection(profile: Profile, onImageChange: (Uri?) -> Unit) {
         modifier =
             Modifier.padding(top = 48.dp, bottom = 48.dp, start = 16.dp, end = 0.dp)
                 .size(width = 100.dp, height = 100.dp)
-                .clickable { launcher.launch("image/*") }
+                // .clickable { launcher.launch("image/*") }
                 .align(Alignment.Center)
                 .testTag("profilePicture"),
         imageUri = imageUri,
