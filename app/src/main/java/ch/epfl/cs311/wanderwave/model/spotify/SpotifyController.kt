@@ -446,7 +446,7 @@ suspend fun getTotalLikedTracksFromSpotity(spotifyController: SpotifyController)
  * @since 3.0
  * @last update 3.0
  */
-suspend fun getLikedTracksFromSpotify(
+fun getLikedTracksFromSpotify(
     likedSongsTrackList: MutableStateFlow<List<ListItem>>,
     spotifyController: SpotifyController,
     scope: CoroutineScope,

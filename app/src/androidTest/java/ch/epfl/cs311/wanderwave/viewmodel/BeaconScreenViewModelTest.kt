@@ -12,6 +12,7 @@ import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -22,11 +23,13 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -105,6 +108,27 @@ class BeaconScreenViewModelTest {
     viewModel.selectTrack(track)
 
     verify { mockSpotifyController.playTrackList(any(), any(), any()) }
+  }
+
+  @Test
+  fun addTrackToList_addsTrack_whenSuccessful() = runBlockingTest {
+    // Mocking
+    val track = Track("Sample Track ID", "Sample Track Title", "Sample Artist Name")
+    val beaconId = "Sample Beacon ID"
+    coEvery { beaconRepository.addTrackToBeacon(beaconId, track, any(), any()) } answers
+        {
+          lastArg<(Boolean) -> Unit>().invoke(true)
+        }
+
+    // Act
+    viewModel.addTrackToList(track)
+
+    // Assert
+    assertEquals(track, viewModel.uiState.value.beacon?.profileAndTrack?.first()?.track)
+
+    viewModel.clearLikedSongs()
+
+    assertTrue(viewModel.likedSongsTrackList.value.isEmpty())
   }
 
   @Test

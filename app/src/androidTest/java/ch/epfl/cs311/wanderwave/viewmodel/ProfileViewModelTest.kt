@@ -3,6 +3,7 @@ package ch.epfl.cs311.wanderwave.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.spotify.protocol.types.ListItem
@@ -22,6 +23,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -68,6 +70,49 @@ class ProfileViewModelTest {
 
     val result = spotifyController.getAllChildren(expectedListItem)
     assertEquals(expectedListItem, result.first().get(0)) // Check if the first item is as expected
+  }
+
+  @Test
+  fun addTrackToList_addsNewTrack_whenTrackIdDoesNotContainSpotifyPrefix() = runBlockingTest {
+    // Arrange
+    val trackWithoutSpotifyPrefix = Track("123", "title", "artist")
+    val expectedTrackWithSpotifyPrefix = Track("spotify:track:123", "title", "artist")
+
+    // Act
+    viewModel.addTrackToList(trackWithoutSpotifyPrefix)
+
+    // Assert
+    assertTrue(viewModel.songLists.value.contains(expectedTrackWithSpotifyPrefix))
+    // Act
+    viewModel.clearLikedSongs()
+
+    // Assert
+    assertTrue(viewModel.likedSongsTrackList.value.isEmpty())
+  }
+
+  @Test
+  fun addTrackToList_addsExistingTrack_whenTrackIdContainsSpotifyPrefix() = runBlockingTest {
+    // Arrange
+    val trackWithSpotifyPrefix = Track("spotify:track:123", "title", "artist")
+
+    // Act
+    viewModel.addTrackToList(trackWithSpotifyPrefix)
+
+    // Assert
+    assertTrue(viewModel.songLists.value.contains(trackWithSpotifyPrefix))
+  }
+
+  @Test
+  fun addTrackToList_doesNotAddDuplicateTrack() = runBlockingTest {
+    // Arrange
+    val track = Track("spotify:track:123", "title", "artist")
+
+    // Act
+    viewModel.addTrackToList(track)
+    viewModel.addTrackToList(track)
+
+    // Assert
+    assertEquals(1, viewModel.songLists.value.count { it == track })
   }
 
   @Test
