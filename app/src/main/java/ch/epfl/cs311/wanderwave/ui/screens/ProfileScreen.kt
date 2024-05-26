@@ -111,7 +111,7 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel, on
                         else spotify_green,
                     disabledContentColor = Color.Gray,
                     disabledContainerColor = Color.Black),
-            shape = RoundedCornerShape(size = 10.dp)) {
+            shape = RoundedCornerShape(size = 50.dp)) {
               Text(
                   if (isTopSongsListVisible) stringResource(id = R.string.showChosenSongs)
                   else stringResource(id = R.string.showLikedSongs))
@@ -216,7 +216,7 @@ fun SignOutButton(modifier: Modifier, navActions: NavigationActions) {
               contentColor = MaterialTheme.colorScheme.onSurface,
               disabledContainerColor = Color.Gray,
               disabledContentColor = MaterialTheme.colorScheme.primary),
-      shape = RoundedCornerShape(size = 10.dp)) {
+      shape = RoundedCornerShape(size = 50.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween) {
@@ -240,7 +240,7 @@ fun AboutButton(modifier: Modifier, navActions: NavigationActions) {
               contentColor = MaterialTheme.colorScheme.onSurface,
               disabledContainerColor = Color.Gray,
               disabledContentColor = MaterialTheme.colorScheme.primary),
-      shape = RoundedCornerShape(size = 10.dp)) {
+      shape = RoundedCornerShape(size = 50.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween) {

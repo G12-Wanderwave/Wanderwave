@@ -173,7 +173,7 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit, onDelete: () -> Unit
             onClick = onSave,
             colors = ButtonDefaults.buttonColors(containerColor = md_theme_light_primary),
             modifier = Modifier.width(100.dp).testTag("saveButton"),
-            shape = RoundedCornerShape(size = 10.dp)) {
+            shape = RoundedCornerShape(size = 50.dp)) {
               Text(stringResource(id = R.string.save))
             }
         Spacer(modifier = Modifier.width(8.dp))
@@ -181,7 +181,7 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit, onDelete: () -> Unit
             onClick = onCancel,
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
             border = BorderStroke(1.dp, md_theme_dark_error),
-            shape = RoundedCornerShape(size = 10.dp),
+            shape = RoundedCornerShape(size = 50.dp),
             modifier = Modifier.width(100.dp).testTag("cancelButton")) {
               Text(text = stringResource(id = R.string.cancel), color = md_theme_dark_error)
             }
@@ -190,7 +190,7 @@ fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit, onDelete: () -> Unit
             onClick = onDelete,
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
             border = BorderStroke(1.dp, md_theme_dark_error),
-            shape = RoundedCornerShape(size = 10.dp),
+            shape = RoundedCornerShape(size = 50.dp),
             modifier = Modifier.width(200.dp).testTag("deleteButton")) {
               Text(text = stringResource(id = R.string.deleteProfile), color = md_theme_dark_error)
             }
