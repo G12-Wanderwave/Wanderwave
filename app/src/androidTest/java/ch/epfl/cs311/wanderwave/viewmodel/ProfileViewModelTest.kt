@@ -102,6 +102,8 @@ class ProfileViewModelTest {
     assertTrue(viewModel.songLists.value.contains(trackWithSpotifyPrefix))
   }
 
+  @Test fun testGetLikedTracks() = runBlocking { viewModel.getLikedTracks() } // Test no crash
+
   @Test
   fun addTrackToList_doesNotAddDuplicateTrack() = runBlockingTest {
     // Arrange
@@ -162,4 +164,7 @@ class ProfileViewModelTest {
 
     viewModel.getProfileByID("firebaseUid", false)
   }
+
+  @Test
+  fun testGetNbrLikedTracks() = runBlocking { viewModel.getTotalLikedTracks() } // Test no crash
 }

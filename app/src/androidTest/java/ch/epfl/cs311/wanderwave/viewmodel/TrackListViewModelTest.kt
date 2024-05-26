@@ -161,4 +161,9 @@ class TrackListViewModelTest {
     assertEquals(emptyList<Track>(), viewModel.uiState.value.tracks)
     assertEquals(false, viewModel.uiState.value.loading)
   }
+
+  @Test fun testGetLikedTracks() = runBlocking { viewModel.getLikedTracks() } // Test no crash
+
+  @Test
+  fun testGetNbrLikedTracks() = runBlocking { viewModel.getTotalLikedTracks() } // Test no crash
 }

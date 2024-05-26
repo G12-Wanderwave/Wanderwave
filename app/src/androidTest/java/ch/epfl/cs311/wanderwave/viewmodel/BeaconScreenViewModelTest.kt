@@ -97,7 +97,7 @@ class BeaconScreenViewModelTest {
     verify { beaconConnection.addTrackToBeacon(any(), any(), any(), any()) }
   }
 
-  @Test fun testGetLikedTracks() = runBlocking { viewModel.getLikedTracks() }
+  @Test fun testGetLikedTracks() = runBlocking { viewModel.getLikedTracks() } // Test no crash
 
   @Test
   fun canSelectTracks() {
@@ -176,4 +176,7 @@ class BeaconScreenViewModelTest {
     assertFalse(uiStateError.isLoading)
     assertEquals("Test Exception", uiStateError.error)
   }
+
+  @Test
+  fun testGetNbrLikedTracks() = runBlocking { viewModel.getTotalLikedTracks() } // Test no crash
 }
