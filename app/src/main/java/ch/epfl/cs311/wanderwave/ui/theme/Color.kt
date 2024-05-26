@@ -32,35 +32,76 @@ val md_theme_light_surfaceTint = Color(0xFF00668A)
 val md_theme_light_outlineVariant = Color(0xFFC0C7CD)
 val md_theme_light_scrim = Color(0xFF000000)
 
-val md_theme_dark_primary = Color(0xFFFFBE6D) // FFD60A
-val md_theme_dark_onPrimary = Color(0xFF17212B)
-val md_theme_dark_primaryContainer = Color(0xFFFFBE6D) // FFC300
-val md_theme_dark_onPrimaryContainer = Color(0xFF17212B)
-val md_theme_dark_secondary = Color(0xFFB5C9D7)
-val md_theme_dark_onSecondary = Color(0xFF20333E)
-val md_theme_dark_secondaryContainer = Color(0xFF364955)
-val md_theme_dark_onSecondaryContainer = Color(0xFFD1E5F4)
-val md_theme_dark_tertiary = Color(0xFF86CFFF)
-val md_theme_dark_onTertiary = Color(0xFF00344C)
-val md_theme_dark_tertiaryContainer = Color(0xFF004C6D)
-val md_theme_dark_onTertiaryContainer = Color(0xFFC7E7FF)
-val md_theme_dark_error = Color(0xFFFFB4AB)
-val md_theme_dark_onError = Color(0xFF690005)
-val md_theme_dark_errorContainer = Color(0xFF93000A)
-val md_theme_dark_onErrorContainer = Color(0xFFFFDAD6)
-val md_theme_dark_outline = Color(0xFF8B9297)
-val md_theme_dark_background = Color(0xFF17212B)
-val md_theme_dark_onBackground = Color(0xFFfff7eb)
-val md_theme_dark_surface = Color(0xFF0E1621)
-val md_theme_dark_onSurface = Color(0xFFC5C6C9)
-val md_theme_dark_surfaceVariant = Color(0xFF41484D)
-val md_theme_dark_onSurfaceVariant = Color(0xFFC0C7CD)
-val md_theme_dark_inverseSurface = Color(0xFFE1E2E5)
-val md_theme_dark_inverseOnSurface = Color(0xFF191C1E)
-val md_theme_dark_inversePrimary = Color(0xFF00668A)
-val md_theme_dark_surfaceTint = Color(0xFF7BD0FF)
-val md_theme_dark_outlineVariant = Color(0xFF41484D)
-val md_theme_dark_scrim = Color(0xFF17212B)
+val md_theme_dark_primary = Color(0xFFFFD54F) // Lighter yellow primary color
+val md_theme_dark_onPrimary = Color(0xFF000000)
+val md_theme_dark_primaryContainer = Color(0xFFFFE082)
+val md_theme_dark_onPrimaryContainer = Color(0xFF000000)
+
+val md_theme_dark_secondary = Color(0xFFFF7043) // Orangish secondary color
+val md_theme_dark_onSecondary = Color(0xFFFFFFFF)
+val md_theme_dark_secondaryContainer = Color(0xFFFFAB91)
+val md_theme_dark_onSecondaryContainer = Color(0xFF000000)
+
+val md_theme_dark_tertiary = Color(0xFF03A9F4)
+val md_theme_dark_onTertiary = Color(0xFF000000)
+val md_theme_dark_tertiaryContainer = Color(0xFF004BA0)
+val md_theme_dark_onTertiaryContainer = Color(0xFF8CE7FF)
+
+val md_theme_dark_error = Color(0xFFCF6679)
+val md_theme_dark_onError = Color(0xFF000000)
+val md_theme_dark_errorContainer = Color(0xFFB00020)
+val md_theme_dark_onErrorContainer = Color(0xFFFFDAD4)
+
+val md_theme_dark_outline = Color(0xFFB3B3B3)
+val md_theme_dark_background = Color(0xFF091121) // Even darker blue background color
+val md_theme_dark_onBackground = Color(0xFFE0E0E0)
+val md_theme_dark_surface = Color(0xFF091121) // Even darker blue surface color
+val md_theme_dark_onSurface = Color(0xFFE0E0E0)
+val md_theme_dark_surfaceVariant = Color(0xFF2C2C2C)
+val md_theme_dark_onSurfaceVariant = Color(0xFFB3B3B3)
+
+val md_theme_dark_inverseSurface = Color(0xFFE0E0E0)
+val md_theme_dark_inverseOnSurface = Color(0xFF121212)
+val md_theme_dark_inversePrimary = Color(0xFFFFD54F)
+val md_theme_dark_surfaceTint = Color(0xFFFFD54F)
+val md_theme_dark_outlineVariant = Color(0xFF3E3E3E)
+val md_theme_dark_scrim = Color(0xFF000000)
+
+val md_theme_dark_card = Color(0xFF37474F) // Dark grey for cards
+val md_theme_dark_onCard = Color(0xFFFFFFFF) // White text on cards
+
+val md_theme_dark_textField = Color(0xFF455A64) // Darker grey for text input field
+val md_theme_dark_onTextField = Color(0xFFFFFFFF) // White text in text input field
+
+//val md_theme_dark_primary = Color(0xFFFFBE6D) // FFD60A
+//val md_theme_dark_onPrimary = Color(0xFF17212B)
+//val md_theme_dark_primaryContainer = Color(0xFFFFBE6D) // FFC300
+//val md_theme_dark_onPrimaryContainer = Color(0xFF17212B)
+//val md_theme_dark_secondary = Color(0xFFB5C9D7)
+//val md_theme_dark_onSecondary = Color(0xFF20333E)
+//val md_theme_dark_secondaryContainer = Color(0xFF364955)
+//val md_theme_dark_onSecondaryContainer = Color(0xFFD1E5F4)
+//val md_theme_dark_tertiary = Color(0xFF86CFFF)
+//val md_theme_dark_onTertiary = Color(0xFF00344C)
+//val md_theme_dark_tertiaryContainer = Color(0xFF004C6D)
+//val md_theme_dark_onTertiaryContainer = Color(0xFFC7E7FF)
+//val md_theme_dark_error = Color(0xFFFFB4AB)
+//val md_theme_dark_onError = Color(0xFF690005)
+//val md_theme_dark_errorContainer = Color(0xFF93000A)
+//val md_theme_dark_onErrorContainer = Color(0xFFFFDAD6)
+//val md_theme_dark_outline = Color(0xFF8B9297)
+//val md_theme_dark_background = Color(0xFF17212B)
+//val md_theme_dark_onBackground = Color(0xFFfff7eb)
+//val md_theme_dark_surface = Color(0xFF0E1621)
+//val md_theme_dark_onSurface = Color(0xFFC5C6C9)
+//val md_theme_dark_surfaceVariant = Color(0xFF41484D)
+//val md_theme_dark_onSurfaceVariant = Color(0xFFC0C7CD)
+//val md_theme_dark_inverseSurface = Color(0xFFE1E2E5)
+//val md_theme_dark_inverseOnSurface = Color(0xFF191C1E)
+//val md_theme_dark_inversePrimary = Color(0xFF00668A)
+//val md_theme_dark_surfaceTint = Color(0xFF7BD0FF)
+//val md_theme_dark_outlineVariant = Color(0xFF41484D)
+//val md_theme_dark_scrim = Color(0xFF17212B)
 
 // val md_theme_dark_primary = Color(0xFF7BD0FF)
 // val md_theme_dark_onPrimary = Color(0xFF003549)

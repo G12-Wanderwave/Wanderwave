@@ -28,6 +28,11 @@ import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.navigation.TOP_LEVEL_DESTINATIONS
+import ch.epfl.cs311.wanderwave.ui.theme.md_theme_dark_background
+import ch.epfl.cs311.wanderwave.ui.theme.md_theme_dark_inverseOnSurface
+import ch.epfl.cs311.wanderwave.ui.theme.md_theme_dark_primary
+import ch.epfl.cs311.wanderwave.ui.theme.md_theme_dark_scrim
+import ch.epfl.cs311.wanderwave.ui.theme.md_theme_dark_surface
 
 val trackListIcon: ImageVector = Icons.Default.List
 val profileIcon: ImageVector = Icons.Default.Person
@@ -52,9 +57,7 @@ fun AppBottomBar(navActions: NavigationActions, online: Boolean) {
   BottomAppBar(
       modifier =
           Modifier.fillMaxWidth()
-              .background(MaterialTheme.colorScheme.surface)
-              .testTag("appBottomBar"),
-      containerColor = MaterialTheme.colorScheme.scrim) {
+              .testTag("appBottomBar"),) {
         // Assumes TOP_LEVEL_DESTINATIONS are in the order of Track List, Main, and Map for indexing
         IconButton(
             onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[0].route) },
