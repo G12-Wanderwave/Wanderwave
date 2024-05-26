@@ -487,10 +487,14 @@ class DataClassesTest {
   fun testProfileTrackFromNull() = run {
     val mockProfile = mockk<Profile>()
     val mockTrack = mockk<Track>()
-    val mockDocumentSnapshot = mockk<DocumentSnapshot>()
-    every { mockDocumentSnapshot.exists() } returns false
+    val mockDocumentSnapshotMain = mockk<DocumentSnapshot>()
+    val mockDocumentSnapshotProfile = mockk<DocumentSnapshot>()
+    val mockDocumentSnapshotTrack = mockk<DocumentSnapshot>()
+    every { mockDocumentSnapshotTrack.exists() } returns false
+    every { mockDocumentSnapshotMain["likersId"] } returns null
+    every { mockDocumentSnapshotMain["likes"] } returns null
     val profileTrackAssociation =
-        ProfileTrackAssociation.from(mapOf(), mockDocumentSnapshot, mockDocumentSnapshot)
+        ProfileTrackAssociation.from(mapOf(), mockDocumentSnapshotProfile, mockDocumentSnapshotTrack)
     assert(profileTrackAssociation == null)
   }
 }
