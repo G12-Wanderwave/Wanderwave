@@ -94,31 +94,18 @@ class ProfileConnection(
                     chosenSongs,
                     bannedSongs,
                     likedSongs ->
-                  Log.e("ProfileUpdate", "Combining profiles...")
+                  Log.i("ProfileUpdate", "Combining profiles...")
 
-                  Log.e("ProfileUpdate", "Top Songs: Attempting to retrieve or default.")
+                  Log.i("ProfileUpdate", "Top Songs: Attempting to retrieve or default.")
                   val updatedTopSongs = topSongs.getOrNull()
-                  if (updatedTopSongs == null) {
-                    Log.e("ProfileUpdate", "Top Songs: Retrieval failed, defaulting.")
-                  }
-
-                  Log.e("ProfileUpdate", "Chosen Songs: Attempting to retrieve or default.")
+                  Log.i("ProfileUpdate", "Chosen Songs: Attempting to retrieve or default.")
                   val updatedChosenSongs = chosenSongs.getOrNull()
-                  if (updatedChosenSongs == null) {
-                    Log.e("ProfileUpdate", "Chosen Songs: Retrieval failed, defaulting.")
-                  }
 
-                  Log.e("ProfileUpdate", "Banned Songs: Attempting to retrieve or default.")
+                  Log.i("ProfileUpdate", "Banned Songs: Attempting to retrieve or default.")
                   val updatedBannedSongs = bannedSongs.getOrNull()
-                  if (updatedBannedSongs == null) {
-                    Log.e("ProfileUpdate", "Banned Songs: Retrieval failed, defaulting.")
-                  }
 
-                  Log.e("ProfileUpdate", "Liked Songs: Attempting to retrieve or default.")
+                  Log.i("ProfileUpdate", "Liked Songs: Attempting to retrieve or default.")
                   val updatedLikedSongs = likedSongs.getOrNull()
-                  if (updatedLikedSongs == null) {
-                    Log.e("ProfileUpdate", "Liked Songs: Retrieval failed, defaulting.")
-                  }
 
                   // Create the updated profile
                   profile
