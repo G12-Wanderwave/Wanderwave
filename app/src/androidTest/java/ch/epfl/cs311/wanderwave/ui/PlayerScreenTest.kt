@@ -44,11 +44,9 @@ class PlayerScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
   @Test
   fun exclusivePlayerScreenInteractionsAndComponentsDisplayed() = run {
     composeTestRule.setContent {
-      val checked = remember { mutableStateOf(false) }
       val selectedVote = remember { mutableIntStateOf(0) }
       val progress = remember { mutableFloatStateOf(0f) }
       ExclusivePlayer(
-          checked = checked,
           selectedVote = selectedVote,
           uiState = viewModel.uiState.collectAsState().value,
           progress = progress)
@@ -57,17 +55,11 @@ class PlayerScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
     onComposeScreen<ExclusivePlayerScreen>(composeTestRule) {
       assertIsDisplayed()
       playerDragHandle.assertIsDisplayed()
-      votingButtons.assertIsDisplayed()
       toggleShuffle.performClick()
       toggleShuffle.performClick()
       toggleRepeat.performClick()
       toggleRepeat.performClick()
       toggleRepeat.performClick()
-      switch.performClick()
-      broadcastButton.performClick()
-      beaconButton.performClick()
-      playlistButton.performClick()
-      ignoreButton.performClick()
     }
   }
 
