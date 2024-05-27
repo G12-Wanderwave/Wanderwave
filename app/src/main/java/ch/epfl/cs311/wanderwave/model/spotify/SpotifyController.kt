@@ -79,13 +79,36 @@ constructor(
     return builder.build()
   }
 
+  suspend fun getTrackImage(trackId: String): Bitmap? {
+    return try {
+      val albumId = getAlbumIdFromTrackId(this, trackId)
+      Log.d("SpotifyController", "Album ID: $albumId")
+      getAlbumImage(albumId)
+
+    } catch (e: Exception) {
+      e.printStackTrace()
+      null
+    }
+  }
+
+  suspend fun getAlbumIdFromTrackId(spotifyController: SpotifyController, trackId: String): String {
+    val jsonResponse = spotifyController.spotifyGetFromURL("https://api.spotify.com/v1/tracks/$trackId")
+    val jsonObject = JSONObject(jsonResponse)
+    val album = jsonObject.getJSONObject("album")
+    Log.d("SpotifyController", "Album: $album")
+    return album.getString("id")
+  }
+
   suspend fun getAlbumImage(albumId: String): Bitmap? {
     return try {
+      Log.d("SpotifyController", "Album ID: $albumId")
       val url = "https://api.spotify.com/v1/albums/$albumId"
       val jsonResponse = spotifyGetFromURL(url)
       val imageUrl = extractImageUrlFromJson(jsonResponse)
+      Log.d("SpotifyController", "Image URL: $imageUrl")
       imageUrl?.let { fetchImageFromUrl(context, it) }
     } catch (e: Exception) {
+      Log.d("SpotifyController", "Failed to get album image")
       e.printStackTrace()
       null
     }

@@ -1,8 +1,10 @@
 package ch.epfl.cs311.wanderwave.ui.components.player
 
+import android.util.Log
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.TweenSpec
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,6 +34,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -53,13 +56,16 @@ fun ExclusivePlayer(
 ) {
   val viewModel: PlayerViewModel = hiltViewModel()
   Column(
-      modifier = Modifier.fillMaxSize().padding(bottom = 84.dp).testTag("exclusivePlayer"),
+      modifier = Modifier
+        .fillMaxSize()
+        .padding(bottom = 84.dp)
+        .testTag("exclusivePlayer"),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.SpaceBetween) {
         Column(verticalArrangement = Arrangement.Top) {
           PlayerDragHandle(duration1 = 1500, duration2 = 1500, duration3 = 1500, startColor = pink)
           Spacer(modifier = Modifier.height(10.dp))
-          // TODO : show image of the album
+          TrackImageComponent(uiState = uiState, fetchAlbumImage = viewModel::fetchImage)
         }
       Column(verticalArrangement = Arrangement.Bottom) {
         TrackInfoComponent(uiState)
@@ -68,9 +74,44 @@ fun ExclusivePlayer(
         Spacer(modifier = Modifier.height(10.dp))
         PlayerControlRowComponent(viewModel, uiState)
       }
-      }
+  }
 }
 
+@Composable
+fun TrackImageComponent(uiState: PlayerViewModel.UiState, fetchAlbumImage: () -> Unit){
+
+  LaunchedEffect (uiState.track){
+    // fetch the image of the album
+    fetchAlbumImage()
+  }
+
+  LaunchedEffect (uiState.bitmapImage){
+    Log.d("SpotifyController", "TrackImageComponent: ${uiState.bitmapImage}")
+  }
+
+  // show the image of the album
+  if (uiState.bitmapImage != null) {
+    Image(
+      bitmap = uiState.bitmapImage!!.asImageBitmap(),
+      contentDescription = "Album Art",
+      modifier = Modifier.size(200.dp)
+    )
+  } else {
+  // draw a square
+    Box(
+      modifier = Modifier.size(200.dp),
+      contentAlignment = Alignment.Center
+    ) {
+      Icon(
+        painter = painterResource(id = R.drawable.wanderwave_icon),
+        contentDescription = "Album Art",
+        tint = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.size(100.dp)
+      )
+    }
+  }
+
+}
 
 @Composable
 fun TrackInfoComponent(uiState: PlayerViewModel.UiState) {
