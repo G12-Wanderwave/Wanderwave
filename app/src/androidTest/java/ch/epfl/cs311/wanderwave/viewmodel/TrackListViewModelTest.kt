@@ -1,8 +1,5 @@
-
-import android.util.Log
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationUserData
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.TrackRecord
@@ -191,8 +188,8 @@ class TrackListViewModelTest {
             Track(
                 "spotify:track:2NZhNbfb1rD1aRj3hZaoqk", "The Imperial Suite", "Michael Giacchino"),
         )
-    tracks.forEach { viewModel.addTrackToList( it) }
-    tracks.forEach { viewModel.addTrackToList( it) }
+    tracks.forEach { viewModel.addTrackToList(it) }
+    tracks.forEach { viewModel.addTrackToList(it) }
     tracks.forEach { viewModel.addTrackToList(it) }
     viewModel.loadTracksBasedOnSource(2)
     viewModel.removeTrackFromBanList(tracks[0])
