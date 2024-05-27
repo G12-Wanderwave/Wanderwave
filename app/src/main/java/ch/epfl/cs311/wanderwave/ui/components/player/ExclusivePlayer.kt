@@ -64,10 +64,12 @@ fun ExclusivePlayer(
       verticalArrangement = Arrangement.SpaceBetween) {
         Column(verticalArrangement = Arrangement.Top) {
           PlayerDragHandle(duration1 = 1500, duration2 = 1500, duration3 = 1500, startColor = pink)
-          Spacer(modifier = Modifier.height(10.dp))
-          TrackImageComponent(uiState = uiState, fetchAlbumImage = viewModel::fetchImage)
+
         }
-      Column(verticalArrangement = Arrangement.Bottom) {
+      Column(verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.CenterHorizontally) {
+        TrackImageComponent(uiState = uiState, fetchAlbumImage = viewModel::fetchImage)
+        Spacer(modifier = Modifier.height(10.dp))
         TrackInfoComponent(uiState)
         Spacer(modifier = Modifier.height(10.dp))
         SliderComponent(progress)
@@ -89,19 +91,21 @@ fun TrackImageComponent(uiState: PlayerViewModel.UiState, fetchAlbumImage: () ->
     Log.d("SpotifyController", "TrackImageComponent: ${uiState.bitmapImage}")
   }
 
+
   // show the image of the album
-  if (uiState.bitmapImage != null) {
-    Image(
-      bitmap = uiState.bitmapImage!!.asImageBitmap(),
-      contentDescription = "Album Art",
-      modifier = Modifier.size(200.dp)
-    )
-  } else {
-  // draw a square
-    Box(
-      modifier = Modifier.size(200.dp),
-      contentAlignment = Alignment.Center
-    ) {
+  Box(
+    modifier = Modifier.size(200.dp),
+    contentAlignment = Alignment.Center,
+
+  ) {
+    if (uiState.bitmapImage != null) {
+      Image(
+        bitmap = uiState.bitmapImage!!.asImageBitmap(),
+        contentDescription = "Album Art",
+        modifier = Modifier.size(200.dp)
+      )
+    } else {
+    // draw a square
       Icon(
         painter = painterResource(id = R.drawable.wanderwave_icon),
         contentDescription = "Album Art",

@@ -92,8 +92,12 @@ constructor(
   }
 
   suspend fun getAlbumIdFromTrackId(spotifyController: SpotifyController, trackId: String): String {
+    val trackId = trackId.split(":")[2]
+    Log.d("SpotifyController", "getAlbumIdFromTrackId Track ID: $trackId, URL : https://api.spotify.com/v1/tracks/$trackId")
     val jsonResponse = spotifyController.spotifyGetFromURL("https://api.spotify.com/v1/tracks/$trackId")
+    Log.d("SpotifyController", "Track: $jsonResponse")
     val jsonObject = JSONObject(jsonResponse)
+    Log.d("SpotifyController", "Track: $jsonObject")
     val album = jsonObject.getJSONObject("album")
     Log.d("SpotifyController", "Album: $album")
     return album.getString("id")
