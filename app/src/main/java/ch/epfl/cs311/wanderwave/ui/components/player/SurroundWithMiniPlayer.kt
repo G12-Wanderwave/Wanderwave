@@ -19,7 +19,6 @@ import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
@@ -57,10 +56,7 @@ fun SurroundWithMiniPlayer(
               onPauseClick = { viewModel.pause() },
               progress = progress)
         } else {
-          ExclusivePlayer(
-              selectedVote = selectedVote,
-              uiState = uiState,
-              progress = progress)
+          ExclusivePlayer(selectedVote = selectedVote, uiState = uiState, progress = progress)
         }
       },
       sheetShape = RectangleShape,
@@ -69,14 +65,12 @@ fun SurroundWithMiniPlayer(
         if (!uiState.expanded && sheetState.hasPartiallyExpandedState && displayPlayer) {
           Column(
               modifier =
-              Modifier
-                .background(
-                  if (!uiState.isPlaying) MaterialTheme.colorScheme.primary
-                  else spotify_green
-                )
-                .fillMaxWidth()
-                .height(2.dp)
-                .clickable {}) {}
+                  Modifier.background(
+                          if (!uiState.isPlaying) MaterialTheme.colorScheme.primary
+                          else spotify_green)
+                      .fillMaxWidth()
+                      .height(2.dp)
+                      .clickable {}) {}
         }
       },
       scaffoldState =
@@ -125,7 +119,5 @@ fun HandleProgressChanges(uiState: PlayerViewModel.UiState, progress: MutableFlo
       }
     }
   }
-  LaunchedEffect(uiState.track) {
-    progress.floatValue = 0f
-  }
+  LaunchedEffect(uiState.track) { progress.floatValue = 0f }
 }

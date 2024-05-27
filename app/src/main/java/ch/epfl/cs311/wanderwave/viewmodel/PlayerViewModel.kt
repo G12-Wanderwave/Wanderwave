@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class   PlayerViewModel @Inject constructor(val spotifyController: SpotifyController) : ViewModel() {
+class PlayerViewModel @Inject constructor(val spotifyController: SpotifyController) : ViewModel() {
   private val _playerState = spotifyController.playerState()
   private val _looping = spotifyController.looping
   private val _shuffling = spotifyController.shuffling
@@ -68,8 +68,9 @@ class   PlayerViewModel @Inject constructor(val spotifyController: SpotifyContro
   }
 
   fun fetchImage() {
-    viewModelScope.launch { uiState.value.track?.let { _bitmapImage.value = spotifyController.getTrackImage(it.id)
-    Log.d("PlayerViewModel", "fetchImage: ${_bitmapImage.value}")}}
+    viewModelScope.launch {
+      uiState.value.track?.let { _bitmapImage.value = spotifyController.getTrackImage(it.id) }
+    }
   }
 
   fun skipForward() {

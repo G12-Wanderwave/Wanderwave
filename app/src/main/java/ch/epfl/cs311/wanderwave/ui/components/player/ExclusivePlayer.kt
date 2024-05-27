@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.ui.components.player
 
-import android.util.Log
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.TweenSpec
@@ -22,14 +21,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderColors
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.MutableIntState
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
-import ch.epfl.cs311.wanderwave.ui.theme.orange
 import ch.epfl.cs311.wanderwave.ui.theme.pink
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 import ch.epfl.cs311.wanderwave.viewmodel.PlayerViewModel
@@ -56,65 +51,53 @@ fun ExclusivePlayer(
 ) {
   val viewModel: PlayerViewModel = hiltViewModel()
   Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(bottom = 84.dp)
-        .testTag("exclusivePlayer"),
+      modifier = Modifier.fillMaxSize().padding(bottom = 84.dp).testTag("exclusivePlayer"),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.SpaceBetween) {
         Column(verticalArrangement = Arrangement.Top) {
           PlayerDragHandle(duration1 = 1500, duration2 = 1500, duration3 = 1500, startColor = pink)
-
         }
-      Column(verticalArrangement = Arrangement.Bottom,
-        horizontalAlignment = Alignment.CenterHorizontally) {
-        TrackImageComponent(uiState = uiState, fetchAlbumImage = viewModel::fetchImage)
-        Spacer(modifier = Modifier.height(10.dp))
-        TrackInfoComponent(uiState)
-        Spacer(modifier = Modifier.height(10.dp))
-        SliderComponent(progress)
-        Spacer(modifier = Modifier.height(10.dp))
-        PlayerControlRowComponent(viewModel, uiState)
+        Column(
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              TrackImageComponent(uiState = uiState, fetchAlbumImage = viewModel::fetchImage)
+              Spacer(modifier = Modifier.height(10.dp))
+              TrackInfoComponent(uiState)
+              Spacer(modifier = Modifier.height(10.dp))
+              SliderComponent(progress)
+              Spacer(modifier = Modifier.height(10.dp))
+              PlayerControlRowComponent(viewModel, uiState)
+            }
       }
-  }
 }
 
 @Composable
-fun TrackImageComponent(uiState: PlayerViewModel.UiState, fetchAlbumImage: () -> Unit){
+fun TrackImageComponent(uiState: PlayerViewModel.UiState, fetchAlbumImage: () -> Unit) {
 
-  LaunchedEffect (uiState.track){
+  LaunchedEffect(uiState.track) {
     // fetch the image of the album
     fetchAlbumImage()
   }
 
-  LaunchedEffect (uiState.bitmapImage){
-    Log.d("SpotifyController", "TrackImageComponent: ${uiState.bitmapImage}")
-  }
-
-
   // show the image of the album
   Box(
-    modifier = Modifier.size(200.dp),
-    contentAlignment = Alignment.Center,
-
+      modifier = Modifier.size(200.dp),
+      contentAlignment = Alignment.Center,
   ) {
     if (uiState.bitmapImage != null) {
       Image(
-        bitmap = uiState.bitmapImage!!.asImageBitmap(),
-        contentDescription = "Album Art",
-        modifier = Modifier.size(200.dp)
-      )
+          bitmap = uiState.bitmapImage!!.asImageBitmap(),
+          contentDescription = "Album Art",
+          modifier = Modifier.size(200.dp))
     } else {
-    // draw a square
+      // draw a square
       Icon(
-        painter = painterResource(id = R.drawable.wanderwave_icon),
-        contentDescription = "Album Art",
-        tint = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier.size(100.dp)
-      )
+          painter = painterResource(id = R.drawable.wanderwave_icon),
+          contentDescription = "Album Art",
+          tint = MaterialTheme.colorScheme.onSurface,
+          modifier = Modifier.size(100.dp))
     }
   }
-
 }
 
 @Composable
@@ -122,7 +105,8 @@ fun TrackInfoComponent(uiState: PlayerViewModel.UiState) {
   val scrollState = rememberScrollState()
   val coroutineScope = rememberCoroutineScope()
 
-  val slowScrollAnimation: AnimationSpec<Float> = TweenSpec(durationMillis = 10000, easing = FastOutSlowInEasing)
+  val slowScrollAnimation: AnimationSpec<Float> =
+      TweenSpec(durationMillis = 10000, easing = FastOutSlowInEasing)
 
   LaunchedEffect(key1 = true) {
     coroutineScope.launch {
@@ -137,23 +121,18 @@ fun TrackInfoComponent(uiState: PlayerViewModel.UiState) {
 
   Box(modifier = Modifier.padding(32.dp)) {
     Column(
-      modifier = Modifier
-        .fillMaxWidth()
-        .horizontalScroll(scrollState),
-      horizontalAlignment = Alignment.Start,
-      verticalArrangement = Arrangement.Center
-    ) {
-      Text(
-        text = uiState.track?.artist ?: "",
-        style = MaterialTheme.typography.titleSmall,
-        modifier = Modifier.padding(10.dp)
-      )
-      Text(
-        text = uiState.track?.title ?: "",
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(10.dp)
-      )
-    }
+        modifier = Modifier.fillMaxWidth().horizontalScroll(scrollState),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center) {
+          Text(
+              text = uiState.track?.artist ?: "",
+              style = MaterialTheme.typography.titleSmall,
+              modifier = Modifier.padding(10.dp))
+          Text(
+              text = uiState.track?.title ?: "",
+              style = MaterialTheme.typography.titleMedium,
+              modifier = Modifier.padding(10.dp))
+        }
   }
 }
 
