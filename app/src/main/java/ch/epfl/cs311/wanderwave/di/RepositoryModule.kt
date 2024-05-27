@@ -3,12 +3,14 @@ package ch.epfl.cs311.wanderwave.di
 import android.content.Context
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.localDb.LocalAuthTokenRepository
+import ch.epfl.cs311.wanderwave.model.localDb.LocalRecentlyPlayedRepositoryImpl
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
 import ch.epfl.cs311.wanderwave.model.repository.AuthTokenRepository
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
+import ch.epfl.cs311.wanderwave.model.repository.RecentlyPlayedRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
@@ -88,5 +90,15 @@ object RepositoryModule {
   @Singleton
   fun provideAuthTokenRepository(appDatabase: AppDatabase): AuthTokenRepository {
     return LocalAuthTokenRepository(appDatabase, Dispatchers.IO)
+  }
+
+  @Provides
+  @Singleton
+  fun provideRecentlyPlayedRepository(
+      appDatabase: AppDatabase,
+      trackRepository: TrackRepository
+  ): RecentlyPlayedRepository {
+    return LocalRecentlyPlayedRepositoryImpl(
+        appDatabase.recentlyPlayedDao(), trackRepository, Dispatchers.IO)
   }
 }
