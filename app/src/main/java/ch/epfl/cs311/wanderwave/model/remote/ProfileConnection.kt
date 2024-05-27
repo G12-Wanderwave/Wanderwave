@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.model.remote
 
+import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
@@ -89,11 +90,40 @@ class ProfileConnection(
                     chosenSongs,
                     bannedSongs,
                     likedSongs ->
-                  profile.copy(
-                      topSongs = topSongs.getOrNull() ?: profile.topSongs,
-                      chosenSongs = chosenSongs.getOrNull() ?: profile.chosenSongs,
-                      bannedSongs = bannedSongs.getOrNull() ?: profile.bannedSongs,
-                      likedSongs = likedSongs.getOrNull() ?: profile.likedSongs)
+                  Log.e("ProfileUpdate", "Combining profiles...")
+
+                  Log.e("ProfileUpdate", "Top Songs: Attempting to retrieve or default.")
+                  val updatedTopSongs = topSongs.getOrNull()
+                  if (updatedTopSongs == null) {
+                    Log.e("ProfileUpdate", "Top Songs: Retrieval failed, defaulting.")
+                  }
+
+                  Log.e("ProfileUpdate", "Chosen Songs: Attempting to retrieve or default.")
+                  val updatedChosenSongs = chosenSongs.getOrNull()
+                  if (updatedChosenSongs == null) {
+                    Log.e("ProfileUpdate", "Chosen Songs: Retrieval failed, defaulting.")
+                  }
+
+                  Log.e("ProfileUpdate", "Banned Songs: Attempting to retrieve or default.")
+                  val updatedBannedSongs = bannedSongs.getOrNull()
+                  if (updatedBannedSongs == null) {
+                    Log.e("ProfileUpdate", "Banned Songs: Retrieval failed, defaulting.")
+                  }
+
+                  Log.e("ProfileUpdate", "Liked Songs: Attempting to retrieve or default.")
+                  val updatedLikedSongs = likedSongs.getOrNull()
+                  if (updatedLikedSongs == null) {
+                    Log.e("ProfileUpdate", "Liked Songs: Retrieval failed, defaulting.")
+                  }
+
+                  // Create the updated profile
+                  profile
+                      .copy(
+                          topSongs = updatedTopSongs ?: profile.topSongs,
+                          chosenSongs = updatedChosenSongs ?: profile.chosenSongs,
+                          bannedSongs = updatedBannedSongs ?: profile.bannedSongs,
+                          likedSongs = updatedLikedSongs ?: profile.likedSongs)
+                      .also { Log.e("ProfileUpdate", "Profile combined and updated.") }
                 }
 
             // would like to keep the flow without collecting it, but I don't know how to do
