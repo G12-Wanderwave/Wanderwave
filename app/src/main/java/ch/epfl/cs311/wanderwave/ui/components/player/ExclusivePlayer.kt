@@ -90,24 +90,25 @@ fun TrackInfoComponent(uiState: PlayerViewModel.UiState) {
     }
   }
 
-  Column(
-    modifier = Modifier
-      .fillMaxWidth()
-      .horizontalScroll(scrollState)
-      .padding(10.dp),
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.Center
-  ) {
-    Text(
-      text = uiState.track?.artist ?: "",
-      style = MaterialTheme.typography.titleSmall,
-      modifier = Modifier.padding(10.dp)
-    )
-    Text(
-      text = uiState.track?.title ?: "",
-      style = MaterialTheme.typography.titleMedium,
-      modifier = Modifier.padding(10.dp)
-    )
+  Box(modifier = Modifier.padding(32.dp)) {
+    Column(
+      modifier = Modifier
+        .fillMaxWidth()
+        .horizontalScroll(scrollState),
+      horizontalAlignment = Alignment.Start,
+      verticalArrangement = Arrangement.Center
+    ) {
+      Text(
+        text = uiState.track?.artist ?: "",
+        style = MaterialTheme.typography.titleSmall,
+        modifier = Modifier.padding(10.dp)
+      )
+      Text(
+        text = uiState.track?.title ?: "",
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.padding(10.dp)
+      )
+    }
   }
 }
 
