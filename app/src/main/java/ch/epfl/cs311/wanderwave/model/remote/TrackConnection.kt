@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.model.remote
 
 import android.util.Log
+import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
@@ -80,6 +81,7 @@ class TrackConnection(
       } else {
         try {
           val likes = profileAndTrackRef["likes"] as? Int ?: 0
+          val likersId = profileAndTrackRef["likersId"] as? List<String> ?: emptyList()
           val trackRef = profileAndTrackRef["track"] as? DocumentReference
           val profileRef = profileAndTrackRef["creator"] as? DocumentReference
 
@@ -93,17 +95,17 @@ class TrackConnection(
                 val profile = profileDocument?.let { Profile.from(it) }
                 trySend(
                     Result.success(
-                        ProfileTrackAssociation(profile = profile, track = track, likes = likes)))
-              } ?: trySend(Result.success(ProfileTrackAssociation(null, track, likes)))
+                        ProfileTrackAssociation(profile = profile, track = track, likersId = likersId, likes = likes)))
+              } ?: trySend(Result.success(ProfileTrackAssociation(null, track, likersId, likes)))
             }
           }
               ?: trySend(
                   Result.failure(Exception("Error fetching the track, firebase format is wrong")))
+        } catch (e: Exception) {
+          // Handle exceptions
+          Log.e("Firestore", "Error fetching profile and track:${e.message}")
+          trySend(Result.failure(e))
         }
-      } catch (e: Exception) {
-        // Handle exceptions
-        Log.e("Firestore", "Error fetching profile and track:${e.message}")
-        trySend(Result.failure(e))
       }
     }
     awaitClose { close() }

@@ -187,12 +187,11 @@ fun SongList(
     navigationActions: NavigationActions
 ) {
   TrackListWithProfiles(
-      tracks = beacon.profileAndTrack,
-      profileViewModel,
       tracks =
-          beacon.profileAndTrack.filter { profileTrack ->
-            bannedTracks.any { profileTrack.track.id == it.id }.not()
-          },
+      beacon.profileAndTrack.filter { profileTrack ->
+          bannedTracks.any { profileTrack.track.id == it.id }.not()
+      },
+      profileViewModel,
       title = stringResource(R.string.beaconTracksTitle),
       onAddTrack = { track: Track ->
         addTrackToBeacon(beacon.id, track) { success ->
