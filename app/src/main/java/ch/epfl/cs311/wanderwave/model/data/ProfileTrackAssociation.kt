@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.model.data
 
+import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -33,6 +34,7 @@ data class ProfileTrackAssociation(
 
   fun likeTrack(profile: Profile): ProfileTrackAssociation {
     if (this.profile != null && !likersId.contains(profile.firebaseUid)) {
+      Log.i("ProfileTrackAssociation", "Liked track")
       this.profile.numberOfLikes += 1
       return ProfileTrackAssociation(profile, track, likersId + profile.firebaseUid, likes + 1)
     }
@@ -41,9 +43,11 @@ data class ProfileTrackAssociation(
 
   fun unlikeTrack(profile: Profile): ProfileTrackAssociation {
     if (this.profile != null && likersId.contains(profile.firebaseUid)) {
+      Log.i("ProfileTrackAssociation", "Unliked track")
       this.profile.numberOfLikes -= 1
       return ProfileTrackAssociation(profile, track, likersId - profile.firebaseUid, likes - 1)
     }
+    Log.e("ProfileTrackAssociation", "Failed to unlike track")
     return this
   }
 
@@ -59,8 +63,10 @@ data class ProfileTrackAssociation(
         val likersId = mainDocumentSnapshot["likersId"] as? List<String> ?: emptyList()
         val likes = (mainDocumentSnapshot["likes"] as? Long)?.toInt() ?: 0
 
+        Log.i("ProfileTrackAssociation", "Created ProfileTrackAssociation")
         track?.let { track: Track -> ProfileTrackAssociation(profile, track, likersId, likes) }
       } else {
+        Log.e("ProfileTrackAssociation", "Failed to create ProfileTrackAssociation")
         null
       }
     }

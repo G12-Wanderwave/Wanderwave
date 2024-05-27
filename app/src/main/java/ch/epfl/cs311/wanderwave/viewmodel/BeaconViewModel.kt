@@ -117,10 +117,10 @@ constructor(
   }
 
   fun updateBeacon(beacon: Beacon) {
-    Log.d("BeaconViewModel", "updating Beacon: $beacon")
+    Log.i("BeaconViewModel", "updating Beacon: $beacon")
     viewModelScope.launch {
       beaconRepository.updateItem(beacon)
-      Log.d("BeaconViewModel", "updated Beacon: $beacon")
+      Log.i("BeaconViewModel", "updated Beacon: $beacon")
     }
   }
 
