@@ -68,7 +68,12 @@ import kotlinx.coroutines.launch
  * @param onClick The action to perform when the track is clicked.
  */
 @Composable
-fun TrackListItem(track: Track, selected: Boolean, onClick: () -> Unit, profileViewModel: ProfileViewModel) {
+fun TrackListItem(
+    track: Track,
+    selected: Boolean,
+    onClick: () -> Unit,
+    profileViewModel: ProfileViewModel
+) {
   val scope = rememberCoroutineScope()
   val scrollState = rememberScrollState()
 
@@ -78,28 +83,28 @@ fun TrackListItem(track: Track, selected: Boolean, onClick: () -> Unit, profileV
     Row(
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val isLiked = remember {
-            mutableStateOf(profileViewModel.wanderwaveLikedTracks.value.contains(track))
-        }
-        LikeButton(
-            isLiked = isLiked,
-            onLike = {
-                // Add liked track to the profile
-                profileViewModel.likeTrack(track)
-                // Update it on Firebase
-                profileViewModel.updateProfile(profileViewModel.profile.value)
-                // Update UI
-                isLiked.value = true
-            },
-            onUnlike = {
-                // Add liked track to the profile
-                profileViewModel.unlikeTrack(track)
-                // Update it on Firebase
-                profileViewModel.updateProfile(profileViewModel.profile.value)
+      val isLiked = remember {
+        mutableStateOf(profileViewModel.wanderwaveLikedTracks.value.contains(track))
+      }
+      LikeButton(
+          isLiked = isLiked,
+          onLike = {
+            // Add liked track to the profile
+            profileViewModel.likeTrack(track)
+            // Update it on Firebase
+            profileViewModel.updateProfile(profileViewModel.profile.value)
+            // Update UI
+            isLiked.value = true
+          },
+          onUnlike = {
+            // Add liked track to the profile
+            profileViewModel.unlikeTrack(track)
+            // Update it on Firebase
+            profileViewModel.updateProfile(profileViewModel.profile.value)
 
-                // Update UI
-                isLiked.value = false
-            })
+            // Update UI
+            isLiked.value = false
+          })
 
       Box(
           modifier = Modifier.fillMaxHeight().aspectRatio(1f),
@@ -324,7 +329,11 @@ fun RemovableTrackListItem(
                     orientation = Orientation.Horizontal,
                 )
                 .offset(x = swipeState.offset.value.dp)) {
-          TrackListItem(track = track, selected = selected, onClick = onClick, profileViewModel = profileViewModel)
+          TrackListItem(
+              track = track,
+              selected = selected,
+              onClick = onClick,
+              profileViewModel = profileViewModel)
         }
     AnimatedVisibility(visible = swipeState.offset.value <= -swipeDistance) {
       IconButton(

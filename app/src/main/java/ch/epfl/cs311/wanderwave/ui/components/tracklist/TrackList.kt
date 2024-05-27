@@ -49,9 +49,7 @@ fun TrackList(
 ) {
   Column {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween) {
           if (title != null) {
@@ -104,9 +102,7 @@ fun TrackListWithProfiles(
     var showDialog by remember { mutableStateOf(false) }
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween) {
           if (title != null) {
@@ -169,9 +165,7 @@ fun RemovableTrackList(
 ) {
   Column {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween) {
           if (title != null) {
@@ -225,5 +219,6 @@ fun PreviewRemovableTrackList() {
     Log.d("TrackList", "Tracks: $tracks")
   }
   val profileViewModel: ProfileViewModel = hiltViewModel()
-  RemovableTrackList(tracks, title, canAddSong, ::onAddTrack, ::onSelectTrack, ::onRemoveTrack, profileViewModel)
+  RemovableTrackList(
+      tracks, title, canAddSong, ::onAddTrack, ::onSelectTrack, ::onRemoveTrack, profileViewModel)
 }

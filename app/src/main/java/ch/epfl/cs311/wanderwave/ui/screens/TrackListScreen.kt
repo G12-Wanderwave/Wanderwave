@@ -107,8 +107,7 @@ fun TabContent1(
             onSelectTrack = viewModel::playTrack,
             navActions = navActions,
             viewModelName = viewModelType.TRACKLIST,
-            profileViewModel = profileViewModel
-        )
+            profileViewModel = profileViewModel)
       }
       1 -> {
         TrackList(
@@ -121,8 +120,7 @@ fun TabContent1(
             onSelectTrack = viewModel::playTrack,
             navActions = navActions,
             viewModelName = viewModelType.TRACKLIST,
-            profileViewModel = profileViewModel
-        )
+            profileViewModel = profileViewModel)
       }
       2 -> {
         RemovableTrackList(
@@ -131,8 +129,7 @@ fun TabContent1(
             onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
             onSelectTrack = viewModel::playTrack,
             onRemoveTrack = viewModel::removeTrackFromBanList,
-            profileViewModel = profileViewModel
-        )
+            profileViewModel = profileViewModel)
       }
     }
   }
