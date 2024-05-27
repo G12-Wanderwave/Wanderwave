@@ -38,7 +38,6 @@ import ch.epfl.cs311.wanderwave.viewmodel.PlayerViewModel
 
 @Composable
 fun ExclusivePlayer(
-    checked: MutableState<Boolean>,
     selectedVote: MutableIntState,
     uiState: PlayerViewModel.UiState,
     progress: MutableFloatState
@@ -51,76 +50,18 @@ fun ExclusivePlayer(
         Column(verticalArrangement = Arrangement.Top) {
           PlayerDragHandle(duration1 = 1500, duration2 = 1500, duration3 = 1500, startColor = pink)
           Spacer(modifier = Modifier.height(10.dp))
-          PlayerIconButtonRowComponent()
-          Spacer(modifier = Modifier.height(15.dp))
-          VotingButtonsComponent(selectedVote)
+          // TODO : show image of the album
         }
+      Column(verticalArrangement = Arrangement.Bottom) {
         TrackInfoComponent(uiState)
+        Spacer(modifier = Modifier.height(10.dp))
         SliderComponent(progress)
+        Spacer(modifier = Modifier.height(10.dp))
         PlayerControlRowComponent(viewModel, uiState)
       }
-}
-
-@Composable
-fun SwitchComponent(checked: MutableState<Boolean>) {
-  Switch(
-      modifier = Modifier.testTag("switch"),
-      checked = checked.value,
-      onCheckedChange = { checked.value = it },
-      colors =
-          SwitchColors(
-              checkedThumbColor = pink,
-              checkedTrackColor = MaterialTheme.colorScheme.surface,
-              checkedBorderColor = pink,
-              checkedIconColor = pink,
-              uncheckedThumbColor = spotify_green,
-              uncheckedTrackColor = MaterialTheme.colorScheme.surface,
-              uncheckedBorderColor = spotify_green,
-              uncheckedIconColor = spotify_green,
-              disabledCheckedThumbColor = MaterialTheme.colorScheme.onBackground,
-              disabledCheckedTrackColor = MaterialTheme.colorScheme.onBackground,
-              disabledCheckedBorderColor = MaterialTheme.colorScheme.onBackground,
-              disabledCheckedIconColor = MaterialTheme.colorScheme.onBackground,
-              disabledUncheckedThumbColor = MaterialTheme.colorScheme.onBackground,
-              disabledUncheckedTrackColor = MaterialTheme.colorScheme.onBackground,
-              disabledUncheckedBorderColor = MaterialTheme.colorScheme.onBackground,
-              disabledUncheckedIconColor = MaterialTheme.colorScheme.onBackground,
-          ))
-}
-
-@Composable
-fun PlayerIconButtonRowComponent() {
-  Row(
-      horizontalArrangement = Arrangement.SpaceAround,
-      verticalAlignment = Alignment.CenterVertically,
-      modifier = Modifier.fillMaxWidth()) {
-        PlayerIconButton(
-            onClick = {},
-            testTag = "broadcastButton",
-            painterId = R.drawable.broadcast_icon,
-            tint = MaterialTheme.colorScheme.onSurface)
-        PlayerIconButton(
-            onClick = {},
-            testTag = "beaconButton",
-            painterId = R.drawable.beacon_add_icon,
-            tint = MaterialTheme.colorScheme.onSurface)
-        PlayerIconButton(
-            onClick = {},
-            testTag = "playlistButton",
-            painterId = R.drawable.playlist_add_icon,
-            tint = MaterialTheme.colorScheme.onSurface)
-        PlayerIconButton(
-            onClick = {},
-            testTag = "ignoreButton",
-            painterId = R.drawable.ignore_list_icon,
-            tint = MaterialTheme.colorScheme.onSurface)
       }
 }
 
-@Composable
-fun VotingButtonsComponent(selectedVote: MutableIntState) {
-  VotingButtons(selectedVote) { vote -> selectedVote.intValue = vote }
-}
 
 @Composable
 fun TrackInfoComponent(uiState: PlayerViewModel.UiState) {
@@ -250,48 +191,5 @@ private fun PlayerIconButton(onClick: () -> Unit, testTag: String, painterId: In
         contentDescription = "",
         tint = tint,
         modifier = Modifier.size(50.dp))
-  }
-}
-
-@Composable
-fun VotingButtons(selectedVote: MutableState<Int>, onVoteSelected: (Int) -> Unit) {
-  val voteOptions = listOf(-2, -1, 1, 2)
-  val icons =
-      listOf(
-          R.drawable.downvote_two_icon,
-          R.drawable.downvote_one_icon,
-          R.drawable.upvote_one_icon,
-          R.drawable.upvote_two_icon)
-  val tints = listOf(Color.DarkGray, Color.Gray, orange, Color.Red)
-
-  Row(
-      horizontalArrangement = Arrangement.SpaceAround,
-      verticalAlignment = Alignment.CenterVertically,
-      modifier = Modifier.fillMaxWidth().testTag("votingButtons")) {
-        voteOptions.forEachIndexed { index, vote ->
-          VotingButton(
-              vote = vote,
-              selectedVote = selectedVote,
-              onVoteSelected = onVoteSelected,
-              icon = icons[index],
-              tint = tints[index])
-        }
-      }
-}
-
-@Composable
-fun VotingButton(
-    vote: Int,
-    selectedVote: MutableState<Int>,
-    onVoteSelected: (Int) -> Unit,
-    icon: Int,
-    tint: Color
-) {
-  IconButton(onClick = { onVoteSelected(vote) }, modifier = Modifier.size(20.dp)) {
-    Icon(
-        painter = painterResource(id = icon),
-        contentDescription = "",
-        tint = if (selectedVote.value == vote) tint else MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier.size(20.dp))
   }
 }
