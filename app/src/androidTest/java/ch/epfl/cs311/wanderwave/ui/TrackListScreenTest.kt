@@ -56,6 +56,7 @@ class TrackListScreenTest : TestCase() {
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
   @RelaxedMockK lateinit var viewModel: TrackListViewModel
+  @RelaxedMockK lateinit var profileViewModel: ProfileViewModel
 
   @RelaxedMockK lateinit var mockShowMessage: (String) -> Unit
   @RelaxedMockK private lateinit var mockNavController: NavHostController
@@ -85,9 +86,9 @@ class TrackListScreenTest : TestCase() {
 
     val profile = mockk<Profile>(relaxed = true)
     val profileRepository = mockk<ProfileRepository>(relaxed = true)
-    val profileViewModel = mockk<ProfileViewModel>(relaxed = true)
+    profileViewModel = mockk<ProfileViewModel>(relaxed = true)
     every { profileRepository.getItem(any()) } returns flowOf(Result.success(profile))
-
+    every { profileViewModel.wanderwaveLikedTracks.value.contains(any()) } returns false
     viewModel =
         TrackListViewModel(
             mockSpotifyController,
