@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.model.remote
 
+import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
@@ -82,7 +83,11 @@ class ProfileConnection(
             val topSongs = documentReferencesToFlows(topSongRefs, trackConnection)
             val bannedSongs = documentReferencesToFlows(bannedSongRefs, trackConnection)
             val likedSongs = documentReferencesToFlows(likedSongRefs, trackConnection)
-
+            Log.i("ProfileConnection", "flows created")
+            Log.i("ProfileConnection", "chosenSongs: $chosenSongs")
+            Log.i("ProfileConnection", "topSongs: $topSongs")
+            Log.i("ProfileConnection", "bannedSongs: $bannedSongs")
+            Log.i("ProfileConnection", "likedSongs: $likedSongs")
             val updatedProfile =
                 combine(topSongs, chosenSongs, bannedSongs, likedSongs) {
                     topSongs,
@@ -101,7 +106,10 @@ class ProfileConnection(
             updatedProfile
                 .map { Result.success(it) }
                 .collect { result ->
-                  result.onSuccess { profile -> trySend(Result.success(profile)) }
+                  result.onSuccess { profile ->
+                    Log.i("ProfileConnection", "profile fetched")
+                    trySend(Result.success(profile))
+                  }
                 }
           }
         }
@@ -116,7 +124,12 @@ class ProfileConnection(
         // map to a list of flow
         ?.map { trackRef -> trackConnection.fetchTrack(trackRef) }
         // Extract the track from Result or return null if it's a failure
-        ?.map { flow -> flow.mapNotNull { result -> result.getOrNull() } }
+        ?.map { flow ->
+          flow.mapNotNull { result ->
+            Log.i("ProfileConnection", "track fetched")
+            result.getOrNull()
+          }
+        }
         // map to a list of track
         ?.fold(flowOf(Result.success(listOf<Track>()))) { acc, track ->
           acc.combine(track) { accTracks, track -> accTracks.map { tracks -> tracks + track } }

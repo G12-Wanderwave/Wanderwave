@@ -12,6 +12,7 @@ import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import io.mockk.MockKAnnotations
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -19,6 +20,7 @@ import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
@@ -28,6 +30,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
@@ -389,6 +392,89 @@ public class ProfileConnectionTest {
     assertEquals(expectedProfileMixed.likedSongs, combinedProfileMixed.likedSongs)
     assertEquals(expectedProfileMixed, combinedProfileMixed)
   }
+
+  @Test
+  fun documentReferencesToFlows_returnsFlowOfTracks_whenDocumentReferencesAreValid() =
+      runBlockingTest {
+        // Mocking
+        val documentReference = mockk<DocumentReference>()
+        val trackConnection = mockk<TrackConnection>()
+        val track = mockk<Track>()
+        val documentReferences = listOf(documentReference, documentReference, documentReference)
+
+        coEvery { trackConnection.fetchTrack(any()) } returns flowOf(Result.success(track))
+
+        // Act
+        val result =
+            profileConnection.documentReferencesToFlows(documentReferences, trackConnection).first()
+
+        // Assert
+        assertTrue(result.isSuccess)
+        assertEquals(listOf(track, track, track), result.getOrNull())
+      }
+
+  @Test
+  fun documentReferencesToFlows_returnsFailure_whenDocumentReferencesAreNull() = runBlockingTest {
+    // Mocking
+    val trackConnection = mockk<TrackConnection>()
+
+    // Act
+    val result = profileConnection.documentReferencesToFlows(null, trackConnection).first()
+
+    // Assert
+    assertTrue(result.isFailure)
+    assertEquals("Could not retrieve topSongs", result.exceptionOrNull()?.message)
+  }
+
+  //    @Test
+  //    fun documentReferencesToFlows_returnsFailure_whenFetchTrackFails() = runBlockingTest {
+  //        // Mocking
+  //        val documentReference = mockk<DocumentReference>()
+  //        val trackConnection = mockk<TrackConnection>()
+  //        val documentReferences = listOf(documentReference, documentReference, documentReference)
+  //
+  //        coEvery { trackConnection.fetchTrack(any()) } returns
+  // flowOf(Result.failure(Exception("Fetch failed")))
+  //
+  //        // Act
+  //        val result = profileConnection.documentReferencesToFlows(documentReferences,
+  // trackConnection).first()
+  //
+  //        // Assert
+  //        assertTrue(result.isFailure)
+  //    }
+  //
+  //
+  //    @Test
+  //    fun documentTransform_returnsFailure_whenDocumentDoesNotExist() = runBlockingTest {
+  //        // Mocking
+  //        val documentSnapshot = mockk<DocumentSnapshot>()
+  //        every { documentSnapshot.exists() } returns false
+  //
+  //        // Act
+  //        val result = profileConnection.documentTransform(documentSnapshot, null).first()
+  //
+  //        // Assert
+  //        assertTrue(result.isFailure)
+  //        assertEquals("Document does not exist", result.exceptionOrNull()?.message)
+  //    }
+  //
+  //    @Test
+  //    fun documentTransform_returnsProfile_whenDocumentExistsAndItemIsNull() = runBlockingTest {
+  //        // Mocking
+  //        val documentSnapshot = mockk<DocumentSnapshot>()
+  //        every { documentSnapshot.exists() } returns true
+  //        every { documentSnapshot.getString(any()) } returns "test"
+  //        every { documentSnapshot.getLong(any()) } returns 1
+  //        every { documentSnapshot.getBoolean(any()) } returns true
+  //        every { documentSnapshot.get(any<String>()) } returns listOf<DocumentReference>()
+  //        // Act
+  //        val result = profileConnection.documentTransform(documentSnapshot, null).first()
+  //
+  //        // Assert
+  //        assertTrue(result.isSuccess)
+  //        assertNotNull(result.getOrNull())
+  //    }
 
   @Test
   fun testCombine() = runBlocking {
