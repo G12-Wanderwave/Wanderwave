@@ -96,10 +96,12 @@ abstract class FirebaseConnection<T, U>(
   }
 
   open fun getItem(itemId: String): Flow<Result<T>> {
+    Log.d("Firestore", "getItem called with itemId: $itemId")
     val callbackFlow =
         callbackFlow<Flow<Result<T>>> {
           withContext(ioDispatcher) {
             db.collection(collectionName).document(itemId).addSnapshotListener { document, error ->
+              Log.d("Firestore", "DocumentSnapshot data: ${document} error: ${error}")
               if (error != null) {
                 Log.e("Firestore", "Error getting document: ", error)
                 // return failure result

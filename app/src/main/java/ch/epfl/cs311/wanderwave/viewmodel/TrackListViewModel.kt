@@ -10,6 +10,7 @@ import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
+import ch.epfl.cs311.wanderwave.model.repository.RecentlyPlayedRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
@@ -35,7 +36,8 @@ constructor(
     private val appDatabase: AppDatabase,
     private val repository: TrackRepository,
     private val profileRepository: ProfileRepository,
-    private val authenticationController: AuthenticationController
+    private val authenticationController: AuthenticationController,
+    private val recentlyPlayedRepository: RecentlyPlayedRepository
 ) : ViewModel(), SpotifySongsActions {
 
   private val _uiState = MutableStateFlow(UiState(loading = true))
@@ -45,14 +47,18 @@ constructor(
   override val isTopSongsListVisible: StateFlow<Boolean> = _isTopSongsListVisible
 
   private var _searchQuery = MutableStateFlow("")
+  private var observeTracksJob: Job? = null
 
   fun loadTracksBasedOnSource(index: Int) {
+    Log.d("TrackListViewModel", "loadTracksBasedOnSource: $index")
     viewModelScope.launch {
+      observeTracksJob?.let {
+        Log.d("TrackListViewModel", "loadTracksBasedOnSource: canceling job: $it")
+        it.cancel()
+      }
       _uiState.value = _uiState.value.copy(loading = true)
       when (index) {
-        0 ->
-            _uiState.value =
-                _uiState.value.copy(tracks = spotifyController.recentlyPlayedTracks.value)
+        0 -> loadRecentlyPlayedTracks()
         1 -> loadRecentlyAddedTracks() // TODO: modify here for recently added tracks
         2 -> loadRecentlyAddedTracks() // TODO: modify here for the liked tracks
         3 -> loadRecentlyAddedTracks() // TODO: modify here for the banned tracks
@@ -60,16 +66,27 @@ constructor(
     }
   }
 
-  fun loadRecentlyAddedTracks() {
-    viewModelScope.launch {
-      val trackRecords =
-          appDatabase.trackRecordDao().getAllRecentlyAddedTracks().firstOrNull() ?: listOf()
-      val trackDetails =
-          trackRecords.mapNotNull {
-            repository.getItem(it.trackId).firstOrNull()?.getOrElse { null }
+  fun loadRecentlyPlayedTracks() {
+    observeTracksJob =
+        viewModelScope.launch {
+          recentlyPlayedRepository.getRecentlyPlayed().collect { tracks ->
+            Log.d("TrackListViewModel", "loadRecentlyPlayedTracks: $tracks")
+            _uiState.value = _uiState.value.copy(tracks = tracks, loading = false)
           }
-      _uiState.value = _uiState.value.copy(tracks = trackDetails, loading = false)
-    }
+        }
+  }
+
+  fun loadRecentlyAddedTracks() {
+    observeTracksJob =
+        viewModelScope.launch {
+          val trackRecords =
+              appDatabase.trackRecordDao().getAllRecentlyAddedTracks().firstOrNull() ?: listOf()
+          val trackDetails =
+              trackRecords.mapNotNull {
+                repository.getItem(it.trackId).firstOrNull()?.getOrElse { null }
+              }
+          _uiState.value = _uiState.value.copy(tracks = trackDetails, loading = false)
+        }
   }
 
   private var _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
