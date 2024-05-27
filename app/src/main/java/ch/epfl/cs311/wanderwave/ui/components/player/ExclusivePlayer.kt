@@ -49,12 +49,7 @@ fun ExclusivePlayer(
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.SpaceBetween) {
         Column(verticalArrangement = Arrangement.Top) {
-          PlayerDragHandleComponent(checked)
-          Box(
-              contentAlignment = Alignment.Center,
-              modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) {
-                SwitchComponent(checked)
-              }
+          PlayerDragHandle(duration1 = 1500, duration2 = 1500, duration3 = 1500, startColor = pink)
           Spacer(modifier = Modifier.height(10.dp))
           PlayerIconButtonRowComponent()
           Spacer(modifier = Modifier.height(15.dp))
@@ -64,16 +59,6 @@ fun ExclusivePlayer(
         SliderComponent(progress)
         PlayerControlRowComponent(viewModel, uiState)
       }
-}
-
-@Composable
-fun PlayerDragHandleComponent(checked: MutableState<Boolean>) {
-  if (checked.value) {
-    PlayerDragHandle(duration1 = 1500, duration2 = 1500, duration3 = 1500, startColor = pink)
-  } else {
-    PlayerDragHandle(
-        duration1 = 4000, duration2 = 3000, duration3 = 2000, startColor = spotify_green)
-  }
 }
 
 @Composable
