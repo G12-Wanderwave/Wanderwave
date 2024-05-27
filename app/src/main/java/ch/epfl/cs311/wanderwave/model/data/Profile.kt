@@ -40,7 +40,7 @@ data class Profile(
         "spotifyUid" to spotifyUid,
         "firebaseUid" to firebaseUid,
         "isPublic" to isPublic,
-        "profilePictureUri" to (profilePictureUri?.toString() ?: ""),
+        "profilePictureUri" to (profilePictureUri?.toString() ?: ""), // implement this later
         "numberOfLikes" to numberOfLikes,
         "topSongs" to topSongsReferences,
         "likedSongs" to likedSongsReferences,
@@ -57,8 +57,8 @@ data class Profile(
             description = documentSnapshot.getString("description") ?: "",
             numberOfLikes = documentSnapshot.getLong("numberOfLikes")?.toInt() ?: 0,
             isPublic = documentSnapshot.getBoolean("isPublic") ?: false,
-            profilePictureUri =
-                documentSnapshot.getString("profilePictureUri")?.let { Uri.parse(it) },
+            profilePictureUri = // implement this later
+            documentSnapshot.getString("profilePictureUri")?.let { Uri.parse(it) },
             spotifyUid = documentSnapshot.getString("spotifyUid") ?: "",
             firebaseUid = documentSnapshot.getString("firebaseUid") ?: "",
         )

@@ -46,7 +46,7 @@ import androidx.wear.compose.material.swipeable
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
-import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
+import ch.epfl.cs311.wanderwave.ui.components.profile.PlaceholderProfilePicture
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -93,11 +93,6 @@ fun TrackListItem(track: Track, selected: Boolean, onClick: () -> Unit) {
   }
 }
 
-/**
- * Same as [TrackListItem] but with a profile picture on the right side of the track information.
- * Takes a [ProfileTrackAssociation] instead of a [Track].to display profile information, as well as
- * a [NavigationActions] to navigate to the profile view screen.
- */
 @Composable
 fun TrackListItemWithProfile(
     trackAndProfile: ProfileTrackAssociation,
@@ -113,51 +108,51 @@ fun TrackListItemWithProfile(
   TrackListItemCard(onClick = onClick, selected = selected) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Box(
-          modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-          contentAlignment = Alignment.Center) {
-            Image(
-                imageVector = Icons.Default.PlayArrow,
-                contentDescription = "Album Cover",
-                modifier = Modifier.fillMaxSize(.8f),
-            )
+        modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+          Box(
+              modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+              contentAlignment = Alignment.Center) {
+                Image(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "Album Cover",
+                    modifier = Modifier.fillMaxSize(.8f),
+                )
+              }
+          Column(
+              modifier =
+                  Modifier.padding(horizontal = 8.dp).weight(1f).horizontalScroll(scrollState)) {
+                Text(
+                    text = trackAndProfile.track.title,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = trackAndProfile.track.artist,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+              }
+          if (trackAndProfile.profile != null) {
+            Box(
+                modifier =
+                    Modifier.size(48.dp)
+                        .clickable(
+                            enabled = trackAndProfile.profile.isPublic,
+                            onClick = {
+                              if (trackAndProfile.profile.isPublic) {
+                                navigationActions.navigateToProfile(
+                                    trackAndProfile.profile.firebaseUid)
+                              } else {
+                                scope.launch {
+                                  snackbarHostState.showSnackbar(
+                                      "This profile is private, you cannot access profile information.")
+                                }
+                              }
+                            }),
+                contentAlignment = Alignment.Center) {
+                  PlaceholderProfilePicture(name = trackAndProfile.profile.firstName)
+                }
           }
-      Column(modifier = Modifier.padding(8.dp).horizontalScroll(scrollState)) {
-        Text(
-            text = trackAndProfile.track.title,
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.titleMedium)
-        Text(
-            text = trackAndProfile.track.artist,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-      }
-      if (trackAndProfile.profile != null) {
-        SelectImage(
-            modifier =
-                Modifier.size(width = 150.dp, height = 100.dp)
-                    .clickable(
-                        enabled = trackAndProfile.profile.isPublic,
-                        onClick = {
-                          if (trackAndProfile.profile.isPublic) {
-                            // if the profile is public, navigate to the profile view screen
-                            navigationActions.navigateToProfile(trackAndProfile.profile.firebaseUid)
-                          } else {
-                            // if the profile is private , output a message that say the profile
-                            // is
-                            // private, you cannot access to profile informations
-                            scope.launch {
-                              snackbarHostState.showSnackbar(
-                                  "This profile is private, you cannot access profile information.")
-                            }
-                          }
-                        }),
-            imageUri = trackAndProfile.profile.profilePictureUri,
-        )
-      }
-    }
+        }
   }
 }
 
