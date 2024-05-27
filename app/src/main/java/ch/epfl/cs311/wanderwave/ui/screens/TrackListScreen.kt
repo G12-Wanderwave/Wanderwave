@@ -107,7 +107,8 @@ fun TabContent1(
             onSelectTrack = viewModel::playTrack,
             navActions = navActions,
             viewModelName = viewModelType.TRACKLIST,
-            profileViewModel = profileViewModel)
+            profileViewModel = profileViewModel,
+            canLike = true)
       }
       1 -> {
         TrackList(

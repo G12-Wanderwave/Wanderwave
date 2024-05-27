@@ -72,7 +72,8 @@ fun TrackListItem(
     track: Track,
     selected: Boolean,
     onClick: () -> Unit,
-    profileViewModel: ProfileViewModel
+    profileViewModel: ProfileViewModel,
+    canLike: Boolean = false
 ) {
   val scope = rememberCoroutineScope()
   val scrollState = rememberScrollState()
@@ -86,25 +87,27 @@ fun TrackListItem(
       val isLiked = remember {
         mutableStateOf(profileViewModel.wanderwaveLikedTracks.value.contains(track))
       }
-      LikeButton(
-          isLiked = isLiked,
-          onLike = {
-            // Add liked track to the profile
-            profileViewModel.likeTrack(track)
-            // Update it on Firebase
-            profileViewModel.updateProfile(profileViewModel.profile.value)
-            // Update UI
-            isLiked.value = true
-          },
-          onUnlike = {
-            // Add liked track to the profile
-            profileViewModel.unlikeTrack(track)
-            // Update it on Firebase
-            profileViewModel.updateProfile(profileViewModel.profile.value)
+      if (canLike) {
+        LikeButton(
+            isLiked = isLiked,
+            onLike = {
+              // Add liked track to the profile
+              profileViewModel.likeTrack(track)
+              // Update it on Firebase
+              profileViewModel.updateProfile(profileViewModel.profile.value)
+              // Update UI
+              isLiked.value = true
+            },
+            onUnlike = {
+              // Add liked track to the profile
+              profileViewModel.unlikeTrack(track)
+              // Update it on Firebase
+              profileViewModel.updateProfile(profileViewModel.profile.value)
 
-            // Update UI
-            isLiked.value = false
-          })
+              // Update UI
+              isLiked.value = false
+            })
+      }
 
       Box(
           modifier = Modifier.fillMaxHeight().aspectRatio(1f),

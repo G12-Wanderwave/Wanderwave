@@ -45,7 +45,8 @@ fun TrackList(
     onSelectTrack: (Track) -> Unit = {},
     navActions: NavigationActions,
     viewModelName: viewModelType,
-    profileViewModel: ProfileViewModel
+    profileViewModel: ProfileViewModel,
+    canLike: Boolean = false
 ) {
   Column {
     Row(
@@ -80,7 +81,8 @@ fun TrackList(
               selectedTrack = track
               onSelectTrack(track)
             },
-            profileViewModel = profileViewModel)
+            profileViewModel = profileViewModel,
+            canLike = canLike)
       }
     }
   }
