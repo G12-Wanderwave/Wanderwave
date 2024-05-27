@@ -1,6 +1,8 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
+import ch.epfl.cs311.wanderwave.model.data.Profile
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import io.mockk.called
 import io.mockk.coEvery
@@ -24,6 +26,7 @@ class SpotifyConnectScreenViewModelTest {
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
 
   @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
+  @RelaxedMockK private lateinit var mockProfileRepository: ProfileRepository
 
   private lateinit var viewModel: SpotifyConnectScreenViewModel
 
@@ -36,7 +39,7 @@ class SpotifyConnectScreenViewModelTest {
     every { mockAuthenticationController.isSignedIn() } returns isSignedIn
     coEvery { mockAuthenticationController.refreshTokenIfNecessary() } returns
         (isSignedIn || canRefresh)
-    viewModel = SpotifyConnectScreenViewModel(mockSpotifyController, mockAuthenticationController)
+    viewModel = SpotifyConnectScreenViewModel(mockSpotifyController, mockAuthenticationController,mockProfileRepository)
   }
 
   @Test
@@ -96,5 +99,27 @@ class SpotifyConnectScreenViewModelTest {
     val uiState = viewModel.uiState.first()
     assert(uiState.hasResult)
     assert(uiState.success.not())
+  }
+  @Test
+  fun checkIfFirstTime_whenProfileExists() = runBlocking {
+
+    setup(SpotifyController.ConnectResult.SUCCESS, true, true)
+    val userId = "user123"
+    val profile = Profile(
+      firstName = "John",
+      lastName = "Doe",
+      description = "A profile description",
+      numberOfLikes = 0,
+      isPublic = true,
+      spotifyUid = "spotifyUid",
+      firebaseUid = "firebaseUid"
+    )
+    val profileResult = Result.success(profile)
+    every { mockProfileRepository.getItem(userId) } returns flowOf(profileResult)
+
+    viewModel.checkIfFirstTime()
+
+    val isFirstTime = viewModel.isFirstTime.first()
+    assert(!isFirstTime)
   }
 }
