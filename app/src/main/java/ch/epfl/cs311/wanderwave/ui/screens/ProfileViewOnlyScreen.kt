@@ -74,6 +74,7 @@ fun ProfileViewOnlyScreen(
               {},
               onSelectTrack = { viewModel.selectTrack(it, ListType.TOP_SONGS.name) },
               canAddSong = false,
+              profileViewModel = viewModel,
           )
         }
   }

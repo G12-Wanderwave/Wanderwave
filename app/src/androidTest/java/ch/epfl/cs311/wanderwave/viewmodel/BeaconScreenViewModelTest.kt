@@ -138,6 +138,13 @@ class BeaconScreenViewModelTest {
   }
 
   @Test
+  fun testUpdateBeacon() = runBlocking {
+    val beacon = Beacon("beaconId", Location(0.0, 0.0, "Lausanne"))
+    viewModel.updateBeacon(beacon)
+    verify { beaconRepository.updateItem(beacon) }
+  }
+
+  @Test
   fun addTrackToBeaconTest() {
     val viewModel =
         BeaconViewModel(

@@ -19,6 +19,7 @@ import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.screens.TrackListScreen
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 import com.google.common.base.Verify.verify
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -55,6 +56,7 @@ class TrackListScreenTest : TestCase() {
   @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
   @RelaxedMockK lateinit var viewModel: TrackListViewModel
+  @RelaxedMockK lateinit var profileViewModel: ProfileViewModel
 
   @RelaxedMockK lateinit var mockShowMessage: (String) -> Unit
   @RelaxedMockK private lateinit var mockNavController: NavHostController
@@ -84,8 +86,9 @@ class TrackListScreenTest : TestCase() {
 
     val profile = mockk<Profile>(relaxed = true)
     val profileRepository = mockk<ProfileRepository>(relaxed = true)
+    profileViewModel = mockk<ProfileViewModel>(relaxed = true)
     every { profileRepository.getItem(any()) } returns flowOf(Result.success(profile))
-
+    every { profileViewModel.wanderwaveLikedTracks.value.contains(any()) } returns false
     viewModel =
         TrackListViewModel(
             mockSpotifyController,
@@ -95,7 +98,9 @@ class TrackListScreenTest : TestCase() {
             authenticationController)
     every { mockSpotifyController.recentlyPlayedTracks.value } returns
         listOf(Track("id1", "title1", "artist1"))
-    composeTestRule.setContent { TrackListScreen(mockNavigationActions, viewModel, true) }
+    composeTestRule.setContent {
+      TrackListScreen(mockNavigationActions, viewModel, profileViewModel, true)
+    }
   }
 
   @Test

@@ -106,6 +106,15 @@ constructor(
           }
         })
   }
+
+  fun updateBeacon(beacon: Beacon) {
+    Log.i("BeaconViewModel", "updating Beacon: $beacon")
+    viewModelScope.launch {
+      beaconRepository.updateItem(beacon)
+      Log.i("BeaconViewModel", "updated Beacon: $beacon")
+    }
+  }
+
   /**
    * Get all the element of the main screen and add them to the top list
    *
