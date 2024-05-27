@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
@@ -43,11 +44,14 @@ fun TrackList(
     onAddTrack: (Track) -> Unit,
     onSelectTrack: (Track) -> Unit = {},
     navActions: NavigationActions,
-    viewModelName: viewModelType
+    viewModelName: viewModelType,
+    profileViewModel: ProfileViewModel
 ) {
   Column {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween) {
           if (title != null) {
@@ -77,7 +81,8 @@ fun TrackList(
             onClick = {
               selectedTrack = track
               onSelectTrack(track)
-            })
+            },
+            profileViewModel = profileViewModel)
       }
     }
   }
@@ -99,7 +104,9 @@ fun TrackListWithProfiles(
     var showDialog by remember { mutableStateOf(false) }
 
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween) {
           if (title != null) {
@@ -158,10 +165,13 @@ fun RemovableTrackList(
     onAddTrack: () -> Unit,
     onSelectTrack: (Track) -> Unit = {},
     onRemoveTrack: (Track) -> Unit,
+    profileViewModel: ProfileViewModel
 ) {
   Column {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween) {
           if (title != null) {
@@ -189,7 +199,8 @@ fun RemovableTrackList(
               selectedTrack = track
               onSelectTrack(track)
             },
-            onRemove = { onRemoveTrack(track) })
+            onRemove = { onRemoveTrack(track) },
+            profileViewModel = profileViewModel)
       }
     }
   }
@@ -213,5 +224,6 @@ fun PreviewRemovableTrackList() {
     tracks = tracks.filterNot { it.id == track.id }
     Log.d("TrackList", "Tracks: $tracks")
   }
-  RemovableTrackList(tracks, title, canAddSong, ::onAddTrack, ::onSelectTrack, ::onRemoveTrack)
+  val profileViewModel: ProfileViewModel = hiltViewModel()
+  RemovableTrackList(tracks, title, canAddSong, ::onAddTrack, ::onSelectTrack, ::onRemoveTrack, profileViewModel)
 }

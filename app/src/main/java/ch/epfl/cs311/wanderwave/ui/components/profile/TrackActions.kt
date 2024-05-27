@@ -17,6 +17,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.SongList
 
 /**
@@ -111,7 +112,8 @@ fun SongsListDisplay(
     onAddTrack: (Track) -> Unit,
     onSelectTrack: (Track) -> Unit,
     canAddSong: Boolean = true,
-    viewModelName: viewModelType = viewModelType.NULL
+    viewModelName: viewModelType = viewModelType.NULL,
+    profileViewModel: ProfileViewModel
 ) {
   val name = if (isTopSongsListVisible) ListType.TOP_SONGS else ListType.LIKED_SONGS
   songLists
@@ -124,6 +126,7 @@ fun SongsListDisplay(
             onAddTrack = onAddTrack,
             canAddSong = canAddSong,
             navActions = navigationActions,
-            viewModelName = viewModelName)
+            viewModelName = viewModelName,
+            profileViewModel = profileViewModel)
       }
 }
