@@ -163,12 +163,13 @@ fun TrackListItemWithProfile(
       LikeButton(
           isLiked = isLiked,
           onLike = {
-//            // Update the profile and track association
-//            val newTrackProfile = trackAndProfile.likeTrack(profileViewModel.profile.value)
-//            // Update it in the beacon
-//            val newBeacon = beacon.updateProfileAndTrackElement(newTrackProfile)
-//            // Update it on Firebase
-//            beaconViewModel.updateBeacon(newBeacon)
+            //            // Update the profile and track association
+            //            val newTrackProfile =
+            // trackAndProfile.likeTrack(profileViewModel.profile.value)
+            //            // Update it in the beacon
+            //            val newBeacon = beacon.updateProfileAndTrackElement(newTrackProfile)
+            //            // Update it on Firebase
+            //            beaconViewModel.updateBeacon(newBeacon)
 
             // Add liked track to the profile
             profileViewModel.likeTrack(trackAndProfile.track)
@@ -179,12 +180,13 @@ fun TrackListItemWithProfile(
             isLiked.value = true
           },
           onUnlike = {
-//            // Update the profile and track association
-//            val newTrackProfile = trackAndProfile.unlikeTrack(profileViewModel.profile.value)
-//            // Update it in the beacon
-//            val newBeacon = beacon.updateProfileAndTrackElement(newTrackProfile)
-//            // Update it on Firebase
-//            beaconViewModel.updateBeacon(newBeacon)
+            //            // Update the profile and track association
+            //            val newTrackProfile =
+            // trackAndProfile.unlikeTrack(profileViewModel.profile.value)
+            //            // Update it in the beacon
+            //            val newBeacon = beacon.updateProfileAndTrackElement(newTrackProfile)
+            //            // Update it on Firebase
+            //            beaconViewModel.updateBeacon(newBeacon)
 
             // Add liked track to the profile
             profileViewModel.unlikeTrack(trackAndProfile.track)
