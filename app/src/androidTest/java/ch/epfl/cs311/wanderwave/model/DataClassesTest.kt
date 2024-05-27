@@ -459,6 +459,19 @@ class DataClassesTest {
   }
 
   @Test
+  fun testProfileTrackLikeTrackNull() = run {
+    val mockProfile = mockk<Profile>(relaxed = true)
+    every { mockProfile.numberOfLikes = 0 } just Runs
+    every { mockProfile.firebaseUid } returns "firebaseUid"
+    val mockTrack = mockk<Track>()
+    val profileTrackAssociation = ProfileTrackAssociation(null, mockTrack)
+    every { mockTrack.id } returns "trackId"
+    val unlikedAssociation = profileTrackAssociation.unlikeTrack(mockProfile)
+    assertEquals(0, unlikedAssociation.likes)
+    assertEquals(0, unlikedAssociation.likersId.size)
+  }
+
+  @Test
   fun testProfileTrackFrom() = run {
     val mockProfile = mockk<Profile>()
     val mockTrack = mockk<Track>()
