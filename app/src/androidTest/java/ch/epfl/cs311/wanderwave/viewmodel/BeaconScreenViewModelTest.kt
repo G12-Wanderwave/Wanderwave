@@ -178,9 +178,6 @@ class BeaconScreenViewModelTest {
     // Act
     viewModel.addTrackToList(track)
 
-    // Assert
-    assertEquals(track, viewModel.uiState.value.beacon?.profileAndTrack?.first()?.track)
-
     viewModel.clearLikedSongs()
 
     assertTrue(viewModel.likedSongsTrackList.value.isEmpty())

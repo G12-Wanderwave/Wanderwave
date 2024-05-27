@@ -81,7 +81,9 @@ constructor(
 
   // Function to add a track to a song list
   override fun addTrackToList(track: Track) {
+
     addTrackToBeacon(beaconId, track) { success ->
+      Log.d("BeaconViewModel", "Track added to beacon")
       if (success) {
         getBeaconById(beaconId)
         Log.i("BeaconViewModel", "Track added to beacon")
