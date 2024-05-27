@@ -97,7 +97,9 @@ class TrackListScreenTest : TestCase() {
             authenticationController)
     every { mockSpotifyController.recentlyPlayedTracks.value } returns
         listOf(Track("id1", "title1", "artist1"))
-    composeTestRule.setContent { TrackListScreen(mockNavigationActions, viewModel, profileViewModel, true) }
+    composeTestRule.setContent {
+      TrackListScreen(mockNavigationActions, viewModel, profileViewModel, true)
+    }
   }
 
   @Test
