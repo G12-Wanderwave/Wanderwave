@@ -33,6 +33,7 @@
 
     <string name="search_tracks">Search Tracks</string>
     <string name="show_recently_added">Show Recently Added</string>
+    <string name="recently_played_tracks">Recently Played Tracks</string>
     <string name="recently_added_tracks">Recently Added Tracks</string>
     <string name="liked_tracks">Liked Tracks</string>
     <string name="banned_tracks">Banned Tracks</string>

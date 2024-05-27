@@ -52,12 +52,10 @@ constructor(
       when (index) {
         0 ->
             _uiState.value =
-                _uiState.value.copy(
-                    tracks =
-                        spotifyController.recentlyPlayedTracks
-                            .value) // TODO:modify for the recnetly played tracks
-        1 -> loadRecentlyAddedTracks() // TODO: modify here for the liked tracks
-        2 -> loadRecentlyAddedTracks() // TODO: modify here for the banned tracks
+                _uiState.value.copy(tracks = spotifyController.recentlyPlayedTracks.value)
+        1 -> loadRecentlyAddedTracks() // TODO: modify here for recently added tracks
+        2 -> loadRecentlyAddedTracks() // TODO: modify here for the liked tracks
+        3 -> loadRecentlyAddedTracks() // TODO: modify here for the banned tracks
       }
     }
   }
