@@ -113,7 +113,7 @@ fun AppScaffold(navController: NavHostController) {
                     }
                 composable(Route.ABOUT.routeString) { AboutScreen(navActions) }
                 composable(Route.TRACK_LIST.routeString) {
-                  TrackListScreen(navActions, showSnackbar, trackListViewModel, online)
+                  TrackListScreen(navActions, trackListViewModel, online)
                 }
                 if (online)
                     composable(Route.MAP.routeString) { MapScreen(navActions, mapViewModel) }

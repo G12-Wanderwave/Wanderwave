@@ -50,9 +50,6 @@ constructor(
   private val _isTopSongsListVisible = MutableStateFlow(true)
   override val isTopSongsListVisible: StateFlow<Boolean> = _isTopSongsListVisible
 
-  private val _isInEditMode = MutableStateFlow(false)
-  val isInEditMode: StateFlow<Boolean> = _isInEditMode
-
   private val _isInPublicMode = MutableStateFlow(false)
   val isInPublicMode: StateFlow<Boolean> = _isInPublicMode
 

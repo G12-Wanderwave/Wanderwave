@@ -86,20 +86,17 @@ class TrackConnection(
 
           trackRef?.addSnapshotListener { trackDocument, error ->
             val track = trackDocument?.let { Track.from(it) }
-            profileRef?.addSnapshotListener { profileDocument, error ->
-              val profile = profileDocument?.let { Profile.from(it) }
-              if (track == null) {
-                trySend(
-                    Result.failure(Exception("Error fetching the track, firebase format is wrong")))
-              } else {
+            if (track == null) {
+              trySend(
+                  Result.failure(Exception("Error fetching the track, firebase format is wrong")))
+            } else {
+              profileRef?.addSnapshotListener { profileDocument, error ->
+                val profile = profileDocument?.let { Profile.from(it) }
                 trySend(
                     Result.success(
                         ProfileTrackAssociation(profile = profile, track = track, likes = likes)))
-              }
+              } ?: trySend(Result.success(ProfileTrackAssociation(null, track, likes)))
             }
-                ?: trySend(
-                    Result.failure(
-                        Exception("Error fetching the profile, firebase format is wrong")))
           }
               ?: trySend(
                   Result.failure(Exception("Error fetching the track, firebase format is wrong")))
