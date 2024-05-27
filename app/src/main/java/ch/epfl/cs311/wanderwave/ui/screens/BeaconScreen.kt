@@ -188,9 +188,9 @@ fun SongList(
 ) {
   TrackListWithProfiles(
       tracks =
-      beacon.profileAndTrack.filter { profileTrack ->
-          bannedTracks.any { profileTrack.track.id == it.id }.not()
-      },
+          beacon.profileAndTrack.filter { profileTrack ->
+            bannedTracks.any { profileTrack.track.id == it.id }.not()
+          },
       profileViewModel,
       title = stringResource(R.string.beaconTracksTitle),
       onAddTrack = { track: Track ->

@@ -95,7 +95,8 @@ class TrackConnection(
                 val profile = profileDocument?.let { Profile.from(it) }
                 trySend(
                     Result.success(
-                        ProfileTrackAssociation(profile = profile, track = track, likersId = likersId, likes = likes)))
+                        ProfileTrackAssociation(
+                            profile = profile, track = track, likersId = likersId, likes = likes)))
               } ?: trySend(Result.success(ProfileTrackAssociation(null, track, likersId, likes)))
             }
           }
