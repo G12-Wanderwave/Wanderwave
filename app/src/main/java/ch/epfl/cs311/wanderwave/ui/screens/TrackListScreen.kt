@@ -100,6 +100,7 @@ fun TabContent1(
                   uiState.bannedTracks.any { it.id == track.id }.not()
                 },
             title = stringResource(R.string.recently_added_tracks),
+            canAddSong = false,
             onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
             onSelectTrack = viewModel::playTrack,
             navActions = navActions,
