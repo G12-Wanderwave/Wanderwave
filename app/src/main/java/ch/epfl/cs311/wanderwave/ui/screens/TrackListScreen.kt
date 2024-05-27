@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -70,6 +71,7 @@ fun TrackListScreen(
  * @author Menzo Bouaissi
  * @since 4.0
  */
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun TabContent1(
     navActions: NavigationActions,
