@@ -114,7 +114,7 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
-    implementation(libs.core)
+    implementation(libs.androidx.compose.material)
     kapt(libs.hilt.android.compiler)
     androidTestImplementation(libs.hilt.android.testing)
     kaptAndroidTest(libs.dagger.hilt.android.compiler)

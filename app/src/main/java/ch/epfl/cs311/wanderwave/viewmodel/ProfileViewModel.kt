@@ -50,9 +50,6 @@ constructor(
   private val _isTopSongsListVisible = MutableStateFlow(true)
   override val isTopSongsListVisible: StateFlow<Boolean> = _isTopSongsListVisible
 
-  private val _isInEditMode = MutableStateFlow(false)
-  val isInEditMode: StateFlow<Boolean> = _isInEditMode
-
   private val _isInPublicMode = MutableStateFlow(false)
   val isInPublicMode: StateFlow<Boolean> = _isInPublicMode
 
@@ -166,6 +163,7 @@ constructor(
     viewModelScope.launch {
       repository.getItem(id).collect { fetchedProfile ->
         fetchedProfile.onSuccess { profile ->
+          profile.profilePictureUri = null // TODO : @Clarence, pls can you do it more properly
           _profile.value = profile
           _uiState.value = UIState(profile = profile, isLoading = false)
         }

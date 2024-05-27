@@ -76,6 +76,7 @@ fun BeaconScreen(
               beacon = uiState.beacon!!,
               beaconViewModel = viewModel,
               profileViewModel,
+              bannedTracks = uiState.bannedTracks,
               viewModel::addTrackToBeacon,
               viewModel::selectTrack,
               navigationActions,
@@ -91,6 +92,7 @@ private fun BeaconScreen(
     beacon: Beacon,
     beaconViewModel: BeaconViewModel,
     profileViewModel: ProfileViewModel,
+    bannedTracks: List<Track>,
     addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit = { _, _, _ -> },
     onSelectTrack: (Track) -> Unit = {},
     navigationActions: NavigationActions,
@@ -105,6 +107,7 @@ private fun BeaconScreen(
             beacon,
             beaconViewModel,
             profileViewModel,
+            bannedTracks,
             addTrackToBeacon,
             onSelectTrack,
             navigationActions)
@@ -178,6 +181,7 @@ fun SongList(
     beacon: Beacon,
     beaconViewModel: BeaconViewModel,
     profileViewModel: ProfileViewModel,
+    bannedTracks: List<Track>,
     addTrackToBeacon: (String, Track, (Boolean) -> Unit) -> Unit,
     onSelectTrack: (Track) -> Unit,
     navigationActions: NavigationActions
@@ -185,6 +189,10 @@ fun SongList(
   TrackListWithProfiles(
       tracks = beacon.profileAndTrack,
       profileViewModel,
+      tracks =
+          beacon.profileAndTrack.filter { profileTrack ->
+            bannedTracks.any { profileTrack.track.id == it.id }.not()
+          },
       title = stringResource(R.string.beaconTracksTitle),
       onAddTrack = { track: Track ->
         addTrackToBeacon(beacon.id, track) { success ->

@@ -1,10 +1,12 @@
 package ch.epfl.cs311.wanderwave.ui.components.tracklist
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,16 +16,21 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -47,6 +54,13 @@ import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
+import androidx.wear.compose.material.ExperimentalWearMaterialApi
+import androidx.wear.compose.material.rememberSwipeableState
+import androidx.wear.compose.material.swipeable
+import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
+import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.navigation.NavigationActions
+import ch.epfl.cs311.wanderwave.ui.components.profile.PlaceholderProfilePicture
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -93,11 +107,6 @@ fun TrackListItem(track: Track, selected: Boolean, onClick: () -> Unit) {
   }
 }
 
-/**
- * Same as [TrackListItem] but with a profile picture on the right side of the track information.
- * Takes a [ProfileTrackAssociation] instead of a [Track].to display profile information, as well as
- * a [NavigationActions] to navigate to the profile view screen.
- */
 @Composable
 fun TrackListItemWithProfile(
     trackAndProfile: ProfileTrackAssociation,
@@ -154,50 +163,95 @@ fun TrackListItemWithProfile(
             // Update UI
             isLiked.value = false
           })
-      Box(
-          modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-          contentAlignment = Alignment.Center) {
-            Image(
-                imageVector = Icons.Default.PlayArrow,
-                contentDescription = "Album Cover",
-                modifier = Modifier.fillMaxSize(.8f),
-            )
-          }
-      Column(modifier = Modifier.padding(8.dp).horizontalScroll(scrollState)) {
-        Text(
-            text = trackAndProfile.track.title,
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.titleMedium)
-        Text(
-            text = trackAndProfile.track.artist,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-      }
 
-      if (trackAndProfile.profile != null) {
-        SelectImage(
-            modifier =
-                Modifier.size(width = 150.dp, height = 100.dp)
-                    .clickable(
-                        enabled = trackAndProfile.profile.isPublic,
-                        onClick = {
-                          if (trackAndProfile.profile.isPublic) {
-                            // if the profile is public, navigate to the profile view screen
-                            navigationActions.navigateToProfile(trackAndProfile.profile.firebaseUid)
-                          } else {
-                            // if the profile is private , output a message that say the profile
-                            // is
-                            // private, you cannot access to profile informations
-                            scope.launch {
-                              snackbarHostState.showSnackbar(
-                                  "This profile is private, you cannot access profile information.")
-                            }
-                          }
-                        }),
-            imageUri = trackAndProfile.profile.profilePictureUri,
-        )
-      }
+        modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+          Box(
+              modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+              contentAlignment = Alignment.Center) {
+                Image(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "Album Cover",
+                    modifier = Modifier.fillMaxSize(.8f),
+                )
+              }
+          Column(
+              modifier =
+                  Modifier.padding(horizontal = 8.dp).weight(1f).horizontalScroll(scrollState)) {
+                Text(
+                    text = trackAndProfile.track.title,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = trackAndProfile.track.artist,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+              }
+          if (trackAndProfile.profile != null) {
+            Box(
+                modifier =
+                    Modifier.size(48.dp)
+                        .clickable(
+                            enabled = trackAndProfile.profile.isPublic,
+                            onClick = {
+                              if (trackAndProfile.profile.isPublic) {
+                                navigationActions.navigateToProfile(
+                                    trackAndProfile.profile.firebaseUid)
+                              } else {
+                                scope.launch {
+                                  snackbarHostState.showSnackbar(
+                                      "This profile is private, you cannot access profile information.")
+                                }
+                              }
+                            }),
+                contentAlignment = Alignment.Center) {
+                  PlaceholderProfilePicture(name = trackAndProfile.profile.firstName)
+                }
+          }
+        }
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalWearMaterialApi::class)
+@Composable
+fun RemovableTrackListItem(
+    track: Track,
+    selected: Boolean,
+    onClick: () -> Unit,
+    onRemove: () -> Unit
+) {
+  val scope = rememberCoroutineScope()
+  val scrollState = rememberScrollState()
+  TrackListItemLaunchedEffect(scope = scope, scrollState = scrollState)
+
+  val swipeState = rememberSwipeableState(0)
+  val swipeDistance = 100f
+
+  Box(
+      contentAlignment = Alignment.CenterEnd,
+  ) {
+    Box(
+        modifier =
+            Modifier.swipeable(
+                    state = swipeState,
+                    anchors = mapOf(-swipeDistance to 1, 0f to 0),
+                    orientation = Orientation.Horizontal,
+                )
+                .offset(x = swipeState.offset.value.dp)) {
+          TrackListItem(track = track, selected = selected, onClick = onClick)
+        }
+    AnimatedVisibility(visible = swipeState.offset.value <= -swipeDistance) {
+      IconButton(
+          onClick = {
+            scope.launch { swipeState.snapTo(0) }
+            onRemove()
+          },
+          modifier = Modifier.padding(8.dp)) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete",
+                tint = MaterialTheme.colorScheme.error)
+          }
     }
   }
 }

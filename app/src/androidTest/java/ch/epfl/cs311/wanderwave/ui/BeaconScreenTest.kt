@@ -25,6 +25,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
@@ -48,6 +49,7 @@ class BeaconScreenTest {
   @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
   @RelaxedMockK private lateinit var profileViewModel: ProfileViewModel
   @RelaxedMockK private lateinit var profileRepository: ProfileRepository
+  @RelaxedMockK private lateinit var mockProfileRepository: ProfileRepository
 
   @Before
   fun setup() {
@@ -84,9 +86,17 @@ class BeaconScreenTest {
     every { mockAuthenticationController.getUserData() } returns
         AuthenticationUserData("test-uid", "test-email", "test-name", "test-photo-url")
 
+    val mockProfile = mockk<Profile>(relaxed = true) { every { isPublic } returns true }
+
+    every { mockProfileRepository.getItem(any()) } returns flowOf(Result.success(mockProfile))
+
     val viewModel =
         BeaconViewModel(
-            trackRepository, beaconConnection, mockSpotifyController, mockAuthenticationController)
+            trackRepository,
+            beaconConnection,
+            mockProfileRepository,
+            mockSpotifyController,
+            mockAuthenticationController)
 
     val profileViewModel =
         ProfileViewModel(profileRepository, mockSpotifyController, mockAuthenticationController)

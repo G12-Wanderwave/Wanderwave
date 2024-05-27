@@ -82,8 +82,8 @@ class DataClassesTest {
     every { document.getString("description") } returns null
     every { document.getLong("numberOfLikes") } returns null
     every { document.getBoolean("isPublic") } returns null
-    every { document.getString("profilePictureUri") } returns null
     every { document.getString("spotifyUid") } returns null
+    every { document.getString("profilePictureUri") } returns null
     every { document.getString("firebaseUid") } returns null
 
     val profile = Profile.from(document)
@@ -172,6 +172,7 @@ class DataClassesTest {
             "profilePictureUri" to "https://example.com/image.jpg",
             "chosenSongs" to listOf<DocumentReference>(),
             "topSongs" to listOf<DocumentReference>(),
+            "likedSongs" to listOf<DocumentReference>(),
             "bannedSongs" to listOf<DocumentReference>())
 
     val mockFirebaseFirestore = mockk<FirebaseFirestore>()

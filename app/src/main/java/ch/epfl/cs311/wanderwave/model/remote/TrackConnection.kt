@@ -74,29 +74,28 @@ class TrackConnection(
   fun fetchProfileAndTrack(
       profileAndTrackRef: Map<String, Any>?
   ): Flow<Result<ProfileTrackAssociation>> = callbackFlow {
-    if (profileAndTrackRef == null) {
-      trySend(Result.failure(Exception("Profile and Track reference is null")))
-    } else {
-      try {
-        (profileAndTrackRef["track"] as? DocumentReference)?.addSnapshotListener {
-            trackDocument,
-            errorProfile ->
-          (profileAndTrackRef["creator"] as? DocumentReference)?.addSnapshotListener {
-              profileDocument,
-              errorTrack ->
-            trackDocument?.let {
-              ProfileTrackAssociation.from(
-                      profileAndTrackRef,
-                      profileDocumentSnapshot = profileDocument,
-                      trackDocumentSnapshot = trackDocument)
-                  ?.let { trySend(Result.success(it)) }
-                  ?: trySend(
-                      Result.failure(
-                          Exception("Error fetching the track, firebase format is wrong")))
+    withContext(ioDispatcher) {
+      if (profileAndTrackRef == null) {
+        trySend(Result.failure(Exception("Profile and Track reference is null")))
+      } else {
+        try {
+          val likes = profileAndTrackRef["likes"] as? Int ?: 0
+          val trackRef = profileAndTrackRef["track"] as? DocumentReference
+          val profileRef = profileAndTrackRef["creator"] as? DocumentReference
+
+          trackRef?.addSnapshotListener { trackDocument, error ->
+            val track = trackDocument?.let { Track.from(it) }
+            if (track == null) {
+              trySend(
+                  Result.failure(Exception("Error fetching the track, firebase format is wrong")))
+            } else {
+              profileRef?.addSnapshotListener { profileDocument, error ->
+                val profile = profileDocument?.let { Profile.from(it) }
+                trySend(
+                    Result.success(
+                        ProfileTrackAssociation(profile = profile, track = track, likes = likes)))
+              } ?: trySend(Result.success(ProfileTrackAssociation(null, track, likes)))
             }
-                ?: trySend(
-                    Result.failure(
-                        Exception("Error fetching the track, firebase error", errorTrack)))
           }
               ?: trySend(
                   Result.failure(Exception("Error fetching the track, firebase format is wrong")))
