@@ -391,6 +391,81 @@ public class ProfileConnectionTest {
   }
 
   @Test
+  fun testCombine() = runBlocking {
+    val initialProfile =
+        Profile(
+            firstName = "Sample First Name",
+            lastName = "Sample Last Name",
+            description = "Sample Description",
+            numberOfLikes = 0,
+            isPublic = false,
+            profilePictureUri = Uri.parse("https://example.com/image.jpg"),
+            spotifyUid = "Sample Profile ID",
+            firebaseUid = "Sample Firebase ID",
+            topSongs = listOf(),
+            chosenSongs = listOf(),
+            bannedSongs = listOf(),
+            likedSongs = listOf())
+
+    val track1 = Track("trackId1", "Track Title 1", "Track Artist 1")
+    val track2 = Track("trackId2", "Track Title 2", "Track Artist 2")
+
+    // Define flows with successful results
+    val topSongsFlow = flowOf(Result.success(listOf(track1, track2)))
+    val chosenSongsFlow = flowOf(Result.success(listOf(track1)))
+    val bannedSongsFlow = flowOf(Result.success(listOf(track2)))
+    val likedSongsFlow = flowOf(Result.success(listOf(track1, track2)))
+
+    // Define flows with null results to simulate failures
+    val topSongsFlowNull = flowOf<Result<List<Track>>>(Result.failure(Throwable("Error")))
+    val chosenSongsFlowNull = flowOf<Result<List<Track>>>(Result.failure(Throwable("Error")))
+    val bannedSongsFlowNull = flowOf<Result<List<Track>>>(Result.failure(Throwable("Error")))
+    val likedSongsFlowNull = flowOf<Result<List<Track>>>(Result.failure(Throwable("Error")))
+
+    // Combine with non-null values
+    val combinedProfile =
+        combine(topSongsFlow, chosenSongsFlow, bannedSongsFlow, likedSongsFlow) {
+                topSongsResult,
+                chosenSongsResult,
+                bannedSongsResult,
+                likedSongsResult ->
+              initialProfile.copy(
+                  topSongs = topSongsResult.getOrNull() ?: initialProfile.topSongs,
+                  chosenSongs = chosenSongsResult.getOrNull() ?: initialProfile.chosenSongs,
+                  bannedSongs = bannedSongsResult.getOrNull() ?: initialProfile.bannedSongs,
+                  likedSongs = likedSongsResult.getOrNull() ?: initialProfile.likedSongs)
+            }
+            .first()
+
+    // Check results for non-null values
+    assertEquals(listOf(track1, track2), combinedProfile.topSongs)
+    assertEquals(listOf(track1), combinedProfile.chosenSongs)
+    assertEquals(listOf(track2), combinedProfile.bannedSongs)
+    assertEquals(listOf(track1, track2), combinedProfile.likedSongs)
+
+    // Combine with null values
+    val combinedProfileWithNulls =
+        combine(topSongsFlowNull, chosenSongsFlowNull, bannedSongsFlowNull, likedSongsFlowNull) {
+                topSongsResult,
+                chosenSongsResult,
+                bannedSongsResult,
+                likedSongsResult ->
+              initialProfile.copy(
+                  topSongs = topSongsResult.getOrNull() ?: initialProfile.topSongs,
+                  chosenSongs = chosenSongsResult.getOrNull() ?: initialProfile.chosenSongs,
+                  bannedSongs = bannedSongsResult.getOrNull() ?: initialProfile.bannedSongs,
+                  likedSongs = likedSongsResult.getOrNull() ?: initialProfile.likedSongs)
+            }
+            .first()
+
+    // Check results for null values (should fallback to initial profile values)
+    assertEquals(initialProfile.topSongs, combinedProfileWithNulls.topSongs)
+    assertEquals(initialProfile.chosenSongs, combinedProfileWithNulls.chosenSongs)
+    assertEquals(initialProfile.bannedSongs, combinedProfileWithNulls.bannedSongs)
+    assertEquals(initialProfile.likedSongs, combinedProfileWithNulls.likedSongs)
+  }
+
+  @Test
   fun testDocumentTransformStringTracks() {
     runBlocking {
       val getTestProfile =
