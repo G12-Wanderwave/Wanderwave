@@ -113,7 +113,7 @@ fun TabContent1(
       1 -> {
         TrackList(
             tracks =
-                uiState.tracks.filter { track ->
+                profileViewModel.wanderwaveLikedTracks.value.filter { track ->
                   uiState.bannedTracks.any { it.id == track.id }.not()
                 },
             title = stringResource(R.string.liked_tracks),
