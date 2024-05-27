@@ -29,7 +29,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -70,7 +69,7 @@ val INPUT_BOX_NAM_SIZE = 150.dp
  * @last update 2.0
  */
 @Composable
-fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
+fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel, online: Boolean) {
   val currentProfileState by viewModel.profile.collectAsState()
   val songLists by viewModel.songLists.collectAsState()
   val dialogListType by remember { mutableStateOf(ListType.TOP_SONGS) }
@@ -93,10 +92,12 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel) {
         Box(modifier = Modifier.fillMaxWidth()) {
           VisitCard(Modifier, currentProfile)
           ProfileSwitch(Modifier.align(Alignment.TopEnd), viewModel)
-          ClickableIcon(
-              Modifier.align(Alignment.BottomEnd),
-              Icons.Filled.Create,
-              onClick = { navActions.navigateTo(Route.EDIT_PROFILE) })
+          if (online) {
+            ClickableIcon(
+                Modifier.align(Alignment.BottomEnd),
+                Icons.Filled.Create,
+                onClick = { navActions.navigateTo(Route.EDIT_PROFILE) })
+          }
         }
         // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
         Button(
