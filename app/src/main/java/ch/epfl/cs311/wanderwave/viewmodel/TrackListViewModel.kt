@@ -4,8 +4,11 @@ import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
+import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
@@ -27,7 +30,9 @@ class TrackListViewModel
 constructor(
     private val spotifyController: SpotifyController,
     private val appDatabase: AppDatabase,
-    private val repository: TrackRepository
+    private val repository: TrackRepository,
+    private val profileRepository: ProfileRepository,
+    private val authenticationController: AuthenticationController
 ) : ViewModel(), SpotifySongsActions {
 
   private val _uiState = MutableStateFlow(UiState(loading = true))
@@ -38,25 +43,25 @@ constructor(
   private val _nbrLikedSongs = MutableStateFlow(0)
   override val nbrLikedSongs: StateFlow<Int> = _nbrLikedSongs
 
-  fun recentTracks(): StateFlow<List<Track>> {
-    return spotifyController.recentlyPlayedTracks
-  }
 
-  fun toggleTrackSource() {
-    _uiState.value = _uiState.value.copy(showRecentlyAdded = !_uiState.value.showRecentlyAdded)
-    loadTracksBasedOnSource()
-  }
 
-  fun loadTracksBasedOnSource() {
-    viewModelScope.launch {
-      _uiState.value = _uiState.value.copy(loading = true)
-      if (_uiState.value.showRecentlyAdded) {
-        loadRecentlyAddedTracks()
-      } else {
-        _uiState.value = _uiState.value.copy(tracks = spotifyController.recentlyPlayedTracks.value)
-      }
+
+    fun loadTracksBasedOnSource(index: Int) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(loading = true)
+            when (index) {
+                0 ->
+                    _uiState.value =
+                        _uiState.value.copy(
+                            tracks =
+                            spotifyController.recentlyPlayedTracks
+                                .value) // TODO:modify for the recnetly played tracks
+                1 -> loadRecentlyAddedTracks() // TODO: modify here for the liked tracks
+                2 -> loadRecentlyAddedTracks() // TODO: modify here for the banned tracks
+            }
+        }
     }
-  }
+
 
   fun loadRecentlyAddedTracks() {
     viewModelScope.launch {
@@ -92,6 +97,17 @@ constructor(
     }
   }
 
+  fun updateBannedSongs() {
+    viewModelScope.launch {
+      val profileId = authenticationController.getUserData()!!.id
+      profileRepository.getItem(profileId).collect { fetchedProfile ->
+        fetchedProfile.onSuccess { profile ->
+          _uiState.value = uiState.value.copy(bannedTracks = profile.bannedSongs)
+        }
+      }
+    }
+  }
+
   private fun matchesSearchQuery(track: Track): Boolean {
     return track.title.contains(_searchQuery.value, ignoreCase = true) ||
         track.artist.contains(_searchQuery.value, ignoreCase = true)
@@ -109,18 +125,25 @@ constructor(
         }
   }
 
-  override fun addTrackToList(track: Track) {
-    val newTrack =
-        if (!track.id.contains("spotify:track:")) {
-          Track("spotify:track:" + track.id, track.title, track.artist)
-        } else {
-          track
+    override fun addTrackToList(track: Track) {
+        val newTrack =
+            if (!track.id.contains("spotify:track:")) {
+                Track("spotify:track:" + track.id, track.title, track.artist)
+            } else {
+                track
+            }
+        if (!_uiState.value.tracks.contains(newTrack)) {
+            val updatedTracks = _uiState.value.tracks + newTrack
+            _uiState.value = _uiState.value.copy(tracks = updatedTracks)
         }
-    if (!_uiState.value.tracks.contains(newTrack)) {
-      val updatedTracks = _uiState.value.tracks + newTrack
-      _uiState.value = _uiState.value.copy(tracks = updatedTracks)
     }
+
+  fun removeTrackFromBanList(track: Track) {
+    // TODO: only update the Ban List and make it update on firebase
+    val updatedTracks = _uiState.value.tracks - track
+    _uiState.value = _uiState.value.copy(tracks = updatedTracks)
   }
+
 
   /**
    * Plays the given track using the SpotifyController.
@@ -153,12 +176,11 @@ constructor(
 
   data class UiState(
       val tracks: List<Track> = listOf(),
+      val bannedTracks: List<Track> = emptyList(),
       val loading: Boolean = false,
       val expanded: Boolean = false,
       val progress: MutableFloatState = mutableFloatStateOf(0f),
       val isShuffled: Boolean = false,
-      val loopMode: SpotifyController.RepeatMode = SpotifyController.RepeatMode.OFF,
-      val showRecentlyAdded: Boolean =
-          true // New state to toggle between recently added and recently viewed
+      val loopMode: SpotifyController.RepeatMode = SpotifyController.RepeatMode.OFF
   )
 }

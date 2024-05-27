@@ -40,7 +40,6 @@ constructor(
               firebaseUid = "My Firebase UID",
               profilePictureUri = null))
   val profile: StateFlow<Profile> = _profile
-
   private val _isInPublicMode = MutableStateFlow(false)
   val isInPublicMode: StateFlow<Boolean> = _isInPublicMode
 
@@ -89,6 +88,7 @@ constructor(
     viewModelScope.launch {
       repository.getItem(id).collect { fetchedProfile ->
         fetchedProfile.onSuccess { profile ->
+          profile.profilePictureUri = null // TODO : @Clarence, pls can you do it more properly
           _profile.value = profile
           _uiState.value = UIState(profile = profile, isLoading = false)
         }
