@@ -71,12 +71,14 @@ fun SurroundWithMiniPlayer(
         if (!uiState.expanded && sheetState.hasPartiallyExpandedState && displayPlayer) {
           Column(
               modifier =
-                  Modifier.background(
-                          if (!uiState.isPlaying) MaterialTheme.colorScheme.primary
-                          else spotify_green)
-                      .fillMaxWidth()
-                      .height(2.dp)
-                      .clickable {}) {}
+              Modifier
+                .background(
+                  if (!uiState.isPlaying) MaterialTheme.colorScheme.primary
+                  else spotify_green
+                )
+                .fillMaxWidth()
+                .height(2.dp)
+                .clickable {}) {}
         }
       },
       scaffoldState =
@@ -117,14 +119,15 @@ private fun HandleSheetStateChanges(
 @Composable
 fun HandleProgressChanges(uiState: PlayerViewModel.UiState, progress: MutableFloatState) {
   LaunchedEffect(uiState.isPlaying) {
-    if (uiState.isPlaying) {
-      while (true) {
-        delay(1000L)
-        progress.floatValue += 0.01f
-        if (progress.floatValue >= 1f) {
-          progress.floatValue = 0f
-        }
+    while (uiState.isPlaying) {
+      delay(1000L)
+      progress.floatValue += 0.01f
+      if (progress.floatValue >= 1f) {
+        progress.floatValue = 0f
       }
     }
+  }
+  LaunchedEffect(uiState.track) {
+    progress.floatValue = 0f
   }
 }
