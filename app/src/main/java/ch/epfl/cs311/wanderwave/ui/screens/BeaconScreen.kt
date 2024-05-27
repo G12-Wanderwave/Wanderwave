@@ -190,7 +190,7 @@ fun SongList(
       tracks =
           beacon.profileAndTrack.filter { profileTrack ->
             bannedTracks.any { profileTrack.track.id == it.id }.not()
-          },
+          }.sortedBy { it.track.id },
       profileViewModel,
       title = stringResource(R.string.beaconTracksTitle),
       onAddTrack = { track: Track ->
