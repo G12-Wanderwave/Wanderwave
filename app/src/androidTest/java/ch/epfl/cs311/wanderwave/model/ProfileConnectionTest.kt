@@ -378,7 +378,6 @@ public class ProfileConnectionTest {
             }
 
     val combinedProfileMixed = combinedProfileFlowMixed.first()
-    // ktfmt
     val expectedProfileMixed =
         initialProfile.copy(
             topSongs = listOf(track1, track2),
