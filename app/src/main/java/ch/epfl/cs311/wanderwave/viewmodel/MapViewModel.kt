@@ -145,32 +145,39 @@ constructor(
 
 
 
-  fun retrieveRandomSongFromProfileAndAddToBeacon(beaconId: String) {
-    viewModelScope.launch {
-      profile.value?.let {
-        profileRepository.getItem(it.firebaseUid).collect { fetchedProfile ->
-          fetchedProfile.onSuccess { profile ->
-            Log.d("Profile", "Profile fetched successfully${profile}")
-            if (profile.topSongs.isNotEmpty()) {
+    fun retrieveRandomSongFromProfileAndAddToBeacon(beaconId: String) {
+        viewModelScope.launch {
+            profile.value?.let { currentProfile ->
+                profileRepository.getItem(currentProfile.firebaseUid).collect { fetchedProfile ->
+                    fetchedProfile.onSuccess { profile ->
+                        Log.d("Profile", "Profile fetched successfully: $profile")
+                        if (profile.topSongs.isNotEmpty()) {
+                            val track = profile.topSongs.random()
+                            val beacon = _uiState.value.beacons.find { it.id == beaconId }
+                            beacon?.let {
+                                if (it.profileAndTrack.none { it.track == track }) {
+                                    val newProfileAndTrack = it.profileAndTrack + ProfileTrackAssociation(profile, track)
+                                    val newBeacon = it.copy(profileAndTrack = newProfileAndTrack)
 
-              addTrackToBeacon(
-                  beaconId,
-                  profile.topSongs.random(),
-                  trackRepository,
-                  beaconRepository,
-                  authenticationController) {}
+                                    // Update the beacon in the repository
+                                    beaconRepository.updateItem(newBeacon)
+                                } else {
+                                    Log.d("ProfileTrackAssociation", "Track already associated with beacon: $track")
+                                }
+                            } ?: run {
+                                Log.e("Beacon not found", "Beacon not found for the given id: $beaconId")
+                            }
+                        }
+                    }
+                    fetchedProfile.onFailure { exception ->
+                        Log.e("Profile not found", "Profile not found for the given id: $exception")
+                    }
+                }
             }
-          }
-          fetchedProfile.onFailure { exception ->
-            Log.e("Profile not found", "Profile not found for the given id $exception")
-          }
         }
-      }
     }
-  }
 
-    fun updateProfile() {
-
+fun updateProfile() {
         viewModelScope.launch {
             val profileId = authenticationController.getUserData()!!.id
             profileRepository.getItem(profileId).collect { fetchedProfile ->

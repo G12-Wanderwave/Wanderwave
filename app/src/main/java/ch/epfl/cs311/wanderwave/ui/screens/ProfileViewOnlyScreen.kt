@@ -23,7 +23,6 @@ import ch.epfl.cs311.wanderwave.ui.components.profile.VisitCard
 import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
-val mockSongLists = listOf(Track("3", "Track 3", "Artist 3"), Track("4", "Track 4", "Artist 4"))
 // TODO: modify this, because the profile.songLists is not available yet
 
 /**
@@ -60,7 +59,7 @@ fun ProfileViewOnlyScreen(
 
           SongsListDisplay(
               navigationActions = navigationActions,
-              mockSongLists,
+              uiState.profile!!.topSongs,
               {},
               onSelectTrack = { viewModel.selectTrack(it) },
               canAddSong = false,
