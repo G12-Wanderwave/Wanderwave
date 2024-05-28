@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.model.data
 
-import com.google.firebase.firestore.DocumentReference
+import android.util.Log
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
 /**
@@ -15,15 +16,59 @@ import com.google.firebase.firestore.FirebaseFirestore
 data class ProfileTrackAssociation(
     val profile: Profile? = null,
     val track: Track,
+    val likersId: List<String> = emptyList(),
     val likes: Int = 0
 ) {
 
   fun toMap(db: FirebaseFirestore): Map<String, Any?> {
-    val profileRef: DocumentReference? =
-        profile?.let { db.collection("users").document(it.firebaseUid) }
-    val trackRef: DocumentReference? = db.collection("tracks")?.document(track.id)
+    return hashMapOf(
+        "creator" to profile?.firebaseUid?.let { db.collection("users").document(it) },
+        "track" to db.collection("tracks").document(track.id),
+        "likersId" to likersId,
+        "likes" to likes)
+  }
 
-    // mapping to null will not show on firebase
-    return hashMapOf("profile" to profileRef, "track" to trackRef, "likes" to likes)
+  fun isLiked(profile: Profile): Boolean {
+    return likersId.contains(profile.firebaseUid)
+  }
+
+  fun likeTrack(profile: Profile): ProfileTrackAssociation {
+    if (this.profile != null && !likersId.contains(profile.firebaseUid)) {
+      Log.i("ProfileTrackAssociation", "Liked track")
+      this.profile.numberOfLikes += 1
+      return ProfileTrackAssociation(profile, track, likersId + profile.firebaseUid, likes + 1)
+    }
+    return this
+  }
+
+  fun unlikeTrack(profile: Profile): ProfileTrackAssociation {
+    if (this.profile != null && likersId.contains(profile.firebaseUid)) {
+      Log.i("ProfileTrackAssociation", "Unliked track")
+      this.profile.numberOfLikes -= 1
+      return ProfileTrackAssociation(profile, track, likersId - profile.firebaseUid, likes - 1)
+    }
+    Log.e("ProfileTrackAssociation", "Failed to unlike track")
+    return this
+  }
+
+  companion object {
+    fun from(
+        mainDocumentSnapshot: Map<String, Any>,
+        profileDocumentSnapshot: DocumentSnapshot?,
+        trackDocumentSnapshot: DocumentSnapshot
+    ): ProfileTrackAssociation? {
+      return if (trackDocumentSnapshot.exists()) {
+        val profile: Profile? = profileDocumentSnapshot?.let { Profile.from(it) }
+        val track: Track? = Track.from(trackDocumentSnapshot)
+        val likersId = mainDocumentSnapshot["likersId"] as? List<String> ?: emptyList()
+        val likes = (mainDocumentSnapshot["likes"] as? Long)?.toInt() ?: 0
+
+        Log.i("ProfileTrackAssociation", "Created ProfileTrackAssociation")
+        track?.let { track: Track -> ProfileTrackAssociation(profile, track, likersId, likes) }
+      } else {
+        Log.e("ProfileTrackAssociation", "Failed to create ProfileTrackAssociation")
+        null
+      }
+    }
   }
 }

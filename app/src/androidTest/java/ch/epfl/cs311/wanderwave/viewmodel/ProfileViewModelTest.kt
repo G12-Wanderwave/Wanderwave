@@ -70,14 +70,33 @@ class ProfileViewModelTest {
     clearAllMocks() // Clear all MockK mocks
   }
 
-  //  override fun getTracksFromPlaylist(
-  //    playlistId: String,
-  //    playlist: MutableStateFlow<List<ListItem>>
-  //  ) {
-  //    viewModelScope.launch {
-  //      getTracksFromSpotifyPlaylist(playlistId, playlist, spotifyController, viewModelScope)
-  //    }
-  //  }
+  @Test
+  fun testLikeTrack() = runBlockingTest {
+    val track = Track("id", "title", "artist")
+    val track2 = Track("id2", "title2", "artist2")
+    assertTrue(viewModel.wanderwaveLikedTracks.value.isEmpty())
+    viewModel.likeTrack(track)
+    viewModel.likeTrack(track2)
+    assertFalse(viewModel.wanderwaveLikedTracks.value.isEmpty())
+    viewModel.likeTrack(track)
+    viewModel.likeTrack(track2)
+    assertFalse(viewModel.wanderwaveLikedTracks.value.isEmpty())
+  }
+
+  @Test
+  fun testUnlikeTrack() = runBlockingTest {
+    val track = Track("id", "title", "artist")
+    val track2 = Track("id2", "title2", "artist2")
+    viewModel.likeTrack(track)
+    viewModel.likeTrack(track2)
+    assertFalse(viewModel.wanderwaveLikedTracks.value.isEmpty())
+    viewModel.unlikeTrack(track)
+    viewModel.unlikeTrack(track2)
+    assertTrue(viewModel.wanderwaveLikedTracks.value.isEmpty())
+    viewModel.unlikeTrack(track)
+    viewModel.unlikeTrack(track2)
+    assertTrue(viewModel.wanderwaveLikedTracks.value.isEmpty())
+  }
 
   @Test
   fun testGetTracksFromPlaylist() = runBlockingTest {
@@ -170,6 +189,12 @@ class ProfileViewModelTest {
     val result = flow.timeout(2.seconds).catch {}.firstOrNull()
 
     assertEquals(expectedListItem.id, result?.get(0)?.tracks?.get(0)?.id)
+
+    viewModel.emptyChildrenList()
+
+    val flow2 = viewModel.childrenPlaylistTrackList
+    val result2 = flow2.timeout(2.seconds).catch {}.firstOrNull()
+    assertEquals(result2, emptyList<ListItem>())
   }
 
   @Test

@@ -50,9 +50,6 @@ constructor(
   private val _isTopSongsListVisible = MutableStateFlow(true)
   override val isTopSongsListVisible: StateFlow<Boolean> = _isTopSongsListVisible
 
-  private val _isInEditMode = MutableStateFlow(false)
-  val isInEditMode: StateFlow<Boolean> = _isInEditMode
-
   private val _isInPublicMode = MutableStateFlow(false)
   val isInPublicMode: StateFlow<Boolean> = _isInPublicMode
 
@@ -71,6 +68,9 @@ constructor(
 
   private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
+
+  private val _wanderwaveLikedTracks = MutableStateFlow<List<Track>>(emptyList())
+  val wanderwaveLikedTracks: StateFlow<List<Track>> = _wanderwaveLikedTracks
 
   fun createSpecificSongList(listType: ListType) {
     val listName = listType // Check if the list already exists
@@ -163,6 +163,7 @@ constructor(
     viewModelScope.launch {
       repository.getItem(id).collect { fetchedProfile ->
         fetchedProfile.onSuccess { profile ->
+          profile.profilePictureUri = null // TODO : @Clarence, pls can you do it more properly
           _profile.value = profile
           _uiState.value = UIState(profile = profile, isLoading = false)
         }
@@ -227,6 +228,26 @@ constructor(
 
   override fun emptyChildrenList() {
     _childrenPlaylistTrackList.value = (emptyList())
+  }
+
+  /**
+   * Like a song and add it to the liked songs list.
+   *
+   * @param track the track to like
+   */
+  fun likeTrack(track: Track) {
+    // Check if song is already liked
+    if (!wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value += track
+  }
+
+  /**
+   * Unlike a song and remove it from the liked songs list.
+   *
+   * @param track the track to unlike
+   */
+  fun unlikeTrack(track: Track) {
+    // Check if song was not liked
+    if (wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value -= track
   }
 
   data class UIState(

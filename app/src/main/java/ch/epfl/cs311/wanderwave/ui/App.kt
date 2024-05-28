@@ -113,7 +113,7 @@ fun AppScaffold(navController: NavHostController) {
                     }
                 composable(Route.ABOUT.routeString) { AboutScreen(navActions) }
                 composable(Route.TRACK_LIST.routeString) {
-                  TrackListScreen(navActions, showSnackbar, trackListViewModel, online)
+                  TrackListScreen(navActions, trackListViewModel, profileViewModel, online)
                 }
                 if (online)
                     composable(Route.MAP.routeString) { MapScreen(navActions, mapViewModel) }
@@ -143,10 +143,14 @@ fun AppScaffold(navController: NavHostController) {
                 composable("${Route.VIEW_PROFILE.routeString}/{profileId}") {
                   ProfileViewOnlyScreen(it.arguments?.getString("profileId") ?: "", navActions)
                 }
+
                 if (online)
                     composable("${Route.BEACON.routeString}/{beaconId}") {
                       BeaconScreen(
-                          it.arguments?.getString("beaconId") ?: "", navActions, beaconViewModel)
+                          it.arguments?.getString("beaconId") ?: "",
+                          profileViewModel,
+                          navActions,
+                          beaconViewModel)
                     }
               }
         }
