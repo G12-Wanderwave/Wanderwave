@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationUserData
 import ch.epfl.cs311.wanderwave.model.data.Profile
@@ -27,6 +28,7 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
+import io.github.kakaocup.kakao.common.utilities.getResourceString
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -115,15 +117,27 @@ class TrackListScreenTest : TestCase() {
       assertIsDisplayed()
       composeTestRule.onNodeWithTag("tab0").performClick()
       composeTestRule.onNodeWithTag("trackListTitle").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("trackListTitle").assertTextEquals("Recently Added Tracks")
+      composeTestRule
+          .onNodeWithTag("trackListTitle")
+          .assertTextEquals(getResourceString(R.string.recently_played_tracks))
 
       composeTestRule.onNodeWithTag("tab1").performClick()
       composeTestRule.onNodeWithTag("trackListTitle").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("trackListTitle").assertTextEquals("Liked Tracks")
+      composeTestRule
+          .onNodeWithTag("trackListTitle")
+          .assertTextEquals(getResourceString(R.string.recently_added_tracks))
 
       composeTestRule.onNodeWithTag("tab2").performClick()
       composeTestRule.onNodeWithTag("trackListTitle").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("trackListTitle").assertTextEquals("Banned Tracks")
+      composeTestRule
+          .onNodeWithTag("trackListTitle")
+          .assertTextEquals(getResourceString(R.string.liked_tracks))
+
+      composeTestRule.onNodeWithTag("tab3").performClick()
+      composeTestRule.onNodeWithTag("trackListTitle").assertIsDisplayed()
+      composeTestRule
+          .onNodeWithTag("trackListTitle")
+          .assertTextEquals(getResourceString(R.string.banned_tracks))
     }
   }
 
