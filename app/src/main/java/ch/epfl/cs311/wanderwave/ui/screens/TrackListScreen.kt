@@ -82,7 +82,10 @@ fun TabContent1(
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   var searchQuery by remember { mutableStateOf("") }
 
-  LaunchedEffect(Unit) { viewModel.updateBannedSongs() }
+  LaunchedEffect(Unit) {
+      profileViewModel.getRetrievedSongs()
+      viewModel.updateBannedSongs()
+  }
 
   Column(modifier = Modifier.testTag("trackListScreen")) {
     TextField(

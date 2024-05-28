@@ -115,9 +115,10 @@ fun createLocationReceiver(
         if (context != null) {
           viewModel.loadBeacons(context, locationState.value!!)
         }
+          viewModel.updateProfile()
         val tempBeacon = findClosestBeacon(locationState.value!!, viewModel.beaconList.value)
         if (tempBeacon != null) {
-          viewModel.getRandomSongAndAddToProfile(tempBeacon.id)
+          viewModel.getRandomSong(tempBeacon.id)
           viewModel.retrieveRandomSongFromProfileAndAddToBeacon(tempBeacon.id)
           Log.d("MapScreen", "retrieved song: ${song.value}")
         }

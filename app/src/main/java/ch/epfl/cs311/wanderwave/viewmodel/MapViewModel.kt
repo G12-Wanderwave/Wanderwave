@@ -126,7 +126,7 @@ constructor(
    * @author Menzo Bouaissi
    * @since 4.0
    */
-  fun getRandomSongAndAddToProfile(beaconId: String) {
+  fun getRandomSong(beaconId: String) {
     viewModelScope.launch {
       beaconRepository.getItem(beaconId).collect { fetchedBeacon ->
         fetchedBeacon.onSuccess { beacon ->
@@ -150,6 +150,7 @@ constructor(
           fetchedProfile.onSuccess { profile ->
             Log.d("Profile", "Profile fetched successfully${profile}")
             if (profile.topSongs.isNotEmpty()) {
+
               addTrackToBeacon(
                   beaconId,
                   profile.topSongs.random(),
@@ -166,6 +167,17 @@ constructor(
     }
   }
 
+    fun updateProfile() {
+
+        viewModelScope.launch {
+            val profileId = authenticationController.getUserData()!!.id
+            profileRepository.getItem(profileId).collect { fetchedProfile ->
+                fetchedProfile.onSuccess { profile ->
+                    _profile.value = profile.copy(retrievedSongs = profile.retrievedSongs+listOf(retrievedSongs.value.track))
+                }
+            }
+        }
+    }
   fun getProfileOfCurrentUser() {
 
     viewModelScope.launch {
