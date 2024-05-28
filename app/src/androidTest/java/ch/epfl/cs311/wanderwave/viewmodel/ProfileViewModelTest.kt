@@ -98,7 +98,7 @@ class ProfileViewModelTest {
     val expectedTrack = Track("spotify:track:Some Track ID", "Track Title", "Artist Name")
 
     // Ensure song lists are initially empty
-    assertTrue(viewModel.songLists.value.isEmpty())
+    assertTrue(viewModel.profile.value.topSongs.isEmpty())
 
     // Call createSpecificSongList to initialize a list
 
@@ -106,7 +106,7 @@ class ProfileViewModelTest {
     viewModel.addTrackToList(newTrack)
 
     // Get the updated song list
-    val songLists = viewModel.songLists.value
+    val songLists = viewModel.profile.value.topSongs
     assertFalse("Song list should not be empty after adding a track", songLists.isEmpty())
 
     // Check if the track was added correctly
@@ -134,7 +134,7 @@ class ProfileViewModelTest {
     viewModel.addTrackToList(trackWithoutSpotifyPrefix)
 
     // Assert
-    assertTrue(viewModel.songLists.value.contains(expectedTrackWithSpotifyPrefix))
+    assertTrue(viewModel.profile.value.topSongs.contains(expectedTrackWithSpotifyPrefix))
     // Act
     viewModel.clearLikedSongs()
 
@@ -151,7 +151,7 @@ class ProfileViewModelTest {
     viewModel.addTrackToList(trackWithSpotifyPrefix)
 
     // Assert
-    assertTrue(viewModel.songLists.value.contains(trackWithSpotifyPrefix))
+    assertTrue(viewModel.profile.value.topSongs.contains(trackWithSpotifyPrefix))
   }
 
   @Test fun testGetLikedTracks() = runBlocking { viewModel.getLikedTracks() } // Test no crash
@@ -166,7 +166,7 @@ class ProfileViewModelTest {
     viewModel.addTrackToList(track)
 
     // Assert
-    assertEquals(1, viewModel.songLists.value.count { it == track })
+    assertEquals(1, viewModel.profile.value.topSongs.count { it == track })
   }
 
   @Test
