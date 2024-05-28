@@ -132,7 +132,7 @@ fun SetupNavHost(
         startDestination = if (online) Route.SPOTIFY_CONNECT.routeString else Route.TRACK_LIST.routeString,
         modifier = Modifier.padding(innerPadding).background(MaterialTheme.colorScheme.background)
     ) {
-        AddComposableRoutes(
+        addComposableRoutes(
             navActions = navActions,
             showSnackbar = showSnackbar,
             profileViewModel = profileViewModel,
@@ -145,7 +145,7 @@ fun SetupNavHost(
 }
 
 @SuppressLint("ComposableDestinationInComposeScope")
-fun NavGraphBuilder.AddComposableRoutes(
+fun NavGraphBuilder.addComposableRoutes(
     navActions: NavigationActions,
     showSnackbar: (String) -> Unit,
     profileViewModel: ProfileViewModel,
