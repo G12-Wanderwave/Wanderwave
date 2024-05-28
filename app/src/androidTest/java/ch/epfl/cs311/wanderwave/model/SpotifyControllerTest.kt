@@ -1004,12 +1004,29 @@ class SpotifyControllerTest {
     val playerApi = mockk<PlayerApi>(relaxed = true)
     val subscription = mockk<Subscription<PlayerState>>(relaxed = true)
 
+    val spotifyTrack =
+        com.spotify.protocol.types.Track(
+            Artist("Rick Astley", ""),
+            listOf(),
+            mockk(),
+            1,
+            "Never Gonna Give You Up",
+            "spotify:track:4PTG3Z6ehGkBFwjybzWkR8?si=0f7d62dba3704a0b",
+            mockk(),
+            false,
+            false)
+
     // When playerApi.subscribeToPlayerState() is called, return the mocked subscription
     every { playerApi.subscribeToPlayerState() } returns subscription
 
     // When subscription.setEventCallback(any()) is called, invoke the callback with the test
     // PlayerState
-    every { subscription.setEventCallback(any()) } answers { subscription }
+    every { subscription.setEventCallback(any()) } answers
+        {
+          val callback = firstArg<Subscription.EventCallback<PlayerState>>()
+          callback.onEvent(PlayerState(spotifyTrack, false, 1f, 0, mockk(), mockk()))
+          subscription
+        }
 
     // When subscription.setErrorCallback(any()) is called, do nothing
     every { subscription.setErrorCallback(any()) } just Awaits
@@ -1022,6 +1039,16 @@ class SpotifyControllerTest {
 
     // Verify that setEventCallback was called
     verify { subscription.setEventCallback(any()) }
+
+    verify {
+      mockRecentlyPlayedRepository.addRecentlyPlayed(
+          withArg {
+            assertEquals(it.id, spotifyTrack.uri)
+            assertEquals(it.title, spotifyTrack.name)
+            assertEquals(it.artist, spotifyTrack.artist.name)
+          },
+          any())
+    }
   }
 
   @Test
@@ -1226,6 +1253,8 @@ class SpotifyControllerTest {
     parseTracks(jsonResponse, likedSongsTrackList)
     assertEquals(likedSongsTrackList.value.size, 0)
   }
+
+  @Test fun recentlyPlayedTracksAreRecorder() = runBlocking {}
 }
 
 interface UrlFactory {
