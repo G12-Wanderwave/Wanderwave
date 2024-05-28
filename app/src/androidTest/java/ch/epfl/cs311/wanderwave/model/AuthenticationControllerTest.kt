@@ -423,32 +423,38 @@ class AuthenticationControllerTest {
     unmockkStatic(Base64::class)
   }
 
-  @Test
-  fun testUploadPlaylistImage_Success() = runBlocking {
-    // Arrange
-    val mockContext: Context = mockk(relaxed = true)
-    val playlistId = "testPlaylistId"
-    val mockBitmap: Bitmap = mockk(relaxed = true)
-    val mockCall: Call = mockk()
-    val mockResponse: Response = mockk()
-    val mockResponseBody: ResponseBody = mockk()
-
-    coEvery { mockTokenRepository.getAuthToken(any()) } returns "testToken"
-    every { mockHttpClient.newCall(any()) } returns mockCall
-    every { mockCall.execute() } returns mockResponse
-    every { mockResponse.isSuccessful } returns true
-    every { mockResponse.body } returns mockResponseBody
-    every { mockResponseBody.string() } returns ""
-
+  private fun setupMockBitmapAndBase64Encoding() {
+    val mockBitmap: Bitmap = mockk()
     mockkStatic(BitmapFactory::class)
-    every { BitmapFactory.decodeResource(mockContext.resources, R.drawable.ic_logo) } returns
-        mockBitmap
+    every { BitmapFactory.decodeResource(any(), R.drawable.ic_logo) } returns mockBitmap
 
     mockkStatic(Base64::class)
     val outputStream = ByteArrayOutputStream()
     every { mockBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream) } returns true
     val imageBytes = outputStream.toByteArray()
     every { Base64.encodeToString(imageBytes, Base64.NO_WRAP) } returns "base64ImageString"
+  }
+
+  @Test
+  fun testUploadPlaylistImage_Success() = runBlocking {
+    // Arrange
+    val mockContext: Context = mockk(relaxed = true)
+    val playlistId = "testPlaylistId"
+    val mockCall: Call = mockk()
+    val mockResponse: Response = mockk()
+    val mockResponseBody: ResponseBody = mockk()
+
+    coEvery {
+      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+    } returns "testToken"
+    coEvery { authenticationController.refreshSpotifyToken() } returns true
+    every { mockHttpClient.newCall(any()) } returns mockCall
+    every { mockCall.execute() } returns mockResponse
+    every { mockResponse.isSuccessful } returns true
+    every { mockResponse.body } returns mockResponseBody
+    every { mockResponseBody.string() } returns ""
+
+    setupMockBitmapAndBase64Encoding()
 
     val requestSlot = slot<Request>()
 
@@ -469,14 +475,16 @@ class AuthenticationControllerTest {
     // Arrange
     val mockContext: Context = mockk(relaxed = true)
     val playlistId = "testPlaylistId"
-    val mockBitmap: Bitmap = mockk(relaxed = true)
     val mockCall: Call = mockk()
     val mockResponse: Response = mockk()
     val mockRetryResponse: Response = mockk()
     val mockResponseBody: ResponseBody = mockk()
     val mockRetryResponseBody: ResponseBody = mockk()
 
-    coEvery { mockTokenRepository.getAuthToken(any()) } returns "expiredToken" andThen "newToken"
+    coEvery {
+      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+    } returns "expiredToken" andThen "newToken"
+    coEvery { authenticationController.refreshSpotifyToken() } returns true
     every { mockHttpClient.newCall(any()) } returns mockCall
     every { mockCall.execute() } returns mockResponse andThen mockRetryResponse
     every { mockResponse.isSuccessful } returns false
@@ -487,17 +495,7 @@ class AuthenticationControllerTest {
     every { mockRetryResponse.body } returns mockRetryResponseBody
     every { mockRetryResponseBody.string() } returns ""
 
-    mockkStatic(BitmapFactory::class)
-    every { BitmapFactory.decodeResource(mockContext.resources, R.drawable.ic_logo) } returns
-        mockBitmap
-
-    mockkStatic(Base64::class)
-    val outputStream = ByteArrayOutputStream()
-    every { mockBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream) } returns true
-    val imageBytes = outputStream.toByteArray()
-    every { Base64.encodeToString(imageBytes, Base64.NO_WRAP) } returns "base64ImageString"
-
-    coEvery { authenticationController.refreshSpotifyToken() } returns true
+    setupMockBitmapAndBase64Encoding()
 
     val requestSlot = slot<Request>()
 
@@ -518,29 +516,22 @@ class AuthenticationControllerTest {
     // Arrange
     val mockContext: Context = mockk(relaxed = true)
     val playlistId = "testPlaylistId"
-    val mockBitmap: Bitmap = mockk(relaxed = true)
     val mockCall: Call = mockk()
     val mockResponse: Response = mockk()
     val mockResponseBody: ResponseBody = mockk()
 
-    coEvery { mockTokenRepository.getAuthToken(any()) } returns "expiredToken"
+    coEvery {
+      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+    } returns "expiredToken"
+    coEvery { authenticationController.refreshSpotifyToken() } returns false
     every { mockHttpClient.newCall(any()) } returns mockCall
     every { mockCall.execute() } returns mockResponse
     every { mockResponse.isSuccessful } returns false
     every { mockResponse.code } returns 401
-    coEvery { authenticationController.refreshSpotifyToken() } returns false
     every { mockResponse.body } returns mockResponseBody
     every { mockResponseBody.string() } returns ""
 
-    mockkStatic(BitmapFactory::class)
-    every { BitmapFactory.decodeResource(mockContext.resources, R.drawable.ic_logo) } returns
-        mockBitmap
-
-    mockkStatic(Base64::class)
-    val outputStream = ByteArrayOutputStream()
-    every { mockBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream) } returns true
-    val imageBytes = outputStream.toByteArray()
-    every { Base64.encodeToString(imageBytes, Base64.NO_WRAP) } returns "base64ImageString"
+    setupMockBitmapAndBase64Encoding()
 
     val requestSlot = slot<Request>()
 
@@ -561,12 +552,14 @@ class AuthenticationControllerTest {
     // Arrange
     val mockContext: Context = mockk(relaxed = true)
     val playlistId = "testPlaylistId"
-    val mockBitmap: Bitmap = mockk(relaxed = true)
     val mockCall: Call = mockk()
     val mockResponse: Response = mockk()
     val mockResponseBody: ResponseBody = mockk()
 
-    coEvery { mockTokenRepository.getAuthToken(any()) } returns "testToken"
+    coEvery {
+      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+    } returns "testToken"
+    coEvery { authenticationController.refreshSpotifyToken() } returns true
     every { mockHttpClient.newCall(any()) } returns mockCall
     every { mockCall.execute() } returns mockResponse
     every { mockResponse.isSuccessful } returns false
@@ -574,15 +567,7 @@ class AuthenticationControllerTest {
     every { mockResponse.body } returns mockResponseBody
     every { mockResponseBody.string() } returns ""
 
-    mockkStatic(BitmapFactory::class)
-    every { BitmapFactory.decodeResource(mockContext.resources, R.drawable.ic_logo) } returns
-        mockBitmap
-
-    mockkStatic(Base64::class)
-    val outputStream = ByteArrayOutputStream()
-    every { mockBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream) } returns true
-    val imageBytes = outputStream.toByteArray()
-    every { Base64.encodeToString(imageBytes, Base64.NO_WRAP) } returns "base64ImageString"
+    setupMockBitmapAndBase64Encoding()
 
     val requestSlot = slot<Request>()
 
@@ -603,22 +588,16 @@ class AuthenticationControllerTest {
     // Arrange
     val mockContext: Context = mockk(relaxed = true)
     val playlistId = "testPlaylistId"
-    val mockBitmap: Bitmap = mockk(relaxed = true)
     val mockCall: Call = mockk()
 
-    coEvery { mockTokenRepository.getAuthToken(any()) } returns "testToken"
+    coEvery {
+      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+    } returns "testToken"
+    coEvery { authenticationController.refreshSpotifyToken() } returns true
     every { mockHttpClient.newCall(any()) } returns mockCall
     every { mockCall.execute() } throws IOException("Network error")
 
-    mockkStatic(BitmapFactory::class)
-    every { BitmapFactory.decodeResource(mockContext.resources, R.drawable.ic_logo) } returns
-        mockBitmap
-
-    mockkStatic(Base64::class)
-    val outputStream = ByteArrayOutputStream()
-    every { mockBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream) } returns true
-    val imageBytes = outputStream.toByteArray()
-    every { Base64.encodeToString(imageBytes, Base64.NO_WRAP) } returns "base64ImageString"
+    setupMockBitmapAndBase64Encoding()
 
     val requestSlot = slot<Request>()
 
