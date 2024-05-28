@@ -254,7 +254,7 @@ class MapViewModelTest {
     coEvery { trackRepository.addItemsIfNotExist(any()) } just Runs
 
     // When
-    viewModel.getRandomSongAndAddToProfile(beaconId)
+    viewModel.getRandomSong(beaconId)
 
     // Then
     coVerify { trackRepository.addItemsIfNotExist(listOf(beacon.profileAndTrack.random().track)) }
@@ -273,7 +273,7 @@ class MapViewModelTest {
         flowOf(Result.failure(Exception("Profile not found")))
 
     // When
-    viewModel.getRandomSongAndAddToProfile(beaconId)
+    viewModel.getRandomSong(beaconId)
 
     // Then
     coVerify(exactly = 0) { trackRepository.addItemsIfNotExist(any()) }
