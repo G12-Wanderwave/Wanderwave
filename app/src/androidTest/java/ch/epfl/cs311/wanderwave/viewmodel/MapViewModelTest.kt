@@ -16,6 +16,7 @@ import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runBlockingTest
@@ -285,6 +286,158 @@ class MapViewModelTest {
         // Assert
         coVerify(exactly = 0) { profileRepository.updateItem(any()) }
       }
+
+  @Test
+  fun testRetrieveRandomSongFromProfileAndAddToBeacon_handlesExceptionsGracefully() =
+      runBlockingTest {
+        // Given
+        val beaconId = "Sample Beacon ID"
+        coEvery { profileRepository.getItem(any()) } returns
+            flowOf(Result.failure(Exception("Profile not found")))
+        coEvery { mockBeaconRepository.getItem(any()) } returns
+            flowOf(Result.failure(Exception("Beacon not found")))
+
+        // Act
+        viewModel.retrieveRandomSongFromProfileAndAddToBeacon(beaconId)
+
+        // Assert
+        coVerify(exactly = 0) { mockBeaconRepository.updateItem(any()) }
+      }
+
+  @Test
+  fun testUpdateChosenSongsProfile_addsNewSongToProfile() = runBlockingTest {
+    // Given
+    val userId = "userId"
+    val track = Track("New Track ID", "New Track Title", "New Artist Name")
+    val profile =
+        Profile(
+            firebaseUid = userId,
+            chosenSongs = listOf(),
+            topSongs = listOf(),
+            likedSongs = listOf(),
+            bannedSongs = listOf(),
+            numberOfLikes = 0,
+            isPublic = true,
+            spotifyUid = "My Spotify UID",
+            profilePictureUri = null,
+            firstName = "My FirstName",
+            lastName = "My LastName",
+            description = "My Description")
+
+    val mockUserData = mockk<AuthenticationUserData> { every { id } returns userId }
+
+    // Mock the responses
+    coEvery { mockAuthenticationController.getUserData() } returns mockUserData
+    coEvery { profileRepository.getItem(userId) } returns flowOf(Result.success(profile))
+    coEvery { profileRepository.updateItem(any()) } just Runs
+
+    // Inject the retrieved song into the viewModel's private state
+    val privateRetrievedSongField = viewModel::class.java.getDeclaredField("_retrievedSong")
+    privateRetrievedSongField.isAccessible = true
+    privateRetrievedSongField.set(
+        viewModel, MutableStateFlow(ProfileTrackAssociation(profile, track)))
+
+    // When
+    viewModel.updateChosenSongsProfile()
+
+    // Then
+    coVerify {
+      profileRepository.updateItem(profile.copy(chosenSongs = profile.chosenSongs + track))
+    }
+  }
+
+  @Test
+  fun testUpdateChosenSongsProfile_doesNotUpdateProfile_whenSongAlreadyExists() = runBlockingTest {
+    // Given
+    val userId = "userId"
+    val track = Track("Sample Track ID", "Sample Track Title", "Sample Artist Name")
+    val profile =
+        Profile(
+            firebaseUid = userId,
+            chosenSongs = listOf(track),
+            topSongs = listOf(),
+            likedSongs = listOf(),
+            bannedSongs = listOf(),
+            numberOfLikes = 0,
+            isPublic = true,
+            spotifyUid = "My Spotify UID",
+            profilePictureUri = null,
+            firstName = "My FirstName",
+            lastName = "My LastName",
+            description = "My Description")
+
+    val mockUserData = mockk<AuthenticationUserData> { every { id } returns userId }
+
+    // Mock the responses
+    coEvery { mockAuthenticationController.getUserData() } returns mockUserData
+    coEvery { profileRepository.getItem(userId) } returns flowOf(Result.success(profile))
+
+    // Inject the retrieved song into the viewModel's private state
+    val privateRetrievedSongField = viewModel::class.java.getDeclaredField("_retrievedSong")
+    privateRetrievedSongField.isAccessible = true
+    privateRetrievedSongField.set(
+        viewModel, MutableStateFlow(ProfileTrackAssociation(profile, track)))
+
+    // When
+    viewModel.updateChosenSongsProfile()
+
+    // Then
+    coVerify(exactly = 0) { profileRepository.updateItem(any()) }
+  }
+
+  @Test
+  fun testUpdateChosenSongsProfile_handlesProfileRetrievalException() = runBlockingTest {
+    // Given
+    val userId = "userId"
+    val mockUserData = mockk<AuthenticationUserData> { every { id } returns userId }
+
+    // Mock the responses
+    coEvery { mockAuthenticationController.getUserData() } returns mockUserData
+    coEvery { profileRepository.getItem(userId) } returns
+        flowOf(Result.failure(Exception("Profile not found")))
+
+    // When
+    viewModel.updateChosenSongsProfile()
+
+    // Then
+    coVerify(exactly = 0) { profileRepository.updateItem(any()) }
+  }
+
+  @Test
+  fun testUpdateChosenSongsProfile_handlesProfileNotFoundFailure() = runBlockingTest {
+    // Given
+    val userId = "userId"
+    val mockUserData = mockk<AuthenticationUserData> { every { id } returns userId }
+
+    // Mock the responses
+    coEvery { mockAuthenticationController.getUserData() } returns mockUserData
+    coEvery { profileRepository.getItem(userId) } returns
+        flowOf(Result.failure(Exception("Profile not found")))
+
+    // When
+    viewModel.updateChosenSongsProfile()
+
+    // Then
+    coVerify(exactly = 0) { profileRepository.updateItem(any()) }
+  }
+
+  @Test
+  fun testLoadBeacons_withDifferentLocations() = runTest {
+    // Given
+    val location1 = ch.epfl.cs311.wanderwave.model.data.Location(46.519653, 6.632273, "Lausanne")
+    val location2 = ch.epfl.cs311.wanderwave.model.data.Location(40.712776, -74.005974, "New York")
+
+    // Mock the responses
+    coEvery { mockBeaconRepository.getAll() } returns
+        flowOf(
+            listOf(
+                Beacon("UAn8OUadgrUOKYagf8a2", location1, profileAndTrack = emptyList()),
+                Beacon("UAn8OUadgrUOKYagf8a3", location2, profileAndTrack = emptyList())))
+
+    // Act & Assert
+    viewModel.loadBeacons(context, location1)
+    viewModel.loadBeacons(context, location2)
+  }
 
   @Test
   fun retrieveSongFromProfileAndAddToBeaconSongs() = runTest {
