@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -67,10 +68,12 @@ val INPUT_BOX_NAM_SIZE = 150.dp
 @Composable
 fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel, online: Boolean) {
   val currentProfileState by viewModel.profile.collectAsState()
-  val songLists by viewModel.songLists.collectAsState()
+  val profile by viewModel.profile.collectAsState()
 
   val currentProfile: Profile = currentProfileState
-  LaunchedEffect(Unit) { viewModel.getProfileOfCurrentUser(true) }
+  LaunchedEffect(Unit) {
+      viewModel.getProfileOfCurrentUser(true)
+  }
 
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
@@ -91,7 +94,7 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel, on
         }
         SongsListDisplay(
             navigationActions = navActions,
-            songLists = songLists,
+            songLists = profile.topSongs,
             onAddTrack = { track -> viewModel.addTrackToList(track) },
             onSelectTrack = { track -> viewModel.selectTrack(track) },
             viewModelName = viewModelType.PROFILE,

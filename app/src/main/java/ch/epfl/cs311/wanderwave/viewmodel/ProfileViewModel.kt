@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
@@ -43,10 +44,6 @@ constructor(
   private val _isInPublicMode = MutableStateFlow(false)
   val isInPublicMode: StateFlow<Boolean> = _isInPublicMode
 
-  // Add a state for managing song lists
-  private val _songLists = MutableStateFlow(emptyList<Track>())
-  val songLists: StateFlow<List<Track>> = _songLists
-
   private var _uiState = MutableStateFlow(UIState())
   val uiState: StateFlow<UIState> = _uiState
 
@@ -67,7 +64,9 @@ constructor(
         } else {
           track
         }
-    if (!_songLists.value.contains(newTrack)) _songLists.value += mutableListOf(newTrack)
+    if (!_profile.value.topSongs.contains(newTrack))_profile.value.topSongs+= mutableListOf(newTrack)
+
+    updateProfile(_profile.value)
   }
 
   fun updateProfile(updatedProfile: Profile) {
@@ -152,6 +151,7 @@ constructor(
     // Check if song was not liked
     if (wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value -= track
   }
+
 
   data class UIState(
       val profile: Profile? = null,
