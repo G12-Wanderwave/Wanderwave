@@ -62,6 +62,7 @@ val md_theme_dark_surfaceTint = Color(0xFF7BD0FF)
 val md_theme_dark_outlineVariant = Color(0xFF41484D)
 val md_theme_dark_scrim = Color(0xFF000000)
 
+val md_them_ = Color(0xFFFFB4AB)
 val ProfileBackground1 = Color(0xFFAA47BD)
 val ProfileBackground2 = Color(0xFF7B1FA2)
 val ProfileBackground3 = Color(0xFF77919D)
