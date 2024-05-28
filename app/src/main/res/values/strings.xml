@@ -31,6 +31,8 @@
     <string name="showChosenSongs">Show CHOSEN SONGS</string>
     <string name="showLikedSongs">Show LIKED SONGS</string>
 
+    <string name="next">Next > </string>
+    <string name="previous"> &lt; Previous</string>
     <string name="search_tracks">Search Tracks</string>
     <string name="show_recently_added">Show Recently Added</string>
     <string name="recently_played_tracks">Recently Played Tracks</string>

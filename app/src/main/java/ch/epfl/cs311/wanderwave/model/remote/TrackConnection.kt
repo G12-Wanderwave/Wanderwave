@@ -81,6 +81,7 @@ class TrackConnection(
       } else {
         try {
           val likes = profileAndTrackRef["likes"] as? Int ?: 0
+          val likersId = profileAndTrackRef["likersId"] as? List<String> ?: emptyList()
           val trackRef = profileAndTrackRef["track"] as? DocumentReference
           val profileRef = profileAndTrackRef["creator"] as? DocumentReference
 
@@ -94,8 +95,9 @@ class TrackConnection(
                 val profile = profileDocument?.let { Profile.from(it) }
                 trySend(
                     Result.success(
-                        ProfileTrackAssociation(profile = profile, track = track, likes = likes)))
-              } ?: trySend(Result.success(ProfileTrackAssociation(null, track, likes)))
+                        ProfileTrackAssociation(
+                            profile = profile, track = track, likersId = likersId, likes = likes)))
+              } ?: trySend(Result.success(ProfileTrackAssociation(null, track, likersId, likes)))
             }
           }
               ?: trySend(

@@ -23,7 +23,8 @@ enum class Route(val routeString: String, val showBottomBar: Boolean) {
 
   companion object {
     fun forRouteString(routeString: String): Route? {
-      return entries.firstOrNull { it.routeString == routeString }
+      val topLevelRouteString = routeString.split("/").firstOrNull()
+      return entries.firstOrNull { it.routeString == topLevelRouteString }
     }
   }
 }
@@ -57,7 +58,6 @@ class NavigationActions(navController: NavHostController) {
       // Restore state when reselecting a previously selected item
       restoreState = true
     }
-    _currentRouteFlow.value = topLevelRoute
   }
 
   fun getCurrentRoute(): Route? {
@@ -69,17 +69,14 @@ class NavigationActions(navController: NavHostController) {
 
   fun navigateTo(route: Route) {
     navigationController.navigate(route.routeString)
-    _currentRouteFlow.value = route
   }
 
   fun navigateToBeacon(beaconId: String) {
     navigationController.navigate("${Route.BEACON.routeString}/$beaconId")
-    _currentRouteFlow.value = Route.BEACON
   }
 
   fun navigateToProfile(profileId: String) {
     navigationController.navigate("${Route.VIEW_PROFILE.routeString}/$profileId")
-    _currentRouteFlow.value = Route.PROFILE
   }
 
   fun navigateToSelectSongScreen(viewModelType: viewModelType) {

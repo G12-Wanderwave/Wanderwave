@@ -20,7 +20,7 @@ data class Profile(
     var bannedSongs: List<Track> = emptyList(),
 ) {
 
-  fun toMap(db: FirebaseFirestore? = null): Map<String, Any> {
+  fun toMap(db: FirebaseFirestore): Map<String, Any> {
 
     fun mapTrackToDocumentReference(tracks: List<Track>): List<DocumentReference> {
       return db?.let { nonNulldb -> tracks.map { nonNulldb.collection("tracks").document(it.id) } }

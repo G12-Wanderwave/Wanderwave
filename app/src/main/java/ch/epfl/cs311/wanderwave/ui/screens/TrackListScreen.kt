@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,12 +27,14 @@ import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.RemovableTrackList
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
 @Composable
 fun TrackListScreen(
     navActions: NavigationActions,
     viewModel: TrackListViewModel = hiltViewModel(),
+    profileViewModel: ProfileViewModel,
     online: Boolean
 ) {
 
@@ -57,7 +60,7 @@ fun TrackListScreen(
             )
       }
     }
-    TabContent1(navActions, viewModel, selectedTabIndex)
+    TabContent1(navActions, viewModel, profileViewModel, selectedTabIndex)
   }
 }
 /**
@@ -69,10 +72,12 @@ fun TrackListScreen(
  * @author Menzo Bouaissi
  * @since 4.0
  */
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun TabContent1(
     navActions: NavigationActions,
     viewModel: TrackListViewModel = hiltViewModel(),
+    profileViewModel: ProfileViewModel,
     selectedTabIndex: Int
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -96,15 +101,18 @@ fun TabContent1(
     when (selectedTabIndex) {
       0 -> {
         TrackList(
-            tracks =
-                uiState.tracks.filter { track ->
-                  uiState.bannedTracks.any { it.id == track.id }.not()
-                },
-            title = stringResource(R.string.recently_played_tracks),
-            onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
-            onSelectTrack = viewModel::playTrack,
-            navActions = navActions,
-            viewModelName = viewModelType.TRACKLIST,
+          tracks =
+            uiState.tracks.filter { track ->
+              uiState.bannedTracks.any { it.id == track.id }.not()
+            },
+          title = stringResource(R.string.recently_played_tracks),
+          canAddSong = false,
+          onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
+          onSelectTrack = viewModel::playTrack,
+          navActions = navActions,
+          viewModelName = viewModelType.TRACKLIST,
+          profileViewModel = profileViewModel,
+          canLike = true
         )
       }
       1 -> {
@@ -114,16 +122,18 @@ fun TabContent1(
                   uiState.bannedTracks.any { it.id == track.id }.not()
                 },
             title = stringResource(R.string.recently_added_tracks),
+            canAddSong = false,
             onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
             onSelectTrack = viewModel::playTrack,
             navActions = navActions,
             viewModelName = viewModelType.TRACKLIST,
-        )
+            profileViewModel = profileViewModel,
+            canLike = true)
       }
       2 -> {
         TrackList(
             tracks =
-                uiState.tracks.filter { track ->
+                profileViewModel.wanderwaveLikedTracks.value.filter { track ->
                   uiState.bannedTracks.any { it.id == track.id }.not()
                 },
             title = stringResource(R.string.liked_tracks),
@@ -131,7 +141,7 @@ fun TabContent1(
             onSelectTrack = viewModel::playTrack,
             navActions = navActions,
             viewModelName = viewModelType.TRACKLIST,
-        )
+            profileViewModel = profileViewModel)
       }
       3 -> {
         RemovableTrackList(
@@ -140,7 +150,7 @@ fun TabContent1(
             onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
             onSelectTrack = viewModel::playTrack,
             onRemoveTrack = viewModel::removeTrackFromBanList,
-        )
+            profileViewModel = profileViewModel)
       }
     }
   }
