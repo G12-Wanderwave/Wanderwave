@@ -14,6 +14,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
+import ch.epfl.cs311.wanderwave.model.repository.RecentlyPlayedRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -61,6 +62,7 @@ class TrackListScreenTest : TestCase() {
   @RelaxedMockK lateinit var mockShowMessage: (String) -> Unit
   @RelaxedMockK private lateinit var mockNavController: NavHostController
 
+  @RelaxedMockK private lateinit var mockRecentlyPlayedRepository: RecentlyPlayedRepository
   @Before
   fun setup() {
 
@@ -95,9 +97,11 @@ class TrackListScreenTest : TestCase() {
             appDatabase,
             trackRepository,
             profileRepository,
-            authenticationController)
-    every { mockSpotifyController.recentlyPlayedTracks.value } returns
-        listOf(Track("id1", "title1", "artist1"))
+            authenticationController,
+            mockRecentlyPlayedRepository
+          )
+    every { mockRecentlyPlayedRepository.getRecentlyPlayed() } returns
+        flowOf(listOf(Track("id1", "title1", "artist1")))
     composeTestRule.setContent {
       TrackListScreen(mockNavigationActions, viewModel, profileViewModel, true)
     }

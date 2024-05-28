@@ -5,6 +5,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.TrackRecord
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
+import ch.epfl.cs311.wanderwave.model.repository.RecentlyPlayedRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
@@ -42,6 +43,8 @@ class TrackListViewModelTest {
   @RelaxedMockK private lateinit var appDatabase: AppDatabase
   @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
   @RelaxedMockK private lateinit var mockProfileRepository: ProfileRepository
+
+  @RelaxedMockK private lateinit var mockRecentlyPlayedRepository: RecentlyPlayedRepository
 
   private val testDispatcher = TestCoroutineDispatcher()
   private lateinit var track: Track
@@ -98,7 +101,8 @@ class TrackListViewModelTest {
             appDatabase,
             repository,
             mockProfileRepository,
-            mockAuthenticationController)
+            mockAuthenticationController,
+            mockRecentlyPlayedRepository)
 
     runBlocking { viewModel.uiState.first { !it.loading } }
   }
