@@ -3,7 +3,7 @@ package ch.epfl.cs311.wanderwave.di
 import android.content.Context
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.localDb.LocalAuthTokenRepository
-import ch.epfl.cs311.wanderwave.model.localDb.LocalRecentlyPlayedRepositoryImpl
+import ch.epfl.cs311.wanderwave.model.localDb.LocalRecentlyPlayedRepository
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
 import ch.epfl.cs311.wanderwave.model.remote.TrackConnection
@@ -98,7 +98,7 @@ object RepositoryModule {
       appDatabase: AppDatabase,
       trackRepository: TrackRepository
   ): RecentlyPlayedRepository {
-    return LocalRecentlyPlayedRepositoryImpl(
+    return LocalRecentlyPlayedRepository(
         appDatabase.recentlyPlayedDao(), trackRepository, Dispatchers.IO)
   }
 }

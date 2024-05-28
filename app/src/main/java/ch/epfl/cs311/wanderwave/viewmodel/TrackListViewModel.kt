@@ -50,12 +50,8 @@ constructor(
   private var observeTracksJob: Job? = null
 
   fun loadTracksBasedOnSource(index: Int) {
-    Log.d("TrackListViewModel", "loadTracksBasedOnSource: $index")
     viewModelScope.launch {
-      observeTracksJob?.let {
-        Log.d("TrackListViewModel", "loadTracksBasedOnSource: canceling job: $it")
-        it.cancel()
-      }
+      observeTracksJob?.let { it.cancel() }
       _uiState.value = _uiState.value.copy(loading = true)
       when (index) {
         0 -> loadRecentlyPlayedTracks()
@@ -70,7 +66,6 @@ constructor(
     observeTracksJob =
         viewModelScope.launch {
           recentlyPlayedRepository.getRecentlyPlayed().collect { tracks ->
-            Log.d("TrackListViewModel", "loadRecentlyPlayedTracks: $tracks")
             _uiState.value = _uiState.value.copy(tracks = tracks, loading = false)
           }
         }
