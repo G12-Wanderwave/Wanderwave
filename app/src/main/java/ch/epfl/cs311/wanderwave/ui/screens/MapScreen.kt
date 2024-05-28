@@ -108,6 +108,8 @@ fun createLocationReceiver(
 ): BroadcastReceiver {
   return object : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
+
+        Log.d("MapScreen", "retrieved song: ${song.value}")
       val latitude = intent?.getDoubleExtra(LocationUpdatesService.EXTRA_LATITUDE, 0.0)
       val longitude = intent?.getDoubleExtra(LocationUpdatesService.EXTRA_LONGITUDE, 0.0)
       if (latitude != null && longitude != null) {
@@ -120,7 +122,6 @@ fun createLocationReceiver(
         if (tempBeacon != null) {
           viewModel.getRandomSong(tempBeacon.id)
           viewModel.retrieveRandomSongFromProfileAndAddToBeacon(tempBeacon.id)
-          Log.d("MapScreen", "retrieved song: ${song.value}")
         }
       }
     }

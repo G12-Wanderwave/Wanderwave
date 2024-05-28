@@ -81,9 +81,8 @@ fun TabContent1(
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   var searchQuery by remember { mutableStateOf("") }
-
+val retrievedSongs by profileViewModel.retrievedSongs.collectAsStateWithLifecycle()
   LaunchedEffect(Unit) {
-      profileViewModel.getRetrievedSongs()
       viewModel.updateBannedSongs()
   }
 
@@ -96,9 +95,10 @@ fun TabContent1(
         },
         label = { Text("Search Tracks") },
         modifier =
-            Modifier.fillMaxWidth()
-                .padding(16.dp)
-                .testTag("searchBar") // Adding a test tag for the search bar
+        Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .testTag("searchBar") // Adding a test tag for the search bar
         )
     when (selectedTabIndex) {
       0 -> {

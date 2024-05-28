@@ -16,7 +16,6 @@ fun addTrackToBeacon(
 ) {
   // Call the BeaconConnection's addTrackToBeacon with the provided beaconId and trac
   val correctTrack = track.copy(id = "spotify:track:" + track.id)
-    Log.d("BeaconInteraction", "Adding track to beacon$correctTrack")
   trackRepository.addItemsIfNotExist(listOf(correctTrack))
   beaconRepository.addTrackToBeacon(
       beaconId, correctTrack, authenticationController.getUserData()!!.id, onComplete)
