@@ -95,6 +95,8 @@ class TrackListViewModelTest {
     every { mockProfileRepository.getItem(any()) } returns flowOf(Result.success(mockProfile))
     every { mockProfile.bannedSongs } returns bannedSongs
 
+    every { mockRecentlyPlayedRepository.getRecentlyPlayed() } returns flowOf(trackList)
+
     viewModel =
         TrackListViewModel(
             mockSpotifyController,
@@ -206,5 +208,11 @@ class TrackListViewModelTest {
     assertTrue(
         viewModel.uiState.value.bannedTracks.toString(),
         viewModel.uiState.value.bannedTracks.size == 1)
+  }
+
+  @Test
+  fun testGetRecentlyPlayed() = runBlocking {
+    viewModel.loadTracksBasedOnSource(0)
+    assertTrue(viewModel.uiState.value.tracks.isNotEmpty())
   }
 }
