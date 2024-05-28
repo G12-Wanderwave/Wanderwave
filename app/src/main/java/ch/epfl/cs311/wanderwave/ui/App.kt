@@ -70,45 +70,42 @@ fun App(navController: NavHostController) {
 
 @Composable
 fun AppScaffold(navController: NavHostController) {
-    val navActions = remember { NavigationActions(navController) }
-    var showBottomBar by remember { mutableStateOf(false) }
-    val currentRouteState by navActions.currentRouteFlow.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val profileViewModel: ProfileViewModel = hiltViewModel()
-    val trackListViewModel = hiltViewModel<TrackListViewModel>()
-    val beaconViewModel = hiltViewModel<BeaconViewModel>()
-    val mapViewModel = hiltViewModel<MapViewModel>()
+  val navActions = remember { NavigationActions(navController) }
+  var showBottomBar by remember { mutableStateOf(false) }
+  val currentRouteState by navActions.currentRouteFlow.collectAsStateWithLifecycle()
+  val snackbarHostState = remember { SnackbarHostState() }
+  val profileViewModel: ProfileViewModel = hiltViewModel()
+  val trackListViewModel = hiltViewModel<TrackListViewModel>()
+  val beaconViewModel = hiltViewModel<BeaconViewModel>()
+  val mapViewModel = hiltViewModel<MapViewModel>()
 
-    CreateIcon()
+  CreateIcon()
 
-    val scope = rememberCoroutineScope()
-    val showSnackbar: (String) -> Unit = { message: String ->
-        scope.launch { snackbarHostState.showSnackbar(message) }
-    }
+  val scope = rememberCoroutineScope()
+  val showSnackbar: (String) -> Unit = { message: String ->
+    scope.launch { snackbarHostState.showSnackbar(message) }
+  }
 
-    LaunchedEffect(currentRouteState) {
-        showBottomBar = currentRouteState?.showBottomBar ?: false
-    }
+  LaunchedEffect(currentRouteState) { showBottomBar = currentRouteState?.showBottomBar ?: false }
 
-    val online = isOnline(LocalContext.current)
+  val online = isOnline(LocalContext.current)
 
-    Scaffold(
-        bottomBar = { if (showBottomBar) AppBottomBar(navActions = navActions, online = online) }
-    ) { innerPadding ->
+  Scaffold(
+      bottomBar = { if (showBottomBar) AppBottomBar(navActions = navActions, online = online) }) {
+          innerPadding ->
         SurroundWithMiniPlayer(displayPlayer = showBottomBar) {
-            SetupNavHost(
-                navController = navController,
-                navActions = navActions,
-                innerPadding = innerPadding,
-                showSnackbar = showSnackbar,
-                profileViewModel = profileViewModel,
-                trackListViewModel = trackListViewModel,
-                beaconViewModel = beaconViewModel,
-                mapViewModel = mapViewModel,
-                online = online
-            )
+          SetupNavHost(
+              navController = navController,
+              navActions = navActions,
+              innerPadding = innerPadding,
+              showSnackbar = showSnackbar,
+              profileViewModel = profileViewModel,
+              trackListViewModel = trackListViewModel,
+              beaconViewModel = beaconViewModel,
+              mapViewModel = mapViewModel,
+              online = online)
         }
-    }
+      }
 }
 
 @Composable
@@ -123,15 +120,15 @@ fun SetupNavHost(
     mapViewModel: MapViewModel,
     online: Boolean
 ) {
-    NavHost(
-        navController = navController,
-        enterTransition = { EnterTransition.None },
-        exitTransition = { ExitTransition.None },
-        popEnterTransition = { EnterTransition.None },
-        popExitTransition = { ExitTransition.None },
-        startDestination = if (online) Route.SPOTIFY_CONNECT.routeString else Route.TRACK_LIST.routeString,
-        modifier = Modifier.padding(innerPadding).background(MaterialTheme.colorScheme.background)
-    ) {
+  NavHost(
+      navController = navController,
+      enterTransition = { EnterTransition.None },
+      exitTransition = { ExitTransition.None },
+      popEnterTransition = { EnterTransition.None },
+      popExitTransition = { ExitTransition.None },
+      startDestination =
+          if (online) Route.SPOTIFY_CONNECT.routeString else Route.TRACK_LIST.routeString,
+      modifier = Modifier.padding(innerPadding).background(MaterialTheme.colorScheme.background)) {
         addComposableRoutes(
             navActions = navActions,
             showSnackbar = showSnackbar,
@@ -139,9 +136,8 @@ fun SetupNavHost(
             trackListViewModel = trackListViewModel,
             beaconViewModel = beaconViewModel,
             mapViewModel = mapViewModel,
-            online = online
-        )
-    }
+            online = online)
+      }
 }
 
 @SuppressLint("ComposableDestinationInComposeScope")
@@ -154,73 +150,66 @@ fun NavGraphBuilder.addComposableRoutes(
     mapViewModel: MapViewModel,
     online: Boolean
 ) {
-    if (online) {
-        composable(Route.LOGIN.routeString) { LoginScreen(navActions, showSnackbar) }
-        composable(Route.SPOTIFY_CONNECT.routeString) { SpotifyConnectScreen(navActions) }
-    }
-    composable(Route.ABOUT.routeString) { AboutScreen(navActions) }
-    composable(Route.TRACK_LIST.routeString) {
-        TrackListScreen(navActions, trackListViewModel, profileViewModel, online)
-    }
-    if (online) {
-        composable(Route.MAP.routeString) { MapScreen(navActions, mapViewModel) }
-    }
-    composable(Route.PROFILE.routeString) {
-        ProfileScreen(navActions, profileViewModel, online)
-    }
-    if (online) {
-        composable(Route.EDIT_PROFILE.routeString) {
-            EditProfileScreen(navActions, profileViewModel)
-        }
-    }
-    composable(
-        route = "${Route.SELECT_SONG.routeString}/{viewModelType}",
-        arguments = listOf(navArgument("viewModelType") { type = NavType.StringType })
-    ) { backStackEntry ->
+  if (online) {
+    composable(Route.LOGIN.routeString) { LoginScreen(navActions, showSnackbar) }
+    composable(Route.SPOTIFY_CONNECT.routeString) { SpotifyConnectScreen(navActions) }
+  }
+  composable(Route.ABOUT.routeString) { AboutScreen(navActions) }
+  composable(Route.TRACK_LIST.routeString) {
+    TrackListScreen(navActions, trackListViewModel, profileViewModel, online)
+  }
+  if (online) {
+    composable(Route.MAP.routeString) { MapScreen(navActions, mapViewModel) }
+  }
+  composable(Route.PROFILE.routeString) { ProfileScreen(navActions, profileViewModel, online) }
+  if (online) {
+    composable(Route.EDIT_PROFILE.routeString) { EditProfileScreen(navActions, profileViewModel) }
+  }
+  composable(
+      route = "${Route.SELECT_SONG.routeString}/{viewModelType}",
+      arguments = listOf(navArgument("viewModelType") { type = NavType.StringType })) {
+          backStackEntry ->
         val viewModelType = backStackEntry.arguments?.getString("viewModelType")
-        val viewModel = when (viewModelType) {
-            "profile" -> profileViewModel
-            "tracklist" -> trackListViewModel
-            "beacon" -> beaconViewModel
-            else -> error("Invalid ViewModel type for SelectSongScreen")
-        }
+        val viewModel =
+            when (viewModelType) {
+              "profile" -> profileViewModel
+              "tracklist" -> trackListViewModel
+              "beacon" -> beaconViewModel
+              else -> error("Invalid ViewModel type for SelectSongScreen")
+            }
         SelectSongScreen(navActions, viewModel)
+      }
+  composable("${Route.VIEW_PROFILE.routeString}/{profileId}") {
+    ProfileViewOnlyScreen(it.arguments?.getString("profileId") ?: "", navActions)
+  }
+  if (online) {
+    composable("${Route.BEACON.routeString}/{beaconId}") {
+      BeaconScreen(
+          it.arguments?.getString("beaconId") ?: "", profileViewModel, navActions, beaconViewModel)
     }
-    composable("${Route.VIEW_PROFILE.routeString}/{profileId}") {
-        ProfileViewOnlyScreen(it.arguments?.getString("profileId") ?: "", navActions)
-    }
-    if (online) {
-        composable("${Route.BEACON.routeString}/{beaconId}") {
-            BeaconScreen(
-                it.arguments?.getString("beaconId") ?: "",
-                profileViewModel,
-                navActions,
-                beaconViewModel
-            )
-        }
-    }
+  }
 }
 
 @Composable
 private fun CreateIcon() {
-    val context = LocalContext.current
-    try {
-        MapsInitializer.initialize(context)
-        AppResources.beaconIcon = getIcon(context)
-    } catch (e: GooglePlayServicesNotAvailableException) {
-        e.printStackTrace()
-    }
+  val context = LocalContext.current
+  try {
+    MapsInitializer.initialize(context)
+    AppResources.beaconIcon = getIcon(context)
+  } catch (e: GooglePlayServicesNotAvailableException) {
+    e.printStackTrace()
+  }
 }
 
 private fun isOnline(context: Context): Boolean {
-    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val network = connectivityManager.activeNetwork ?: return false
-    val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
-    return when {
-        activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-        activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-        activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-        else -> false
-    }
+  val connectivityManager =
+      context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+  val network = connectivityManager.activeNetwork ?: return false
+  val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+  return when {
+    activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+    activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+    activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+    else -> false
+  }
 }
-

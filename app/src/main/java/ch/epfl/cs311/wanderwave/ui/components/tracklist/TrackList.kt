@@ -214,8 +214,12 @@ fun PreviewRemovableTrackList() {
   }
   val title = "My Playlist"
   val canAddSong = false
-  fun onAddTrack() {/*Not needed for preview*/}
-  fun onSelectTrack(track: Track) {/*Not needed for preview*/}
+  fun onAddTrack() {
+    /*Not needed for preview*/
+  }
+  fun onSelectTrack(track: Track) {
+    /*Not needed for preview*/
+  }
   fun onRemoveTrack(track: Track) {
     tracks = tracks.filterNot { it.id == track.id }
     Log.d("TrackList", "Tracks: $tracks")
