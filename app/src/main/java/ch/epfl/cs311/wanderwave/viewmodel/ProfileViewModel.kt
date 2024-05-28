@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
@@ -64,7 +63,8 @@ constructor(
         } else {
           track
         }
-    if (!_profile.value.topSongs.contains(newTrack))_profile.value.topSongs+= mutableListOf(newTrack)
+    if (!_profile.value.topSongs.contains(newTrack))
+        _profile.value.topSongs += mutableListOf(newTrack)
 
     updateProfile(_profile.value)
   }
@@ -151,7 +151,6 @@ constructor(
     // Check if song was not liked
     if (wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value -= track
   }
-
 
   data class UIState(
       val profile: Profile? = null,
