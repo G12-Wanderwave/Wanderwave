@@ -101,19 +101,18 @@ fun TabContent1(
     when (selectedTabIndex) {
       0 -> {
         TrackList(
-          tracks =
-            uiState.tracks.filter { track ->
-              uiState.bannedTracks.any { it.id == track.id }.not()
-            },
-          title = stringResource(R.string.recently_played_tracks),
-          canAddSong = false,
-          onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
-          onSelectTrack = viewModel::playTrack,
-          navActions = navActions,
-          viewModelName = viewModelType.TRACKLIST,
-          profileViewModel = profileViewModel,
-          canLike = true
-        )
+            tracks =
+                uiState.tracks.filter { track ->
+                  uiState.bannedTracks.any { it.id == track.id }.not()
+                },
+            title = stringResource(R.string.recently_played_tracks),
+            canAddSong = false,
+            onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
+            onSelectTrack = viewModel::playTrack,
+            navActions = navActions,
+            viewModelName = viewModelType.TRACKLIST,
+            profileViewModel = profileViewModel,
+            canLike = true)
       }
       1 -> {
         TrackList(
