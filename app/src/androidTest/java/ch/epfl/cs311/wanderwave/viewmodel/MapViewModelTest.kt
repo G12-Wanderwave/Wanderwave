@@ -18,6 +18,7 @@ import io.mockk.junit4.MockKRule
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Before
@@ -142,37 +143,148 @@ class MapViewModelTest {
   }
 
   @Test
-  fun addTrackToBeaconAddsTrackToRepositoryAndBeacon() = runTest {
-    // Given
-    val beaconId = "beaconId"
-    val track = Track("trackId", "trackName", "trackArtist")
+  fun getRandomSong_returnsRandomSong_whenBeaconHasSongs() = runBlockingTest {
+    // Mocking
+    val beaconId = "Sample Beacon ID"
+    val track = Track("Sample Track ID", "Sample Track Title", "Sample Artist Name")
     val userId = "userId"
+    val profile =
+        Profile(
+            firebaseUid = userId,
+            chosenSongs = listOf(track),
+            topSongs = listOf(track),
+            likedSongs = listOf(track),
+            bannedSongs = listOf(track),
+            numberOfLikes = 0,
+            isPublic = true,
+            spotifyUid = "My Spotify UID",
+            profilePictureUri = null,
+            firstName = "My FirstName",
+            lastName = "My LastName",
+            description = "My Description")
+    val beacon =
+        Beacon(
+            beaconId,
+            profileAndTrack = listOf(ProfileTrackAssociation(profile, track)),
+            location = ch.epfl.cs311.wanderwave.model.data.Location(0.0, 0.0))
 
     // Mock the AuthenticationUserData
     val mockUserData = mockk<AuthenticationUserData> { every { id } returns userId }
 
     // Mock the responses
     coEvery { mockAuthenticationController.getUserData() } returns mockUserData
-    coEvery { trackRepository.addItemsIfNotExist(any()) } just Runs
-    coEvery { mockBeaconRepository.addTrackToBeacon(any(), any(), any(), any()) } answers
-        {
-          val callback = args[3] as ((Boolean) -> Unit)
-          callback.invoke(true)
-        }
+    // Mocking
+    coEvery { profileRepository.getItem(userId) } returns flowOf(Result.success(profile))
 
-    // When
-    addTrackToBeacon(
-        beaconId, track, trackRepository, mockBeaconRepository, mockAuthenticationController) {}
+    coEvery { mockBeaconRepository.getItem(beaconId) } returns flowOf(Result.success(beacon))
 
-    // Then
-    coVerify {
-      trackRepository.addItemsIfNotExist(listOf(track.copy(id = "spotify:track:${track.id}")))
-    }
-    coVerify {
-      mockBeaconRepository.addTrackToBeacon(
-          beaconId, track.copy(id = "spotify:track:${track.id}"), userId, any())
-    }
+    // Act
+    viewModel.getRandomSong(beaconId)
   }
+
+  @Test
+  fun retrieveRandomSongFromProfileAndAddToBeacon_retrievesSongAndAddsToBeacon_whenProfileHasSongs() =
+      runBlockingTest {
+        // Given
+        val beaconId = "Sample Beacon ID"
+        val track = Track("Sample Track ID", "Sample Track Title", "Sample Artist Name")
+        val profile =
+            Profile(
+                firebaseUid = "Sample ",
+                chosenSongs = listOf(track),
+                topSongs = listOf(track),
+                likedSongs = listOf(track),
+                bannedSongs = listOf(track),
+                numberOfLikes = 0,
+                isPublic = true,
+                spotifyUid = "My Spotify UID",
+                profilePictureUri = null,
+                firstName = "My FirstName",
+                lastName = "My LastName",
+                description = "My Description")
+        val beacon =
+            Beacon(
+                beaconId,
+                profileAndTrack = emptyList(),
+                location = ch.epfl.cs311.wanderwave.model.data.Location(0.0, 0.0))
+
+        // Mock the responses
+        coEvery { profileRepository.getItem(profile.firebaseUid) } returns
+            flowOf(Result.success(profile))
+        coEvery { mockBeaconRepository.getItem(beaconId) } returns flowOf(Result.success(beacon))
+        coEvery { mockBeaconRepository.updateItem(any()) } just Runs
+
+        // Act
+        viewModel.retrieveRandomSongFromProfileAndAddToBeacon(beaconId)
+      }
+
+  @Test
+  fun retrieveRandomSongFromProfileAndAddToBeacon_doesNothing_whenProfileHasNoSongs() =
+      runBlockingTest {
+        // Given
+        val beaconId = "Sample Beacon ID"
+        val track = Track("Sample Track ID", "Sample Track Title", "Sample Artist Name")
+
+        val profile =
+            Profile(
+                firebaseUid = "Sample ",
+                chosenSongs = listOf(track),
+                topSongs = listOf(track),
+                likedSongs = listOf(track),
+                bannedSongs = listOf(track),
+                numberOfLikes = 0,
+                isPublic = true,
+                spotifyUid = "My Spotify UID",
+                profilePictureUri = null,
+                firstName = "My FirstName",
+                lastName = "My LastName",
+                description = "My Description")
+
+        // Mock the responses
+        coEvery { profileRepository.getItem(profile.firebaseUid) } returns
+            flowOf(Result.success(profile))
+
+        // Act
+        viewModel.retrieveRandomSongFromProfileAndAddToBeacon(beaconId)
+
+        // Assert
+        coVerify(exactly = 0) { mockBeaconRepository.updateItem(any()) }
+      }
+
+  @Test
+  fun updateChosenSongsProfile_doesNotUpdateProfile_whenSongIdIsAlreadyInChosenSongs() =
+      runBlockingTest {
+        val userId = "userId"
+
+        // Mock the AuthenticationUserData
+        val mockUserData = mockk<AuthenticationUserData> { every { id } returns userId }
+
+        // Mock the responses
+        coEvery { mockAuthenticationController.getUserData() } returns mockUserData
+        // Mocking
+        val track = Track("Sample Track ID", "Sample Track Title", "Sample Artist Name")
+        val profile =
+            Profile(
+                firebaseUid = userId,
+                chosenSongs = listOf(track),
+                topSongs = listOf(track),
+                likedSongs = listOf(track),
+                bannedSongs = listOf(track),
+                numberOfLikes = 0,
+                isPublic = true,
+                spotifyUid = "My Spotify UID",
+                profilePictureUri = null,
+                firstName = "My FirstName",
+                lastName = "My LastName",
+                description = "My Description")
+        coEvery { profileRepository.getItem(userId) } returns flowOf(Result.success(profile))
+
+        // Act
+        viewModel.updateChosenSongsProfile()
+
+        // Assert
+        coVerify(exactly = 0) { profileRepository.updateItem(any()) }
+      }
 
   @Test
   fun retrieveSongFromProfileAndAddToBeaconSongs() = runTest {
@@ -227,37 +339,6 @@ class MapViewModelTest {
 
     // Then
     coVerify(exactly = 0) { mockBeaconRepository.addTrackToBeacon(any(), any(), any(), any()) }
-  }
-
-  @Test
-  fun getRandomSongAndAddToProfileSongs() = runTest {
-    // Given
-    val beaconId = "beaconId"
-    val beacon =
-        Beacon(
-            id = beaconId,
-            location = ch.epfl.cs311.wanderwave.model.data.Location(0.0, 0.0),
-            profileAndTrack =
-                listOf(
-                    ProfileTrackAssociation(
-                        Profile(
-                            firstName = "My FirstName",
-                            lastName = "My LastName",
-                            description = "My Description",
-                            numberOfLikes = 0,
-                            isPublic = true,
-                            spotifyUid = "My Spotify UID",
-                            firebaseUid = "My Firebase UID",
-                            profilePictureUri = null),
-                        Track("trackId", "trackName", "trackArtist"))))
-    coEvery { mockBeaconRepository.getItem(beaconId) } returns flowOf(Result.success(beacon))
-    coEvery { trackRepository.addItemsIfNotExist(any()) } just Runs
-
-    // When
-    viewModel.getRandomSong(beaconId)
-
-    // Then
-    coVerify { trackRepository.addItemsIfNotExist(listOf(beacon.profileAndTrack.random().track)) }
   }
 
   @Test

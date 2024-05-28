@@ -187,12 +187,8 @@ constructor(
       val profileId = authenticationController.getUserData()?.id
       profileId?.let {
         try {
-          Log.d("Beacon68", "Starting to collect profile flow")
           val fetchedProfile = profileRepository.getItem(profileId).first()
-          Log.d("Beacon68", "Profile flow collection completed")
-
           fetchedProfile.onSuccess { profile ->
-            Log.d("Beacon68", "Profile fetched successfully: $profile")
             if (_retrievedSong.value.track.id.isNotEmpty() &&
                 profile.chosenSongs.none { it.id == _retrievedSong.value.track.id }) {
               _profile.value =
@@ -203,12 +199,12 @@ constructor(
           }
 
           fetchedProfile.onFailure { exception ->
-            Log.e("Beacon68", "Profile not found for the given id: $exception")
+            Log.e("Profile not found", "Profile not found for the given id $exception")
           }
         } catch (exception: Exception) {
-          Log.e("Beacon68", "Error fetching profile: $exception")
+          Log.e("Error", "Error fetching profile: $exception") // Error handling
         }
-      } ?: run { Log.e("Beacon68", "User data is null") }
+      }
     }
   }
 

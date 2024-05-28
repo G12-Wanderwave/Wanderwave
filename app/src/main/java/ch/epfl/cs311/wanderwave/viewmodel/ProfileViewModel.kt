@@ -155,15 +155,6 @@ constructor(
     if (wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value -= track
   }
 
-  fun getRetrievedSongs() {
-    viewModelScope.launch {
-      val profileId = authenticationController.getUserData()!!.id
-      repository.getItem(profileId).collect { fetchedProfile ->
-        fetchedProfile.onSuccess { profile -> _retrievedSongs.value = profile.retrievedSongs }
-      }
-    }
-  }
-
   data class UIState(
       val profile: Profile? = null,
       val isLoading: Boolean = true,

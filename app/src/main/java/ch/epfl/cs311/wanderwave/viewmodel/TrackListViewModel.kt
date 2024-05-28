@@ -54,7 +54,7 @@ constructor(
                         spotifyController.recentlyPlayedTracks
                             .value) // TODO:modify for the recnetly played tracks
         1 -> loadRecentlyAddedTracks() // TODO: modify here for the liked tracks
-        2 -> loadRetrievedTracks() // TODO: modify here for the banned tracks
+        2 -> loadRecentlyAddedTracks() // TODO: modify here for the banned tracks
       }
     }
   }

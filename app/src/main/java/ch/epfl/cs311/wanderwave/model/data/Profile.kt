@@ -17,7 +17,6 @@ data class Profile(
     var likedSongs: List<Track> = emptyList(),
     var topSongs: List<Track> = emptyList(),
     var chosenSongs: List<Track> = emptyList(),
-    var retrievedSongs: List<Track> = emptyList(),
     var bannedSongs: List<Track> = emptyList(),
 ) {
 

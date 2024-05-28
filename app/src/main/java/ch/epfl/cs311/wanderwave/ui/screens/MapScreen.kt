@@ -77,7 +77,6 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel) {
     LaunchedEffect(true) {
       val intent = Intent(context, LocationUpdatesService::class.java)
       context.startService(intent)
-      viewModel.getProfileOfCurrentUser()
     }
 
     DisposableEffect(Unit) {
