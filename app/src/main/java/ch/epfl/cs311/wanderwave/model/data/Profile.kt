@@ -14,18 +14,20 @@ data class Profile(
     var profilePictureUri: Uri? = null,
     var spotifyUid: String,
     var firebaseUid: String,
+    var likedSongs: List<Track> = emptyList(),
     var topSongs: List<Track> = emptyList(),
     var chosenSongs: List<Track> = emptyList(),
     var bannedSongs: List<Track> = emptyList(),
 ) {
 
-  fun toMap(db: FirebaseFirestore? = null): Map<String, Any> {
+  fun toMap(db: FirebaseFirestore): Map<String, Any> {
 
     fun mapTrackToDocumentReference(tracks: List<Track>): List<DocumentReference> {
       return db?.let { nonNulldb -> tracks.map { nonNulldb.collection("tracks").document(it.id) } }
           ?: emptyList()
     }
 
+    val likedSongsReferences: List<DocumentReference> = mapTrackToDocumentReference(likedSongs)
     val topSongsReferences: List<DocumentReference> = mapTrackToDocumentReference(topSongs)
     val chosenSongsReferences: List<DocumentReference> = mapTrackToDocumentReference(chosenSongs)
     val bannedSongsReferences: List<DocumentReference> = mapTrackToDocumentReference(bannedSongs)
@@ -38,12 +40,12 @@ data class Profile(
         "spotifyUid" to spotifyUid,
         "firebaseUid" to firebaseUid,
         "isPublic" to isPublic,
-        "profilePictureUri" to (profilePictureUri?.toString() ?: ""),
+        "profilePictureUri" to (profilePictureUri?.toString() ?: ""), // implement this later
         "numberOfLikes" to numberOfLikes,
         "topSongs" to topSongsReferences,
+        "likedSongs" to likedSongsReferences,
         "chosenSongs" to chosenSongsReferences,
-        "bannedSongs" to bannedSongsReferences,
-    )
+        "bannedSongs" to bannedSongsReferences)
   }
 
   companion object {
@@ -55,8 +57,8 @@ data class Profile(
             description = documentSnapshot.getString("description") ?: "",
             numberOfLikes = documentSnapshot.getLong("numberOfLikes")?.toInt() ?: 0,
             isPublic = documentSnapshot.getBoolean("isPublic") ?: false,
-            profilePictureUri =
-                documentSnapshot.getString("profilePictureUri")?.let { Uri.parse(it) },
+            profilePictureUri = // implement this later
+            documentSnapshot.getString("profilePictureUri")?.let { Uri.parse(it) },
             spotifyUid = documentSnapshot.getString("spotifyUid") ?: "",
             firebaseUid = documentSnapshot.getString("firebaseUid") ?: "",
         )

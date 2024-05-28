@@ -33,7 +33,7 @@ fun WanderwaveGoogleMap(
               mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)),
       uiSettings =
           MapUiSettings(
-              zoomControlsEnabled = controlsEnabled,
+              zoomControlsEnabled = false, // we want this nowhere
               compassEnabled = controlsEnabled,
               myLocationButtonEnabled = controlsEnabled,
               scrollGesturesEnabled = controlsEnabled,

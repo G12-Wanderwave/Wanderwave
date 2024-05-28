@@ -11,18 +11,21 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.BeaconConnection
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.screens.BeaconScreen
 import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.kakaocup.compose.node.element.ComposeScreen
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
@@ -44,6 +47,9 @@ class BeaconScreenTest {
   @RelaxedMockK private lateinit var mockNavController: NavHostController
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
   @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
+  @RelaxedMockK private lateinit var profileViewModel: ProfileViewModel
+  @RelaxedMockK private lateinit var profileRepository: ProfileRepository
+  @RelaxedMockK private lateinit var mockProfileRepository: ProfileRepository
 
   @Before
   fun setup() {
@@ -80,11 +86,24 @@ class BeaconScreenTest {
     every { mockAuthenticationController.getUserData() } returns
         AuthenticationUserData("test-uid", "test-email", "test-name", "test-photo-url")
 
+    val mockProfile = mockk<Profile>(relaxed = true) { every { isPublic } returns true }
+
+    every { mockProfileRepository.getItem(any()) } returns flowOf(Result.success(mockProfile))
+
     val viewModel =
         BeaconViewModel(
-            trackRepository, beaconConnection, mockSpotifyController, mockAuthenticationController)
+            trackRepository,
+            beaconConnection,
+            mockProfileRepository,
+            mockSpotifyController,
+            mockAuthenticationController)
 
-    composeTestRule.setContent { BeaconScreen(beaconId, mockNavigationActions, viewModel) }
+    val profileViewModel =
+        ProfileViewModel(profileRepository, mockSpotifyController, mockAuthenticationController)
+
+    composeTestRule.setContent {
+      BeaconScreen(beaconId, profileViewModel, mockNavigationActions, viewModel)
+    }
 
     every { mockNavController.navigate(any<String>()) } returns Unit
     mockNavigationActions = NavigationActions(mockNavController)

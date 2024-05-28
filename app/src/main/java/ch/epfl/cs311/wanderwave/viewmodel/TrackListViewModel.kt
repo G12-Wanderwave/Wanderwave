@@ -1,19 +1,17 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import android.util.Log
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ch.epfl.cs311.wanderwave.model.data.ListType
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
-import ch.epfl.cs311.wanderwave.model.spotify.getTracksFromSpotifyPlaylist
-import ch.epfl.cs311.wanderwave.model.spotify.retrieveAndAddSubsectionFromSpotify
-import ch.epfl.cs311.wanderwave.model.spotify.retrieveChildFromSpotify
+import ch.epfl.cs311.wanderwave.model.spotify.getTotalLikedTracksFromSpotity
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,33 +29,31 @@ class TrackListViewModel
 constructor(
     private val spotifyController: SpotifyController,
     private val appDatabase: AppDatabase,
-    private val repository: TrackRepository
+    private val repository: TrackRepository,
+    private val profileRepository: ProfileRepository,
+    private val authenticationController: AuthenticationController
 ) : ViewModel(), SpotifySongsActions {
 
   private val _uiState = MutableStateFlow(UiState(loading = true))
   val uiState: StateFlow<UiState> = _uiState
 
-  private val _isTopSongsListVisible = MutableStateFlow(true)
-  override val isTopSongsListVisible: StateFlow<Boolean> = _isTopSongsListVisible
-
   private var _searchQuery = MutableStateFlow("")
 
-  fun recentTracks(): StateFlow<List<Track>> {
-    return spotifyController.recentlyPlayedTracks
-  }
+  private val _nbrLikedSongs = MutableStateFlow(0)
+  override val nbrLikedSongs: StateFlow<Int> = _nbrLikedSongs
 
-  fun toggleTrackSource() {
-    _uiState.value = _uiState.value.copy(showRecentlyAdded = !_uiState.value.showRecentlyAdded)
-    loadTracksBasedOnSource()
-  }
-
-  fun loadTracksBasedOnSource() {
+  fun loadTracksBasedOnSource(index: Int) {
     viewModelScope.launch {
       _uiState.value = _uiState.value.copy(loading = true)
-      if (_uiState.value.showRecentlyAdded) {
-        loadRecentlyAddedTracks()
-      } else {
-        _uiState.value = _uiState.value.copy(tracks = spotifyController.recentlyPlayedTracks.value)
+      when (index) {
+        0 ->
+            _uiState.value =
+                _uiState.value.copy(
+                    tracks =
+                        spotifyController.recentlyPlayedTracks
+                            .value) // TODO:modify for the recnetly played tracks
+        1 -> loadRecentlyAddedTracks() // TODO: modify here for the liked tracks
+        2 -> loadRecentlyAddedTracks() // TODO: modify here for the banned tracks
       }
     }
   }
@@ -73,12 +69,6 @@ constructor(
       _uiState.value = _uiState.value.copy(tracks = trackDetails, loading = false)
     }
   }
-
-  private var _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
-  override val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
-
-  private var _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
-  override val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
 
   private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
@@ -102,6 +92,17 @@ constructor(
     }
   }
 
+  fun updateBannedSongs() {
+    viewModelScope.launch {
+      val profileId = authenticationController.getUserData()!!.id
+      profileRepository.getItem(profileId).collect { fetchedProfile ->
+        fetchedProfile.onSuccess { profile ->
+          _uiState.value = uiState.value.copy(bannedTracks = profile.bannedSongs)
+        }
+      }
+    }
+  }
+
   private fun matchesSearchQuery(track: Track): Boolean {
     return track.title.contains(_searchQuery.value, ignoreCase = true) ||
         track.artist.contains(_searchQuery.value, ignoreCase = true)
@@ -119,40 +120,23 @@ constructor(
         }
   }
 
-  override fun addTrackToList(listName: ListType, track: Track) {
-    Log.d("ProfileViewModel", "addTrackToList $track")
+  override fun addTrackToList(track: Track) {
     val newTrack =
         if (!track.id.contains("spotify:track:")) {
           Track("spotify:track:" + track.id, track.title, track.artist)
         } else {
           track
         }
-    Log.d("ProfileViewModel", "addTrackToListnewTrack $newTrack")
+    if (!_uiState.value.tracks.contains(newTrack)) {
+      val updatedTracks = _uiState.value.tracks + newTrack
+      _uiState.value = _uiState.value.copy(tracks = updatedTracks)
+    }
+  }
 
-    val updatedTracks = _uiState.value.tracks + newTrack
+  fun removeTrackFromBanList(track: Track) {
+    // TODO: only update the Ban List and make it update on firebase
+    val updatedTracks = _uiState.value.tracks - track
     _uiState.value = _uiState.value.copy(tracks = updatedTracks)
-    _childrenPlaylistTrackList.value = (emptyList())
-  }
-
-  /**
-   * Get all the element of the main screen and add them to the top list
-   *
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 3.0
-   */
-  override fun retrieveAndAddSubsection() {
-    retrieveAndAddSubsectionFromSpotify(_spotifySubsectionList, spotifyController, viewModelScope)
-  }
-  /**
-   * Get all the element of the main screen and add them to the top list
-   *
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 3.0
-   */
-  override fun retrieveChild(item: ListItem) {
-    retrieveChildFromSpotify(item, _childrenPlaylistTrackList, spotifyController, viewModelScope)
   }
 
   /**
@@ -172,27 +156,25 @@ constructor(
     _uiState.value = _uiState.value.copy(expanded = true)
   }
 
-  override suspend fun getLikedTracks() {
-    getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
+  override suspend fun getLikedTracks(page: Int) {
+    getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope, page)
   }
 
-  override fun getTracksFromPlaylist(playlistId: String) {
-    getTracksFromSpotifyPlaylist(
-        playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
+  override suspend fun getTotalLikedTracks() {
+    _nbrLikedSongs.value = getTotalLikedTracksFromSpotity(spotifyController)
   }
 
-  override fun emptyChildrenList() {
-    _childrenPlaylistTrackList.value = (emptyList())
+  override fun clearLikedSongs() {
+    _likedSongsTrackList.value = emptyList()
   }
 
   data class UiState(
       val tracks: List<Track> = listOf(),
+      val bannedTracks: List<Track> = emptyList(),
       val loading: Boolean = false,
       val expanded: Boolean = false,
       val progress: MutableFloatState = mutableFloatStateOf(0f),
       val isShuffled: Boolean = false,
-      val loopMode: SpotifyController.RepeatMode = SpotifyController.RepeatMode.OFF,
-      val showRecentlyAdded: Boolean =
-          true // New state to toggle between recently added and recently viewed
+      val loopMode: SpotifyController.RepeatMode = SpotifyController.RepeatMode.OFF
   )
 }

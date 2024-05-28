@@ -1,12 +1,13 @@
-import android.util.Log
-import ch.epfl.cs311.wanderwave.model.data.ListType
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
+import ch.epfl.cs311.wanderwave.model.auth.AuthenticationUserData
+import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.TrackRecord
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
-import com.spotify.protocol.types.ListItem
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -14,19 +15,17 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -41,6 +40,8 @@ class TrackListViewModelTest {
   @RelaxedMockK private lateinit var mockSpotifyController: SpotifyController
   @RelaxedMockK private lateinit var repository: TrackRepository
   @RelaxedMockK private lateinit var appDatabase: AppDatabase
+  @RelaxedMockK private lateinit var mockAuthenticationController: AuthenticationController
+  @RelaxedMockK private lateinit var mockProfileRepository: ProfileRepository
 
   private val testDispatcher = TestCoroutineDispatcher()
   private lateinit var track: Track
@@ -82,7 +83,22 @@ class TrackListViewModelTest {
 
     every { repository.getAll() } returns flowOf(trackList)
 
-    viewModel = TrackListViewModel(mockSpotifyController, appDatabase, repository)
+    every { mockAuthenticationController.isSignedIn() } returns true
+    every { mockAuthenticationController.getUserData() } returns
+        AuthenticationUserData("uid", "email", "name", "http://photoUrl/img.jpg")
+
+    val bannedSongs = listOf(track5)
+    val mockProfile = mockk<Profile>()
+    every { mockProfileRepository.getItem(any()) } returns flowOf(Result.success(mockProfile))
+    every { mockProfile.bannedSongs } returns bannedSongs
+
+    viewModel =
+        TrackListViewModel(
+            mockSpotifyController,
+            appDatabase,
+            repository,
+            mockProfileRepository,
+            mockAuthenticationController)
 
     runBlocking { viewModel.uiState.first { !it.loading } }
   }
@@ -113,35 +129,9 @@ class TrackListViewModelTest {
   }
 
   @Test
-  fun testRetrieveSubsectionAndChildrenFlow() =
-      testDispatcher.runBlockingTest {
-        val expectedListItem = ListItem("id", "title", null, "subtitle", "", false, true)
-        every { mockSpotifyController.getAllElementFromSpotify() } returns
-            flowOf(listOf(expectedListItem))
-        every {
-          mockSpotifyController.getAllChildren(
-              ListItem("id", "title", null, "subtitle", "", false, true))
-        } returns flowOf(listOf(expectedListItem))
-
-        viewModel.retrieveAndAddSubsection()
-        viewModel.retrieveChild(expectedListItem)
-
-        advanceUntilIdle() // This replaces advanceTimeBy and ensures all coroutines are completed
-
-        val result = viewModel.spotifySubsectionList.first() // Safely access the first item
-        val result2 = viewModel.childrenPlaylistTrackList.first() // Safely access the first item
-        Log.d(
-            "TrackListViewModel23",
-            "retrieveAndAddSubsection: ${viewModel.spotifySubsectionList.value}")
-
-        assertEquals(listOf(expectedListItem), result)
-        assertEquals(listOf(expectedListItem), result2)
-      }
-
-  @Test
   fun testAddTrackToList() = runBlocking {
     val track = Track("spotify:track:1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
-    viewModel.addTrackToList(ListType.TOP_SONGS, track)
+    viewModel.addTrackToList(track)
     assertTrue(viewModel.uiState.value.tracks.contains(track))
   }
 
@@ -149,18 +139,8 @@ class TrackListViewModelTest {
   fun testAddTrackToListWithoutPrefix() = runBlocking {
     val track = Track("spotify:track:1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
     val trackWithoutPrefix = Track("1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
-    viewModel.addTrackToList(ListType.TOP_SONGS, trackWithoutPrefix)
+    viewModel.addTrackToList(trackWithoutPrefix)
     assertTrue(viewModel.uiState.value.tracks.contains(track))
-  }
-
-  @Test
-  fun toggleTrackSourceTest() = run {
-    every { mockSpotifyController.recentlyPlayedTracks } returns
-        MutableStateFlow(emptyList<Track>())
-    val initial = viewModel.uiState.value.showRecentlyAdded
-    viewModel.toggleTrackSource()
-    val toggled = viewModel.uiState.value.showRecentlyAdded
-    assertNotEquals(initial, toggled)
   }
 
   @Test
@@ -192,10 +172,35 @@ class TrackListViewModelTest {
     assertEquals(false, viewModel.uiState.value.loading)
   }
 
-  @Test
-  fun emptyChildrenList_clearsChildrenPlaylistTrackList() = runBlockingTest {
+  @Test fun testGetLikedTracks() = runBlocking { viewModel.getLikedTracks() } // Test no crash
 
-    // Act
-    viewModel.emptyChildrenList()
+  @Test
+  fun testGetNbrLikedTracks() = runBlocking { viewModel.getTotalLikedTracks() } // Test no crash
+
+  @Test
+  fun removeTrackFromBanList() = runTest {
+    val tracks =
+        listOf(
+            Track("spotify:track:1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams"),
+            Track("spotify:track:6ImuyUQYhJKEKFtlrstHCD", "Main Title", "John Williams"),
+            Track(
+                "spotify:track:0HLQFjnwq0FHpNVxormx60", "The Nightingale", "Percival Schuttenbach"),
+            Track(
+                "spotify:track:2NZhNbfb1rD1aRj3hZaoqk", "The Imperial Suite", "Michael Giacchino"),
+        )
+    tracks.forEach { viewModel.addTrackToList(it) }
+    tracks.forEach { viewModel.addTrackToList(it) }
+    tracks.forEach { viewModel.addTrackToList(it) }
+    viewModel.loadTracksBasedOnSource(2)
+    viewModel.removeTrackFromBanList(tracks[0])
+    assertFalse(viewModel.uiState.value.tracks.contains(tracks[0]))
+  }
+
+  @Test
+  fun bannedTracksAreInUiState() = runBlocking {
+    viewModel.updateBannedSongs()
+    assertTrue(
+        viewModel.uiState.value.bannedTracks.toString(),
+        viewModel.uiState.value.bannedTracks.size == 1)
   }
 }

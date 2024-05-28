@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.model.remote
 
+import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
@@ -44,12 +45,24 @@ class ProfileConnection(
     super.addItem(item)
     trackConnection.addItemsIfNotExist(item.topSongs)
     trackConnection.addItemsIfNotExist(item.chosenSongs)
+    trackConnection.addItemsIfNotExist(item.bannedSongs)
+    trackConnection.addItemsIfNotExist(item.likedSongs)
   }
 
   override fun addItemWithId(item: Profile) {
     super.addItemWithId(item)
     trackConnection.addItemsIfNotExist(item.topSongs)
     trackConnection.addItemsIfNotExist(item.chosenSongs)
+    trackConnection.addItemsIfNotExist(item.bannedSongs)
+    trackConnection.addItemsIfNotExist(item.likedSongs)
+  }
+
+  override fun updateItem(item: Profile) {
+    super.updateItem(item)
+    trackConnection.addItemsIfNotExist(item.topSongs)
+    trackConnection.addItemsIfNotExist(item.chosenSongs)
+    trackConnection.addItemsIfNotExist(item.bannedSongs)
+    trackConnection.addItemsIfNotExist(item.likedSongs)
   }
 
   override fun documentTransform(
@@ -62,10 +75,12 @@ class ProfileConnection(
         } else {
           val profile: Profile = item ?: Profile.from(document)!!
 
+          val likedSongsObject = document["likedSongs"]
           val topSongsObject = document["topSongs"]
           val chosenSongsObject = document["chosenSongs"]
           val bannedSongsObject = document["bannedSongs"]
 
+          val likedSongRefs = castToListOfReferences(likedSongsObject)
           val topSongRefs = castToListOfReferences(topSongsObject)
           val chosenSongRefs = castToListOfReferences(chosenSongsObject)
           val bannedSongRefs = castToListOfReferences(bannedSongsObject)
@@ -79,30 +94,57 @@ class ProfileConnection(
             val chosenSongs = documentReferencesToFlows(chosenSongRefs, trackConnection)
             val topSongs = documentReferencesToFlows(topSongRefs, trackConnection)
             val bannedSongs = documentReferencesToFlows(bannedSongRefs, trackConnection)
-
+            val likedSongs = documentReferencesToFlows(likedSongRefs, trackConnection)
+            Log.i("ProfileConnection", "flows created")
+            Log.i("ProfileConnection", "chosenSongs: $chosenSongs")
+            Log.i("ProfileConnection", "topSongs: $topSongs")
+            Log.i("ProfileConnection", "bannedSongs: $bannedSongs")
+            Log.i("ProfileConnection", "likedSongs: $likedSongs")
             val updatedProfile =
-                topSongs
-                    .combine(chosenSongs) { topSongs, chosenSongs -> Pair(topSongs, chosenSongs) }
-                    .combine(bannedSongs) { pair, bannedSongs ->
-                      profile.copy(
-                          topSongs = pair.first.getOrNull() ?: profile.topSongs,
-                          chosenSongs = pair.second.getOrNull() ?: profile.chosenSongs,
-                          bannedSongs = bannedSongs.getOrNull() ?: profile.bannedSongs)
-                    }
+                combine(topSongs, chosenSongs, bannedSongs, likedSongs) {
+                    topSongs,
+                    chosenSongs,
+                    bannedSongs,
+                    likedSongs ->
+                  Log.i("ProfileUpdate", "Combining profiles...")
+
+                  Log.i("ProfileUpdate", "Top Songs: Attempting to retrieve or default.")
+                  val updatedTopSongs = topSongs.getOrNull()
+                  Log.i("ProfileUpdate", "Chosen Songs: Attempting to retrieve or default.")
+                  val updatedChosenSongs = chosenSongs.getOrNull()
+
+                  Log.i("ProfileUpdate", "Banned Songs: Attempting to retrieve or default.")
+                  val updatedBannedSongs = bannedSongs.getOrNull()
+
+                  Log.i("ProfileUpdate", "Liked Songs: Attempting to retrieve or default.")
+                  val updatedLikedSongs = likedSongs.getOrNull()
+
+                  // Create the updated profile
+                  profile
+                      .copy(
+                          topSongs = updatedTopSongs ?: profile.topSongs,
+                          chosenSongs = updatedChosenSongs ?: profile.chosenSongs,
+                          bannedSongs = updatedBannedSongs ?: profile.bannedSongs,
+                          likedSongs = updatedLikedSongs ?: profile.likedSongs)
+                      .also { Log.e("ProfileUpdate", "Profile combined and updated.") }
+                }
 
             // would like to keep the flow without collecting it, but I don't know how to do
             // it...
             updatedProfile
                 .map { Result.success(it) }
                 .collect { result ->
-                  result.onSuccess { profile -> trySend(Result.success(profile)) }
+                  result.onSuccess { profile ->
+                    Log.i("ProfileConnection", "profile fetched")
+                    trySend(Result.success(profile))
+                  }
                 }
           }
         }
         awaitClose {}
       }
 
-  private fun documentReferencesToFlows(
+  fun documentReferencesToFlows(
       documentReferences: List<DocumentReference>?,
       trackConnection: TrackConnection
   ): Flow<Result<List<Track>>> {
@@ -110,7 +152,12 @@ class ProfileConnection(
         // map to a list of flow
         ?.map { trackRef -> trackConnection.fetchTrack(trackRef) }
         // Extract the track from Result or return null if it's a failure
-        ?.map { flow -> flow.mapNotNull { result -> result.getOrNull() } }
+        ?.map { flow ->
+          flow.mapNotNull { result ->
+            Log.i("ProfileConnection", "track fetched")
+            result.getOrNull()
+          }
+        }
         // map to a list of track
         ?.fold(flowOf(Result.success(listOf<Track>()))) { acc, track ->
           acc.combine(track) { accTracks, track -> accTracks.map { tracks -> tracks + track } }

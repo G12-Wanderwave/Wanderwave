@@ -10,5 +10,7 @@ class TrackListScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
 
   // val trackButton = onNode { hasTestTag("trackButton") }
   val trackButton = onNode { hasTestTag("trackItem") }
+  val tabs = onNode { hasTestTag("tab") }
   val searchBar = onNode { hasTestTag("searchBar") }
+  val trackListTitle = onNode { hasTestTag("trackListTitle") }
 }

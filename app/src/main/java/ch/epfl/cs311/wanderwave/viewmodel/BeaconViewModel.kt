@@ -5,18 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Beacon
-import ch.epfl.cs311.wanderwave.model.data.ListType
-import ch.epfl.cs311.wanderwave.model.data.Location
-import ch.epfl.cs311.wanderwave.model.data.Profile
-import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
+import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
-import ch.epfl.cs311.wanderwave.model.spotify.getTracksFromSpotifyPlaylist
-import ch.epfl.cs311.wanderwave.model.spotify.retrieveAndAddSubsectionFromSpotify
-import ch.epfl.cs311.wanderwave.model.spotify.retrieveChildFromSpotify
+import ch.epfl.cs311.wanderwave.model.spotify.getTotalLikedTracksFromSpotity
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 import com.spotify.protocol.types.ListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,6 +26,7 @@ class BeaconViewModel
 constructor(
     private val trackRepository: TrackRepository,
     private val beaconRepository: BeaconRepository,
+    private val profileRepository: ProfileRepository,
     private val spotifyController: SpotifyController,
     private val authenticationController: AuthenticationController
 ) : ViewModel(), SpotifySongsActions {
@@ -38,56 +34,38 @@ constructor(
   private var _uiState = MutableStateFlow(UIState())
   val uiState: StateFlow<UIState> = _uiState
 
-  private var _spotifySubsectionList = MutableStateFlow<List<ListItem>>(emptyList())
-  override val spotifySubsectionList: StateFlow<List<ListItem>> = _spotifySubsectionList
-
-  private var _childrenPlaylistTrackList = MutableStateFlow<List<ListItem>>(emptyList())
-  override val childrenPlaylistTrackList: StateFlow<List<ListItem>> = _childrenPlaylistTrackList
-
-  private val _songLists = MutableStateFlow<List<SongList>>(emptyList())
-  val songLists: StateFlow<List<SongList>> = _songLists
-
-  private val _isTopSongsListVisible = MutableStateFlow(false)
-  override val isTopSongsListVisible: StateFlow<Boolean> = _isTopSongsListVisible
-
   private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
   override val likedSongsTrackList: StateFlow<List<ListItem>> = _likedSongsTrackList
 
+  private val _nbrLikedSongs = MutableStateFlow(0)
+  override val nbrLikedSongs: StateFlow<Int> = _nbrLikedSongs
   var beaconId: String = ""
-
-  init {
-    val sampleBeacon =
-        Beacon(
-            id = "Sample ID",
-            location = Location(0.0, 0.0, "Sample Location"),
-            profileAndTrack =
-                listOf(
-                    ProfileTrackAssociation(
-                        Profile(
-                            "Sample First Name",
-                            "Sample last name",
-                            "Sample desc",
-                            0,
-                            false,
-                            null,
-                            "Sample Profile ID",
-                            "Sample Track ID"),
-                        Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
-
-    _uiState.value = UIState(beacon = sampleBeacon, isLoading = false)
-  }
 
   fun getBeaconById(id: String) {
     viewModelScope.launch {
       beaconRepository.getItem(id).collect { fetchedBeacon ->
         // the fetched beacon has a result
         fetchedBeacon.onSuccess { beacon ->
-          _uiState.value = UIState(beacon = beacon, isLoading = false)
+          _uiState.value = uiState.value.copy(beacon = beacon, isLoading = false)
         }
 
         fetchedBeacon.onFailure { exception ->
-          _uiState.value = UIState(error = exception.message, isLoading = false, beacon = null)
+          _uiState.value =
+              uiState.value.copy(error = exception.message, isLoading = false, beacon = null)
           Log.e("BeaconViewModel", "Failed to get beacon by id: $id", exception)
+        }
+      }
+    }
+
+    viewModelScope.launch {
+      val profileId = authenticationController.getUserData()!!.id
+      profileRepository.getItem(profileId).collect { fetchedProfile ->
+        fetchedProfile.onSuccess { profile ->
+          _uiState.value = uiState.value.copy(bannedTracks = profile.bannedSongs)
+        }
+        fetchedProfile.onFailure { exception ->
+          _uiState.value = uiState.value.copy(error = exception.message, isLoading = false)
+          Log.e("BeaconViewModel", "Failed to get profile by id: $profileId", exception)
         }
       }
     }
@@ -100,57 +78,29 @@ constructor(
   }
 
   // Function to add a track to a song list
-  override fun addTrackToList(listName: ListType, track: Track) {
-    addTrackToBeacon(
-        beaconId,
-        track,
-        { success ->
-          if (success) {
-            getBeaconById(beaconId)
-            Log.i("BeaconViewModel", "Track added to beacon")
-          } else {
-            Log.e("BeaconViewModel", "Failed to add track to beacon")
-          }
-        })
-  }
-  /**
-   * Get all the element of the main screen and add them to the top list
-   *
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 3.0
-   */
-  override fun retrieveAndAddSubsection() {
-    retrieveAndAddSubsectionFromSpotify(_spotifySubsectionList, spotifyController, viewModelScope)
-  }
-  /**
-   * Get all the element of the main screen and add them to the top list
-   *
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 3.0
-   */
-  override fun retrieveChild(item: ListItem) {
-    Log.d("BeaconViewModel", "retrieveChild: $item")
-    retrieveChildFromSpotify(
-        item, this._childrenPlaylistTrackList, spotifyController, viewModelScope)
+  override fun addTrackToList(track: Track) {
+
+    addTrackToBeacon(beaconId, track) { success ->
+      Log.d("BeaconViewModel", "Track added to beacon")
+      if (success) {
+        getBeaconById(beaconId)
+        Log.i("BeaconViewModel", "Track added to beacon")
+      } else {
+        Log.e("BeaconViewModel", "Failed to add track to beacon")
+      }
+    }
   }
 
-  override suspend fun getLikedTracks() {
-    getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope)
+  fun updateBeacon(beacon: Beacon) {
+    Log.i("BeaconViewModel", "updating Beacon: $beacon")
+    viewModelScope.launch {
+      beaconRepository.updateItem(beacon)
+      Log.i("BeaconViewModel", "updated Beacon: $beacon")
+    }
   }
 
-  override fun getTracksFromPlaylist(playlistId: String) {
-    getTracksFromSpotifyPlaylist(
-        playlistId, _childrenPlaylistTrackList, spotifyController, viewModelScope)
-  }
-
-  override fun emptyChildrenList() {
-    _childrenPlaylistTrackList.value = (emptyList())
-  }
-
-  fun changeChosenSongs() {
-    _isTopSongsListVisible.value = !_isTopSongsListVisible.value
+  override suspend fun getLikedTracks(page: Int) {
+    getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope, page)
   }
 
   fun selectTrack(track: Track) {
@@ -158,8 +108,17 @@ constructor(
     tracks?.let { spotifyController.playTrackList(it, track) }
   }
 
+  override suspend fun getTotalLikedTracks() {
+    _nbrLikedSongs.value = getTotalLikedTracksFromSpotity(spotifyController)
+  }
+
+  override fun clearLikedSongs() {
+    _likedSongsTrackList.value = emptyList()
+  }
+
   data class UIState(
       val beacon: Beacon? = null,
+      val bannedTracks: List<Track> = emptyList(),
       val isLoading: Boolean = true,
       val error: String? = null
   )
