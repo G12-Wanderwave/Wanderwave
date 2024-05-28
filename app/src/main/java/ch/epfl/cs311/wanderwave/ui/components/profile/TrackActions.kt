@@ -17,6 +17,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
 /**
  * Dialog composable that allows the user to add a new track by entering the track ID, title, and
@@ -109,7 +110,8 @@ fun SongsListDisplay(
     onAddTrack: (Track) -> Unit,
     onSelectTrack: (Track) -> Unit,
     canAddSong: Boolean = true,
-    viewModelName: viewModelType = viewModelType.NULL
+    viewModelName: viewModelType = viewModelType.NULL,
+    profileViewModel: ProfileViewModel
 ) {
   songLists?.let { songList ->
     TrackList(
@@ -119,6 +121,7 @@ fun SongsListDisplay(
         onAddTrack = onAddTrack,
         canAddSong = canAddSong,
         navActions = navigationActions,
-        viewModelName = viewModelName)
+        viewModelName = viewModelName,
+        profileViewModel = profileViewModel,)
   }
 }

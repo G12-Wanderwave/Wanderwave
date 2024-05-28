@@ -56,6 +56,11 @@ constructor(
   private val _nbrLikedSongs = MutableStateFlow(0)
   override val nbrLikedSongs: StateFlow<Int> = _nbrLikedSongs
 
+  private val _wanderwaveLikedTracks = MutableStateFlow<List<Track>>(emptyList())
+  val wanderwaveLikedTracks: StateFlow<List<Track>> = _wanderwaveLikedTracks
+
+
+
   // Function to add a track to a song list
   override fun addTrackToList(track: Track) {
     val newTrack =
@@ -128,6 +133,26 @@ constructor(
   /** Get the total number of liked tracks of the user. */
   override suspend fun getTotalLikedTracks() {
     _nbrLikedSongs.value = getTotalLikedTracksFromSpotity(spotifyController)
+  }
+
+  /**
+   * Like a song and add it to the liked songs list.
+   *
+   * @param track the track to like
+   */
+  fun likeTrack(track: Track) {
+    // Check if song is already liked
+    if (!wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value += track
+  }
+
+  /**
+   * Unlike a song and remove it from the liked songs list.
+   *
+   * @param track the track to unlike
+   */
+  fun unlikeTrack(track: Track) {
+    // Check if song was not liked
+    if (wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value -= track
   }
 
   data class UIState(

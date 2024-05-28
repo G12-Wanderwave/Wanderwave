@@ -90,8 +90,19 @@ constructor(
       } else {
         Log.e("BeaconViewModel", "Failed to add track to beacon")
       }
+    } }
+
+
+  fun updateBeacon(beacon: Beacon) {
+    Log.i("BeaconViewModel", "updating Beacon: $beacon")
+    viewModelScope.launch {
+      beaconRepository.updateItem(beacon)
+      Log.i("BeaconViewModel", "updated Beacon: $beacon")
     }
   }
+
+
+
 
   override suspend fun getLikedTracks(page: Int) {
     getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope, page)

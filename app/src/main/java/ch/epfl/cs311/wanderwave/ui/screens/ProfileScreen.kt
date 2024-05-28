@@ -95,7 +95,7 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel, on
             onAddTrack = { track -> viewModel.addTrackToList(track) },
             onSelectTrack = { track -> viewModel.selectTrack(track) },
             viewModelName = viewModelType.PROFILE,
-        )
+            profileViewModel = viewModel)
       }
 }
 /**

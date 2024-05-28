@@ -64,6 +64,7 @@ fun ProfileViewOnlyScreen(
               {},
               onSelectTrack = { viewModel.selectTrack(it) },
               canAddSong = false,
+              profileViewModel = viewModel,
           )
         }
   }

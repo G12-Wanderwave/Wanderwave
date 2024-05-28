@@ -2,6 +2,7 @@ package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
+import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
@@ -23,6 +24,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -60,6 +62,60 @@ class ProfileViewModelTest {
   @After
   fun clearMocks() {
     clearAllMocks() // Clear all MockK mocks
+  }
+
+  @Test
+  fun testLikeTrack() = runBlockingTest {
+    val track = Track("id", "title", "artist")
+    val track2 = Track("id2", "title2", "artist2")
+    assertTrue(viewModel.wanderwaveLikedTracks.value.isEmpty())
+    viewModel.likeTrack(track)
+    viewModel.likeTrack(track2)
+    assertFalse(viewModel.wanderwaveLikedTracks.value.isEmpty())
+    viewModel.likeTrack(track)
+    viewModel.likeTrack(track2)
+    assertFalse(viewModel.wanderwaveLikedTracks.value.isEmpty())
+  }
+
+  @Test
+  fun testUnlikeTrack() = runBlockingTest {
+    val track = Track("id", "title", "artist")
+    val track2 = Track("id2", "title2", "artist2")
+    viewModel.likeTrack(track)
+    viewModel.likeTrack(track2)
+    assertFalse(viewModel.wanderwaveLikedTracks.value.isEmpty())
+    viewModel.unlikeTrack(track)
+    viewModel.unlikeTrack(track2)
+    assertTrue(viewModel.wanderwaveLikedTracks.value.isEmpty())
+    viewModel.unlikeTrack(track)
+    viewModel.unlikeTrack(track2)
+    assertTrue(viewModel.wanderwaveLikedTracks.value.isEmpty())
+  }
+
+
+
+  @Test
+  fun testAddTrackToList() = runBlockingTest {
+    // Define a new track
+    val newTrack = Track("Some Track ID", "Track Title", "Artist Name")
+    val expectedTrack = Track("spotify:track:Some Track ID", "Track Title", "Artist Name")
+
+    // Ensure song lists are initially empty
+    assertTrue(viewModel.songLists.value.isEmpty())
+
+    // Call createSpecificSongList to initialize a list
+
+    // Add track to "TOP SONGS"
+    viewModel.addTrackToList( newTrack)
+
+    // Get the updated song list
+    val songLists = viewModel.songLists.value
+    assertFalse("Song list should not be empty after adding a track", songLists.isEmpty())
+
+    // Check if the track was added correctly
+
+    assertTrue(
+        "Song list should contain the newly added track", songLists.contains(expectedTrack))
   }
 
   @Test

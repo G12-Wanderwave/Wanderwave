@@ -26,12 +26,14 @@ import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.RemovableTrackList
 import ch.epfl.cs311.wanderwave.ui.components.tracklist.TrackList
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
 @Composable
 fun TrackListScreen(
     navActions: NavigationActions,
     viewModel: TrackListViewModel = hiltViewModel(),
+    profileViewModel: ProfileViewModel,
     online: Boolean
 ) {
 
@@ -56,7 +58,7 @@ fun TrackListScreen(
             )
       }
     }
-    TabContent1(navActions, viewModel, selectedTabIndex)
+    TabContent1(navActions, viewModel, profileViewModel, selectedTabIndex)
   }
 }
 /**
@@ -72,6 +74,7 @@ fun TrackListScreen(
 fun TabContent1(
     navActions: NavigationActions,
     viewModel: TrackListViewModel = hiltViewModel(),
+    profileViewModel: ProfileViewModel,
     selectedTabIndex: Int
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -104,7 +107,8 @@ fun TabContent1(
             onSelectTrack = viewModel::playTrack,
             navActions = navActions,
             viewModelName = viewModelType.TRACKLIST,
-        )
+            profileViewModel = profileViewModel,
+            canLike = true)
       }
       1 -> {
         TrackList(
@@ -117,7 +121,7 @@ fun TabContent1(
             onSelectTrack = viewModel::playTrack,
             navActions = navActions,
             viewModelName = viewModelType.TRACKLIST,
-        )
+            profileViewModel = profileViewModel)
       }
       2 -> {
         RemovableTrackList(
@@ -126,7 +130,7 @@ fun TabContent1(
             onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
             onSelectTrack = viewModel::playTrack,
             onRemoveTrack = viewModel::removeTrackFromBanList,
-        )
+            profileViewModel = profileViewModel)
       }
     }
   }
