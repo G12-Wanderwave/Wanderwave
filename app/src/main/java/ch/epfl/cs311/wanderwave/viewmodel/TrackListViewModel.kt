@@ -54,7 +54,18 @@ constructor(
                         spotifyController.recentlyPlayedTracks
                             .value) // TODO:modify for the recnetly played tracks
         1 -> loadRecentlyAddedTracks() // TODO: modify here for the liked tracks
-        2 -> loadRecentlyAddedTracks() // TODO: modify here for the banned tracks
+        2 -> loadRetrievedTracks() // TODO: modify here for the banned tracks
+      }
+    }
+  }
+
+  fun loadRetrievedTracks() {
+    viewModelScope.launch {
+      val profileId = authenticationController.getUserData()!!.id
+      profileRepository.getItem(profileId).collect { fetchedProfile ->
+        fetchedProfile.onSuccess { profile ->
+          _uiState.value = uiState.value.copy(retrievedTrack = profile.chosenSongs)
+        }
       }
     }
   }
@@ -67,7 +78,7 @@ constructor(
           trackRecords.mapNotNull {
             repository.getItem(it.trackId).firstOrNull()?.getOrElse { null }
           }
-        Log.d("TrackListViewModel", "loadRecentlyAddedTracks: $trackDetails")
+      Log.d("TrackListViewModel", "loadRecentlyAddedTracks: $trackDetails")
       _uiState.value = _uiState.value.copy(tracks = trackDetails, loading = false)
     }
   }
@@ -172,6 +183,7 @@ constructor(
 
   data class UiState(
       val tracks: List<Track> = listOf(),
+      val retrievedTrack: List<Track> = listOf(),
       val bannedTracks: List<Track> = emptyList(),
       val loading: Boolean = false,
       val expanded: Boolean = false,

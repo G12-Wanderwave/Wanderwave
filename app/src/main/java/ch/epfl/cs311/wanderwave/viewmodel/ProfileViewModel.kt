@@ -52,11 +52,11 @@ constructor(
   private val _nbrLikedSongs = MutableStateFlow(0)
   override val nbrLikedSongs: StateFlow<Int> = _nbrLikedSongs
 
-    private val _wanderwaveLikedTracks = MutableStateFlow<List<Track>>(emptyList())
-    val wanderwaveLikedTracks: StateFlow<List<Track>> = _wanderwaveLikedTracks
+  private val _wanderwaveLikedTracks = MutableStateFlow<List<Track>>(emptyList())
+  val wanderwaveLikedTracks: StateFlow<List<Track>> = _wanderwaveLikedTracks
 
-    private val _retrievedSongs = MutableStateFlow<List<Track>>(emptyList())
-    val retrievedSongs: StateFlow<List<Track>> = _retrievedSongs
+  private val _retrievedSongs = MutableStateFlow<List<Track>>(emptyList())
+  val retrievedSongs: StateFlow<List<Track>> = _retrievedSongs
 
   // Function to add a track to a song list
   override fun addTrackToList(track: Track) {
@@ -155,16 +155,15 @@ constructor(
     if (wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value -= track
   }
 
-    fun getRetrievedSongs() {
-        viewModelScope.launch {
-            val profileId = authenticationController.getUserData()!!.id
-            repository.getItem(profileId).collect { fetchedProfile ->
-                fetchedProfile.onSuccess { profile ->
-                    _retrievedSongs.value = profile.retrievedSongs
-                }
-            }
-        }
+  fun getRetrievedSongs() {
+    viewModelScope.launch {
+      val profileId = authenticationController.getUserData()!!.id
+      repository.getItem(profileId).collect { fetchedProfile ->
+        fetchedProfile.onSuccess { profile -> _retrievedSongs.value = profile.retrievedSongs }
+      }
     }
+  }
+
   data class UIState(
       val profile: Profile? = null,
       val isLoading: Boolean = true,

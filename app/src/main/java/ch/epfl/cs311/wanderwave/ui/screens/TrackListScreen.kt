@@ -81,10 +81,7 @@ fun TabContent1(
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   var searchQuery by remember { mutableStateOf("") }
-val retrievedSongs by profileViewModel.retrievedSongs.collectAsStateWithLifecycle()
-  LaunchedEffect(Unit) {
-      viewModel.updateBannedSongs()
-  }
+  LaunchedEffect(Unit) { viewModel.updateBannedSongs() }
 
   Column(modifier = Modifier.testTag("trackListScreen")) {
     TextField(
@@ -95,10 +92,9 @@ val retrievedSongs by profileViewModel.retrievedSongs.collectAsStateWithLifecycl
         },
         label = { Text("Search Tracks") },
         modifier =
-        Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .testTag("searchBar") // Adding a test tag for the search bar
+            Modifier.fillMaxWidth()
+                .padding(16.dp)
+                .testTag("searchBar") // Adding a test tag for the search bar
         )
     when (selectedTabIndex) {
       0 -> {
@@ -131,7 +127,7 @@ val retrievedSongs by profileViewModel.retrievedSongs.collectAsStateWithLifecycl
       }
       2 -> {
         RemovableTrackList(
-            tracks = uiState.tracks,
+            tracks = uiState.retrievedTrack,
             title = stringResource(R.string.banned_tracks),
             onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
             onSelectTrack = viewModel::playTrack,

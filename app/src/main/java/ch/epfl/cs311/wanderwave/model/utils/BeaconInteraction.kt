@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.model.utils
 
-import android.util.Log
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
@@ -15,8 +14,7 @@ fun addTrackToBeacon(
     onComplete: (Boolean) -> Unit,
 ) {
   // Call the BeaconConnection's addTrackToBeacon with the provided beaconId and trac
-  val correctTrack = track.copy(id = "spotify:track:" + track.id)
-  trackRepository.addItemsIfNotExist(listOf(correctTrack))
+  trackRepository.addItemsIfNotExist(listOf(track))
   beaconRepository.addTrackToBeacon(
-      beaconId, correctTrack, authenticationController.getUserData()!!.id, onComplete)
+      beaconId, track, authenticationController.getUserData()!!.id, onComplete)
 }
