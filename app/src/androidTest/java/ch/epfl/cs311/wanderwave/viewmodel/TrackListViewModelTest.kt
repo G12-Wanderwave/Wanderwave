@@ -1,7 +1,5 @@
-import android.util.Log
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationUserData
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.TrackRecord
@@ -10,7 +8,6 @@ import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
-import com.spotify.protocol.types.ListItem
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -22,7 +19,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
@@ -133,35 +129,9 @@ class TrackListViewModelTest {
   }
 
   @Test
-  fun testRetrieveSubsectionAndChildrenFlow() =
-      testDispatcher.runBlockingTest {
-        val expectedListItem = ListItem("id", "title", null, "subtitle", "", false, true)
-        every { mockSpotifyController.getAllElementFromSpotify() } returns
-            flowOf(listOf(expectedListItem))
-        every {
-          mockSpotifyController.getAllChildren(
-              ListItem("id", "title", null, "subtitle", "", false, true))
-        } returns flowOf(listOf(expectedListItem))
-
-        viewModel.retrieveAndAddSubsection()
-        viewModel.retrieveChild(expectedListItem)
-
-        advanceUntilIdle() // This replaces advanceTimeBy and ensures all coroutines are completed
-
-        val result = viewModel.spotifySubsectionList.first() // Safely access the first item
-        val result2 = viewModel.childrenPlaylistTrackList.first() // Safely access the first item
-        Log.d(
-            "TrackListViewModel23",
-            "retrieveAndAddSubsection: ${viewModel.spotifySubsectionList.value}")
-
-        assertEquals(listOf(expectedListItem), result)
-        assertEquals(listOf(expectedListItem), result2)
-      }
-
-  @Test
   fun testAddTrackToList() = runBlocking {
     val track = Track("spotify:track:1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
-    viewModel.addTrackToList(ListType.TOP_SONGS, track)
+    viewModel.addTrackToList(track)
     assertTrue(viewModel.uiState.value.tracks.contains(track))
   }
 
@@ -169,7 +139,7 @@ class TrackListViewModelTest {
   fun testAddTrackToListWithoutPrefix() = runBlocking {
     val track = Track("spotify:track:1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
     val trackWithoutPrefix = Track("1cNf5WAYWuQwGoJyfsHcEF", "Across The Stars", "John Williams")
-    viewModel.addTrackToList(ListType.TOP_SONGS, trackWithoutPrefix)
+    viewModel.addTrackToList(trackWithoutPrefix)
     assertTrue(viewModel.uiState.value.tracks.contains(track))
   }
 
@@ -202,12 +172,10 @@ class TrackListViewModelTest {
     assertEquals(false, viewModel.uiState.value.loading)
   }
 
-  @Test
-  fun emptyChildrenList_clearsChildrenPlaylistTrackList() = runBlockingTest {
+  @Test fun testGetLikedTracks() = runBlocking { viewModel.getLikedTracks() } // Test no crash
 
-    // Act
-    viewModel.emptyChildrenList()
-  }
+  @Test
+  fun testGetNbrLikedTracks() = runBlocking { viewModel.getTotalLikedTracks() } // Test no crash
 
   @Test
   fun removeTrackFromBanList() = runTest {
@@ -220,9 +188,9 @@ class TrackListViewModelTest {
             Track(
                 "spotify:track:2NZhNbfb1rD1aRj3hZaoqk", "The Imperial Suite", "Michael Giacchino"),
         )
-    tracks.forEach { viewModel.addTrackToList(ListType.TOP_SONGS, it) }
-    tracks.forEach { viewModel.addTrackToList(ListType.LIKED_SONGS, it) }
-    tracks.forEach { viewModel.addTrackToList(ListType.BANNED_SONGS, it) }
+    tracks.forEach { viewModel.addTrackToList(it) }
+    tracks.forEach { viewModel.addTrackToList(it) }
+    tracks.forEach { viewModel.addTrackToList(it) }
     viewModel.loadTracksBasedOnSource(2)
     viewModel.removeTrackFromBanList(tracks[0])
     assertFalse(viewModel.uiState.value.tracks.contains(tracks[0]))

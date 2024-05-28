@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -70,6 +71,7 @@ fun TrackListScreen(
  * @author Menzo Bouaissi
  * @since 4.0
  */
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun TabContent1(
     navActions: NavigationActions,
@@ -103,6 +105,7 @@ fun TabContent1(
                   uiState.bannedTracks.any { it.id == track.id }.not()
                 },
             title = stringResource(R.string.recently_added_tracks),
+            canAddSong = false,
             onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
             onSelectTrack = viewModel::playTrack,
             navActions = navActions,
@@ -113,7 +116,7 @@ fun TabContent1(
       1 -> {
         TrackList(
             tracks =
-                uiState.tracks.filter { track ->
+                profileViewModel.wanderwaveLikedTracks.value.filter { track ->
                   uiState.bannedTracks.any { it.id == track.id }.not()
                 },
             title = stringResource(R.string.liked_tracks),

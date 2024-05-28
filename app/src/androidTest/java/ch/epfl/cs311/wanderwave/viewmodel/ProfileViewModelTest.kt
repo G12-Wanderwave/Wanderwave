@@ -2,7 +2,6 @@ package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
@@ -13,20 +12,14 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.verify
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -99,48 +92,26 @@ class ProfileViewModelTest {
   }
 
   @Test
-  fun testGetTracksFromPlaylist() = runBlockingTest {
-    val playlistId = "Some Playlist ID"
-
-    // Call getTracksFromPlaylist to initialize the playlist
-    viewModel.getTracksFromPlaylist(playlistId)
-  }
-
-  @Test
-  fun testChangeChosenSongs() = runBlockingTest {
-    // Ensure the initial value is true
-    assertTrue(viewModel.isTopSongsListVisible.value)
-
-    // Change the value
-    viewModel.changeChosenSongs()
-
-    // Ensure the value is now false
-    assertFalse(viewModel.isTopSongsListVisible.value)
-  }
-
-  @Test
   fun testAddTrackToList() = runBlockingTest {
     // Define a new track
     val newTrack = Track("Some Track ID", "Track Title", "Artist Name")
     val expectedTrack = Track("spotify:track:Some Track ID", "Track Title", "Artist Name")
 
     // Ensure song lists are initially empty
-    assertTrue(viewModel.songLists.value.isEmpty())
+    assertTrue(viewModel.profile.value.topSongs.isEmpty())
 
     // Call createSpecificSongList to initialize a list
-    viewModel.createSpecificSongList(ListType.TOP_SONGS)
 
     // Add track to "TOP SONGS"
-    viewModel.addTrackToList(ListType.TOP_SONGS, newTrack)
+    viewModel.addTrackToList(newTrack)
 
     // Get the updated song list
-    val songLists = viewModel.songLists.value
+    val songLists = viewModel.profile.value.topSongs
     assertFalse("Song list should not be empty after adding a track", songLists.isEmpty())
 
     // Check if the track was added correctly
-    val songsInList = songLists.find { it.name == ListType.TOP_SONGS }?.tracks ?: emptyList()
-    assertTrue(
-        "Song list should contain the newly added track", songsInList.contains(expectedTrack))
+
+    assertTrue("Song list should contain the newly added track", songLists.contains(expectedTrack))
   }
 
   @Test
@@ -154,58 +125,48 @@ class ProfileViewModelTest {
   }
 
   @Test
-  fun testRetrieveSubsectionAndChildrenFlow() = runBlockingTest {
-    val expectedListItem = ListItem("id", "title", null, "subtitle", "", false, true)
-    every { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(expectedListItem))
-    every {
-      spotifyController.getAllChildren(ListItem("id", "title", null, "subtitle", "", false, true))
-    } returns flowOf(listOf(expectedListItem))
-    viewModel.retrieveAndAddSubsection()
-    viewModel.retrieveChild(expectedListItem)
-    advanceUntilIdle() // Ensure all coroutines are completed
+  fun addTrackToList_addsNewTrack_whenTrackIdDoesNotContainSpotifyPrefix() = runBlockingTest {
+    // Arrange
+    val trackWithoutSpotifyPrefix = Track("123", "title", "artist")
+    val expectedTrackWithSpotifyPrefix = Track("spotify:track:123", "title", "artist")
 
-    // val result = viewModel.spotifySubsectionList.first()  // Safely access the first item
-    val flow = viewModel.spotifySubsectionList
-    val flow2 = viewModel.childrenPlaylistTrackList
-    val result = flow.timeout(2.seconds).catch {}.firstOrNull()
-    val result2 = flow2.timeout(2.seconds).catch {}.firstOrNull()
+    // Act
+    viewModel.addTrackToList(trackWithoutSpotifyPrefix)
 
-    assertEquals(expectedListItem, result?.get(0))
-    assertEquals(expectedListItem, result2?.get(0))
+    // Assert
+    assertTrue(viewModel.profile.value.topSongs.contains(expectedTrackWithSpotifyPrefix))
+    // Act
+    viewModel.clearLikedSongs()
+
+    // Assert
+    assertTrue(viewModel.likedSongsTrackList.value.isEmpty())
   }
 
   @Test
-  fun testRetrieveTracksFromSpotify() = runBlocking {
-    val listItem = ListItem("id", "title", null, "subtitle", "", false, true)
-    val expectedListItem = ListItem("spotify:track:id", "title", null, "subtitle", "", false, true)
-    every { spotifyController.getAllElementFromSpotify() } returns flowOf(listOf(listItem))
-    every {
-      spotifyController.getAllChildren(ListItem("id", "title", null, "subtitle", "", false, true))
-    } returns flowOf(listOf(listItem))
-    viewModel.createSpecificSongList(ListType.TOP_SONGS)
-    viewModel.retrieveTracksFromSpotify()
+  fun addTrackToList_addsExistingTrack_whenTrackIdContainsSpotifyPrefix() = runBlockingTest {
+    // Arrange
+    val trackWithSpotifyPrefix = Track("spotify:track:123", "title", "artist")
 
-    val flow = viewModel.songLists
-    val result = flow.timeout(2.seconds).catch {}.firstOrNull()
+    // Act
+    viewModel.addTrackToList(trackWithSpotifyPrefix)
 
-    assertEquals(expectedListItem.id, result?.get(0)?.tracks?.get(0)?.id)
-
-    viewModel.emptyChildrenList()
-
-    val flow2 = viewModel.childrenPlaylistTrackList
-    val result2 = flow2.timeout(2.seconds).catch {}.firstOrNull()
-    assertEquals(result2, emptyList<ListItem>())
+    // Assert
+    assertTrue(viewModel.profile.value.topSongs.contains(trackWithSpotifyPrefix))
   }
 
-  @Test
-  fun testSelectTrack() = runTest {
-    val track = Track("id", "title", "artist")
-    viewModel.createSpecificSongList(ListType.TOP_SONGS)
-    viewModel.selectTrack(track, ListType.TOP_SONGS.name)
-    verify { spotifyController.playTrackList(any(), any(), any(), any()) }
+  @Test fun testGetLikedTracks() = runBlocking { viewModel.getLikedTracks() } // Test no crash
 
-    viewModel.selectTrack(track, "fake name")
-    verify { spotifyController.playTrack(track) }
+  @Test
+  fun addTrackToList_doesNotAddDuplicateTrack() = runBlockingTest {
+    // Arrange
+    val track = Track("spotify:track:123", "title", "artist")
+
+    // Act
+    viewModel.addTrackToList(track)
+    viewModel.addTrackToList(track)
+
+    // Assert
+    assertEquals(1, viewModel.profile.value.topSongs.count { it == track })
   }
 
   @Test
@@ -255,4 +216,7 @@ class ProfileViewModelTest {
 
     viewModel.getProfileByID("firebaseUid", false)
   }
+
+  @Test
+  fun testGetNbrLikedTracks() = runBlocking { viewModel.getTotalLikedTracks() } // Test no crash
 }

@@ -45,12 +45,24 @@ class ProfileConnection(
     super.addItem(item)
     trackConnection.addItemsIfNotExist(item.topSongs)
     trackConnection.addItemsIfNotExist(item.chosenSongs)
+    trackConnection.addItemsIfNotExist(item.bannedSongs)
+    trackConnection.addItemsIfNotExist(item.likedSongs)
   }
 
   override fun addItemWithId(item: Profile) {
     super.addItemWithId(item)
     trackConnection.addItemsIfNotExist(item.topSongs)
     trackConnection.addItemsIfNotExist(item.chosenSongs)
+    trackConnection.addItemsIfNotExist(item.bannedSongs)
+    trackConnection.addItemsIfNotExist(item.likedSongs)
+  }
+
+  override fun updateItem(item: Profile) {
+    super.updateItem(item)
+    trackConnection.addItemsIfNotExist(item.topSongs)
+    trackConnection.addItemsIfNotExist(item.chosenSongs)
+    trackConnection.addItemsIfNotExist(item.bannedSongs)
+    trackConnection.addItemsIfNotExist(item.likedSongs)
   }
 
   override fun documentTransform(
