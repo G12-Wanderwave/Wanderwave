@@ -38,8 +38,7 @@ constructor(
     return recentlyPlayedDao
         .getRecentlyPlayed()
         .flatMapLatest { recentlyPlayed ->
-          val flows: List<Flow<Result<Track>>> =
-              recentlyPlayed.map { trackRepository.getItem(it.trackId) }
+          val flows = recentlyPlayed.map { trackRepository.getItem(it.trackId) }
           combine(flows) { it.mapNotNull { it.getOrNull() }.toList() }
         }
         .flowOn(ioDispatcher)
