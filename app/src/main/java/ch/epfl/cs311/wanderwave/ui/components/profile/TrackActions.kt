@@ -122,6 +122,7 @@ fun SongsListDisplay(
         canAddSong = canAddSong,
         navActions = navigationActions,
         viewModelName = viewModelName,
-        profileViewModel = profileViewModel,)
+        profileViewModel = profileViewModel,
+    )
   }
 }

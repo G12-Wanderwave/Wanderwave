@@ -59,8 +59,6 @@ constructor(
   private val _wanderwaveLikedTracks = MutableStateFlow<List<Track>>(emptyList())
   val wanderwaveLikedTracks: StateFlow<List<Track>> = _wanderwaveLikedTracks
 
-
-
   // Function to add a track to a song list
   override fun addTrackToList(track: Track) {
     val newTrack =

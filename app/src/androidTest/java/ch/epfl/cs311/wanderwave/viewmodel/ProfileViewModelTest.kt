@@ -2,7 +2,6 @@ package ch.epfl.cs311.wanderwave.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.remote.ProfileConnection
@@ -92,8 +91,6 @@ class ProfileViewModelTest {
     assertTrue(viewModel.wanderwaveLikedTracks.value.isEmpty())
   }
 
-
-
   @Test
   fun testAddTrackToList() = runBlockingTest {
     // Define a new track
@@ -106,7 +103,7 @@ class ProfileViewModelTest {
     // Call createSpecificSongList to initialize a list
 
     // Add track to "TOP SONGS"
-    viewModel.addTrackToList( newTrack)
+    viewModel.addTrackToList(newTrack)
 
     // Get the updated song list
     val songLists = viewModel.songLists.value
@@ -114,8 +111,7 @@ class ProfileViewModelTest {
 
     // Check if the track was added correctly
 
-    assertTrue(
-        "Song list should contain the newly added track", songLists.contains(expectedTrack))
+    assertTrue("Song list should contain the newly added track", songLists.contains(expectedTrack))
   }
 
   @Test
