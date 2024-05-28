@@ -1,6 +1,11 @@
 package ch.epfl.cs311.wanderwave.model
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Base64
+import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationUserData
 import ch.epfl.cs311.wanderwave.model.repository.AuthTokenRepository
@@ -13,7 +18,11 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.slot
+import io.mockk.unmockkStatic
 import io.mockk.verify
+import java.io.ByteArrayOutputStream
 import java.net.URL
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,6 +34,9 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.ResponseBody
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -259,5 +271,154 @@ class AuthenticationControllerTest {
     val result = authenticationController.makeApiRequest(testUrl)
 
     assertEquals("FAILURE", result)
+  }
+
+  @Test
+  fun testUploadPlaylistImage2() = runBlocking {
+    // Arrange
+    val mockContext: Context = mockk(relaxed = true)
+    val playlistId = "testPlaylistId"
+    val mockCall: Call = mockk(relaxed = true)
+    val mockResponse: Response = mockk(relaxed = true)
+
+    coEvery { mockTokenRepository.getAuthToken(any()) } returns "testToken"
+    every { mockHttpClient.newCall(any()) } returns mockCall
+    every { mockCall.execute() } returns mockResponse
+    every { mockResponse.isSuccessful } returns true
+
+    // Act
+    authenticationController.uploadPlaylistImage(mockContext, playlistId)
+  }
+
+  @Test
+  fun testUploadPlaylistImage() = runBlocking {
+    // Arrange
+    val mockContext: Context = mockk(relaxed = true)
+    val playlistId = "testPlaylistId"
+    val mockBitmap: Bitmap = mockk(relaxed = true)
+    val mockCall: Call = mockk()
+    val mockResponse: Response = mockk()
+    val mockResponseBody: ResponseBody = mockk()
+
+    coEvery { mockTokenRepository.getAuthToken(any()) } returns "testToken"
+    every { mockHttpClient.newCall(any()) } returns mockCall
+    every { mockCall.execute() } returns mockResponse
+    every { mockResponse.isSuccessful } returns true
+    every { mockResponse.body } returns mockResponseBody
+    every { mockResponseBody.string() } returns ""
+
+    mockkStatic(BitmapFactory::class)
+    every { BitmapFactory.decodeResource(mockContext.resources, R.drawable.ic_logo) } returns
+        mockBitmap
+
+    mockkStatic(Base64::class)
+    val outputStream = ByteArrayOutputStream()
+    every { mockBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream) } returns true
+    val imageBytes = outputStream.toByteArray()
+    every { Base64.encodeToString(imageBytes, Base64.NO_WRAP) } returns "base64ImageString"
+
+    val requestSlot = slot<Request>()
+
+    // Act
+    authenticationController.uploadPlaylistImage(mockContext, playlistId)
+
+    // Assert
+    verify { mockHttpClient.newCall(capture(requestSlot)) }
+    val request = requestSlot.captured
+
+    // Cleanup
+    unmockkStatic(BitmapFactory::class)
+    unmockkStatic(Base64::class)
+  }
+
+  @Test
+  fun testUploadPlaylistImage_TokenRefresh() = runBlocking {
+    // Arrange
+    val mockContext: Context = mockk(relaxed = true)
+    val playlistId = "testPlaylistId"
+    val mockBitmap: Bitmap = mockk(relaxed = true)
+    val mockCall: Call = mockk()
+    val mockResponse: Response = mockk()
+    val mockRetryResponse: Response = mockk()
+    val mockResponseBody: ResponseBody = mockk()
+    val mockRetryResponseBody: ResponseBody = mockk()
+
+    coEvery { mockTokenRepository.getAuthToken(any()) } returns "expiredToken" andThen "newToken"
+    every { mockHttpClient.newCall(any()) } returns mockCall
+    every { mockCall.execute() } returns mockResponse andThen mockRetryResponse
+    every { mockResponse.isSuccessful } returns false
+    every { mockResponse.code } returns 401
+    every { mockRetryResponse.isSuccessful } returns true
+    every { mockResponse.body } returns mockResponseBody
+    every { mockResponseBody.string() } returns ""
+    every { mockRetryResponse.body } returns mockRetryResponseBody
+    every { mockRetryResponseBody.string() } returns ""
+
+    mockkStatic(BitmapFactory::class)
+    every { BitmapFactory.decodeResource(mockContext.resources, R.drawable.ic_logo) } returns
+        mockBitmap
+
+    mockkStatic(Base64::class)
+    val outputStream = ByteArrayOutputStream()
+    every { mockBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream) } returns true
+    val imageBytes = outputStream.toByteArray()
+    every { Base64.encodeToString(imageBytes, Base64.NO_WRAP) } returns "base64ImageString"
+
+    coEvery { authenticationController.refreshSpotifyToken() } returns true
+
+    val requestSlot = slot<Request>()
+
+    // Act
+    authenticationController.uploadPlaylistImage(mockContext, playlistId)
+
+    // Assert
+    verify { mockHttpClient.newCall(capture(requestSlot)) }
+    val request = requestSlot.captured
+
+    // Cleanup
+    unmockkStatic(BitmapFactory::class)
+    unmockkStatic(Base64::class)
+  }
+
+  @Test
+  fun testUploadPlaylistImage_ErrorHandling() = runBlocking {
+    // Arrange
+    val mockContext: Context = mockk(relaxed = true)
+    val playlistId = "testPlaylistId"
+    val mockBitmap: Bitmap = mockk(relaxed = true)
+    val mockCall: Call = mockk()
+    val mockResponse: Response = mockk()
+    val mockResponseBody: ResponseBody = mockk()
+
+    coEvery { mockTokenRepository.getAuthToken(any()) } returns "testToken"
+    every { mockHttpClient.newCall(any()) } returns mockCall
+    every { mockCall.execute() } returns mockResponse
+    every { mockResponse.isSuccessful } returns false
+    every { mockResponse.code } returns 500
+    every { mockResponse.body } returns mockResponseBody
+    every { mockResponseBody.string() } returns ""
+
+    mockkStatic(BitmapFactory::class)
+    every { BitmapFactory.decodeResource(mockContext.resources, R.drawable.ic_logo) } returns
+        mockBitmap
+
+    mockkStatic(Base64::class)
+    val outputStream = ByteArrayOutputStream()
+    every { mockBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream) } returns true
+    val imageBytes = outputStream.toByteArray()
+    every { Base64.encodeToString(imageBytes, Base64.NO_WRAP) } returns "base64ImageString"
+
+    val requestSlot = slot<Request>()
+
+    // Act
+    authenticationController.uploadPlaylistImage(mockContext, playlistId)
+
+    // Assert
+    verify { mockHttpClient.newCall(capture(requestSlot)) }
+    val request = requestSlot.captured
+
+    // Cleanup
+    unmockkStatic(BitmapFactory::class)
+    unmockkStatic(Base64::class)
   }
 }

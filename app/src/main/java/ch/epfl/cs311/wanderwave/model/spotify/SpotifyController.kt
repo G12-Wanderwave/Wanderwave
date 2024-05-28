@@ -43,7 +43,6 @@ constructor(
     private val context: Context,
     private val authenticationController: AuthenticationController
 ) {
-
   private val PLAYLIST_NAME = "Wanderwave"
   private val PLAYLIST_DESCRIPTION = "Liked songs from Wanderwave"
   private val CLIENT_ID = BuildConfig.SPOTIFY_CLIENT_ID
@@ -85,11 +84,6 @@ constructor(
   }
 
   suspend fun getAllPlaylists(): List<ListItem> {
-
-    val url1 = "https://api.spotify.com/v1/me"
-    Log.d("SpotifyController", spotifyGetFromURL(url1))
-
-    Log.d("SpotifyController", "Getting all playlists")
     val url = "https://api.spotify.com/v1/me/playlists"
     val playlists = spotifyGetFromURL(url)
     val jsonObject = JSONObject(playlists)
@@ -136,7 +130,7 @@ constructor(
     return playlistId
   }
 
-  private suspend fun getCurrentUserId(): String {
+  suspend fun getCurrentUserId(): String {
     val url = "https://api.spotify.com/v1/me"
     val response = authenticationController.makeApiRequest(URL(url))
     if (response == "FAILURE") {
@@ -507,7 +501,15 @@ constructor(
   // https://developer.spotify.com/documentation/web-api
   suspend fun spotifyGetFromURL(url: String): String {
     var answer: String
-    withContext(Dispatchers.IO) { answer = authenticationController.makeApiRequest(URL(url)) }
+    withContext(Dispatchers.IO) {
+      val urlString =
+          if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            "http://$url"
+          } else {
+            url
+          }
+      answer = authenticationController.makeApiRequest(URL(urlString))
+    }
     return answer
   }
 

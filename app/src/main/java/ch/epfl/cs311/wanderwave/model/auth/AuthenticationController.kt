@@ -9,7 +9,6 @@ import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.repository.AuthTokenRepository
 import com.google.firebase.auth.FirebaseAuth
 import java.io.ByteArrayOutputStream
-import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -180,13 +179,6 @@ constructor(
           Log.d("AuthenticationController", "Response code: $responseCode")
           Log.d("AuthenticationController", "Response message: $responseMessage")
 
-          if (responseCode == 403) {
-            Log.e(
-                "AuthenticationController",
-                "Insufficient client scope. Please re-authenticate with the required permissions.")
-            return@withContext "FAILURE: Insufficient client scope"
-          }
-
           if (responseCode in 200..299) {
             inputStream.bufferedReader().use {
               return@withContext it.readText()
@@ -198,11 +190,8 @@ constructor(
             return@withContext "FAILURE"
           }
         }
-      } catch (e: FileNotFoundException) {
-        Log.e("AuthenticationController", "Failed to make API request: ${e.message}")
-        return@withContext "FAILURE"
       } catch (e: IOException) {
-        Log.e("AuthenticationController", "IO Exception: ${e.message}")
+        Log.e("AuthenticationController", "Error making API request: ${e.message}")
         return@withContext "FAILURE"
       }
     }
