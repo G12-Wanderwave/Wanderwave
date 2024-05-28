@@ -155,9 +155,6 @@ constructor(
                 println("Connected to Spotify App Remote")
                 onPlayerStateUpdate()
                 trySend(ConnectResult.SUCCESS)
-                CoroutineScope(ioDispatcher).launch {
-                  playerState().mapNotNull { it?.track }.collect { addRecentlyPlayedTrack(it) }
-                }
                 channel.close()
               }
 
@@ -314,6 +311,7 @@ constructor(
         if (playerState.track != null) {
           startPlaybackTimer(playerState.track.duration - playerState.playbackPosition)
         }
+        addRecentlyPlayedTrack(playerState.track)
       }
     }
   }
