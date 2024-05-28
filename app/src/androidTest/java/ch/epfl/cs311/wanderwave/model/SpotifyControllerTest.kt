@@ -113,7 +113,9 @@ class SpotifyControllerTest {
     context = ApplicationProvider.getApplicationContext()
     authenticationController = mockk<AuthenticationController>()
     testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
-    spotifyController = SpotifyController(context, authenticationController, testDispatcher, mockRecentlyPlayedRepository)
+    spotifyController =
+        SpotifyController(
+            context, authenticationController, testDispatcher, mockRecentlyPlayedRepository)
     spotifyController.appRemote.value = mockAppRemote
     mockkStatic(SpotifyAppRemote::class)
     spotifyController.appRemote.value = mockAppRemote
@@ -393,7 +395,9 @@ class SpotifyControllerTest {
 
     // Initialize SpotifyController with mocked PlayerApi
     every { mockAppRemote.playerApi } returns mockPlayerApi
-    val spotifyController = SpotifyController(context, authenticationController, testDispatcher, mockRecentlyPlayedRepository)
+    val spotifyController =
+        SpotifyController(
+            context, authenticationController, testDispatcher, mockRecentlyPlayedRepository)
     spotifyController.appRemote.value = mockAppRemote
 
     // Mock a PlayerState
@@ -450,7 +454,9 @@ class SpotifyControllerTest {
         }
 
     spotifyController.playTrackList(listOf(mockTrack1, mockTrack2))
-    val spotifyController = SpotifyController(context, authenticationController, testDispatcher, mockRecentlyPlayedRepository)
+    val spotifyController =
+        SpotifyController(
+            context, authenticationController, testDispatcher, mockRecentlyPlayedRepository)
     spotifyController.appRemote.value = mockAppRemote
     // Call playerState()
     val playerStateFlow = spotifyController.playerState()

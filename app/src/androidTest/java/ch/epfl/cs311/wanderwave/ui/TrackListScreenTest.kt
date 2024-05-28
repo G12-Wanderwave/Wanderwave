@@ -63,6 +63,7 @@ class TrackListScreenTest : TestCase() {
   @RelaxedMockK private lateinit var mockNavController: NavHostController
 
   @RelaxedMockK private lateinit var mockRecentlyPlayedRepository: RecentlyPlayedRepository
+
   @Before
   fun setup() {
 
@@ -98,8 +99,7 @@ class TrackListScreenTest : TestCase() {
             trackRepository,
             profileRepository,
             authenticationController,
-            mockRecentlyPlayedRepository
-          )
+            mockRecentlyPlayedRepository)
     every { mockRecentlyPlayedRepository.getRecentlyPlayed() } returns
         flowOf(listOf(Track("id1", "title1", "artist1")))
     composeTestRule.setContent {
