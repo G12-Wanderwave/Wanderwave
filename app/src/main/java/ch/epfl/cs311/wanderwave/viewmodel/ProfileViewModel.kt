@@ -238,8 +238,8 @@ constructor(
   suspend fun likeTrack(track: Track) {
     // Check if song is already liked
     if (!wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value += track
-      Log.d("ProfileViewModel", "likeTrack")
-      spotifyController.addToPlaylist(track)
+    Log.d("ProfileViewModel", "likeTrack")
+    spotifyController.addToPlaylist(track)
   }
 
   /**

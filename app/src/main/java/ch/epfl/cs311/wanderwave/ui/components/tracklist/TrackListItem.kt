@@ -92,10 +92,10 @@ fun TrackListItem(
             isLiked = isLiked,
             onLike = {
               scope.launch {
-                  // Add liked track to the profile
-                  profileViewModel.likeTrack(track)
-                  // Update it on Firebase
-                  profileViewModel.updateProfile(profileViewModel.profile.value)
+                // Add liked track to the profile
+                profileViewModel.likeTrack(track)
+                // Update it on Firebase
+                profileViewModel.updateProfile(profileViewModel.profile.value)
               }
               // Update UI
               isLiked.value = true

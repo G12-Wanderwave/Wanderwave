@@ -5,14 +5,12 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.util.Log
-import androidx.browser.trusted.sharing.ShareTarget.RequestMethod
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.contentValuesOf
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.repository.AuthTokenRepository
 import com.google.firebase.auth.FirebaseAuth
+import java.io.ByteArrayOutputStream
 import java.io.FileNotFoundException
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import javax.inject.Inject
@@ -28,8 +26,6 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.ByteArrayOutputStream
-import java.io.IOException
 
 class AuthenticationController
 @Inject
@@ -153,128 +149,132 @@ constructor(
     auth.signOut()
   }
 
-    suspend fun makeApiRequest(url: URL, requestType: String = "GET", data: String = ""): String {
-        Log.d("AuthenticationController", "Making API request: $url")
-        Log.d("AuthenticationController", "Request type: $requestType")
-        Log.d("AuthenticationController", "Data: $data")
+  suspend fun makeApiRequest(url: URL, requestType: String = "GET", data: String = ""): String {
+    Log.d("AuthenticationController", "Making API request: $url")
+    Log.d("AuthenticationController", "Request type: $requestType")
+    Log.d("AuthenticationController", "Data: $data")
 
-        if (!refreshSpotifyToken()) {
-            Log.e("AuthenticationController", "Failed to refresh Spotify token")
-            return "FAILURE"
-        }
-
-        val accessToken = tokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
-        Log.i("AuthenticationController", "Access token available: ${accessToken != null}")
-
-        return withContext(ioDispatcher) {
-            try {
-                (url.openConnection() as HttpURLConnection).run {
-                    requestMethod = requestType
-                    setRequestProperty("Authorization", "Bearer $accessToken")
-                    setRequestProperty("Content-Type", "application/json")
-
-                    if (requestType == "POST" || requestType == "DELETE") {
-                        doOutput = true
-                        outputStream.bufferedWriter().use {
-                            it.write(data)
-                        }
-                    }
-
-                    val responseCode = responseCode
-                    val responseMessage = responseMessage
-                    Log.d("AuthenticationController", "Response code: $responseCode")
-                    Log.d("AuthenticationController", "Response message: $responseMessage")
-
-                    if (responseCode == 403) {
-                        Log.e("AuthenticationController", "Insufficient client scope. Please re-authenticate with the required permissions.")
-                        return@withContext "FAILURE: Insufficient client scope"
-                    }
-
-                    if (responseCode in 200..299) {
-                        inputStream.bufferedReader().use {
-                            return@withContext it.readText()
-                        }
-                    } else {
-                        errorStream?.bufferedReader()?.use {
-                            Log.e("AuthenticationController", "Error response: ${it.readText()}")
-                        }
-                        return@withContext "FAILURE"
-                    }
-                }
-            } catch (e: FileNotFoundException) {
-                Log.e("AuthenticationController", "Failed to make API request: ${e.message}")
-                return@withContext "FAILURE"
-            } catch (e: IOException) {
-                Log.e("AuthenticationController", "IO Exception: ${e.message}")
-                return@withContext "FAILURE"
-            }
-        }
+    if (!refreshSpotifyToken()) {
+      Log.e("AuthenticationController", "Failed to refresh Spotify token")
+      return "FAILURE"
     }
 
-    suspend fun uploadPlaylistImage(context: Context, playlistId: String) {
-        withContext(ioDispatcher) {
-            if (!refreshSpotifyToken()) {
-                Log.e("AuthenticationController", "Failed to refresh Spotify token")
-                return@withContext
+    val accessToken =
+        tokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+    Log.i("AuthenticationController", "Access token available: ${accessToken != null}")
+
+    return withContext(ioDispatcher) {
+      try {
+        (url.openConnection() as HttpURLConnection).run {
+          requestMethod = requestType
+          setRequestProperty("Authorization", "Bearer $accessToken")
+          setRequestProperty("Content-Type", "application/json")
+
+          if (requestType == "POST" || requestType == "DELETE") {
+            doOutput = true
+            outputStream.bufferedWriter().use { it.write(data) }
+          }
+
+          val responseCode = responseCode
+          val responseMessage = responseMessage
+          Log.d("AuthenticationController", "Response code: $responseCode")
+          Log.d("AuthenticationController", "Response message: $responseMessage")
+
+          if (responseCode == 403) {
+            Log.e(
+                "AuthenticationController",
+                "Insufficient client scope. Please re-authenticate with the required permissions.")
+            return@withContext "FAILURE: Insufficient client scope"
+          }
+
+          if (responseCode in 200..299) {
+            inputStream.bufferedReader().use {
+              return@withContext it.readText()
             }
-
-            val accessToken = tokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
-            Log.i("AuthenticationController", "Access token available: ${accessToken != null}")
-
-            val client = OkHttpClient()
-
-            // Decode the drawable resource to a Bitmap
-            val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.ic_logo)
-
-            // Convert the Bitmap to a Base64 string
-            val outputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
-            val imageBytes = outputStream.toByteArray()
-            val base64Image = Base64.encodeToString(imageBytes, Base64.NO_WRAP)
-
-            // Create the request body
-            val mediaType = "image/jpeg".toMediaTypeOrNull()
-            val requestBody: RequestBody = base64Image.toRequestBody(mediaType)
-
-            // Create the request
-            val request = Request.Builder()
-                .url("https://api.spotify.com/v1/playlists/$playlistId/images")
-                .put(requestBody)
-                .addHeader("Authorization", "Bearer $accessToken")
-                .addHeader("Content-Type", "image/jpeg")
-                .build()
-
-            // Execute the request
-            try {
-                client.newCall(request).execute().use { response ->
-                    if (!response.isSuccessful) {
-                        if (response.code == 401) {
-                            // Token might be expired, try to refresh and retry once
-                            if (refreshSpotifyToken()) {
-                                val newAccessToken = tokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
-                                val retryRequest = request.newBuilder()
-                                    .header("Authorization", "Bearer $newAccessToken")
-                                    .build()
-                                client.newCall(retryRequest).execute().use { retryResponse ->
-                                    if (!retryResponse.isSuccessful) {
-                                        throw IOException("Unexpected code $retryResponse")
-                                    } else {
-                                        println("Image uploaded successfully after token refresh!")
-                                    }
-                                }
-                            } else {
-                                throw IOException("Failed to refresh token")
-                            }
-                        } else {
-                            throw IOException("Unexpected code $response")
-                        }
-                    } else {
-                        println("Image uploaded successfully!")
-                    }
-                }
-            } catch (e: IOException) {
-                Log.e("AuthenticationController", "Error uploading image: ${e.message}")
+          } else {
+            errorStream?.bufferedReader()?.use {
+              Log.e("AuthenticationController", "Error response: ${it.readText()}")
             }
+            return@withContext "FAILURE"
+          }
         }
+      } catch (e: FileNotFoundException) {
+        Log.e("AuthenticationController", "Failed to make API request: ${e.message}")
+        return@withContext "FAILURE"
+      } catch (e: IOException) {
+        Log.e("AuthenticationController", "IO Exception: ${e.message}")
+        return@withContext "FAILURE"
+      }
     }
+  }
+
+  suspend fun uploadPlaylistImage(context: Context, playlistId: String) {
+    withContext(ioDispatcher) {
+      if (!refreshSpotifyToken()) {
+        Log.e("AuthenticationController", "Failed to refresh Spotify token")
+        return@withContext
+      }
+
+      val accessToken =
+          tokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+      Log.i("AuthenticationController", "Access token available: ${accessToken != null}")
+
+      val client = OkHttpClient()
+
+      // Decode the drawable resource to a Bitmap
+      val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.ic_logo)
+
+      // Convert the Bitmap to a Base64 string
+      val outputStream = ByteArrayOutputStream()
+      bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+      val imageBytes = outputStream.toByteArray()
+      val base64Image = Base64.encodeToString(imageBytes, Base64.NO_WRAP)
+
+      // Create the request body
+      val mediaType = "image/jpeg".toMediaTypeOrNull()
+      val requestBody: RequestBody = base64Image.toRequestBody(mediaType)
+
+      // Create the request
+      val request =
+          Request.Builder()
+              .url("https://api.spotify.com/v1/playlists/$playlistId/images")
+              .put(requestBody)
+              .addHeader("Authorization", "Bearer $accessToken")
+              .addHeader("Content-Type", "image/jpeg")
+              .build()
+
+      // Execute the request
+      try {
+        client.newCall(request).execute().use { response ->
+          if (!response.isSuccessful) {
+            if (response.code == 401) {
+              // Token might be expired, try to refresh and retry once
+              if (refreshSpotifyToken()) {
+                val newAccessToken =
+                    tokenRepository.getAuthToken(
+                        AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+                val retryRequest =
+                    request.newBuilder().header("Authorization", "Bearer $newAccessToken").build()
+                client.newCall(retryRequest).execute().use { retryResponse ->
+                  if (!retryResponse.isSuccessful) {
+                    throw IOException("Unexpected code $retryResponse")
+                  } else {
+                    println("Image uploaded successfully after token refresh!")
+                  }
+                }
+              } else {
+                throw IOException("Failed to refresh token")
+              }
+            } else {
+              throw IOException("Unexpected code $response")
+            }
+          } else {
+            println("Image uploaded successfully!")
+          }
+        }
+      } catch (e: IOException) {
+        Log.e("AuthenticationController", "Error uploading image: ${e.message}")
+      }
+    }
+  }
 }
