@@ -91,10 +91,12 @@ fun TrackListItem(
         LikeButton(
             isLiked = isLiked,
             onLike = {
-              // Add liked track to the profile
-              profileViewModel.likeTrack(track)
-              // Update it on Firebase
-              profileViewModel.updateProfile(profileViewModel.profile.value)
+              scope.launch {
+                // Add liked track to the profile
+                profileViewModel.likeTrack(track)
+                // Update it on Firebase
+                profileViewModel.updateProfile(profileViewModel.profile.value)
+              }
               // Update UI
               isLiked.value = true
             },
@@ -170,11 +172,12 @@ fun TrackListItemWithProfile(
             //            val newBeacon = beacon.updateProfileAndTrackElement(newTrackProfile)
             //            // Update it on Firebase
             //            beaconViewModel.updateBeacon(newBeacon)
-
-            // Add liked track to the profile
-            profileViewModel.likeTrack(trackAndProfile.track)
-            // Update it on Firebase
-            profileViewModel.updateProfile(profileViewModel.profile.value)
+            scope.launch {
+              // Add liked track to the profile
+              profileViewModel.likeTrack(trackAndProfile.track)
+              // Update it on Firebase
+              profileViewModel.updateProfile(profileViewModel.profile.value)
+            }
 
             // Update UI
             isLiked.value = true

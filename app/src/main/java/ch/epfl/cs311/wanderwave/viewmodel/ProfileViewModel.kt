@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
@@ -140,9 +141,11 @@ constructor(
    *
    * @param track the track to like
    */
-  fun likeTrack(track: Track) {
+  suspend fun likeTrack(track: Track) {
     // Check if song is already liked
     if (!wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value += track
+    Log.d("ProfileViewModel", "likeTrack")
+    spotifyController.addToPlaylist(track)
   }
 
   /**
@@ -153,6 +156,10 @@ constructor(
   fun unlikeTrack(track: Track) {
     // Check if song was not liked
     if (wanderwaveLikedTracks.value.contains(track)) _wanderwaveLikedTracks.value -= track
+    viewModelScope.launch {
+      Log.d("ProfileViewModel", "unlikeTrack")
+      spotifyController.removeFromPlaylist(track)
+    }
   }
 
   data class UIState(
