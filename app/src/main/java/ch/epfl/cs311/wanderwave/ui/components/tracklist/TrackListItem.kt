@@ -83,10 +83,11 @@ fun TrackListItem(
   val bitmapImage = rememberSaveable { mutableStateOf<Bitmap?>(null) }
 
   // Launching the effect to fetch the image
-  LaunchedEffect(track.id) {
-    val bitmap = profileViewModel.fetchImage(track.id)
-    bitmapImage.value = bitmap
-  }
+  if (track.id.contains("spotify"))
+      LaunchedEffect(track.id) {
+        val bitmap = profileViewModel.fetchImage(track.id)
+        bitmapImage.value = bitmap
+      }
 
   TrackListItemLaunchedEffect(scope = scope, scrollState = scrollState)
 
