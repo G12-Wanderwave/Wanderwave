@@ -67,7 +67,6 @@ constructor(
 
   init {
     observeBeacons()
-    getProfileOfCurrentUser()
   }
 
   private fun observeBeacons() {
