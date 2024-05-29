@@ -147,36 +147,34 @@ constructor(
   fun retrieveRandomSongFromProfileAndAddToBeacon(beaconId: String) {
     viewModelScope.launch {
       profile.value?.let { currentProfile ->
-        if (_areBeaconsLoaded.value) {
-          try {
-            val fetchedProfile = profileRepository.getItem(currentProfile.firebaseUid).first()
-            fetchedProfile.onSuccess { profile ->
-              if (profile.topSongs.isNotEmpty()) {
-                val track = profile.topSongs.random()
-                val beacon = beaconRepository.getItem(beaconId).first()
-                beacon.onSuccess {
-                  if (it.profileAndTrack.none { it.track.id == track.id }) {
-                    val newProfileAndTrack =
-                        it.profileAndTrack + ProfileTrackAssociation(profile, track)
-                    val newBeacon = it.copy(profileAndTrack = newProfileAndTrack)
-                    beaconRepository.updateItem(newBeacon)
-                    _uiState.value =
-                        _uiState.value.copy(
-                            beacons =
-                                _uiState.value.beacons.map { existingBeacon ->
-                                  if (existingBeacon.id == beaconId) newBeacon else existingBeacon
-                                })
-                  }
+        try {
+          val fetchedProfile = profileRepository.getItem(currentProfile.firebaseUid).first()
+          fetchedProfile.onSuccess { profile ->
+            if (profile.topSongs.isNotEmpty()) {
+              val track = profile.topSongs.random()
+              val beacon = beaconRepository.getItem(beaconId).first()
+              beacon.onSuccess {
+                if (it.profileAndTrack.none { it.track.id == track.id }) {
+                  val newProfileAndTrack =
+                      it.profileAndTrack + ProfileTrackAssociation(profile, track)
+                  val newBeacon = it.copy(profileAndTrack = newProfileAndTrack)
+                  beaconRepository.updateItem(newBeacon)
+                  _uiState.value =
+                      _uiState.value.copy(
+                          beacons =
+                              _uiState.value.beacons.map { existingBeacon ->
+                                if (existingBeacon.id == beaconId) newBeacon else existingBeacon
+                              })
                 }
               }
             }
-
-            fetchedProfile.onFailure { exception ->
-              Log.e("Profile not found", "Profile not found for the given id: $exception")
-            }
-          } catch (exception: Exception) {
-            Log.e("Error", "Error fetching profile: $exception")
           }
+
+          fetchedProfile.onFailure { exception ->
+            Log.e("Profile not found", "Profile not found for the given id: $exception")
+          }
+        } catch (exception: Exception) {
+          Log.e("Error", "Error fetching profile: $exception")
         }
       }
     }
