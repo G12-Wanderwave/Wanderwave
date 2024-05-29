@@ -417,7 +417,10 @@ class SpotifyControllerTest {
   fun testGetTrackImage() = runBlocking {
     val trackId = "spotify:track:6rqhFgbbKwnb9MLmUQDhG6"
     val albumId = "testAlbumId"
-    val spotifyController = spyk(SpotifyController(context, authenticationController))
+    val spotifyController =
+        spyk(
+            SpotifyController(
+                context, authenticationController, testDispatcher, mockRecentlyPlayedRepository))
     val json =
         """
             {
@@ -450,7 +453,10 @@ class SpotifyControllerTest {
 
   @Test
   fun testGetAlbumIdFromTrackId() = runBlocking {
-    val spotifyController = spyk(SpotifyController(context, authenticationController))
+    val spotifyController =
+        spyk(
+            SpotifyController(
+                context, authenticationController, testDispatcher, mockRecentlyPlayedRepository))
     val trackId = "spotify:track:6rqhFgbbKwnb9MLmUQDhG6"
     val expectedAlbumId = "testAlbumId"
     val json =
