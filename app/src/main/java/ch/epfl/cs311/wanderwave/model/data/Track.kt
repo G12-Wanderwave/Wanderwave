@@ -23,8 +23,10 @@ data class Track(
   companion object {
     fun from(document: DocumentSnapshot): Track? {
       return if (document.exists()) {
+        val trackId =
+          if (document.id.contains("spotify:track:")) document.id else "spotify:track:" + document.id
         Track(
-            id = document.id,
+            id = trackId,
             title = document.getString("title") ?: "",
             artist = document.getString("artist") ?: "")
       } else {
