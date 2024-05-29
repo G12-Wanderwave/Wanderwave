@@ -15,6 +15,7 @@ import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.AuthTokenRepository
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
+import ch.epfl.cs311.wanderwave.model.repository.RecentlyPlayedRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.ui.screens.AppBottomBarScreen
@@ -165,6 +166,13 @@ class LoginAndLogoutTest {
       val repo = mockk<AuthTokenRepository>(relaxed = true)
       coEvery { repo.getAuthToken(any()) } returns "mockedToken"
       return mockk(relaxed = true)
+    }
+
+    @Provides
+    @Singleton
+    fun provideRecentlyPlayedRepository(): RecentlyPlayedRepository {
+      val repo = mockk<RecentlyPlayedRepository>(relaxed = true)
+      return repo
     }
   }
 

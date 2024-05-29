@@ -73,10 +73,8 @@ constructor(
 
   fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
     // Call the BeaconConnection's addTrackToBeacon with the provided beaconId and track
-    val correctTrack = track.copy(id = "spotify:track:" + track.id)
-    trackRepository.addItemsIfNotExist(listOf(correctTrack))
-    beaconRepository.addTrackToBeacon(
-        beaconId, correctTrack, authenticationController.getUserData()!!.id, onComplete)
+    ch.epfl.cs311.wanderwave.model.utils.addTrackToBeacon(
+        beaconId, track, trackRepository, beaconRepository, authenticationController, onComplete)
   }
 
   // Function to add a track to a song list
