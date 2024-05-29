@@ -93,10 +93,13 @@ class TrackConnection(
             } else {
               profileRef?.addSnapshotListener { profileDocument, error ->
                 val profile = profileDocument?.let { Profile.from(it) }
+                val trackId =
+                  if (track.id.contains("spotify:track:")) track.id else "spotify:track:" + track.id
+                val correctTrack = track.copy(id = trackId)
                 trySend(
                     Result.success(
                         ProfileTrackAssociation(
-                            profile = profile, track = track, likersId = likersId, likes = likes)))
+                            profile = profile, track = correctTrack, likersId = likersId, likes = likes)))
               } ?: trySend(Result.success(ProfileTrackAssociation(null, track, likersId, likes)))
             }
           }

@@ -51,6 +51,7 @@ fun BeaconScreen(
 ) {
 
   LaunchedEffect(beaconId) {
+    Log.d("BeaconScreen", "Fetching beacon with id: $beaconId")
     if (beaconId != null) {
       viewModel.getBeaconById(beaconId)
     } else {
