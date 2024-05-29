@@ -55,6 +55,8 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel) {
   val mapIsLoaded = remember { mutableStateOf(false) }
   val locationState = remember { mutableStateOf<Location?>(null) }
 
+  LaunchedEffect(Unit) { viewModel.getProfileOfCurrentUser() }
+
   val permissionState =
       rememberMultiplePermissionsState(
           listOf(

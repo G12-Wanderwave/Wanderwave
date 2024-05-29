@@ -48,7 +48,8 @@ constructor(
     private val ioDispatcher: CoroutineDispatcher,
     private val recentlyPlayedRepository: RecentlyPlayedRepository
 ) {
-
+  private val PLAYLIST_NAME = "Wanderwave"
+  private val PLAYLIST_DESCRIPTION = "Liked songs from Wanderwave"
   private val CLIENT_ID = BuildConfig.SPOTIFY_CLIENT_ID
   private val REDIRECT_URI = "wanderwave-auth://callback"
   private val SCOPES =
@@ -58,7 +59,10 @@ constructor(
           "playlist-read-collaborative",
           "user-library-read",
           "user-read-email",
-          "user-read-private")
+          "user-read-private",
+          "playlist-modify-public",
+          "playlist-modify-private",
+          "ugc-image-upload")
 
   var playbackTimer: Job? = null
 
@@ -79,6 +83,102 @@ constructor(
         AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
             .setScopes(SCOPES.toTypedArray())
     return builder.build()
+  }
+
+  suspend fun getAllPlaylists(): List<ListItem> {
+    val url = "https://api.spotify.com/v1/me/playlists"
+    val playlists = spotifyGetFromURL(url)
+    val jsonObject = JSONObject(playlists)
+    val items = jsonObject.getJSONArray("items")
+    // Convert items to list of ListItem
+    val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
+    for (i in 0 until items.length()) {
+      val item = items.getJSONObject(i)
+      val id = item.getString("id")
+      val name = item.getString("name")
+      list += ListItem(id, "", null, name, "", false, false)
+    }
+    Log.d("SpotifyController", "Got all playlists: $list")
+    return list
+  }
+
+  suspend fun createPlaylistIfNotExist(): String {
+    val list = getAllPlaylists()
+    if (list.any { it.title == PLAYLIST_NAME }) {
+      return list.first { it.title == PLAYLIST_NAME }.id
+    }
+    val url = "https://api.spotify.com/v1/users/${getCurrentUserId()}/playlists"
+    val data =
+        """
+        {
+            "name": "$PLAYLIST_NAME",
+            "description": "$PLAYLIST_DESCRIPTION",
+            "public": false
+        }
+    """
+            .trimIndent()
+    var playlist: String
+    withContext(Dispatchers.IO) {
+      playlist = authenticationController.makeApiRequest(URL(url), "POST", data)
+    }
+
+    if (playlist == "FAILURE") {
+      throw Exception("Failed to create playlist")
+    }
+
+    val jsonObject = JSONObject(playlist)
+    val playlistId = jsonObject.getString("id")
+    authenticationController.uploadPlaylistImage(context, playlistId)
+    return playlistId
+  }
+
+  suspend fun getCurrentUserId(): String {
+    val url = "https://api.spotify.com/v1/me"
+    val response = authenticationController.makeApiRequest(URL(url))
+    if (response == "FAILURE") {
+      throw Exception("Failed to get current user id")
+    }
+    val jsonObject = JSONObject(response)
+    return jsonObject.getString("id")
+  }
+
+  suspend fun addToPlaylist(track: Track) {
+    val playlistId = createPlaylistIfNotExist()
+    Log.d("SpotifyController", "Adding track to playlist: $playlistId")
+    val url = "https://api.spotify.com/v1/playlists/$playlistId/tracks"
+    val data =
+        """
+        {
+            "uris": ["${track.id}"]
+        }
+    """
+            .trimIndent()
+    val response =
+        withContext(Dispatchers.IO) {
+          authenticationController.makeApiRequest(URL(url), "POST", data)
+        }
+
+    if (response == "FAILURE") {
+      throw Exception("Failed to add track to playlist")
+    }
+  }
+
+  suspend fun removeFromPlaylist(track: Track) {
+    val playlistId = createPlaylistIfNotExist()
+    Log.d("SpotifyController", "Removing track from playlist: $playlistId")
+    val url = "https://api.spotify.com/v1/playlists/$playlistId/tracks"
+    val data =
+        "{\n" +
+            "    \"tracks\": [\n" +
+            "        {\n" +
+            "            \"uri\": \"${track.id}\"\n" +
+            "        }\n" +
+            "    ],\n" +
+            "    \"snapshot_id\": \"$playlistId\"\n" +
+            "}"
+    withContext(Dispatchers.IO) {
+      authenticationController.makeApiRequest(URL(url), "DELETE", data)
+    }
   }
 
   suspend fun getTrackImage(trackId: String): Bitmap? {
@@ -423,7 +523,15 @@ constructor(
   // https://developer.spotify.com/documentation/web-api
   suspend fun spotifyGetFromURL(url: String): String {
     var answer: String
-    withContext(Dispatchers.IO) { answer = authenticationController.makeApiRequest(URL(url)) }
+    withContext(Dispatchers.IO) {
+      val urlString =
+          if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            "http://$url"
+          } else {
+            url
+          }
+      answer = authenticationController.makeApiRequest(URL(urlString))
+    }
     return answer
   }
 
