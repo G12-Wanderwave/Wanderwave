@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.model
 
+import android.content.Context
 import android.net.Uri
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationUserData
@@ -43,6 +44,8 @@ class AuthenticationControllerTest {
   @RelaxedMockK private lateinit var mockTokenRepository: AuthTokenRepository
 
   private lateinit var authenticationController: AuthenticationController
+
+  @RelaxedMockK private lateinit var mockContext: Context
 
   private lateinit var testDispatcher: TestDispatcher
 
@@ -260,4 +263,192 @@ class AuthenticationControllerTest {
 
     assertEquals("FAILURE", result)
   }
+
+  //  @Test
+  //  fun uploadPlaylistImage_ShouldUploadImageSuccessfully() = runBlocking {
+  //    val playlistId = "testPlaylistId"
+  //    val dummyBitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+  //    val dummyByteArrayOutputStream = ByteArrayOutputStream()
+  //    dummyBitmap.compress(Bitmap.CompressFormat.JPEG, 100, dummyByteArrayOutputStream)
+  //    val dummyByteArray = dummyByteArrayOutputStream.toByteArray()
+  //    val dummyBase64Image = Base64.encodeToString(dummyByteArray, Base64.NO_WRAP)
+  //
+  //    // Mock BitmapFactory.decodeResource
+  //    mockkStatic(BitmapFactory::class)
+  //    every { BitmapFactory.decodeResource(mockContext.resources, R.drawable.ic_logo) } returns
+  //        dummyBitmap
+  //
+  //    // Mock ByteArrayOutputStream
+  //    mockkConstructor(ByteArrayOutputStream::class)
+  //    every { anyConstructed<ByteArrayOutputStream>().toByteArray() } returns dummyByteArray
+  //    coEvery { anyConstructed<ByteArrayOutputStream>().write(any(), any(), any()) } just Runs
+  //
+  //    val accessToken = "testAccessToken"
+  //    coEvery {
+  //      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+  //    } returns accessToken
+  //
+  //    // Mock OkHttpClient call
+  //    val mockCall = mockk<Call>()
+  //    val mockResponse = mockk<Response>()
+  //    every { mockHttpClient.newCall(any()) } returns mockCall
+  //    every { mockResponse.isSuccessful } returns true
+  //    every { mockCall.execute() } returns mockResponse
+  //
+  //    // Run the method
+  //    authenticationController.uploadPlaylistImage(mockContext, playlistId)
+  //
+  //    // Verify interactions
+  //    verify {
+  //      mockHttpClient.newCall(
+  //          withArg { request ->
+  //            assert(request.method == "PUT")
+  //            assert(
+  //                request.url.toString() ==
+  // "https://api.spotify.com/v1/playlists/$playlistId/images")
+  //            assert(request.header("Authorization") == "Bearer $accessToken")
+  //            assert(request.header("Content-Type") == "image/jpeg")
+  //            val buffer = okio.Buffer()
+  //            request.body?.writeTo(buffer)
+  //            val requestBodyString = buffer.readUtf8()
+  //            assert(requestBodyString == dummyBase64Image)
+  //          })
+  //    }
+  //
+  //    unmockkStatic(BitmapFactory::class)
+  //  }
+  //
+  //  @Test
+  //  fun uploadPlaylistImage_ShouldRetryOnTokenExpiration() = runBlocking {
+  //    val playlistId = "testPlaylistId"
+  //    val dummyBitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+  //    val dummyByteArrayOutputStream = ByteArrayOutputStream()
+  //    dummyBitmap.compress(Bitmap.CompressFormat.JPEG, 100, dummyByteArrayOutputStream)
+  //    val dummyByteArray = dummyByteArrayOutputStream.toByteArray()
+  //    val dummyBase64Image = Base64.encodeToString(dummyByteArray, Base64.NO_WRAP)
+  //
+  //    // Mock BitmapFactory.decodeResource
+  //    mockkStatic(BitmapFactory::class)
+  //    every { BitmapFactory.decodeResource(mockContext.resources, R.drawable.ic_logo) } returns
+  //        dummyBitmap
+  //
+  //    // Mock ByteArrayOutputStream
+  //    mockkConstructor(ByteArrayOutputStream::class)
+  //    every { anyConstructed<ByteArrayOutputStream>().toByteArray() } returns dummyByteArray
+  //
+  //    var accessToken = "expiredAccessToken"
+  //    coEvery {
+  //      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+  //    } answers { accessToken }
+  //    coEvery { authenticationController.refreshSpotifyToken() } answers
+  //        {
+  //          accessToken = "newAccessToken"
+  //          true
+  //        }
+  //
+  //    // Mock OkHttpClient call
+  //    val mockCall = mockk<Call>()
+  //    val mockResponse = mockk<Response>()
+  //    every { mockHttpClient.newCall(any()) } returns mockCall
+  //    every { mockCall.execute() } returnsMany
+  //        listOf(
+  //            mockResponse.apply {
+  //              every { isSuccessful } returns false
+  //              every { code } returns 401
+  //            },
+  //            mockResponse.apply { every { isSuccessful } returns true })
+  //
+  //    // Run the method
+  //    authenticationController.uploadPlaylistImage(mockContext, playlistId)
+  //
+  //    // Verify interactions
+  //    verify {
+  //      mockHttpClient.newCall(
+  //          withArg { request ->
+  //            assert(request.header("Authorization") == "Bearer expiredAccessToken")
+  //          })
+  //      mockHttpClient.newCall(
+  //          withArg { request -> assert(request.header("Authorization") == "Bearer
+  // newAccessToken") })
+  //    }
+  //
+  //    unmockkStatic(BitmapFactory::class)
+  //  }
+  //
+  //  @Test
+  //  fun uploadPlaylistImage_ShouldFailOnRefreshFailure() = runBlocking {
+  //    val playlistId = "testPlaylistId"
+  //    val dummyBitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+  //
+  //    // Mock BitmapFactory.decodeResource
+  //    mockkStatic(BitmapFactory::class)
+  //    every { BitmapFactory.decodeResource(mockContext.resources, R.drawable.ic_logo) } returns
+  //        dummyBitmap
+  //
+  //    coEvery { authenticationController.refreshSpotifyToken() } returns false
+  //
+  //    // Run the method
+  //    authenticationController.uploadPlaylistImage(mockContext, playlistId)
+  //
+  //    // Verify interactions
+  //    verify(exactly = 0) { mockHttpClient.newCall(any()) }
+  //
+  //    unmockkStatic(BitmapFactory::class)
+  //  }
+  //
+  //  @Test
+  //  fun uploadPlaylistImage_ShouldUploadImageSuccessfully2() = runBlocking {
+  //    val playlistId = "testPlaylistId"
+  //    val dummyBitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+  //    val dummyByteArrayOutputStream = ByteArrayOutputStream()
+  //    dummyBitmap.compress(Bitmap.CompressFormat.JPEG, 100, dummyByteArrayOutputStream)
+  //    val dummyByteArray = dummyByteArrayOutputStream.toByteArray()
+  //    val dummyBase64Image = Base64.encodeToString(dummyByteArray, Base64.NO_WRAP)
+  //
+  //    // Mock BitmapFactory.decodeResource
+  //    mockkStatic(BitmapFactory::class)
+  //    every { BitmapFactory.decodeResource(mockContext.resources, R.drawable.ic_logo) } returns
+  // dummyBitmap
+  //
+  //    // Mock ByteArrayOutputStream
+  //    mockkConstructor(ByteArrayOutputStream::class)
+  //    every { anyConstructed<ByteArrayOutputStream>().toByteArray() } returns dummyByteArray
+  //    coEvery { anyConstructed<ByteArrayOutputStream>().write(any(), any(), any()) } just Runs
+  //
+  //    val accessToken = "testAccessToken"
+  //    coEvery {
+  //      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+  //    } returns accessToken
+  //
+  //    // Mock OkHttpClient call
+  //    val mockCall = mockk<Call>()
+  //    val mockResponse = mockk<Response>()
+  //    val mockResponseBody = mockk<ResponseBody>()
+  //    every { mockHttpClient.newCall(any()) } returns mockCall
+  //    every { mockResponse.isSuccessful } returns true
+  //    every { mockResponse.body } returns mockResponseBody
+  //    every { mockCall.execute() } returns mockResponse
+  //
+  //    // Run the method
+  //    authenticationController.uploadPlaylistImage(mockContext, playlistId)
+  //
+  //    // Verify interactions
+  //    verify {
+  //      mockHttpClient.newCall(
+  //        withArg { request ->
+  //          assert(request.method == "PUT")
+  //          assert(request.url.toString() ==
+  // "https://api.spotify.com/v1/playlists/$playlistId/images")
+  //          assert(request.header("Authorization") == "Bearer $accessToken")
+  //          assert(request.header("Content-Type") == "image/jpeg")
+  //          val buffer = okio.Buffer()
+  //          request.body?.writeTo(buffer)
+  //          val requestBodyString = buffer.readUtf8()
+  //          assert(requestBodyString == dummyBase64Image)
+  //        }
+  //      )
+  //    }
+  //
+  //    unmockkStatic(BitmapFactory::class)
+  //  }
 }
