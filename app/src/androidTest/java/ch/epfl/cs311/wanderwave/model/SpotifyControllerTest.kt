@@ -44,6 +44,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.verify
 import java.net.URL
 import junit.framework.TestCase.assertEquals
@@ -410,6 +411,63 @@ class SpotifyControllerTest {
 
     val result = spotifyController.getAlbumImage(albumId)
     assertNotNull(result)
+  }
+
+  @Test
+  fun testGetTrackImage() = runBlocking {
+    val trackId = "spotify:track:6rqhFgbbKwnb9MLmUQDhG6"
+    val albumId = "testAlbumId"
+    val spotifyController = spyk(SpotifyController(context, authenticationController))
+    val json =
+        """
+            {
+                "album": {
+                    "id": "$albumId"
+                }
+            }
+        """
+    val bitmap: Bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+    coEvery {
+      spotifyController.spotifyGetFromURL(
+          "https://api.spotify.com/v1/tracks/${trackId.split(":")[2]}")
+    } returns json
+    coEvery {
+      authenticationController.makeApiRequest(URL("https://api.spotify.com/v1/albums/$albumId"))
+    } returns
+        """
+            {
+                "images": [
+                    {"url": "https://example.com/image1.jpg"},
+                    {"url": "https://example.com/image2.jpg"}
+                ]
+            }
+        """
+    every { futureTarget.get() } returns bitmap
+
+    val result = spotifyController.getTrackImage(trackId)
+    assertNotNull(result)
+  }
+
+  @Test
+  fun testGetAlbumIdFromTrackId() = runBlocking {
+    val spotifyController = spyk(SpotifyController(context, authenticationController))
+    val trackId = "spotify:track:6rqhFgbbKwnb9MLmUQDhG6"
+    val expectedAlbumId = "testAlbumId"
+    val json =
+        """
+            {
+                "album": {
+                    "id": "$expectedAlbumId"
+                }
+            }
+        """
+    coEvery {
+      spotifyController.spotifyGetFromURL(
+          "https://api.spotify.com/v1/tracks/${trackId.split(":")[2]}")
+    } returns json
+
+    val result = spotifyController.getAlbumIdFromTrackId(spotifyController, trackId)
+    assertEquals(expectedAlbumId, result)
   }
 
   @Test
