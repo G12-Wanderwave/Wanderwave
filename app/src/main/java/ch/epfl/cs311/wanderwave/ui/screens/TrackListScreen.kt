@@ -83,7 +83,7 @@ fun TabContent1(
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   var searchQuery by remember { mutableStateOf("") }
-  LaunchedEffect(Unit) { viewModel.updateBannedSongs() }
+  LaunchedEffect(Unit) { viewModel.updateBannedAndRetrievedSongsSongs() }
 
   Column(modifier = Modifier.testTag("trackListScreen")) {
     TextField(
@@ -115,10 +115,10 @@ fun TabContent1(
             canLike = true)
       }
       1 -> {
-        Log.d("TrackListScreen", "Chosen songs: ${profileViewModel.profile.value.chosenSongs}")
+        Log.d("TrackListScreen", "Chosen songs: ${uiState.retrievedTrack}")
         TrackList(
             tracks =
-                profileViewModel.profile.value.chosenSongs.filter { track ->
+                uiState.retrievedTrack.filter { track ->
                   uiState.bannedTracks.any { it.id == track.id }.not()
                 },
             title = stringResource(R.string.recently_added_tracks),

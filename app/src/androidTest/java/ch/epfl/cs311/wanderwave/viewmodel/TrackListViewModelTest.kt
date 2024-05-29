@@ -204,7 +204,7 @@ class TrackListViewModelTest {
 
   @Test
   fun bannedTracksAreInUiState() = runBlocking {
-    viewModel.updateBannedSongs()
+    viewModel.updateBannedAndRetrievedSongsSongs()
     assertTrue(
         viewModel.uiState.value.bannedTracks.toString(),
         viewModel.uiState.value.bannedTracks.size == 1)
