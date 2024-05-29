@@ -41,7 +41,6 @@ fun SurroundWithMiniPlayer(
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   val sheetState = rememberStandardBottomSheetState(initialValue = SheetValue.PartiallyExpanded)
   val progress = remember { mutableFloatStateOf(0f) }
-  val selectedVote = remember { mutableIntStateOf(0) }
 
   HandleSheetStateChanges(sheetState = sheetState, uiState = uiState, viewModel = viewModel)
   HandleProgressChanges(uiState = uiState, progress = progress)
@@ -56,7 +55,7 @@ fun SurroundWithMiniPlayer(
               onPauseClick = { viewModel.pause() },
               progress = progress)
         } else {
-          ExclusivePlayer(selectedVote = selectedVote, uiState = uiState, progress = progress)
+          ExclusivePlayer(uiState = uiState, progress = progress)
         }
       },
       sheetShape = RectangleShape,

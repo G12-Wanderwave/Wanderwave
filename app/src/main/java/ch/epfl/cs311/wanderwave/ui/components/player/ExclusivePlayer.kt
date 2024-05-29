@@ -45,7 +45,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ExclusivePlayer(
-    selectedVote: MutableIntState,
     uiState: PlayerViewModel.UiState,
     progress: MutableFloatState
 ) {
