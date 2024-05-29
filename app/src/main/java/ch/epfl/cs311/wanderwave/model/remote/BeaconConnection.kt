@@ -184,7 +184,10 @@ class BeaconConnection(
                       val trackRef = db.collection(trackConnection.collectionName).document(trackId)
                       add(
                           hashMapOf(
-                              "creator" to profileRef, "track" to trackRef, "numberOfLikes" to 0))
+                              "creator" to profileRef,
+                              "track" to trackRef,
+                              "likersId" to emptyList<String>(),
+                              "likes" to 0))
                     }
 
             transaction.update(beaconRef, "tracks", newTracks)

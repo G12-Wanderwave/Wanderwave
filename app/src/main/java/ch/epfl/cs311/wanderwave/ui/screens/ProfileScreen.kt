@@ -89,6 +89,7 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel, on
                 onClick = { navActions.navigateTo(Route.EDIT_PROFILE) })
           }
         }
+
         SongsListDisplay(
             navigationActions = navActions,
             songLists = profile.topSongs,
@@ -186,7 +187,7 @@ fun SignOutButton(modifier: Modifier, navActions: NavigationActions) {
               contentColor = MaterialTheme.colorScheme.onSurface,
               disabledContainerColor = Color.Gray,
               disabledContentColor = MaterialTheme.colorScheme.primary),
-      shape = RoundedCornerShape(size = 10.dp)) {
+      shape = RoundedCornerShape(size = 50.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween) {
@@ -210,7 +211,7 @@ fun AboutButton(modifier: Modifier, navActions: NavigationActions) {
               contentColor = MaterialTheme.colorScheme.onSurface,
               disabledContainerColor = Color.Gray,
               disabledContentColor = MaterialTheme.colorScheme.primary),
-      shape = RoundedCornerShape(size = 10.dp)) {
+      shape = RoundedCornerShape(size = 50.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween) {
