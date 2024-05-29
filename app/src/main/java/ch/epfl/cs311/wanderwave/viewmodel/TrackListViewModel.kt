@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.lifecycle.ViewModel
@@ -76,6 +77,7 @@ constructor(
               trackRecords.mapNotNull {
                 repository.getItem(it.trackId).firstOrNull()?.getOrElse { null }
               }
+          Log.d("TrackListViewModel", "loadRecentlyAddedTracks: $trackDetails")
           _uiState.value = _uiState.value.copy(tracks = trackDetails, loading = false)
         }
   }
@@ -180,6 +182,7 @@ constructor(
 
   data class UiState(
       val tracks: List<Track> = listOf(),
+      val retrievedTrack: List<Track> = listOf(),
       val bannedTracks: List<Track> = emptyList(),
       val loading: Boolean = false,
       val expanded: Boolean = false,

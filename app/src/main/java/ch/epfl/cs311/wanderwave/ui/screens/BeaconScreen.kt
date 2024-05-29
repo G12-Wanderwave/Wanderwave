@@ -27,6 +27,7 @@ import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
+import ch.epfl.cs311.wanderwave.model.utils.addTrackToBeacon
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
@@ -72,7 +73,7 @@ fun BeaconScreen(
               profileViewModel,
               bannedTracks = uiState.bannedTracks,
               viewModel::addTrackToBeacon,
-              viewModel::addTrackToList,
+              viewModel::selectTrack,
               navigationActions,
               viewModel)
         } else {

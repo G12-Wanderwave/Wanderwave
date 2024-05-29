@@ -82,7 +82,6 @@ fun TabContent1(
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   var searchQuery by remember { mutableStateOf("") }
-
   LaunchedEffect(Unit) { viewModel.updateBannedSongs() }
 
   Column(modifier = Modifier.testTag("trackListScreen")) {
@@ -144,7 +143,7 @@ fun TabContent1(
       }
       3 -> {
         RemovableTrackList(
-            tracks = uiState.tracks,
+            tracks = uiState.retrievedTrack,
             title = stringResource(R.string.banned_tracks),
             onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
             onSelectTrack = viewModel::playTrack,
