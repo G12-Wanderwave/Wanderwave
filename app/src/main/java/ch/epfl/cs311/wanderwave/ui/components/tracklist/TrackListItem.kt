@@ -49,7 +49,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import androidx.wear.compose.material.rememberSwipeableState
@@ -81,76 +80,65 @@ fun TrackListItem(
     profileViewModel: ProfileViewModel,
     canLike: Boolean = false
 ) {
-    val scope = rememberCoroutineScope()
-    val scrollState = rememberScrollState()
+  val scope = rememberCoroutineScope()
+  val scrollState = rememberScrollState()
 
-    TrackListItemLaunchedEffect(scope = scope, scrollState = scrollState)
+  TrackListItemLaunchedEffect(scope = scope, scrollState = scrollState)
 
-    TrackListItemCard(onClick = onClick, selected = selected) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Box(
-                modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-                contentAlignment = Alignment.Center
-            ) {
+  TrackListItemCard(onClick = onClick, selected = selected) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth()) {
+          Box(
+              modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+              contentAlignment = Alignment.Center) {
                 Image(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = "Album Cover",
-                    modifier = Modifier.fillMaxSize(.8f)
-                )
+                    modifier = Modifier.fillMaxSize(.8f))
+              }
+          Column(modifier = Modifier.padding(8.dp).weight(1f).horizontalScroll(scrollState)) {
+            Text(
+                text = track.title,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = track.artist,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium)
+          }
+          if (canLike) {
+            val isLiked = remember {
+              mutableStateOf(profileViewModel.wanderwaveLikedTracks.value.contains(track))
             }
-            Column(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .weight(1f)
-                    .horizontalScroll(scrollState)
-            ) {
-                Text(
-                    text = track.title,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.titleMedium
+            LikeButton(
+                isLiked = isLiked,
+                onLike = {
+                  scope.launch {
+                    profileViewModel.likeTrack(track)
+                    // Update it on Firebase
+                    profileViewModel.updateProfile(profileViewModel.profile.value)
+                    // Update UI
+                    isLiked.value = true
+                  }
+                },
+                onUnlike = {
+                  scope.launch {
+                    profileViewModel.unlikeTrack(track)
+                    // Update it on Firebase
+                    profileViewModel.updateProfile(profileViewModel.profile.value)
+                    // Update UI
+                    isLiked.value = false
+                  }
+                },
+                modifier =
+                    Modifier.padding(start = 8.dp) // Ensure some padding between text and heart
                 )
-                Text(
-                    text = track.artist,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-            if (canLike) {
-                val isLiked = remember {
-                    mutableStateOf(profileViewModel.wanderwaveLikedTracks.value.contains(track))
-                }
-                LikeButton(
-                    isLiked = isLiked,
-                    onLike = {
-                        scope.launch {
-                            profileViewModel.likeTrack(track)
-                            // Update it on Firebase
-                            profileViewModel.updateProfile(profileViewModel.profile.value)
-                            // Update UI
-                            isLiked.value = true
-                        }
-                    },
-                    onUnlike = {
-                        scope.launch {
-                            profileViewModel.unlikeTrack(track)
-                            // Update it on Firebase
-                            profileViewModel.updateProfile(profileViewModel.profile.value)
-                            // Update UI
-                            isLiked.value = false
-                        }
-                    },
-                    modifier = Modifier.padding(start = 8.dp) // Ensure some padding between text and heart
-                )
-            }
+          }
         }
-    }
+  }
 }
-
-
 
 /**
  * Same as [TrackListItem] but with a profile picture on the right side of the track information.
@@ -188,7 +176,6 @@ fun TrackListItemWithProfile(
                 style = MaterialTheme.typography.bodyMedium)
           }
 
-
           Row(
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.End) {
@@ -200,14 +187,13 @@ fun TrackListItemWithProfile(
                     isLiked = isLiked,
                     onLike = {
 
-                        // Update UI
-                        isLiked.value = true
-                        scope.launch {
-                      profileViewModel.likeTrack(trackAndProfile.track)
-                      // Update it on Firebase
-                      profileViewModel.updateProfile(profileViewModel.profile.value)
-
-                        }
+                      // Update UI
+                      isLiked.value = true
+                      scope.launch {
+                        profileViewModel.likeTrack(trackAndProfile.track)
+                        // Update it on Firebase
+                        profileViewModel.updateProfile(profileViewModel.profile.value)
+                      }
                     },
                     onUnlike = {
 
@@ -216,8 +202,8 @@ fun TrackListItemWithProfile(
                       // Update it on Firebase
                       profileViewModel.updateProfile(profileViewModel.profile.value)
 
-                        // Update UI
-                        isLiked.value = false
+                      // Update UI
+                      isLiked.value = false
                     },
                     modifier = Modifier.size(20.dp) // Adjust size of the heart icon here
                     )
@@ -256,7 +242,6 @@ fun TrackListItemWithProfile(
         }
   }
 }
-
 
 @Composable
 internal fun LikeButton(
