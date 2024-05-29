@@ -2,7 +2,6 @@ package ch.epfl.cs311.wanderwave.ui
 
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -43,12 +42,8 @@ class PlayerScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompo
   @Test
   fun exclusivePlayerScreenInteractionsAndComponentsDisplayed() = run {
     composeTestRule.setContent {
-      val selectedVote = remember { mutableIntStateOf(0) }
       val progress = remember { mutableFloatStateOf(0f) }
-      ExclusivePlayer(
-          selectedVote = selectedVote,
-          uiState = viewModel.uiState.collectAsState().value,
-          progress = progress)
+      ExclusivePlayer(uiState = viewModel.uiState.collectAsState().value, progress = progress)
     }
 
     onComposeScreen<ExclusivePlayerScreen>(composeTestRule) {

@@ -25,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableFloatState
-import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,10 +43,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun ExclusivePlayer(
-    uiState: PlayerViewModel.UiState,
-    progress: MutableFloatState
-) {
+fun ExclusivePlayer(uiState: PlayerViewModel.UiState, progress: MutableFloatState) {
   val viewModel: PlayerViewModel = hiltViewModel()
   Column(
       modifier = Modifier.fillMaxSize().padding(bottom = 84.dp).testTag("exclusivePlayer"),
