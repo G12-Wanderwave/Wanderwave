@@ -134,6 +134,7 @@ constructor(
           if (beacon.profileAndTrack.isNotEmpty()) {
             _retrievedSong.value = beacon.profileAndTrack.random()
             Log.i("Retrieved song", "Retrieved song: ${_retrievedSong.value.track}")
+            Log.i("Beacon", "Beacon: $beacon")
             updateChosenSongsProfile()
           }
         }
@@ -153,18 +154,16 @@ constructor(
           val fetchedProfile = profileRepository.getItem(currentProfile.firebaseUid).first()
 
           Log.d("Profile", "Current profile: $fetchedProfile")
+          Log.d("BeaconId", "BeaconId: $beaconId")
           fetchedProfile.onSuccess { profile ->
             if (profile.topSongs.isNotEmpty()) {
               val track = profile.topSongs.random()
+              Log.d("Track", "Track: $track")
               val beacon = beaconRepository.getItem(beaconId).first()
               beacon.onSuccess {
                 if (it.profileAndTrack.none { it.track.id == track.id }) {
-                  Log.i("Adding track", "Adding track to beacon: ${track.title}")
-                  Log.i("Adding track", "Adding track to beacon: ${it.profileAndTrack}")
-
                   val newProfileAndTrack =
                       it.profileAndTrack + ProfileTrackAssociation(profile, track)
-                  Log.i("Adding track", "Adding track to beacon: $newProfileAndTrack")
 
                   val newBeacon = it.copy(profileAndTrack = newProfileAndTrack)
                   beaconRepository.updateItem(newBeacon)
@@ -208,9 +207,7 @@ constructor(
           fetchedProfile.onFailure { exception ->
             Log.e("Profile not found", "Profile not found for the given id $exception")
           }
-        } catch (exception: Exception) {
-          Log.e("Error", "Error fetching profile: $exception") // Error handling
-        }
+        } catch (exception: Exception) {}
       }
     }
   }
