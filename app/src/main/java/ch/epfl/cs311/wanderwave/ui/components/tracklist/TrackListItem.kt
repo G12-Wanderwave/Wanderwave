@@ -83,81 +83,81 @@ fun TrackListItem(
     profileViewModel: ProfileViewModel,
     canLike: Boolean = false
 ) {
-    val scope = rememberCoroutineScope()
-    val scrollState = rememberScrollState()
-    val bitmapImage = rememberSaveable { mutableStateOf<Bitmap?>(null) }
+  val scope = rememberCoroutineScope()
+  val scrollState = rememberScrollState()
+  val bitmapImage = rememberSaveable { mutableStateOf<Bitmap?>(null) }
 
-    // Launching the effect to fetch the image
-    if (track.id.contains("spotify"))
-        LaunchedEffect(track.id) {
-            val bitmap = profileViewModel.fetchImage(track.id)
-            bitmapImage.value = bitmap
-        }
-    TrackListItemLaunchedEffect(scope = scope, scrollState = scrollState)
+  // Launching the effect to fetch the image
+  if (track.id.contains("spotify"))
+      LaunchedEffect(track.id) {
+        val bitmap = profileViewModel.fetchImage(track.id)
+        bitmapImage.value = bitmap
+      }
+  TrackListItemLaunchedEffect(scope = scope, scrollState = scrollState)
 
-    TrackListItemCard(onClick = onClick, selected = selected) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()) {
-            Box(
-                modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-                contentAlignment = Alignment.Center) {
+  TrackListItemCard(onClick = onClick, selected = selected) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth()) {
+          Box(
+              modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+              contentAlignment = Alignment.Center) {
                 bitmapImage.value?.let { bitmap ->
-                    Image(
-                        bitmap = bitmap.asImageBitmap(),
-                        contentDescription = "Album Cover",
-                        modifier = Modifier.fillMaxSize(.8f),
-                    )
+                  Image(
+                      bitmap = bitmap.asImageBitmap(),
+                      contentDescription = "Album Cover",
+                      modifier = Modifier.fillMaxSize(.8f),
+                  )
                 }
                     ?: run {
-                        Image(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = "Album Cover",
-                            modifier = Modifier.fillMaxSize(.8f),
-                        )
+                      Image(
+                          imageVector = Icons.Default.PlayArrow,
+                          contentDescription = "Album Cover",
+                          modifier = Modifier.fillMaxSize(.8f),
+                      )
                     }
+              }
+          Column(modifier = Modifier.padding(8.dp).weight(1f).horizontalScroll(scrollState)) {
+            Text(
+                text = track.title,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = track.artist,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium)
+          }
+          if (canLike) {
+            val isLiked = remember {
+              mutableStateOf(profileViewModel.wanderwaveLikedTracks.value.contains(track))
             }
-            Column(modifier = Modifier.padding(8.dp).weight(1f).horizontalScroll(scrollState)) {
-                Text(
-                    text = track.title,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.titleMedium)
-                Text(
-                    text = track.artist,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium)
-            }
-            if (canLike) {
-                val isLiked = remember {
-                    mutableStateOf(profileViewModel.wanderwaveLikedTracks.value.contains(track))
-                }
-                LikeButton(
-                    isLiked = isLiked,
-                    onLike = {
-                        isLiked.value = true
-                        scope.launch {
-                            profileViewModel.likeTrack(track)
-                            // Update it on Firebase
-                            profileViewModel.updateProfile(profileViewModel.profile.value)
-                            // Update UI
-                        }
-                    },
-                    onUnlike = {
-                        scope.launch {
-                            profileViewModel.unlikeTrack(track)
-                            // Update it on Firebase
-                            profileViewModel.updateProfile(profileViewModel.profile.value)
-                            // Update UI
-                            isLiked.value = false
-                        }
-                    },
-                    modifier =
+            LikeButton(
+                isLiked = isLiked,
+                onLike = {
+                  isLiked.value = true
+                  scope.launch {
+                    profileViewModel.likeTrack(track)
+                    // Update it on Firebase
+                    profileViewModel.updateProfile(profileViewModel.profile.value)
+                    // Update UI
+                  }
+                },
+                onUnlike = {
+                  scope.launch {
+                    profileViewModel.unlikeTrack(track)
+                    // Update it on Firebase
+                    profileViewModel.updateProfile(profileViewModel.profile.value)
+                    // Update UI
+                    isLiked.value = false
+                  }
+                },
+                modifier =
                     Modifier.padding(start = 8.dp) // Ensure some padding between text and heart
                 )
-            }
+          }
         }
-    }
+  }
 }
 
 /**
@@ -175,118 +175,118 @@ fun TrackListItemWithProfile(
     onClick: () -> Unit,
     navigationActions: NavigationActions
 ) {
-    val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scrollState = rememberScrollState()
-    val bitmapImage = rememberSaveable { mutableStateOf<Bitmap?>(null) }
+  val scope = rememberCoroutineScope()
+  val snackbarHostState = remember { SnackbarHostState() }
+  val scrollState = rememberScrollState()
+  val bitmapImage = rememberSaveable { mutableStateOf<Bitmap?>(null) }
 
-    // Launching the effect to fetch the image
-    if (trackAndProfile.track.id.contains("spotify"))
-        LaunchedEffect(trackAndProfile.track.id) {
-            val bitmap = profileViewModel.fetchImage(trackAndProfile.track.id)
-            bitmapImage.value = bitmap
-        }
-    TrackListItemLaunchedEffect(scope = scope, scrollState = scrollState)
+  // Launching the effect to fetch the image
+  if (trackAndProfile.track.id.contains("spotify"))
+      LaunchedEffect(trackAndProfile.track.id) {
+        val bitmap = profileViewModel.fetchImage(trackAndProfile.track.id)
+        bitmapImage.value = bitmap
+      }
+  TrackListItemLaunchedEffect(scope = scope, scrollState = scrollState)
 
-    TrackListItemCard(onClick = onClick, selected = selected) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Box(
-                modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-                contentAlignment = Alignment.Center) {
+  TrackListItemCard(onClick = onClick, selected = selected) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+          Box(
+              modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+              contentAlignment = Alignment.Center) {
                 bitmapImage.value?.let { bitmap ->
-                    Image(
-                        bitmap = bitmap.asImageBitmap(),
-                        contentDescription = "Album Cover",
-                        modifier = Modifier.fillMaxSize(.8f),
-                    )
+                  Image(
+                      bitmap = bitmap.asImageBitmap(),
+                      contentDescription = "Album Cover",
+                      modifier = Modifier.fillMaxSize(.8f),
+                  )
                 }
                     ?: run {
-                        Image(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = "Album Cover",
-                            modifier = Modifier.fillMaxSize(.8f),
-                        )
+                      Image(
+                          imageVector = Icons.Default.PlayArrow,
+                          contentDescription = "Album Cover",
+                          modifier = Modifier.fillMaxSize(.8f),
+                      )
                     }
-            }
-            Column(modifier = Modifier.weight(1f).horizontalScroll(scrollState)) {
-                Text(
-                    text = trackAndProfile.track.title,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.titleMedium)
-                Text(
-                    text = trackAndProfile.track.artist,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium)
-            }
+              }
+          Column(modifier = Modifier.weight(1f).horizontalScroll(scrollState)) {
+            Text(
+                text = trackAndProfile.track.title,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = trackAndProfile.track.artist,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium)
+          }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End) {
+          Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.End) {
                 val isLiked = remember {
-                    mutableStateOf(
-                        profileViewModel.wanderwaveLikedTracks.value.contains(trackAndProfile.track))
+                  mutableStateOf(
+                      profileViewModel.wanderwaveLikedTracks.value.contains(trackAndProfile.track))
                 }
                 LikeButton(
                     isLiked = isLiked,
                     onLike = {
 
-                        // Update UI
-                        isLiked.value = true
-                        scope.launch {
-                            profileViewModel.likeTrack(trackAndProfile.track)
-                            // Update it on Firebase
-                            profileViewModel.updateProfile(profileViewModel.profile.value)
-                        }
+                      // Update UI
+                      isLiked.value = true
+                      scope.launch {
+                        profileViewModel.likeTrack(trackAndProfile.track)
+                        // Update it on Firebase
+                        profileViewModel.updateProfile(profileViewModel.profile.value)
+                      }
                     },
                     onUnlike = {
 
-                        // Add liked track to the profile
-                        profileViewModel.unlikeTrack(trackAndProfile.track)
-                        // Update it on Firebase
-                        profileViewModel.updateProfile(profileViewModel.profile.value)
+                      // Add liked track to the profile
+                      profileViewModel.unlikeTrack(trackAndProfile.track)
+                      // Update it on Firebase
+                      profileViewModel.updateProfile(profileViewModel.profile.value)
 
-                        // Update UI
-                        isLiked.value = false
+                      // Update UI
+                      isLiked.value = false
                     },
                     modifier = Modifier.size(20.dp) // Adjust size of the heart icon here
-                )
+                    )
 
                 Spacer(
                     modifier =
-                    Modifier.width(
-                        8.dp)) // Add some space between profile picture and heart icon
+                        Modifier.width(
+                            8.dp)) // Add some space between profile picture and heart icon
                 if (trackAndProfile.profile != null) {
-                    SelectImage(
-                        modifier =
-                        Modifier.size(64.dp)
-                            .clip(CircleShape) // Make the profile image circular
-                            .clickable(
-                                enabled = trackAndProfile.profile.isPublic,
-                                onClick = {
+                  SelectImage(
+                      modifier =
+                          Modifier.size(64.dp)
+                              .clip(CircleShape) // Make the profile image circular
+                              .clickable(
+                                  enabled = trackAndProfile.profile.isPublic,
+                                  onClick = {
                                     if (trackAndProfile.profile.isPublic) {
-                                        // if the profile is public, navigate to the profile view
-                                        // screen
-                                        navigationActions.navigateToProfile(
-                                            trackAndProfile.profile.firebaseUid)
+                                      // if the profile is public, navigate to the profile view
+                                      // screen
+                                      navigationActions.navigateToProfile(
+                                          trackAndProfile.profile.firebaseUid)
                                     } else {
-                                        // if the profile is private , output a message that say the
-                                        // profile
-                                        // is private, you cannot access to profile informations
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar(
-                                                "This profile is private, you cannot access profile information.")
-                                        }
+                                      // if the profile is private , output a message that say the
+                                      // profile
+                                      // is private, you cannot access to profile informations
+                                      scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            "This profile is private, you cannot access profile information.")
+                                      }
                                     }
-                                }),
-                        imageUri = trackAndProfile.profile.profilePictureUri,
-                        profile = trackAndProfile.profile)
+                                  }),
+                      imageUri = trackAndProfile.profile.profilePictureUri,
+                      profile = trackAndProfile.profile)
                 }
-            }
+              }
         }
-    }
+  }
 }
 
 @Composable
@@ -296,39 +296,39 @@ internal fun LikeButton(
     onUnlike: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = Modifier.fillMaxHeight().aspectRatio(1f).padding(start = 8.dp),
-        contentAlignment = Alignment.Center) {
+  Box(
+      modifier = Modifier.fillMaxHeight().aspectRatio(1f).padding(start = 8.dp),
+      contentAlignment = Alignment.Center) {
         Image(
             imageVector =
-            if (isLiked.value) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                if (isLiked.value) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
             contentDescription = "Like Button",
             modifier =
-            modifier.fillMaxSize(.65f).clickable {
-                if (isLiked.value) {
+                modifier.fillMaxSize(.65f).clickable {
+                  if (isLiked.value) {
                     onUnlike()
-                } else {
+                  } else {
                     onLike()
-                }
-            },
+                  }
+                },
             colorFilter = ColorFilter.tint(if (isLiked.value) spotify_green else Color.DarkGray))
-    }
+      }
 }
 
 @Composable
 internal fun TrackListItemLaunchedEffect(scope: CoroutineScope, scrollState: ScrollState) {
-    val slowScrollAnimation: AnimationSpec<Float> = TweenSpec(durationMillis = 5000, easing = { it })
-    LaunchedEffect(key1 = true) {
-        while (true) {
-            scope.launch {
-                scrollState.animateScrollTo(
-                    value = scrollState.maxValue, animationSpec = slowScrollAnimation)
-            }
-            delay(6000)
-            scope.launch { scrollState.animateScrollTo(value = 0, animationSpec = slowScrollAnimation) }
-            delay(6000)
-        }
+  val slowScrollAnimation: AnimationSpec<Float> = TweenSpec(durationMillis = 5000, easing = { it })
+  LaunchedEffect(key1 = true) {
+    while (true) {
+      scope.launch {
+        scrollState.animateScrollTo(
+            value = scrollState.maxValue, animationSpec = slowScrollAnimation)
+      }
+      delay(6000)
+      scope.launch { scrollState.animateScrollTo(value = 0, animationSpec = slowScrollAnimation) }
+      delay(6000)
     }
+  }
 }
 
 @Composable
@@ -337,19 +337,19 @@ internal fun TrackListItemCard(
     selected: Boolean,
     content: @Composable () -> Unit
 ) {
-    Card(
-        onClick = onClick,
-        colors =
-        CardColors(
-            containerColor =
-            if (selected) MaterialTheme.colorScheme.surfaceContainerHighest
-            else MaterialTheme.colorScheme.surfaceContainerHigh,
-            CardDefaults.cardColors().contentColor,
-            CardDefaults.cardColors().disabledContainerColor,
-            CardDefaults.cardColors().disabledContentColor),
-        modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem")) {
+  Card(
+      onClick = onClick,
+      colors =
+          CardColors(
+              containerColor =
+                  if (selected) MaterialTheme.colorScheme.surfaceContainerHighest
+                  else MaterialTheme.colorScheme.surfaceContainerHigh,
+              CardDefaults.cardColors().contentColor,
+              CardDefaults.cardColors().disabledContainerColor,
+              CardDefaults.cardColors().disabledContentColor),
+      modifier = Modifier.height(80.dp).fillMaxWidth().padding(4.dp).testTag("trackItem")) {
         content()
-    }
+      }
 }
 
 @OptIn(ExperimentalWearMaterialApi::class)
@@ -361,42 +361,42 @@ fun RemovableTrackListItem(
     onRemove: () -> Unit,
     profileViewModel: ProfileViewModel
 ) {
-    val scope = rememberCoroutineScope()
-    val scrollState = rememberScrollState()
-    TrackListItemLaunchedEffect(scope = scope, scrollState = scrollState)
+  val scope = rememberCoroutineScope()
+  val scrollState = rememberScrollState()
+  TrackListItemLaunchedEffect(scope = scope, scrollState = scrollState)
 
-    val swipeState = rememberSwipeableState(0)
-    val swipeDistance = 100f
+  val swipeState = rememberSwipeableState(0)
+  val swipeDistance = 100f
 
+  Box(
+      contentAlignment = Alignment.CenterEnd,
+  ) {
     Box(
-        contentAlignment = Alignment.CenterEnd,
-    ) {
-        Box(
-            modifier =
+        modifier =
             Modifier.swipeable(
-                state = swipeState,
-                anchors = mapOf(-swipeDistance to 1, 0f to 0),
-                orientation = Orientation.Horizontal,
-            )
+                    state = swipeState,
+                    anchors = mapOf(-swipeDistance to 1, 0f to 0),
+                    orientation = Orientation.Horizontal,
+                )
                 .offset(x = swipeState.offset.value.dp)) {
-            TrackListItem(
-                track = track,
-                selected = selected,
-                onClick = onClick,
-                profileViewModel = profileViewModel)
+          TrackListItem(
+              track = track,
+              selected = selected,
+              onClick = onClick,
+              profileViewModel = profileViewModel)
         }
-        AnimatedVisibility(visible = swipeState.offset.value <= -swipeDistance) {
-            IconButton(
-                onClick = {
-                    scope.launch { swipeState.snapTo(0) }
-                    onRemove()
-                },
-                modifier = Modifier) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
-                    tint = MaterialTheme.colorScheme.error)
-            }
-        }
+    AnimatedVisibility(visible = swipeState.offset.value <= -swipeDistance) {
+      IconButton(
+          onClick = {
+            scope.launch { swipeState.snapTo(0) }
+            onRemove()
+          },
+          modifier = Modifier) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete",
+                tint = MaterialTheme.colorScheme.error)
+          }
     }
+  }
 }
