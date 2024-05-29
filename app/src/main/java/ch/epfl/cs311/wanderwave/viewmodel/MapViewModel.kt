@@ -220,12 +220,7 @@ constructor(
     viewModelScope.launch {
       val currentUserId = authenticationController.getUserData()!!.id
       profileRepository.getItem(currentUserId).collect { fetchedProfile ->
-        fetchedProfile.onSuccess { fetchedProfile ->
-          run {
-            _profile.value = fetchedProfile
-            Log.i("Profile", "Current profile: $fetchedProfile")
-          }
-        }
+        fetchedProfile.onSuccess { fetchedProfile -> _profile.value = fetchedProfile }
         fetchedProfile.onFailure { exception ->
           Log.e("Profile not found", "Profile not found for the given id $exception")
         }
