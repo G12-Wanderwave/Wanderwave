@@ -158,12 +158,12 @@ class BeaconConnection(
               tracks.mapNotNull {
                 val creatorRef = it["creator"]
                 val trackRef = it["track"]
-                val numberOfLikes = it["numberOfLikes"] as? Int ?: 0
+                val likes = it["likes"] as? Int ?: 0
 
                 val creator = creatorRef?.let { Profile.from(transaction[it]) }
                 val track = trackRef?.let { Track.from(transaction[it]) }
 
-                track?.let { ProfileTrackAssociation(creator, it, numberOfLikes) }
+                track?.let { ProfileTrackAssociation(creator, it, likes) }
               }
 
           beacon?.let { beaconNotNull ->
@@ -176,7 +176,7 @@ class BeaconConnection(
                           db.collection(trackConnection.collectionName).document(track.id)
                       add(
                           hashMapOf(
-                              "profile" to profileRef, "track" to trackRef, "numberOfLikes" to 0))
+                              "profile" to profileRef, "track" to trackRef, "likes" to 0))
                     }
 
             transaction.update(beaconRef, "tracks", newTracks)
