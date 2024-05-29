@@ -66,4 +66,6 @@ wrapper/
 .cxx
 local.properties
 secrets.properties
+google-services.json
+app/google-services.json
 *.keystore
