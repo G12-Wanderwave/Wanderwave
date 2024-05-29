@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
+import android.util.Log
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationUserData
@@ -435,6 +436,42 @@ class AuthenticationControllerTest {
     every { Base64.encodeToString(imageBytes, Base64.NO_WRAP) } returns "base64ImageString"
   }
 
+  private fun setupRefreshSpotifyTokenMock(success: Boolean = true) {
+    val responseJson =
+        if (success) {
+          """
+            {
+                "firebase_token": "test-firebase-token",
+                "access_token": "test-access-token",
+                "refresh_token": "test-refresh-token"
+            }
+            """
+              .trimIndent()
+        } else {
+          ""
+        }
+
+    val mockResponseBody: ResponseBody = mockk { every { string() } returns responseJson }
+
+    val mockResponse: Response = mockk {
+      every { isSuccessful } returns success
+      every { body } returns mockResponseBody
+    }
+
+    val mockCall: Call = mockk { every { execute() } returns mockResponse }
+
+    every { mockHttpClient.newCall(any()) } returns mockCall
+
+    if (success) {
+      coEvery { mockTokenRepository.setAuthToken(any(), any(), any()) } returns Unit
+      coEvery {
+        mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+      } returns "test-access-token"
+    }
+
+    coEvery { authenticationController.refreshSpotifyToken() } returns success
+  }
+
   @Test
   fun testUploadPlaylistImage_Success() = runBlocking {
     // Arrange
@@ -444,10 +481,7 @@ class AuthenticationControllerTest {
     val mockResponse: Response = mockk()
     val mockResponseBody: ResponseBody = mockk()
 
-    coEvery {
-      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
-    } returns "testToken"
-    coEvery { authenticationController.refreshSpotifyToken() } returns true
+    setupRefreshSpotifyTokenMock()
     every { mockHttpClient.newCall(any()) } returns mockCall
     every { mockCall.execute() } returns mockResponse
     every { mockResponse.isSuccessful } returns true
@@ -481,10 +515,10 @@ class AuthenticationControllerTest {
     val mockResponseBody: ResponseBody = mockk()
     val mockRetryResponseBody: ResponseBody = mockk()
 
+    setupRefreshSpotifyTokenMock()
     coEvery {
       mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
     } returns "expiredToken" andThen "newToken"
-    coEvery { authenticationController.refreshSpotifyToken() } returns true
     every { mockHttpClient.newCall(any()) } returns mockCall
     every { mockCall.execute() } returns mockResponse andThen mockRetryResponse
     every { mockResponse.isSuccessful } returns false
@@ -523,7 +557,7 @@ class AuthenticationControllerTest {
     coEvery {
       mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
     } returns "expiredToken"
-    coEvery { authenticationController.refreshSpotifyToken() } returns false
+    setupRefreshSpotifyTokenMock(success = false)
     every { mockHttpClient.newCall(any()) } returns mockCall
     every { mockCall.execute() } returns mockResponse
     every { mockResponse.isSuccessful } returns false
@@ -556,10 +590,10 @@ class AuthenticationControllerTest {
     val mockResponse: Response = mockk()
     val mockResponseBody: ResponseBody = mockk()
 
+    setupRefreshSpotifyTokenMock()
     coEvery {
       mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
     } returns "testToken"
-    coEvery { authenticationController.refreshSpotifyToken() } returns true
     every { mockHttpClient.newCall(any()) } returns mockCall
     every { mockCall.execute() } returns mockResponse
     every { mockResponse.isSuccessful } returns false
@@ -590,10 +624,10 @@ class AuthenticationControllerTest {
     val playlistId = "testPlaylistId"
     val mockCall: Call = mockk()
 
+    setupRefreshSpotifyTokenMock()
     coEvery {
       mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
     } returns "testToken"
-    coEvery { authenticationController.refreshSpotifyToken() } returns true
     every { mockHttpClient.newCall(any()) } returns mockCall
     every { mockCall.execute() } throws IOException("Network error")
 
@@ -611,5 +645,102 @@ class AuthenticationControllerTest {
     // Cleanup
     unmockkStatic(BitmapFactory::class)
     unmockkStatic(Base64::class)
+  }
+
+  @Test
+  fun testUploadPlaylistImage3(): Unit = runBlocking {
+    setupDummyUserSignedIn()
+
+    val mockContext: Context = mockk(relaxed = true)
+    val playlistId = "testPlaylistId"
+    val mockCall: Call = mockk()
+    val mockResponse: Response = mockk()
+    val mockResponseBody: ResponseBody = mockk()
+
+    // Mocking token repository to return a valid token
+    coEvery {
+      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+    } returns "testToken"
+
+    // Mocking HTTP client call and response
+    every { mockHttpClient.newCall(any()) } returns mockCall
+    every { mockCall.execute() } returns mockResponse
+    every { mockResponse.isSuccessful } returns true
+    every { mockResponse.body } returns mockResponseBody
+    every { mockResponseBody.string() } returns
+        """
+        {
+          "firebase_token": "test-firebase-token",
+          "access_token": "test-access-token",
+          "refresh_token": "test-refresh-token"
+        }
+    """
+            .trimIndent()
+
+    // Mocking Bitmap and Base64 encoding
+    val mockBitmap: Bitmap = mockk()
+    mockkStatic(BitmapFactory::class)
+    every { BitmapFactory.decodeResource(mockContext.resources, R.drawable.ic_logo) } returns
+        mockBitmap
+
+    val outputStream = ByteArrayOutputStream()
+    every { mockBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream) } returns true
+    val imageBytes = outputStream.toByteArray()
+
+    mockkStatic(Base64::class)
+    every { Base64.encodeToString(imageBytes, Base64.NO_WRAP) } returns "base64Image"
+
+    // Logging to debug the issue
+    Log.d("AuthenticationController", "Starting uploadPlaylistImage test")
+
+    // Act
+    authenticationController.uploadPlaylistImage(mockContext, playlistId)
+
+    // Logging to confirm completion
+    Log.d("AuthenticationController", "uploadPlaylistImage test completed")
+  }
+
+  @Test
+  fun testUploadPlaylistImage_TokenRefreshFlow() = runBlocking {
+    setupDummyUserSignedIn()
+
+    val mockContext: Context = mockk(relaxed = true)
+    val playlistId = "testPlaylistId"
+    val mockCall: Call = mockk()
+    val mockResponse: Response = mockk()
+    val mockResponseBody: ResponseBody = mockk()
+
+    // Simulate token refresh needed
+    coEvery {
+      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+    } returns "expiredToken"
+
+    every { mockHttpClient.newCall(any()) } returns mockCall
+    every { mockCall.execute() } returnsMany
+        listOf(
+            mockResponse.apply {
+              every { isSuccessful } returns false
+              every { code } returns 401
+            },
+            mockResponse.apply { every { isSuccessful } returns true })
+
+    coEvery { authenticationController.refreshSpotifyToken() } returns true
+    coEvery {
+      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+    } returns "newToken"
+
+    val mockBitmap: Bitmap = mockk()
+    mockkStatic(BitmapFactory::class)
+    every { BitmapFactory.decodeResource(mockContext.resources, R.drawable.ic_logo) } returns
+        mockBitmap
+
+    val outputStream = ByteArrayOutputStream()
+    every { mockBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream) } returns true
+    val imageBytes = outputStream.toByteArray()
+
+    mockkStatic(Base64::class)
+    every { Base64.encodeToString(imageBytes, Base64.NO_WRAP) } returns "base64Image"
+
+    authenticationController.uploadPlaylistImage(mockContext, playlistId)
   }
 }
