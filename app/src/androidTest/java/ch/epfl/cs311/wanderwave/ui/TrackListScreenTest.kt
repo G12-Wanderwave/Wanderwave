@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationUserData
 import ch.epfl.cs311.wanderwave.model.data.Profile
@@ -14,6 +15,7 @@ import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
+import ch.epfl.cs311.wanderwave.model.repository.RecentlyPlayedRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -26,6 +28,7 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.kakaocup.compose.node.element.ComposeScreen.Companion.onComposeScreen
+import io.github.kakaocup.kakao.common.utilities.getResourceString
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -61,6 +64,8 @@ class TrackListScreenTest : TestCase() {
   @RelaxedMockK lateinit var mockShowMessage: (String) -> Unit
   @RelaxedMockK private lateinit var mockNavController: NavHostController
 
+  @RelaxedMockK private lateinit var mockRecentlyPlayedRepository: RecentlyPlayedRepository
+
   @Before
   fun setup() {
 
@@ -95,9 +100,10 @@ class TrackListScreenTest : TestCase() {
             appDatabase,
             trackRepository,
             profileRepository,
-            authenticationController)
-    every { mockSpotifyController.recentlyPlayedTracks.value } returns
-        listOf(Track("id1", "title1", "artist1"))
+            authenticationController,
+            mockRecentlyPlayedRepository)
+    every { mockRecentlyPlayedRepository.getRecentlyPlayed() } returns
+        flowOf(listOf(Track("id1", "title1", "artist1")))
     composeTestRule.setContent {
       TrackListScreen(mockNavigationActions, viewModel, profileViewModel, true)
     }
@@ -111,15 +117,27 @@ class TrackListScreenTest : TestCase() {
       assertIsDisplayed()
       composeTestRule.onNodeWithTag("tab0").performClick()
       composeTestRule.onNodeWithTag("trackListTitle").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("trackListTitle").assertTextEquals("Recently Added Tracks")
+      composeTestRule
+          .onNodeWithTag("trackListTitle")
+          .assertTextEquals(getResourceString(R.string.recently_played_tracks))
 
       composeTestRule.onNodeWithTag("tab1").performClick()
       composeTestRule.onNodeWithTag("trackListTitle").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("trackListTitle").assertTextEquals("Liked Tracks")
+      composeTestRule
+          .onNodeWithTag("trackListTitle")
+          .assertTextEquals(getResourceString(R.string.recently_added_tracks))
 
       composeTestRule.onNodeWithTag("tab2").performClick()
       composeTestRule.onNodeWithTag("trackListTitle").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("trackListTitle").assertTextEquals("Banned Tracks")
+      composeTestRule
+          .onNodeWithTag("trackListTitle")
+          .assertTextEquals(getResourceString(R.string.liked_tracks))
+
+      composeTestRule.onNodeWithTag("tab3").performClick()
+      composeTestRule.onNodeWithTag("trackListTitle").assertIsDisplayed()
+      composeTestRule
+          .onNodeWithTag("trackListTitle")
+          .assertTextEquals(getResourceString(R.string.banned_tracks))
     }
   }
 

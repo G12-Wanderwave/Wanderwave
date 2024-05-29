@@ -265,7 +265,7 @@ public class ProfileConnectionTest {
       // Verify that the get function is called on the document with the correct id
       coVerify { documentReference.addSnapshotListener(any()) }
 
-      assertEquals(Result.success<Profile>(getTestProfile), retrievedProfile)
+      assertEquals(Result.success(getTestProfile), retrievedProfile)
     }
   }
 
@@ -424,56 +424,6 @@ public class ProfileConnectionTest {
     assertTrue(result.isFailure)
     assertEquals("Could not retrieve topSongs", result.exceptionOrNull()?.message)
   }
-
-  //    @Test
-  //    fun documentReferencesToFlows_returnsFailure_whenFetchTrackFails() = runBlockingTest {
-  //        // Mocking
-  //        val documentReference = mockk<DocumentReference>()
-  //        val trackConnection = mockk<TrackConnection>()
-  //        val documentReferences = listOf(documentReference, documentReference, documentReference)
-  //
-  //        coEvery { trackConnection.fetchTrack(any()) } returns
-  // flowOf(Result.failure(Exception("Fetch failed")))
-  //
-  //        // Act
-  //        val result = profileConnection.documentReferencesToFlows(documentReferences,
-  // trackConnection).first()
-  //
-  //        // Assert
-  //        assertTrue(result.isFailure)
-  //    }
-  //
-  //
-  //    @Test
-  //    fun documentTransform_returnsFailure_whenDocumentDoesNotExist() = runBlockingTest {
-  //        // Mocking
-  //        val documentSnapshot = mockk<DocumentSnapshot>()
-  //        every { documentSnapshot.exists() } returns false
-  //
-  //        // Act
-  //        val result = profileConnection.documentTransform(documentSnapshot, null).first()
-  //
-  //        // Assert
-  //        assertTrue(result.isFailure)
-  //        assertEquals("Document does not exist", result.exceptionOrNull()?.message)
-  //    }
-  //
-  //    @Test
-  //    fun documentTransform_returnsProfile_whenDocumentExistsAndItemIsNull() = runBlockingTest {
-  //        // Mocking
-  //        val documentSnapshot = mockk<DocumentSnapshot>()
-  //        every { documentSnapshot.exists() } returns true
-  //        every { documentSnapshot.getString(any()) } returns "test"
-  //        every { documentSnapshot.getLong(any()) } returns 1
-  //        every { documentSnapshot.getBoolean(any()) } returns true
-  //        every { documentSnapshot.get(any<String>()) } returns listOf<DocumentReference>()
-  //        // Act
-  //        val result = profileConnection.documentTransform(documentSnapshot, null).first()
-  //
-  //        // Assert
-  //        assertTrue(result.isSuccess)
-  //        assertNotNull(result.getOrNull())
-  //    }
 
   @Test
   fun testCombine() = runBlocking {

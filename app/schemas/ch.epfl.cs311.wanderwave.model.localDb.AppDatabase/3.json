@@ -1,0 +1,120 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "2e9c722cbeea337088766885e56ed0f6",
+    "entities": [
+      {
+        "tableName": "auth_tokens",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`token` TEXT NOT NULL, `expiration_date` INTEGER NOT NULL, `type` INTEGER NOT NULL, PRIMARY KEY(`token`))",
+        "fields": [
+          {
+            "fieldPath": "token",
+            "columnName": "token",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "expirationDate",
+            "columnName": "expiration_date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "token"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_auth_tokens_type",
+            "unique": true,
+            "columnNames": [
+              "type"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_auth_tokens_type` ON `${TABLE_NAME}` (`type`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "track_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `beaconId` TEXT NOT NULL, `trackId` TEXT NOT NULL, `timestamp` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "beaconId",
+            "columnName": "beaconId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "trackId",
+            "columnName": "trackId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "recently_played",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`track_id` TEXT NOT NULL, `last_played` INTEGER NOT NULL, PRIMARY KEY(`track_id`))",
+        "fields": [
+          {
+            "fieldPath": "trackId",
+            "columnName": "track_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastPlayed",
+            "columnName": "last_played",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "track_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2e9c722cbeea337088766885e56ed0f6')"
+    ]
+  }
+}

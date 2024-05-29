@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.lifecycle.ViewModel
@@ -8,6 +9,7 @@ import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
+import ch.epfl.cs311.wanderwave.model.repository.RecentlyPlayedRepository
 import ch.epfl.cs311.wanderwave.model.repository.TrackRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
@@ -31,43 +33,53 @@ constructor(
     private val appDatabase: AppDatabase,
     private val repository: TrackRepository,
     private val profileRepository: ProfileRepository,
-    private val authenticationController: AuthenticationController
+    private val authenticationController: AuthenticationController,
+    private val recentlyPlayedRepository: RecentlyPlayedRepository
 ) : ViewModel(), SpotifySongsActions {
 
   private val _uiState = MutableStateFlow(UiState(loading = true))
   val uiState: StateFlow<UiState> = _uiState
 
   private var _searchQuery = MutableStateFlow("")
+  private var observeTracksJob: Job? = null
 
   private val _nbrLikedSongs = MutableStateFlow(0)
   override val nbrLikedSongs: StateFlow<Int> = _nbrLikedSongs
 
   fun loadTracksBasedOnSource(index: Int) {
     viewModelScope.launch {
+      observeTracksJob?.let { it.cancel() }
       _uiState.value = _uiState.value.copy(loading = true)
       when (index) {
-        0 ->
-            _uiState.value =
-                _uiState.value.copy(
-                    tracks =
-                        spotifyController.recentlyPlayedTracks
-                            .value) // TODO:modify for the recnetly played tracks
-        1 -> loadRecentlyAddedTracks() // TODO: modify here for the liked tracks
-        2 -> loadRecentlyAddedTracks() // TODO: modify here for the banned tracks
+        0 -> loadRecentlyPlayedTracks()
+        1 -> loadRecentlyAddedTracks() // TODO: modify here for recently added tracks
+        2 -> loadRecentlyAddedTracks() // TODO: modify here for the liked tracks
+        3 -> loadRecentlyAddedTracks() // TODO: modify here for the banned tracks
       }
     }
   }
 
-  fun loadRecentlyAddedTracks() {
-    viewModelScope.launch {
-      val trackRecords =
-          appDatabase.trackRecordDao().getAllRecentlyAddedTracks().firstOrNull() ?: listOf()
-      val trackDetails =
-          trackRecords.mapNotNull {
-            repository.getItem(it.trackId).firstOrNull()?.getOrElse { null }
+  fun loadRecentlyPlayedTracks() {
+    observeTracksJob =
+        viewModelScope.launch {
+          recentlyPlayedRepository.getRecentlyPlayed().collect { tracks ->
+            _uiState.value = _uiState.value.copy(tracks = tracks, loading = false)
           }
-      _uiState.value = _uiState.value.copy(tracks = trackDetails, loading = false)
-    }
+        }
+  }
+
+  fun loadRecentlyAddedTracks() {
+    observeTracksJob =
+        viewModelScope.launch {
+          val trackRecords =
+              appDatabase.trackRecordDao().getAllRecentlyAddedTracks().firstOrNull() ?: listOf()
+          val trackDetails =
+              trackRecords.mapNotNull {
+                repository.getItem(it.trackId).firstOrNull()?.getOrElse { null }
+              }
+          Log.d("TrackListViewModel", "loadRecentlyAddedTracks: $trackDetails")
+          _uiState.value = _uiState.value.copy(tracks = trackDetails, loading = false)
+        }
   }
 
   private val _likedSongsTrackList = MutableStateFlow<List<ListItem>>(emptyList())
@@ -170,6 +182,7 @@ constructor(
 
   data class UiState(
       val tracks: List<Track> = listOf(),
+      val retrievedTrack: List<Track> = listOf(),
       val bannedTracks: List<Track> = emptyList(),
       val loading: Boolean = false,
       val expanded: Boolean = false,

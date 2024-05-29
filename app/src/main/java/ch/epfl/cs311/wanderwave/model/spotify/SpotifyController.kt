@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.repository.RecentlyPlayedRepository
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.Target
 import com.spotify.android.appremote.api.ConnectionParams
@@ -21,7 +22,9 @@ import com.spotify.protocol.types.PlayerState
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import java.net.URL
+import java.time.Instant
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,7 +44,9 @@ class SpotifyController
 @Inject
 constructor(
     private val context: Context,
-    private val authenticationController: AuthenticationController
+    private val authenticationController: AuthenticationController,
+    private val ioDispatcher: CoroutineDispatcher,
+    private val recentlyPlayedRepository: RecentlyPlayedRepository
 ) {
   private val PLAYLIST_NAME = "Wanderwave"
   private val PLAYLIST_DESCRIPTION = "Liked songs from Wanderwave"
@@ -60,9 +65,6 @@ constructor(
           "ugc-image-upload")
 
   var playbackTimer: Job? = null
-
-  private val MAX_RECENT_TRACKS = 10
-  val recentlyPlayedTracks = MutableStateFlow(emptyList<Track>())
 
   private val connectionParams =
       ConnectionParams.Builder(CLIENT_ID).setRedirectUri(REDIRECT_URI).showAuthView(true).build()
@@ -232,6 +234,11 @@ constructor(
     return appRemote.value?.isConnected ?: false
   }
 
+  fun addRecentlyPlayedTrack(track: com.spotify.protocol.types.Track) {
+    val wanderwaveTrack = track.toWanderwaveTrack()
+    recentlyPlayedRepository.addRecentlyPlayed(wanderwaveTrack, Instant.now())
+  }
+
   fun connectRemote(): Flow<ConnectResult> {
     return callbackFlow {
       if (isConnected()) {
@@ -278,11 +285,6 @@ constructor(
                 startPlaybackTimer(it.track.duration)
               }
             }
-            // prepend to the start of the recently played tracks list
-            recentlyPlayedTracks.value =
-                (listOf(track) + recentlyPlayedTracks.value.filterNot { it.id == track.id }).take(
-                    MAX_RECENT_TRACKS)
-            recentlyPlayedTracks.value
             onSuccess()
           }
           .setErrorCallback { error -> onFailure(error) }
@@ -408,6 +410,7 @@ constructor(
         if (playerState.track != null) {
           startPlaybackTimer(playerState.track.duration - playerState.playbackPosition)
         }
+        addRecentlyPlayedTrack(playerState.track)
       }
     }
   }
