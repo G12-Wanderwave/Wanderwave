@@ -12,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -116,7 +115,7 @@ fun SongsListDisplay(
   songLists?.let { songList ->
     TrackList(
         tracks = songList,
-        title = ListType.LIKED_SONGS.name,
+        title = "Spotify songs",
         onSelectTrack = onSelectTrack,
         onAddTrack = onAddTrack,
         canAddSong = canAddSong,

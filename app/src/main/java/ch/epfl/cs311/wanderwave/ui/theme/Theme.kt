@@ -77,6 +77,29 @@ private val DarkColorScheme =
         outlineVariant = md_theme_dark_outlineVariant,
         scrim = md_theme_dark_scrim,
     )
+val SpotifyDarkColorScheme =
+    darkColorScheme(
+        primary = spotify_theme_dark_primary,
+        onPrimary = spotify_theme_dark_onPrimary,
+        primaryContainer = spotify_theme_dark_primaryContainer,
+        onPrimaryContainer = spotify_theme_dark_onPrimaryContainer,
+        secondary = spotify_theme_dark_secondary,
+        onSecondary = spotify_theme_dark_onSecondary,
+        secondaryContainer = spotify_theme_dark_secondaryContainer,
+        onSecondaryContainer = spotify_theme_dark_onSecondaryContainer,
+        background = spotify_theme_dark_background,
+        onBackground = spotify_theme_dark_onBackground,
+        surface = spotify_theme_dark_surface,
+        onSurface = spotify_theme_dark_onSurface,
+        surfaceVariant = spotify_theme_dark_surfaceVariant,
+        onSurfaceVariant = spotify_theme_dark_onSurfaceVariant,
+        inverseSurface = spotify_theme_dark_inverseSurface,
+        inverseOnSurface = spotify_theme_dark_inverseOnSurface,
+        inversePrimary = spotify_theme_dark_inversePrimary,
+        surfaceTint = spotify_theme_dark_surfaceTint,
+        outlineVariant = spotify_theme_dark_outlineVariant,
+        scrim = spotify_theme_dark_scrim,
+    )
 
 @Composable
 fun WanderwaveTheme(
@@ -85,7 +108,7 @@ fun WanderwaveTheme(
     content: @Composable() () -> Unit
 ) {
   val colorScheme: ColorScheme =
-      DarkColorScheme // if (darkTheme) DarkColorScheme else LightColorScheme
+      SpotifyDarkColorScheme // if (darkTheme) DarkColorScheme else LightColorScheme
   val view = LocalView.current
   if (!view.isInEditMode) {
     SideEffect {
