@@ -33,7 +33,6 @@ import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.profile.ImageSelection
-import ch.epfl.cs311.wanderwave.ui.components.utils.WanderWaveButton
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_dark_error
 import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_primary
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
@@ -165,36 +164,35 @@ fun EditableTextFields(
  * @since 1.0
  * @last update 1.0
  */
-    @Composable
-    fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit, onDelete: () -> Unit) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-            Button(
-                onClick = onSave,
-                colors = ButtonDefaults.buttonColors(containerColor = md_theme_light_primary),
-                modifier = Modifier.width(100.dp).testTag("saveButton"),
-                shape = RoundedCornerShape(size = 50.dp)
-            ) {
-                Text(stringResource(id = R.string.save))
+@Composable
+fun ActionButtons(onSave: () -> Unit, onCancel: () -> Unit, onDelete: () -> Unit) {
+  Column(
+      verticalArrangement = Arrangement.spacedBy(2.dp),
+      horizontalAlignment = Alignment.CenterHorizontally) {
+        Button(
+            onClick = onSave,
+            colors = ButtonDefaults.buttonColors(containerColor = md_theme_light_primary),
+            modifier = Modifier.width(100.dp).testTag("saveButton"),
+            shape = RoundedCornerShape(size = 50.dp)) {
+              Text(stringResource(id = R.string.save))
             }
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(
-                onClick = onCancel,
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                border = BorderStroke(1.dp, md_theme_dark_error),
-                shape = RoundedCornerShape(size = 50.dp),
-                modifier = Modifier.width(100.dp).testTag("cancelButton")) {
-                Text(text = stringResource(id = R.string.cancel), color = md_theme_dark_error)
+        Spacer(modifier = Modifier.width(8.dp))
+        Button(
+            onClick = onCancel,
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+            border = BorderStroke(1.dp, md_theme_dark_error),
+            shape = RoundedCornerShape(size = 50.dp),
+            modifier = Modifier.width(100.dp).testTag("cancelButton")) {
+              Text(text = stringResource(id = R.string.cancel), color = md_theme_dark_error)
             }
-            Spacer(Modifier.padding(8.dp))
-            Button(
-                onClick = onDelete,
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                border = BorderStroke(1.dp, md_theme_dark_error),
-                shape = RoundedCornerShape(size = 50.dp),
-                modifier = Modifier.width(200.dp).testTag("deleteButton")) {
-                Text(text = stringResource(id = R.string.deleteProfile), color = md_theme_dark_error)
+        Spacer(Modifier.padding(8.dp))
+        Button(
+            onClick = onDelete,
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+            border = BorderStroke(1.dp, md_theme_dark_error),
+            shape = RoundedCornerShape(size = 50.dp),
+            modifier = Modifier.width(200.dp).testTag("deleteButton")) {
+              Text(text = stringResource(id = R.string.deleteProfile), color = md_theme_dark_error)
             }
-        }
-    }
+      }
+}
