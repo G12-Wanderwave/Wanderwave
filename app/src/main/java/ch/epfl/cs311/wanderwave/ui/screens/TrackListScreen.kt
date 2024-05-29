@@ -41,6 +41,7 @@ fun TrackListScreen(
   var selectedTabIndex by remember { mutableIntStateOf(0) }
   val tabs =
       listOf(
+          stringResource(R.string.recently_played_tracks),
           stringResource(R.string.recently_added_tracks),
           stringResource(R.string.liked_tracks),
           stringResource(R.string.banned_tracks))
@@ -81,7 +82,6 @@ fun TabContent1(
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   var searchQuery by remember { mutableStateOf("") }
-
   LaunchedEffect(Unit) { viewModel.updateBannedSongs() }
 
   Column(modifier = Modifier.testTag("trackListScreen")) {
@@ -104,7 +104,7 @@ fun TabContent1(
                 uiState.tracks.filter { track ->
                   uiState.bannedTracks.any { it.id == track.id }.not()
                 },
-            title = stringResource(R.string.recently_added_tracks),
+            title = stringResource(R.string.recently_played_tracks),
             canAddSong = false,
             onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
             onSelectTrack = viewModel::playTrack,
@@ -114,6 +114,21 @@ fun TabContent1(
             canLike = true)
       }
       1 -> {
+        TrackList(
+            tracks =
+                uiState.tracks.filter { track ->
+                  uiState.bannedTracks.any { it.id == track.id }.not()
+                },
+            title = stringResource(R.string.recently_added_tracks),
+            canAddSong = false,
+            onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
+            onSelectTrack = viewModel::playTrack,
+            navActions = navActions,
+            viewModelName = viewModelType.TRACKLIST,
+            profileViewModel = profileViewModel,
+            canLike = true)
+      }
+      2 -> {
         TrackList(
             tracks =
                 profileViewModel.wanderwaveLikedTracks.value.filter { track ->
@@ -126,9 +141,9 @@ fun TabContent1(
             viewModelName = viewModelType.TRACKLIST,
             profileViewModel = profileViewModel)
       }
-      2 -> {
+      3 -> {
         RemovableTrackList(
-            tracks = uiState.tracks,
+            tracks = uiState.retrievedTrack,
             title = stringResource(R.string.banned_tracks),
             onAddTrack = { navActions.navigateToSelectSongScreen(viewModelType.TRACKLIST) },
             onSelectTrack = viewModel::playTrack,

@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,13 +22,16 @@ class PlayerViewModel @Inject constructor(val spotifyController: SpotifyControll
   private val _looping = spotifyController.looping
   private val _shuffling = spotifyController.shuffling
   private val _expandedState = MutableStateFlow(false)
+  // bitmapimage state
+  private val _bitmapImage = MutableStateFlow<Bitmap?>(null)
 
   private var _uiState =
-      combine(_playerState, _expandedState, _looping, _shuffling) {
+      combine(_playerState, _expandedState, _looping, _shuffling, _bitmapImage) {
           playerState,
           expandedState,
           looping,
-          shuffling ->
+          shuffling,
+          bitmapImage ->
         Log.d("PlayerViewModel", "playerState: $playerState, expandedState: $expandedState")
         if (playerState == null) {
           UiState(expanded = expandedState)
@@ -37,7 +41,8 @@ class PlayerViewModel @Inject constructor(val spotifyController: SpotifyControll
                 isPlaying = !playerState.isPaused,
                 repeatMode = looping,
                 isShuffling = shuffling,
-                expanded = expandedState)
+                expanded = expandedState,
+                bitmapImage = bitmapImage)
       }
   val uiState: StateFlow<UiState> =
       _uiState.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), UiState())
@@ -60,6 +65,12 @@ class PlayerViewModel @Inject constructor(val spotifyController: SpotifyControll
 
   fun pause() {
     spotifyController.pauseTrack()
+  }
+
+  fun fetchImage() {
+    viewModelScope.launch {
+      uiState.value.track?.let { _bitmapImage.value = spotifyController.getTrackImage(it.id) }
+    }
   }
 
   fun skipForward() {
@@ -85,6 +96,7 @@ class PlayerViewModel @Inject constructor(val spotifyController: SpotifyControll
       val isPlaying: Boolean = false,
       val repeatMode: SpotifyController.RepeatMode = SpotifyController.RepeatMode.OFF,
       val isShuffling: Boolean = false,
-      val expanded: Boolean = false
+      val expanded: Boolean = false,
+      val bitmapImage: Bitmap? = null
   )
 }

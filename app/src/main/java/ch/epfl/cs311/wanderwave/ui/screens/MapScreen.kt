@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -26,7 +25,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
-import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.utils.LocationUpdatesService
 import ch.epfl.cs311.wanderwave.model.utils.findClosestBeacon
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -56,7 +54,8 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel) {
   val cameraPositionState: CameraPositionState = rememberCameraPositionState {}
   val mapIsLoaded = remember { mutableStateOf(false) }
   val locationState = remember { mutableStateOf<Location?>(null) }
-  val song = viewModel.retrievedSongs.collectAsStateWithLifecycle()
+
+  LaunchedEffect(Unit) { viewModel.getProfileOfCurrentUser() }
 
   val permissionState =
       rememberMultiplePermissionsState(
@@ -84,7 +83,7 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel) {
     }
 
     DisposableEffect(Unit) {
-      val receiver = createLocationReceiver(locationState, viewModel, song)
+      val receiver = createLocationReceiver(locationState, viewModel)
       val filter = IntentFilter(LocationUpdatesService.ACTION_LOCATION_BROADCAST)
       LocalBroadcastManager.getInstance(context).registerReceiver(receiver, filter)
 
@@ -102,25 +101,24 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel) {
 
 fun createLocationReceiver(
     locationState: MutableState<Location?>,
-    viewModel: MapViewModel,
-    song: State<ProfileTrackAssociation>
+    viewModel: MapViewModel
 ): BroadcastReceiver {
   return object : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
+
       val latitude = intent?.getDoubleExtra(LocationUpdatesService.EXTRA_LATITUDE, 0.0)
       val longitude = intent?.getDoubleExtra(LocationUpdatesService.EXTRA_LONGITUDE, 0.0)
       if (latitude != null && longitude != null) {
+        Log.d("MapScreen", "Received location update: $latitude, $longitude")
         locationState.value = Location(latitude, longitude)
+        viewModel.getProfileOfCurrentUser()
         if (context != null) {
           viewModel.loadBeacons(context, locationState.value!!)
         }
         val tempBeacon = findClosestBeacon(locationState.value!!, viewModel.beaconList.value)
         if (tempBeacon != null) {
           viewModel.getRandomSong(tempBeacon.id)
-          Log.d(
-              "MapScreen",
-              "retrieved song: ${song.value}") // TODO: the song is retrieved here if exist
-          // TODO: implement here the fact to drop a song to the nearest beacon
+          viewModel.retrieveRandomSongFromProfileAndAddToBeacon(tempBeacon.id)
         }
       }
     }

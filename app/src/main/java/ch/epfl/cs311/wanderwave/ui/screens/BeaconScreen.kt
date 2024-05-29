@@ -9,18 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +27,7 @@ import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.Location
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
+import ch.epfl.cs311.wanderwave.model.utils.addTrackToBeacon
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.navigation.Route
 import ch.epfl.cs311.wanderwave.ui.components.map.BeaconMapMarker
@@ -148,31 +143,15 @@ fun BeaconInformation(location: Location) {
 
 @Composable
 fun AddTrack(beacon: Beacon, navigationActions: NavigationActions, viewModel: BeaconViewModel) {
-  val chosenList = remember {
-    mutableStateOf(if (viewModel.isTopSongsListVisible.value) " Top Songs " else "Liked Songs")
-  }
   viewModel.beaconId = beacon.id
   Log.d("AddTrack", "Adding track to beacon ${beacon.id}")
 
   Row(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
       horizontalArrangement = Arrangement.Center) {
-        Button(
-            onClick = {
-              viewModel.changeChosenSongs()
-              chosenList.value =
-                  if (viewModel.isTopSongsListVisible.value) " Top Songs " else "Liked Songs"
-            }) {
-              Text(text = chosenList.value)
-            }
-        IconButton(
-            onClick = {
-              navigationActions.navigateToSelectSongScreen(viewModelType.BEACON)
-            }) { // Toggle dialog visibility
-              Icon(
-                  imageVector = Icons.Filled.Add,
-                  contentDescription = stringResource(R.string.beaconTitle))
-            }
+        Button(onClick = { navigationActions.navigateToSelectSongScreen(viewModelType.BEACON) }) {
+          Text(text = "Add a song")
+        }
       }
 }
 

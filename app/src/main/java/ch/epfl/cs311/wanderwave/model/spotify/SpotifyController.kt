@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import ch.epfl.cs311.wanderwave.BuildConfig
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
+import ch.epfl.cs311.wanderwave.model.repository.RecentlyPlayedRepository
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.Target
 import com.spotify.android.appremote.api.ConnectionParams
@@ -21,7 +22,9 @@ import com.spotify.protocol.types.PlayerState
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import java.net.URL
+import java.time.Instant
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,7 +44,9 @@ class SpotifyController
 @Inject
 constructor(
     private val context: Context,
-    private val authenticationController: AuthenticationController
+    private val authenticationController: AuthenticationController,
+    private val ioDispatcher: CoroutineDispatcher,
+    private val recentlyPlayedRepository: RecentlyPlayedRepository
 ) {
 
   private val CLIENT_ID = BuildConfig.SPOTIFY_CLIENT_ID
@@ -56,9 +61,6 @@ constructor(
           "user-read-private")
 
   var playbackTimer: Job? = null
-
-  private val MAX_RECENT_TRACKS = 10
-  val recentlyPlayedTracks = MutableStateFlow(emptyList<Track>())
 
   private val connectionParams =
       ConnectionParams.Builder(CLIENT_ID).setRedirectUri(REDIRECT_URI).showAuthView(true).build()
@@ -77,6 +79,25 @@ constructor(
         AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
             .setScopes(SCOPES.toTypedArray())
     return builder.build()
+  }
+
+  suspend fun getTrackImage(trackId: String): Bitmap? {
+    return try {
+      val albumId = getAlbumIdFromTrackId(this, trackId)
+      getAlbumImage(albumId)
+    } catch (e: Exception) {
+      e.printStackTrace()
+      null
+    }
+  }
+
+  suspend fun getAlbumIdFromTrackId(spotifyController: SpotifyController, trackId: String): String {
+    val trackId = trackId.split(":")[2]
+    val jsonResponse =
+        spotifyController.spotifyGetFromURL("https://api.spotify.com/v1/tracks/$trackId")
+    val jsonObject = JSONObject(jsonResponse)
+    val album = jsonObject.getJSONObject("album")
+    return album.getString("id")
   }
 
   suspend fun getAlbumImage(albumId: String): Bitmap? {
@@ -132,6 +153,11 @@ constructor(
     return appRemote.value?.isConnected ?: false
   }
 
+  fun addRecentlyPlayedTrack(track: com.spotify.protocol.types.Track) {
+    val wanderwaveTrack = track.toWanderwaveTrack()
+    recentlyPlayedRepository.addRecentlyPlayed(wanderwaveTrack, Instant.now())
+  }
+
   fun connectRemote(): Flow<ConnectResult> {
     return callbackFlow {
       if (isConnected()) {
@@ -178,11 +204,6 @@ constructor(
                 startPlaybackTimer(it.track.duration)
               }
             }
-            // prepend to the start of the recently played tracks list
-            recentlyPlayedTracks.value =
-                (listOf(track) + recentlyPlayedTracks.value.filterNot { it.id == track.id }).take(
-                    MAX_RECENT_TRACKS)
-            recentlyPlayedTracks.value
             onSuccess()
           }
           .setErrorCallback { error -> onFailure(error) }
@@ -308,6 +329,7 @@ constructor(
         if (playerState.track != null) {
           startPlaybackTimer(playerState.track.duration - playerState.playbackPosition)
         }
+        addRecentlyPlayedTrack(playerState.track)
       }
     }
   }
@@ -417,58 +439,25 @@ constructor(
     ONE
   }
 }
-/**
- * Get all the element of the main screen and add them to the top list
- *
- * @author Menzo Bouaissi
- * @since 2.0
- * @last update 3.0
- */
-fun retrieveAndAddSubsectionFromSpotify(
-    spotifySubsectionList: MutableStateFlow<List<ListItem>>,
-    spotifyController: SpotifyController,
-    scope: CoroutineScope
-) {
-  val track = spotifyController.getAllElementFromSpotify()
-  checkIfNullAndAddToAList(track, spotifySubsectionList, scope)
-}
 
-/**
- * Get all the element of the main screen and add them to the top list
- *
- * @author Menzo Bouaissi
- * @since 2.0
- * @last update 3.0
- */
-fun retrieveChildFromSpotify(
-    item: ListItem,
-    childrenPlaylistTrackList: MutableStateFlow<List<ListItem>>,
-    spotifyController: SpotifyController,
-    scope: CoroutineScope
-) {
-  val children = spotifyController.getAllChildren(item)
-  checkIfNullAndAddToAList(children, childrenPlaylistTrackList, scope)
-}
-
-fun checkIfNullAndAddToAList(
-    items: Flow<List<ListItem>>,
-    list: MutableStateFlow<List<ListItem>>,
-    scope: CoroutineScope
-) {
-  scope.launch {
-    val value = items.firstOrNull()
-    if (value != null) {
-      for (child in value) {
-        list.value += child
-      }
-    }
-  }
-}
+var totalLikes = -1
 
 fun com.spotify.protocol.types.Track.toWanderwaveTrack(): Track {
   return Track(this.uri, this.name, this.artist.name)
 }
 
+suspend fun getTotalLikedTracksFromSpotity(spotifyController: SpotifyController): Int {
+  val url = "https://api.spotify.com/v1/me/tracks"
+  return try {
+    val jsonResponse = spotifyController.spotifyGetFromURL("$url?limit=1")
+    val jsonObject = JSONObject(jsonResponse)
+    Log.d("SpotifyController", "Total liked tracks: ${jsonObject.getInt("total")}")
+    jsonObject.getInt("total")
+  } catch (e: Exception) {
+    e.printStackTrace()
+    0
+  }
+}
 /**
  * Get all the liked tracks of the user and add them to the likedSongs list.
  *
@@ -479,16 +468,18 @@ fun com.spotify.protocol.types.Track.toWanderwaveTrack(): Track {
  * @since 3.0
  * @last update 3.0
  */
-suspend fun getLikedTracksFromSpotify(
+fun getLikedTracksFromSpotify(
     likedSongsTrackList: MutableStateFlow<List<ListItem>>,
     spotifyController: SpotifyController,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    page: Int = 0
 ) {
   scope.launch {
     val url = "https://api.spotify.com/v1/me/tracks"
     try {
-      val jsonResponse =
-          spotifyController.spotifyGetFromURL("$url?limit=50") // TODO : revoir la limite
+      if (totalLikes == -1) totalLikes = getTotalLikedTracksFromSpotity(spotifyController)
+      val limit = (totalLikes - 50 * page).coerceAtMost(50)
+      val jsonResponse = spotifyController.spotifyGetFromURL("$url?limit=$limit&offset=${page* 50}")
       parseTracks(jsonResponse, likedSongsTrackList)
     } catch (e: Exception) {
       e.printStackTrace()
@@ -502,6 +493,7 @@ fun getTracksFromSpotifyPlaylist(
     spotifyController: SpotifyController,
     scope: CoroutineScope
 ) {
+
   scope.launch {
     val url = "https://api.spotify.com/v1/playlists/$playlistId/tracks"
     try {

@@ -1,5 +1,10 @@
 package ch.epfl.cs311.wanderwave.ui.components.player
 
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.TweenSpec
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,142 +15,120 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderColors
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableFloatState
-import androidx.compose.runtime.MutableIntState
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
-import ch.epfl.cs311.wanderwave.ui.theme.orange
 import ch.epfl.cs311.wanderwave.ui.theme.pink
 import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 import ch.epfl.cs311.wanderwave.viewmodel.PlayerViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
-fun ExclusivePlayer(
-    checked: MutableState<Boolean>,
-    selectedVote: MutableIntState,
-    uiState: PlayerViewModel.UiState,
-    progress: MutableFloatState
-) {
+fun ExclusivePlayer(uiState: PlayerViewModel.UiState, progress: MutableFloatState) {
   val viewModel: PlayerViewModel = hiltViewModel()
   Column(
       modifier = Modifier.fillMaxSize().padding(bottom = 84.dp).testTag("exclusivePlayer"),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.SpaceBetween) {
         Column(verticalArrangement = Arrangement.Top) {
-          PlayerDragHandleComponent(checked)
-          Box(
-              contentAlignment = Alignment.Center,
-              modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) {
-                SwitchComponent(checked)
-              }
-          Spacer(modifier = Modifier.height(10.dp))
-          PlayerIconButtonRowComponent()
-          Spacer(modifier = Modifier.height(15.dp))
-          VotingButtonsComponent(selectedVote)
+          PlayerDragHandle(duration1 = 1500, duration2 = 1500, duration3 = 1500, startColor = pink)
         }
-        TrackInfoComponent(uiState)
-        SliderComponent(progress)
-        PlayerControlRowComponent(viewModel, uiState)
+        Column(
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              TrackImageComponent(uiState = uiState, fetchAlbumImage = viewModel::fetchImage)
+              Spacer(modifier = Modifier.height(10.dp))
+              TrackInfoComponent(uiState)
+              Spacer(modifier = Modifier.height(10.dp))
+              SliderComponent(progress)
+              Spacer(modifier = Modifier.height(10.dp))
+              PlayerControlRowComponent(viewModel, uiState)
+            }
       }
 }
 
 @Composable
-fun PlayerDragHandleComponent(checked: MutableState<Boolean>) {
-  if (checked.value) {
-    PlayerDragHandle(duration1 = 1500, duration2 = 1500, duration3 = 1500, startColor = pink)
-  } else {
-    PlayerDragHandle(
-        duration1 = 4000, duration2 = 3000, duration3 = 2000, startColor = spotify_green)
+fun TrackImageComponent(uiState: PlayerViewModel.UiState, fetchAlbumImage: () -> Unit) {
+
+  LaunchedEffect(uiState.track) {
+    // fetch the image of the album
+    fetchAlbumImage()
+  }
+
+  // show the image of the album
+  Box(
+      modifier = Modifier.size(200.dp),
+      contentAlignment = Alignment.Center,
+  ) {
+    if (uiState.bitmapImage != null) {
+      Image(
+          bitmap = uiState.bitmapImage!!.asImageBitmap(),
+          contentDescription = "Album Art",
+          modifier = Modifier.size(200.dp))
+    } else {
+      // draw a square
+      Icon(
+          painter = painterResource(id = R.drawable.wanderwave_icon),
+          contentDescription = "Album Art",
+          tint = MaterialTheme.colorScheme.onSurface,
+          modifier = Modifier.size(100.dp))
+    }
   }
 }
 
 @Composable
-fun SwitchComponent(checked: MutableState<Boolean>) {
-  Switch(
-      modifier = Modifier.testTag("switch"),
-      checked = checked.value,
-      onCheckedChange = { checked.value = it },
-      colors =
-          SwitchColors(
-              checkedThumbColor = pink,
-              checkedTrackColor = MaterialTheme.colorScheme.surface,
-              checkedBorderColor = pink,
-              checkedIconColor = pink,
-              uncheckedThumbColor = spotify_green,
-              uncheckedTrackColor = MaterialTheme.colorScheme.surface,
-              uncheckedBorderColor = spotify_green,
-              uncheckedIconColor = spotify_green,
-              disabledCheckedThumbColor = MaterialTheme.colorScheme.onBackground,
-              disabledCheckedTrackColor = MaterialTheme.colorScheme.onBackground,
-              disabledCheckedBorderColor = MaterialTheme.colorScheme.onBackground,
-              disabledCheckedIconColor = MaterialTheme.colorScheme.onBackground,
-              disabledUncheckedThumbColor = MaterialTheme.colorScheme.onBackground,
-              disabledUncheckedTrackColor = MaterialTheme.colorScheme.onBackground,
-              disabledUncheckedBorderColor = MaterialTheme.colorScheme.onBackground,
-              disabledUncheckedIconColor = MaterialTheme.colorScheme.onBackground,
-          ))
-}
-
-@Composable
-fun PlayerIconButtonRowComponent() {
-  Row(
-      horizontalArrangement = Arrangement.SpaceAround,
-      verticalAlignment = Alignment.CenterVertically,
-      modifier = Modifier.fillMaxWidth()) {
-        PlayerIconButton(
-            onClick = {},
-            testTag = "broadcastButton",
-            painterId = R.drawable.broadcast_icon,
-            tint = MaterialTheme.colorScheme.onSurface)
-        PlayerIconButton(
-            onClick = {},
-            testTag = "beaconButton",
-            painterId = R.drawable.beacon_add_icon,
-            tint = MaterialTheme.colorScheme.onSurface)
-        PlayerIconButton(
-            onClick = {},
-            testTag = "playlistButton",
-            painterId = R.drawable.playlist_add_icon,
-            tint = MaterialTheme.colorScheme.onSurface)
-        PlayerIconButton(
-            onClick = {},
-            testTag = "ignoreButton",
-            painterId = R.drawable.ignore_list_icon,
-            tint = MaterialTheme.colorScheme.onSurface)
-      }
-}
-
-@Composable
-fun VotingButtonsComponent(selectedVote: MutableIntState) {
-  VotingButtons(selectedVote) { vote -> selectedVote.intValue = vote }
-}
-
-@Composable
 fun TrackInfoComponent(uiState: PlayerViewModel.UiState) {
-  Column(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center) {
-        Text(text = uiState.track?.artist ?: "", style = MaterialTheme.typography.titleSmall)
-        Text(text = uiState.track?.title ?: "", style = MaterialTheme.typography.titleMedium)
+  val scrollState = rememberScrollState()
+  val coroutineScope = rememberCoroutineScope()
+
+  val slowScrollAnimation: AnimationSpec<Float> =
+      TweenSpec(durationMillis = 10000, easing = FastOutSlowInEasing)
+
+  LaunchedEffect(key1 = true) {
+    coroutineScope.launch {
+      while (true) {
+        delay(1000) // delay before scroll starts
+        scrollState.animateScrollTo(scrollState.maxValue, slowScrollAnimation) // scroll to end
+        delay(1000) // delay at the end of scroll
+        scrollState.animateScrollTo(0, slowScrollAnimation) // scroll back to start
       }
+    }
+  }
+
+  Box(modifier = Modifier.padding(32.dp)) {
+    Column(
+        modifier = Modifier.fillMaxWidth().horizontalScroll(scrollState),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center) {
+          Text(
+              text = uiState.track?.artist ?: "",
+              style = MaterialTheme.typography.titleSmall,
+              modifier = Modifier.padding(10.dp))
+          Text(
+              text = uiState.track?.title ?: "",
+              style = MaterialTheme.typography.titleMedium,
+              modifier = Modifier.padding(10.dp))
+        }
+  }
 }
 
 @Composable
@@ -265,48 +248,5 @@ private fun PlayerIconButton(onClick: () -> Unit, testTag: String, painterId: In
         contentDescription = "",
         tint = tint,
         modifier = Modifier.size(50.dp))
-  }
-}
-
-@Composable
-fun VotingButtons(selectedVote: MutableState<Int>, onVoteSelected: (Int) -> Unit) {
-  val voteOptions = listOf(-2, -1, 1, 2)
-  val icons =
-      listOf(
-          R.drawable.downvote_two_icon,
-          R.drawable.downvote_one_icon,
-          R.drawable.upvote_one_icon,
-          R.drawable.upvote_two_icon)
-  val tints = listOf(Color.DarkGray, Color.Gray, orange, Color.Red)
-
-  Row(
-      horizontalArrangement = Arrangement.SpaceAround,
-      verticalAlignment = Alignment.CenterVertically,
-      modifier = Modifier.fillMaxWidth().testTag("votingButtons")) {
-        voteOptions.forEachIndexed { index, vote ->
-          VotingButton(
-              vote = vote,
-              selectedVote = selectedVote,
-              onVoteSelected = onVoteSelected,
-              icon = icons[index],
-              tint = tints[index])
-        }
-      }
-}
-
-@Composable
-fun VotingButton(
-    vote: Int,
-    selectedVote: MutableState<Int>,
-    onVoteSelected: (Int) -> Unit,
-    icon: Int,
-    tint: Color
-) {
-  IconButton(onClick = { onVoteSelected(vote) }, modifier = Modifier.size(20.dp)) {
-    Icon(
-        painter = painterResource(id = icon),
-        contentDescription = "",
-        tint = if (selectedVote.value == vote) tint else MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier.size(20.dp))
   }
 }
