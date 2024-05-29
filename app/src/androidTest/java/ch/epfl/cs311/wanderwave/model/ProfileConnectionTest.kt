@@ -186,7 +186,7 @@ public class ProfileConnectionTest {
       // make a real track
       val track =
           Track( // id, title, artist
-              "Sample ID", "trackTitle", "trackArtist")
+              "spotify:track:Sample ID", "trackTitle", "trackArtist")
 
       val mockDocumentSnapshot = mockk<DocumentSnapshot>()
 
