@@ -18,8 +18,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
@@ -42,8 +40,6 @@ fun SurroundWithMiniPlayer(
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   val sheetState = rememberStandardBottomSheetState(initialValue = SheetValue.PartiallyExpanded)
   val progress = remember { mutableFloatStateOf(0f) }
-  val selectedVote = remember { mutableIntStateOf(0) }
-  val checked = remember { mutableStateOf(false) }
 
   HandleSheetStateChanges(sheetState = sheetState, uiState = uiState, viewModel = viewModel)
   HandleProgressChanges(uiState = uiState, progress = progress)
@@ -58,11 +54,7 @@ fun SurroundWithMiniPlayer(
               onPauseClick = { viewModel.pause() },
               progress = progress)
         } else {
-          ExclusivePlayer(
-              checked = checked,
-              selectedVote = selectedVote,
-              uiState = uiState,
-              progress = progress)
+          ExclusivePlayer(uiState = uiState, progress = progress)
         }
       },
       sheetShape = RectangleShape,
@@ -117,14 +109,13 @@ private fun HandleSheetStateChanges(
 @Composable
 fun HandleProgressChanges(uiState: PlayerViewModel.UiState, progress: MutableFloatState) {
   LaunchedEffect(uiState.isPlaying) {
-    if (uiState.isPlaying) {
-      while (true) {
-        delay(1000L)
-        progress.floatValue += 0.01f
-        if (progress.floatValue >= 1f) {
-          progress.floatValue = 0f
-        }
+    while (uiState.isPlaying) {
+      delay(1000L)
+      progress.floatValue += 0.01f
+      if (progress.floatValue >= 1f) {
+        progress.floatValue = 0f
       }
     }
   }
+  LaunchedEffect(uiState.track) { progress.floatValue = 0f }
 }

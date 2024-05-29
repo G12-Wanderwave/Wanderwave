@@ -81,6 +81,25 @@ constructor(
     return builder.build()
   }
 
+  suspend fun getTrackImage(trackId: String): Bitmap? {
+    return try {
+      val albumId = getAlbumIdFromTrackId(this, trackId)
+      getAlbumImage(albumId)
+    } catch (e: Exception) {
+      e.printStackTrace()
+      null
+    }
+  }
+
+  suspend fun getAlbumIdFromTrackId(spotifyController: SpotifyController, trackId: String): String {
+    val trackId = trackId.split(":")[2]
+    val jsonResponse =
+        spotifyController.spotifyGetFromURL("https://api.spotify.com/v1/tracks/$trackId")
+    val jsonObject = JSONObject(jsonResponse)
+    val album = jsonObject.getJSONObject("album")
+    return album.getString("id")
+  }
+
   suspend fun getAlbumImage(albumId: String): Bitmap? {
     return try {
       val url = "https://api.spotify.com/v1/albums/$albumId"
