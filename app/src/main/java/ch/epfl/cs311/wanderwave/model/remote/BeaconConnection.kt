@@ -100,6 +100,9 @@ class BeaconConnection(
                         }
                       } ?: flowOf(Result.failure(Exception("Could not retrieve chosenSongs")))
 
+              // Send the original beacon first
+              trySend(Result.success(beacon))
+
               // Update the beacon with the profile and track
               profileAndTracks.collect { result ->
                 result.onSuccess { profileAndTracks ->
