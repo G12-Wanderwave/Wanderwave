@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui.components.tracklist
 
+import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.TweenSpec
@@ -39,10 +40,12 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.ExperimentalWearMaterialApi
@@ -77,6 +80,13 @@ fun TrackListItem(
 ) {
   val scope = rememberCoroutineScope()
   val scrollState = rememberScrollState()
+  val bitmapImage = rememberSaveable { mutableStateOf<Bitmap?>(null) }
+
+  // Launching the effect to fetch the image
+  LaunchedEffect(track.id) {
+    val bitmap = profileViewModel.fetchImage(track.id)
+    bitmapImage.value = bitmap
+  }
 
   TrackListItemLaunchedEffect(scope = scope, scrollState = scrollState)
 
@@ -114,11 +124,20 @@ fun TrackListItem(
       Box(
           modifier = Modifier.fillMaxHeight().aspectRatio(1f),
           contentAlignment = Alignment.Center) {
-            Image(
-                imageVector = Icons.Default.PlayArrow,
-                contentDescription = "Album Cover",
-                modifier = Modifier.fillMaxSize(.8f),
-            )
+            bitmapImage.value?.let { bitmap ->
+              Image(
+                  bitmap = bitmap.asImageBitmap(),
+                  contentDescription = "Album Cover",
+                  modifier = Modifier.fillMaxSize(.8f),
+              )
+            }
+                ?: run {
+                  Image(
+                      imageVector = Icons.Default.PlayArrow,
+                      contentDescription = "Album Cover",
+                      modifier = Modifier.fillMaxSize(.8f),
+                  )
+                }
           }
       Column(modifier = Modifier.padding(8.dp).horizontalScroll(scrollState)) {
         Text(
@@ -165,13 +184,6 @@ fun TrackListItemWithProfile(
       LikeButton(
           isLiked = isLiked,
           onLike = {
-            //            // Update the profile and track association
-            //            val newTrackProfile =
-            // trackAndProfile.likeTrack(profileViewModel.profile.value)
-            //            // Update it in the beacon
-            //            val newBeacon = beacon.updateProfileAndTrackElement(newTrackProfile)
-            //            // Update it on Firebase
-            //            beaconViewModel.updateBeacon(newBeacon)
             scope.launch {
               // Add liked track to the profile
               profileViewModel.likeTrack(trackAndProfile.track)
@@ -183,13 +195,6 @@ fun TrackListItemWithProfile(
             isLiked.value = true
           },
           onUnlike = {
-            //            // Update the profile and track association
-            //            val newTrackProfile =
-            // trackAndProfile.unlikeTrack(profileViewModel.profile.value)
-            //            // Update it in the beacon
-            //            val newBeacon = beacon.updateProfileAndTrackElement(newTrackProfile)
-            //            // Update it on Firebase
-            //            beaconViewModel.updateBeacon(newBeacon)
 
             // Add liked track to the profile
             profileViewModel.unlikeTrack(trackAndProfile.track)
