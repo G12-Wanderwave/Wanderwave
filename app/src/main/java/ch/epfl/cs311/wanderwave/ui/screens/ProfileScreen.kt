@@ -27,8 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,7 +38,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
@@ -49,7 +46,6 @@ import ch.epfl.cs311.wanderwave.ui.components.profile.ClickableIcon
 import ch.epfl.cs311.wanderwave.ui.components.profile.SelectImage
 import ch.epfl.cs311.wanderwave.ui.components.profile.SongsListDisplay
 import ch.epfl.cs311.wanderwave.ui.components.profile.VisitCard
-import ch.epfl.cs311.wanderwave.ui.theme.spotify_green
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
 const val SCALE_X = 0.5f
@@ -71,16 +67,10 @@ val INPUT_BOX_NAM_SIZE = 150.dp
 @Composable
 fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel, online: Boolean) {
   val currentProfileState by viewModel.profile.collectAsState()
-  val songLists by viewModel.songLists.collectAsState()
-  val dialogListType by remember { mutableStateOf(ListType.TOP_SONGS) }
-  val isTopSongsListVisible by viewModel.isTopSongsListVisible.collectAsState(false)
+  val profile by viewModel.profile.collectAsState()
 
   val currentProfile: Profile = currentProfileState
-  LaunchedEffect(Unit) {
-    viewModel.getProfileOfCurrentUser(true)
-    viewModel.createSpecificSongList(ListType.TOP_SONGS)
-    viewModel.createSpecificSongList(ListType.LIKED_SONGS)
-  }
+  LaunchedEffect(Unit) { viewModel.getProfileOfCurrentUser(true) }
 
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp).testTag("profileScreen"),
@@ -99,34 +89,13 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel, on
                 onClick = { navActions.navigateTo(Route.EDIT_PROFILE) })
           }
         }
-        // Toggle Button to switch between TOP SONGS and CHOSEN SONGS
-        Button(
-            onClick = { viewModel.changeChosenSongs() },
-            modifier = Modifier.testTag("toggleSongList"),
-            colors =
-                ButtonColors(
-                    contentColor = Color.Black,
-                    containerColor =
-                        if (isTopSongsListVisible) MaterialTheme.colorScheme.primary
-                        else spotify_green,
-                    disabledContentColor = Color.Gray,
-                    disabledContainerColor = Color.Black),
-            shape = RoundedCornerShape(size = 10.dp)) {
-              Text(
-                  if (isTopSongsListVisible) stringResource(id = R.string.showChosenSongs)
-                  else stringResource(id = R.string.showLikedSongs))
-            }
         SongsListDisplay(
             navigationActions = navActions,
-            songLists = songLists,
-            isTopSongsListVisible = isTopSongsListVisible,
-            onAddTrack = { track ->
-              viewModel.createSpecificSongList(dialogListType) // Ensure the list is created
-              viewModel.addTrackToList(dialogListType, track)
-            },
-            onSelectTrack = { track -> viewModel.selectTrack(track, dialogListType.name) },
+            songLists = profile.topSongs,
+            onAddTrack = { track -> viewModel.addTrackToList(track) },
+            onSelectTrack = { track -> viewModel.selectTrack(track) },
             viewModelName = viewModelType.PROFILE,
-        )
+            profileViewModel = viewModel)
       }
 }
 /**
@@ -192,7 +161,8 @@ fun ProfileButton(
         if (navActions.getCurrentRoute() == Route.MAIN) {
           SelectImage(
               modifier = Modifier.clip(CircleShape).size(50.dp),
-              imageUri = currentProfile.profilePictureUri)
+              imageUri = currentProfile.profilePictureUri,
+              profile = currentProfile)
         }
       }
 }

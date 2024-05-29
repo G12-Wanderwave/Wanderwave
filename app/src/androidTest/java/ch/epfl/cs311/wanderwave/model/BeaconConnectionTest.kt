@@ -249,6 +249,7 @@ public class BeaconConnectionTest {
               profileAndTrack = listOf())
 
       every { mockDocumentSnapshot.getData() } returns getTestBeacon.toMap(firestore)
+
       every { mockDocumentSnapshot.exists() } returns true
       every { mockDocumentSnapshot.id } returns getTestBeacon.id
       every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
@@ -329,12 +330,13 @@ public class BeaconConnectionTest {
       every { mockDocumentSnapshot.get("location") } returns getTestBeacon.location.toMap()
       every { mockDocumentSnapshot.get("tracks") } returns
           getTestBeacon.profileAndTrack.map { it.toMap(firestore) }
-      every { mockDocumentSnapshot.getLong(any()) } returns 0
 
       every { mockQuerySnapshot.documents } returns
           listOf(mockDocumentSnapshot, mockDocumentSnapshot)
       every { mockQuerySnapshot.iterator() } returns
           mutableListOf(mockDocumentSnapshot, mockDocumentSnapshot).iterator()
+
+      every { mockDocumentSnapshot.getLong("likes") } returns 0L
 
       // Define behavior for the addOnSuccessListener method
       every { mockTask.addOnSuccessListener(any<OnSuccessListener<QuerySnapshot>>()) } answers
@@ -460,7 +462,7 @@ public class BeaconConnectionTest {
           when {
             reference.path.contains("beacons") -> mockDocumentSnapshot
             reference.path.contains("users") ->
-                mockk<DocumentSnapshot>() { every { getData() } returns profile.toMap() }
+                mockk<DocumentSnapshot>() { every { getData() } returns profile.toMap(firestore) }
             reference.path.contains("tracks") ->
                 mockk<DocumentSnapshot>() { every { getData() } returns track.toMap() }
             reference.path.equals("") -> mockDocumentSnapshot
@@ -483,7 +485,7 @@ public class BeaconConnectionTest {
               "track" to firestore.collection("tracks").document(track.id))
         }
 
-    profile.toMap().forEach { (key, value) ->
+    profile.toMap(firestore).forEach { (key, value) ->
       every { mockDocumentSnapshot.get(key) } returns value
       (value as? String)?.let { every { mockDocumentSnapshot.getString(key) } returns it }
       (value as? Int)?.let { every { mockDocumentSnapshot.getLong(key) } returns it.toLong() }

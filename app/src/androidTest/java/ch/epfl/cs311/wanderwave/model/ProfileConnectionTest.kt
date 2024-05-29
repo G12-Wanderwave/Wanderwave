@@ -12,6 +12,7 @@ import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import io.mockk.MockKAnnotations
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -19,13 +20,17 @@ import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
@@ -116,6 +121,7 @@ public class ProfileConnectionTest {
             "profilePictureUri" to "https://example.com/image.jpg",
             "topSongs" to listOf<DocumentReference>(),
             "chosenSongs" to listOf<DocumentReference>(),
+            "likedSongs" to listOf<DocumentReference>(),
             "bannedSongs" to listOf<DocumentReference>())
 
     assertEquals(expectedMap, profileConnection.itemToMap(profile))
@@ -196,6 +202,7 @@ public class ProfileConnectionTest {
               "Sample ID",
               listOf(track),
               listOf(track, track),
+              listOf(track),
               listOf(track))
 
       every { mockDocumentSnapshot.getData() } returns getTestProfile.toMap(firebaseFirestore)
@@ -217,6 +224,8 @@ public class ProfileConnectionTest {
           getTestProfile.chosenSongs.map { trackDocumentReference }
       every { mockDocumentSnapshot.get("bannedSongs") } returns
           getTestProfile.bannedSongs.map { trackDocumentReference }
+      every { mockDocumentSnapshot.get("likedSongs") } returns
+          getTestProfile.likedSongs.map { trackDocumentReference }
 
       every { mockDocumentSnapshot.getString("title") } returns track.title
       every { mockDocumentSnapshot.getString("artist") } returns track.artist
@@ -256,7 +265,7 @@ public class ProfileConnectionTest {
       // Verify that the get function is called on the document with the correct id
       coVerify { documentReference.addSnapshotListener(any()) }
 
-      assertEquals(Result.success<Profile>(getTestProfile), retrievedProfile)
+      assertEquals(Result.success(getTestProfile), retrievedProfile)
     }
   }
 
@@ -272,6 +281,226 @@ public class ProfileConnectionTest {
   }
 
   @Test
+  fun testCombineFunctionWithNullAndNonNullValues() = runBlocking {
+    val track1 = Track("trackId1", "Track Title 1", "Track Artist 1")
+    val track2 = Track("trackId2", "Track Title 2", "Track Artist 2")
+    val initialProfile =
+        Profile(
+            "Sample First Name",
+            "Sample Last Name",
+            "Sample Description",
+            0,
+            false,
+            Uri.parse("https://example.com/image.jpg"),
+            "Sample Profile ID",
+            "Sample Firebase ID",
+            listOf(),
+            listOf(),
+            listOf(),
+            listOf())
+
+    val topSongsFlow = flowOf(Result.success(listOf(track1, track2)))
+    val chosenSongsFlow = flowOf(Result.success(listOf(track1, track2)))
+    val bannedSongsFlow = flowOf(Result.success(listOf(track1, track2)))
+    val likedSongsFlow = flowOf(Result.success(listOf(track1, track2)))
+
+    val combinedProfileFlow =
+        combine(topSongsFlow, chosenSongsFlow, bannedSongsFlow, likedSongsFlow) {
+            topSongsResult,
+            chosenSongsResult,
+            bannedSongsResult,
+            likedSongsResult ->
+          initialProfile.copy(
+              topSongs = topSongsResult.getOrNull() ?: initialProfile.topSongs,
+              chosenSongs = chosenSongsResult.getOrNull() ?: initialProfile.chosenSongs,
+              bannedSongs = bannedSongsResult.getOrNull() ?: initialProfile.bannedSongs,
+              likedSongs = likedSongsResult.getOrNull() ?: initialProfile.likedSongs)
+        }
+
+    val combinedProfile = combinedProfileFlow.first()
+
+    val expectedProfile =
+        initialProfile.copy(
+            topSongs = listOf(track1, track2),
+            chosenSongs = listOf(track1, track2),
+            bannedSongs = listOf(track1, track2),
+            likedSongs = listOf(track1, track2))
+
+    assertEquals(expectedProfile.topSongs, combinedProfile.topSongs)
+    assertEquals(expectedProfile.chosenSongs, combinedProfile.chosenSongs)
+    assertEquals(expectedProfile.bannedSongs, combinedProfile.bannedSongs)
+    assertEquals(expectedProfile.likedSongs, combinedProfile.likedSongs)
+    assertEquals(expectedProfile, combinedProfile)
+
+    val topSongsFlowNull = flowOf<Result<List<Track>>?>(null)
+    val chosenSongsFlowNull = flowOf<Result<List<Track>>?>(null)
+    val bannedSongsFlowNull = flowOf<Result<List<Track>>?>(null)
+    val likedSongsFlowNull = flowOf<Result<List<Track>>?>(null)
+
+    val combinedProfileFlowNull =
+        combine(topSongsFlowNull, chosenSongsFlowNull, bannedSongsFlowNull, likedSongsFlowNull) {
+            topSongsResult,
+            chosenSongsResult,
+            bannedSongsResult,
+            likedSongsResult ->
+          initialProfile.copy(
+              topSongs = topSongsResult?.getOrNull() ?: initialProfile.topSongs,
+              chosenSongs = chosenSongsResult?.getOrNull() ?: initialProfile.chosenSongs,
+              bannedSongs = bannedSongsResult?.getOrNull() ?: initialProfile.bannedSongs,
+              likedSongs = likedSongsResult?.getOrNull() ?: initialProfile.likedSongs)
+        }
+
+    val combinedProfileNull = combinedProfileFlowNull.first()
+
+    assertEquals(initialProfile.topSongs, combinedProfileNull.topSongs)
+    assertEquals(initialProfile.chosenSongs, combinedProfileNull.chosenSongs)
+    assertEquals(initialProfile.bannedSongs, combinedProfileNull.bannedSongs)
+    assertEquals(initialProfile.likedSongs, combinedProfileNull.likedSongs)
+    assertEquals(initialProfile, combinedProfileNull)
+
+    val topSongsFlowMixed = flowOf(Result.success(listOf(track1, track2)))
+    val chosenSongsFlowMixed = flowOf<Result<List<Track>>?>(null)
+    val bannedSongsFlowMixed = flowOf(Result.success(listOf(track1, track2)))
+    val likedSongsFlowMixed = flowOf<Result<List<Track>>?>(null)
+
+    val combinedProfileFlowMixed =
+        combine(
+            topSongsFlowMixed, chosenSongsFlowMixed, bannedSongsFlowMixed, likedSongsFlowMixed) {
+                topSongsResult,
+                chosenSongsResult,
+                bannedSongsResult,
+                likedSongsResult ->
+              initialProfile.copy(
+                  topSongs = topSongsResult?.getOrNull() ?: initialProfile.topSongs,
+                  chosenSongs = chosenSongsResult?.getOrNull() ?: initialProfile.chosenSongs,
+                  bannedSongs = bannedSongsResult?.getOrNull() ?: initialProfile.bannedSongs,
+                  likedSongs = likedSongsResult?.getOrNull() ?: initialProfile.likedSongs)
+            }
+
+    val combinedProfileMixed = combinedProfileFlowMixed.first()
+    val expectedProfileMixed =
+        initialProfile.copy(
+            topSongs = listOf(track1, track2),
+            chosenSongs = initialProfile.chosenSongs,
+            bannedSongs = listOf(track1, track2),
+            likedSongs = initialProfile.likedSongs)
+
+    assertEquals(expectedProfileMixed.topSongs, combinedProfileMixed.topSongs)
+    assertEquals(expectedProfileMixed.chosenSongs, combinedProfileMixed.chosenSongs)
+    assertEquals(expectedProfileMixed.bannedSongs, combinedProfileMixed.bannedSongs)
+    assertEquals(expectedProfileMixed.likedSongs, combinedProfileMixed.likedSongs)
+    assertEquals(expectedProfileMixed, combinedProfileMixed)
+  }
+
+  @Test
+  fun documentReferencesToFlows_returnsFlowOfTracks_whenDocumentReferencesAreValid() =
+      runBlockingTest {
+        // Mocking
+        val documentReference = mockk<DocumentReference>()
+        val trackConnection = mockk<TrackConnection>()
+        val track = mockk<Track>()
+        val documentReferences = listOf(documentReference, documentReference, documentReference)
+
+        coEvery { trackConnection.fetchTrack(any()) } returns flowOf(Result.success(track))
+
+        // Act
+        val result =
+            profileConnection.documentReferencesToFlows(documentReferences, trackConnection).first()
+
+        // Assert
+        assertTrue(result.isSuccess)
+        assertEquals(listOf(track, track, track), result.getOrNull())
+      }
+
+  @Test
+  fun documentReferencesToFlows_returnsFailure_whenDocumentReferencesAreNull() = runBlockingTest {
+    // Mocking
+    val trackConnection = mockk<TrackConnection>()
+
+    // Act
+    val result = profileConnection.documentReferencesToFlows(null, trackConnection).first()
+
+    // Assert
+    assertTrue(result.isFailure)
+    assertEquals("Could not retrieve topSongs", result.exceptionOrNull()?.message)
+  }
+
+  @Test
+  fun testCombine() = runBlocking {
+    val initialProfile =
+        Profile(
+            firstName = "Sample First Name",
+            lastName = "Sample Last Name",
+            description = "Sample Description",
+            numberOfLikes = 0,
+            isPublic = false,
+            profilePictureUri = Uri.parse("https://example.com/image.jpg"),
+            spotifyUid = "Sample Profile ID",
+            firebaseUid = "Sample Firebase ID",
+            topSongs = listOf(),
+            chosenSongs = listOf(),
+            bannedSongs = listOf(),
+            likedSongs = listOf())
+
+    val track1 = Track("trackId1", "Track Title 1", "Track Artist 1")
+    val track2 = Track("trackId2", "Track Title 2", "Track Artist 2")
+
+    // Define flows with successful results
+    val topSongsFlow = flowOf(Result.success(listOf(track1, track2)))
+    val chosenSongsFlow = flowOf(Result.success(listOf(track1)))
+    val bannedSongsFlow = flowOf(Result.success(listOf(track2)))
+    val likedSongsFlow = flowOf(Result.success(listOf(track1, track2)))
+
+    // Define flows with null results to simulate failures
+    val topSongsFlowNull = flowOf<Result<List<Track>>>(Result.failure(Throwable("Error")))
+    val chosenSongsFlowNull = flowOf<Result<List<Track>>>(Result.failure(Throwable("Error")))
+    val bannedSongsFlowNull = flowOf<Result<List<Track>>>(Result.failure(Throwable("Error")))
+    val likedSongsFlowNull = flowOf<Result<List<Track>>>(Result.failure(Throwable("Error")))
+
+    // Combine with non-null values
+    val combinedProfile =
+        combine(topSongsFlow, chosenSongsFlow, bannedSongsFlow, likedSongsFlow) {
+                topSongsResult,
+                chosenSongsResult,
+                bannedSongsResult,
+                likedSongsResult ->
+              initialProfile.copy(
+                  topSongs = topSongsResult.getOrNull() ?: initialProfile.topSongs,
+                  chosenSongs = chosenSongsResult.getOrNull() ?: initialProfile.chosenSongs,
+                  bannedSongs = bannedSongsResult.getOrNull() ?: initialProfile.bannedSongs,
+                  likedSongs = likedSongsResult.getOrNull() ?: initialProfile.likedSongs)
+            }
+            .first()
+
+    // Check results for non-null values
+    assertEquals(listOf(track1, track2), combinedProfile.topSongs)
+    assertEquals(listOf(track1), combinedProfile.chosenSongs)
+    assertEquals(listOf(track2), combinedProfile.bannedSongs)
+    assertEquals(listOf(track1, track2), combinedProfile.likedSongs)
+
+    // Combine with null values
+    val combinedProfileWithNulls =
+        combine(topSongsFlowNull, chosenSongsFlowNull, bannedSongsFlowNull, likedSongsFlowNull) {
+                topSongsResult,
+                chosenSongsResult,
+                bannedSongsResult,
+                likedSongsResult ->
+              initialProfile.copy(
+                  topSongs = topSongsResult.getOrNull() ?: initialProfile.topSongs,
+                  chosenSongs = chosenSongsResult.getOrNull() ?: initialProfile.chosenSongs,
+                  bannedSongs = bannedSongsResult.getOrNull() ?: initialProfile.bannedSongs,
+                  likedSongs = likedSongsResult.getOrNull() ?: initialProfile.likedSongs)
+            }
+            .first()
+
+    // Check results for null values (should fallback to initial profile values)
+    assertEquals(initialProfile.topSongs, combinedProfileWithNulls.topSongs)
+    assertEquals(initialProfile.chosenSongs, combinedProfileWithNulls.chosenSongs)
+    assertEquals(initialProfile.bannedSongs, combinedProfileWithNulls.bannedSongs)
+    assertEquals(initialProfile.likedSongs, combinedProfileWithNulls.likedSongs)
+  }
+
+  @Test
   fun testDocumentTransformStringTracks() {
     runBlocking {
       val getTestProfile =
@@ -284,6 +513,7 @@ public class ProfileConnectionTest {
               Uri.parse("https://example.com/image.jpg"),
               "Sample Profile ID",
               "Sample ID",
+              listOf(),
               listOf(),
               listOf(),
               listOf())
@@ -309,6 +539,8 @@ public class ProfileConnectionTest {
           getTestProfile.chosenSongs.map { trackDocumentReference }
       every { mockDocumentSnapshot.get("bannedSongs") } returns
           getTestProfile.bannedSongs.map { trackDocumentReference }
+      every { mockDocumentSnapshot.get("likedSongs") } returns
+          getTestProfile.likedSongs.map { trackDocumentReference }
 
       var result = profileConnection.documentTransform(mockDocumentSnapshot, null).first()
       assert(result.isSuccess)
