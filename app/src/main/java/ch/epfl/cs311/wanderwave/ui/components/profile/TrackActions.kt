@@ -116,7 +116,7 @@ fun SongsListDisplay(
   songLists?.let { songList ->
     TrackList(
         tracks = songList,
-        title = ListType.LIKED_SONGS.name,
+        title = "Spotify songs",
         onSelectTrack = onSelectTrack,
         onAddTrack = onAddTrack,
         canAddSong = canAddSong,
