@@ -91,9 +91,11 @@ class TrackListViewModelTest {
         AuthenticationUserData("uid", "email", "name", "http://photoUrl/img.jpg")
 
     val bannedSongs = listOf(track5)
+    val retrievedSongs = listOf(track4)
     val mockProfile = mockk<Profile>()
     every { mockProfileRepository.getItem(any()) } returns flowOf(Result.success(mockProfile))
     every { mockProfile.bannedSongs } returns bannedSongs
+    every { mockProfile.chosenSongs } returns retrievedSongs
 
     every { mockRecentlyPlayedRepository.getRecentlyPlayed() } returns flowOf(trackList)
 
@@ -204,10 +206,13 @@ class TrackListViewModelTest {
 
   @Test
   fun bannedTracksAreInUiState() = runBlocking {
-    viewModel.updateBannedSongs()
+    viewModel.updateBannedAndRetrievedSongsSongs()
     assertTrue(
         viewModel.uiState.value.bannedTracks.toString(),
         viewModel.uiState.value.bannedTracks.size == 1)
+    assertTrue(
+        viewModel.uiState.value.retrievedTrack.toString(),
+        viewModel.uiState.value.retrievedTrack.size == 1)
   }
 
   @Test

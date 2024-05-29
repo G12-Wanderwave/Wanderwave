@@ -98,7 +98,7 @@ private fun BeaconScreen(
       modifier = Modifier.fillMaxSize().padding(8.dp).testTag("beaconScreen"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         BeaconInformation(beacon.location)
-        //  AddTrack(beacon, navigationActions, viewModel)
+        AddTrack(beacon, navigationActions, viewModel)
         SongList(
             beacon,
             beaconViewModel,
