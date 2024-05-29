@@ -179,9 +179,9 @@ class BeaconConnection(
                     .toMutableList()
                     .apply {
                       val trackId =
-                        if (track.id.contains("spotify:track:")) track.id else "spotify:track:" + track.id
-                      val trackRef =
-                          db.collection(trackConnection.collectionName).document(trackId)
+                          if (track.id.contains("spotify:track:")) track.id
+                          else "spotify:track:" + track.id
+                      val trackRef = db.collection(trackConnection.collectionName).document(trackId)
                       add(
                           hashMapOf(
                               "profile" to profileRef, "track" to trackRef, "numberOfLikes" to 0))

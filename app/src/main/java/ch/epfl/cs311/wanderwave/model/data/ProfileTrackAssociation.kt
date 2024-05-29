@@ -21,8 +21,7 @@ data class ProfileTrackAssociation(
 ) {
 
   fun toMap(db: FirebaseFirestore): Map<String, Any?> {
-    val trackId =
-      if (track.id.contains("spotify:track:")) track.id else "spotify:track:" + track.id
+    val trackId = if (track.id.contains("spotify:track:")) track.id else "spotify:track:" + track.id
     return hashMapOf(
         "creator" to profile?.firebaseUid?.let { db.collection("users").document(it) },
         "track" to db.collection("tracks").document(trackId),

@@ -24,7 +24,8 @@ data class Track(
     fun from(document: DocumentSnapshot): Track? {
       return if (document.exists()) {
         val trackId =
-          if (document.id.contains("spotify:track:")) document.id else "spotify:track:" + document.id
+            if (document.id.contains("spotify:track:")) document.id
+            else "spotify:track:" + document.id
         Track(
             id = trackId,
             title = document.getString("title") ?: "",
