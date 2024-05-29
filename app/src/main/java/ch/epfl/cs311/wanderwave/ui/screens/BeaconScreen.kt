@@ -73,7 +73,7 @@ fun BeaconScreen(
               profileViewModel,
               bannedTracks = uiState.bannedTracks,
               viewModel::addTrackToBeacon,
-              viewModel::addTrackToList,
+              viewModel::selectTrack,
               navigationActions,
               viewModel)
         } else {
