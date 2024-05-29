@@ -311,7 +311,7 @@ class DataClassesTest {
     // assert if the track is not null
     assert(track != null)
     // assert if the track has the default values
-    assertEquals("someId", track!!.id)
+    assertEquals("spotify:track:someId", track!!.id)
     assertEquals("", track.title)
     assertEquals("", track.artist)
   }
@@ -403,10 +403,10 @@ class DataClassesTest {
     val mockFirebaseFirestore = mockk<FirebaseFirestore>()
     val mockDocumentReference = mockk<DocumentReference>()
     every { mockProfile.firebaseUid } returns "firebaseUid"
-    every { mockTrack.id } returns "trackId"
+    every { mockTrack.id } returns "spotify:track:trackId"
     every { mockFirebaseFirestore.collection("users").document("firebaseUid") } returns
         mockDocumentReference
-    every { mockFirebaseFirestore.collection("tracks").document("trackId") } returns
+    every { mockFirebaseFirestore.collection("tracks").document("spotify:track:trackId") } returns
         mockDocumentReference
     val profileTrackAssociation = ProfileTrackAssociation(mockProfile, mockTrack)
     val expectedMap =
