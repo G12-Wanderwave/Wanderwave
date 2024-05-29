@@ -1,33 +1,20 @@
 package ch.epfl.cs311.wanderwave.model
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
-import android.util.Base64
-import android.util.Log
-import ch.epfl.cs311.wanderwave.R
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationUserData
 import ch.epfl.cs311.wanderwave.model.repository.AuthTokenRepository
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
-import io.mockk.Runs
 import io.mockk.called
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkConstructor
-import io.mockk.mockkStatic
-import io.mockk.slot
-import io.mockk.unmockkStatic
 import io.mockk.verify
-import java.io.ByteArrayOutputStream
-import java.io.IOException
 import java.net.URL
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -39,10 +26,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
-import okhttp3.Response
-import okhttp3.ResponseBody
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -62,8 +45,7 @@ class AuthenticationControllerTest {
 
   private lateinit var authenticationController: AuthenticationController
 
-  @RelaxedMockK
-  private lateinit var mockContext: Context
+  @RelaxedMockK private lateinit var mockContext: Context
 
   private lateinit var testDispatcher: TestDispatcher
 
@@ -75,9 +57,9 @@ class AuthenticationControllerTest {
   @Before
   fun setup() {
     testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
-    authenticationController = AuthenticationController(
-      mockFirebaseAuth, mockHttpClient, mockTokenRepository, testDispatcher
-    )
+    authenticationController =
+        AuthenticationController(
+            mockFirebaseAuth, mockHttpClient, mockTokenRepository, testDispatcher)
     coEvery { authenticationController.refreshSpotifyToken() } returns true
   }
 
@@ -281,6 +263,4 @@ class AuthenticationControllerTest {
 
     assertEquals("FAILURE", result)
   }
-
-
 }
