@@ -67,6 +67,7 @@ constructor(
 
   init {
     observeBeacons()
+    getProfileOfCurrentUser()
   }
 
   private fun observeBeacons() {
@@ -132,6 +133,7 @@ constructor(
         fetchedBeacon.onSuccess { beacon ->
           if (beacon.profileAndTrack.isNotEmpty()) {
             _retrievedSong.value = beacon.profileAndTrack.random()
+            Log.i("Retrieved song", "Retrieved song: ${_retrievedSong.value.track}")
             updateChosenSongsProfile()
           }
         }
@@ -149,14 +151,21 @@ constructor(
       profile.value?.let { currentProfile ->
         try {
           val fetchedProfile = profileRepository.getItem(currentProfile.firebaseUid).first()
+
+          Log.d("Profile", "Current profile: $fetchedProfile")
           fetchedProfile.onSuccess { profile ->
             if (profile.topSongs.isNotEmpty()) {
               val track = profile.topSongs.random()
               val beacon = beaconRepository.getItem(beaconId).first()
               beacon.onSuccess {
                 if (it.profileAndTrack.none { it.track.id == track.id }) {
+                  Log.i("Adding track", "Adding track to beacon: ${track.title}")
+                  Log.i("Adding track", "Adding track to beacon: ${it.profileAndTrack}")
+
                   val newProfileAndTrack =
                       it.profileAndTrack + ProfileTrackAssociation(profile, track)
+                  Log.i("Adding track", "Adding track to beacon: $newProfileAndTrack")
+
                   val newBeacon = it.copy(profileAndTrack = newProfileAndTrack)
                   beaconRepository.updateItem(newBeacon)
                   _uiState.value =
@@ -211,7 +220,12 @@ constructor(
     viewModelScope.launch {
       val currentUserId = authenticationController.getUserData()!!.id
       profileRepository.getItem(currentUserId).collect { fetchedProfile ->
-        fetchedProfile.onSuccess { fetchedProfile -> _profile.value = fetchedProfile }
+        fetchedProfile.onSuccess { fetchedProfile ->
+          run {
+            _profile.value = fetchedProfile
+            Log.i("Profile", "Current profile: $fetchedProfile")
+          }
+        }
         fetchedProfile.onFailure { exception ->
           Log.e("Profile not found", "Profile not found for the given id $exception")
         }

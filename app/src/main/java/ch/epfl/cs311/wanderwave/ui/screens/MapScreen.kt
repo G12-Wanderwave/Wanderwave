@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.util.Log
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -106,7 +107,9 @@ fun createLocationReceiver(
       val latitude = intent?.getDoubleExtra(LocationUpdatesService.EXTRA_LATITUDE, 0.0)
       val longitude = intent?.getDoubleExtra(LocationUpdatesService.EXTRA_LONGITUDE, 0.0)
       if (latitude != null && longitude != null) {
+        Log.d("MapScreen", "Received location update: $latitude, $longitude")
         locationState.value = Location(latitude, longitude)
+        viewModel.getProfileOfCurrentUser()
         if (context != null) {
           viewModel.loadBeacons(context, locationState.value!!)
         }
