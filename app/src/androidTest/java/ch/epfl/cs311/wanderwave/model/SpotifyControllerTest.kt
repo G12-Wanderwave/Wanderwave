@@ -9,6 +9,7 @@ import ch.epfl.cs311.wanderwave.di.ServiceModule.provideLocationSource
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
+import ch.epfl.cs311.wanderwave.model.repository.RecentlyPlayedRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
 import ch.epfl.cs311.wanderwave.model.spotify.getTracksFromSpotifyPlaylist
@@ -60,6 +61,9 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -80,12 +84,15 @@ class SpotifyControllerTest {
   @RelaxedMockK private lateinit var spotifyController: SpotifyController
   private lateinit var context: Context
   private lateinit var authenticationController: AuthenticationController
+  @RelaxedMockK private lateinit var mockRecentlyPlayedRepository: RecentlyPlayedRepository
 
   @RelaxedMockK private lateinit var mockScope: CoroutineScope
 
   private lateinit var requestManager: RequestManager
   private lateinit var requestBuilder: RequestBuilder<Bitmap>
   private lateinit var futureTarget: FutureTarget<Bitmap>
+
+  private lateinit var testDispatcher: TestDispatcher
 
   @Before
   fun setup() {
@@ -105,7 +112,10 @@ class SpotifyControllerTest {
 
     context = ApplicationProvider.getApplicationContext()
     authenticationController = mockk<AuthenticationController>()
-    spotifyController = SpotifyController(context, authenticationController)
+    testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
+    spotifyController =
+        SpotifyController(
+            context, authenticationController, testDispatcher, mockRecentlyPlayedRepository)
     spotifyController.appRemote.value = mockAppRemote
     mockkStatic(SpotifyAppRemote::class)
     spotifyController.appRemote.value = mockAppRemote
@@ -385,7 +395,9 @@ class SpotifyControllerTest {
 
     // Initialize SpotifyController with mocked PlayerApi
     every { mockAppRemote.playerApi } returns mockPlayerApi
-    val spotifyController = SpotifyController(context, authenticationController)
+    val spotifyController =
+        SpotifyController(
+            context, authenticationController, testDispatcher, mockRecentlyPlayedRepository)
     spotifyController.appRemote.value = mockAppRemote
 
     // Mock a PlayerState
@@ -442,7 +454,9 @@ class SpotifyControllerTest {
         }
 
     spotifyController.playTrackList(listOf(mockTrack1, mockTrack2))
-    val spotifyController = SpotifyController(context, authenticationController)
+    val spotifyController =
+        SpotifyController(
+            context, authenticationController, testDispatcher, mockRecentlyPlayedRepository)
     spotifyController.appRemote.value = mockAppRemote
     // Call playerState()
     val playerStateFlow = spotifyController.playerState()
@@ -990,12 +1004,29 @@ class SpotifyControllerTest {
     val playerApi = mockk<PlayerApi>(relaxed = true)
     val subscription = mockk<Subscription<PlayerState>>(relaxed = true)
 
+    val spotifyTrack =
+        com.spotify.protocol.types.Track(
+            Artist("Rick Astley", ""),
+            listOf(),
+            mockk(),
+            1,
+            "Never Gonna Give You Up",
+            "spotify:track:4PTG3Z6ehGkBFwjybzWkR8?si=0f7d62dba3704a0b",
+            mockk(),
+            false,
+            false)
+
     // When playerApi.subscribeToPlayerState() is called, return the mocked subscription
     every { playerApi.subscribeToPlayerState() } returns subscription
 
     // When subscription.setEventCallback(any()) is called, invoke the callback with the test
     // PlayerState
-    every { subscription.setEventCallback(any()) } answers { subscription }
+    every { subscription.setEventCallback(any()) } answers
+        {
+          val callback = firstArg<Subscription.EventCallback<PlayerState>>()
+          callback.onEvent(PlayerState(spotifyTrack, false, 1f, 0, mockk(), mockk()))
+          subscription
+        }
 
     // When subscription.setErrorCallback(any()) is called, do nothing
     every { subscription.setErrorCallback(any()) } just Awaits
@@ -1008,6 +1039,16 @@ class SpotifyControllerTest {
 
     // Verify that setEventCallback was called
     verify { subscription.setEventCallback(any()) }
+
+    verify {
+      mockRecentlyPlayedRepository.addRecentlyPlayed(
+          withArg {
+            assertEquals(it.id, spotifyTrack.uri)
+            assertEquals(it.title, spotifyTrack.name)
+            assertEquals(it.artist, spotifyTrack.artist.name)
+          },
+          any())
+    }
   }
 
   @Test
@@ -1212,6 +1253,8 @@ class SpotifyControllerTest {
     parseTracks(jsonResponse, likedSongsTrackList)
     assertEquals(likedSongsTrackList.value.size, 0)
   }
+
+  @Test fun recentlyPlayedTracksAreRecorder() = runBlocking {}
 }
 
 interface UrlFactory {
