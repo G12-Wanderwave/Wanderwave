@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui.components.tracklist
 
+import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.TweenSpec
@@ -43,11 +44,13 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.ExperimentalWearMaterialApi
@@ -82,7 +85,14 @@ fun TrackListItem(
 ) {
   val scope = rememberCoroutineScope()
   val scrollState = rememberScrollState()
+  val bitmapImage = rememberSaveable { mutableStateOf<Bitmap?>(null) }
 
+  // Launching the effect to fetch the image
+  if (track.id.contains("spotify"))
+      LaunchedEffect(track.id) {
+        val bitmap = profileViewModel.fetchImage(track.id)
+        bitmapImage.value = bitmap
+      }
   TrackListItemLaunchedEffect(scope = scope, scrollState = scrollState)
 
   TrackListItemCard(onClick = onClick, selected = selected) {
@@ -93,10 +103,20 @@ fun TrackListItem(
           Box(
               modifier = Modifier.fillMaxHeight().aspectRatio(1f),
               contentAlignment = Alignment.Center) {
-                Image(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Album Cover",
-                    modifier = Modifier.fillMaxSize(.8f))
+                bitmapImage.value?.let { bitmap ->
+                  Image(
+                      bitmap = bitmap.asImageBitmap(),
+                      contentDescription = "Album Cover",
+                      modifier = Modifier.fillMaxSize(.8f),
+                  )
+                }
+                    ?: run {
+                      Image(
+                          imageVector = Icons.Default.PlayArrow,
+                          contentDescription = "Album Cover",
+                          modifier = Modifier.fillMaxSize(.8f),
+                      )
+                    }
               }
           Column(modifier = Modifier.padding(8.dp).weight(1f).horizontalScroll(scrollState)) {
             Text(
@@ -115,12 +135,12 @@ fun TrackListItem(
             LikeButton(
                 isLiked = isLiked,
                 onLike = {
+                  isLiked.value = true
                   scope.launch {
                     profileViewModel.likeTrack(track)
                     // Update it on Firebase
                     profileViewModel.updateProfile(profileViewModel.profile.value)
                     // Update UI
-                    isLiked.value = true
                   }
                 },
                 onUnlike = {
@@ -158,6 +178,14 @@ fun TrackListItemWithProfile(
   val scope = rememberCoroutineScope()
   val snackbarHostState = remember { SnackbarHostState() }
   val scrollState = rememberScrollState()
+  val bitmapImage = rememberSaveable { mutableStateOf<Bitmap?>(null) }
+
+  // Launching the effect to fetch the image
+  if (trackAndProfile.track.id.contains("spotify"))
+      LaunchedEffect(trackAndProfile.track.id) {
+        val bitmap = profileViewModel.fetchImage(trackAndProfile.track.id)
+        bitmapImage.value = bitmap
+      }
   TrackListItemLaunchedEffect(scope = scope, scrollState = scrollState)
 
   TrackListItemCard(onClick = onClick, selected = selected) {
@@ -165,6 +193,24 @@ fun TrackListItemWithProfile(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+          Box(
+              modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+              contentAlignment = Alignment.Center) {
+                bitmapImage.value?.let { bitmap ->
+                  Image(
+                      bitmap = bitmap.asImageBitmap(),
+                      contentDescription = "Album Cover",
+                      modifier = Modifier.fillMaxSize(.8f),
+                  )
+                }
+                    ?: run {
+                      Image(
+                          imageVector = Icons.Default.PlayArrow,
+                          contentDescription = "Album Cover",
+                          modifier = Modifier.fillMaxSize(.8f),
+                      )
+                    }
+              }
           Column(modifier = Modifier.weight(1f).horizontalScroll(scrollState)) {
             Text(
                 text = trackAndProfile.track.title,
