@@ -100,6 +100,9 @@ class BeaconConnection(
                         }
                       } ?: flowOf(Result.failure(Exception("Could not retrieve chosenSongs")))
 
+              // Send the original beacon first
+              trySend(Result.success(beacon))
+
               // Update the beacon with the profile and track
               profileAndTracks.collect { result ->
                 result.onSuccess { profileAndTracks ->
@@ -175,8 +178,10 @@ class BeaconConnection(
                     .map { it.toMap(db) }
                     .toMutableList()
                     .apply {
-                      val trackRef =
-                          db.collection(trackConnection.collectionName).document(track.id)
+                      val trackId =
+                          if (track.id.contains("spotify:track:")) track.id
+                          else "spotify:track:" + track.id
+                      val trackRef = db.collection(trackConnection.collectionName).document(trackId)
                       add(
                           hashMapOf(
                               "creator" to profileRef,

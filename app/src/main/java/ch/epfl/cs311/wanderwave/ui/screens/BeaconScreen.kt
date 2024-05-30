@@ -51,6 +51,7 @@ fun BeaconScreen(
 ) {
 
   LaunchedEffect(beaconId) {
+    Log.d("BeaconScreen", "Fetching beacon with id: $beaconId")
     if (beaconId != null) {
       viewModel.getBeaconById(beaconId)
     } else {
@@ -174,6 +175,11 @@ fun SongList(
       profileViewModel,
       title = stringResource(R.string.beaconTracksTitle),
       onAddTrack = { track: Track ->
+        Log.d(
+            "SongList",
+            "Adding track to beacon ${beacon.profileAndTrack
+          .filter { profileTrack -> bannedTracks.any { profileTrack.track.id == it.id }.not() }
+          .sortedBy { it.track.id }}")
         addTrackToBeacon(beacon.id, track) { success ->
           if (success) {
             Log.d("SongList", "Track added successfully.")
