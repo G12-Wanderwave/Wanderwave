@@ -124,4 +124,17 @@ class SpotifyConnectScreenViewModelTest {
     val isFirstTime = viewModel.isFirstTime.first()
     assert(!isFirstTime)
   }
+
+  @Test
+  fun checkIfFirstTime_whenProfileDoesNotExist() = runBlocking {
+    setup(SpotifyController.ConnectResult.SUCCESS, true, true)
+    val userId = "user123"
+    val profileResult = Result.failure<Profile>(Exception("Document does not exist"))
+    every { mockProfileRepository.getItem(userId) } returns flowOf(profileResult)
+
+    viewModel.checkIfFirstTime()
+
+    val isFirstTime = viewModel.isFirstTime.first()
+    assert(!isFirstTime)
+  }
 }
