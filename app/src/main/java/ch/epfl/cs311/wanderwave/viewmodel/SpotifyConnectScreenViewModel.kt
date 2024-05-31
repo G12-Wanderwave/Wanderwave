@@ -52,7 +52,12 @@ constructor(
             profileResult.exceptionOrNull()?.message == "Document does not exist"
 
     Log.i("isfirstime", "isfirsttime: $_isFirstTime")
-    Log.i("profileresult", "profileresult: $profileResult")
+    if (profileResult != null) {
+      Log.i(
+          "profileresult",
+          "profileresult: ${profileResult.exceptionOrNull()?.message=="Document does not exist"}")
+    }
+    Log.i("isfirstime", "isfirsttime: ${profileResult?.isFailure}")
   }
 
   data class UiState(
