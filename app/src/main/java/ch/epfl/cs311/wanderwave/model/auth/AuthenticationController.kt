@@ -113,7 +113,6 @@ constructor(
 
       signInWithCustomToken()
     } catch (e: JSONException) {
-      Log.e("AuthenticationController", "Error parsing JSON: ${e.message}")
       false
     }
   }
@@ -191,7 +190,6 @@ constructor(
           }
         }
       } catch (e: IOException) {
-        Log.e("AuthenticationController", "Error making API request: ${e.message}")
         return@withContext "FAILURE"
       }
     }
@@ -200,13 +198,11 @@ constructor(
   suspend fun uploadPlaylistImage(context: Context, playlistId: String) {
     withContext(ioDispatcher) {
       if (!refreshSpotifyToken()) {
-        Log.e("AuthenticationController", "Failed to refresh Spotify token")
         return@withContext
       }
 
       val accessToken =
           tokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
-      Log.i("AuthenticationController", "Access token available: ${accessToken != null}")
 
       val client = OkHttpClient()
 
@@ -247,8 +243,6 @@ constructor(
                 client.newCall(retryRequest).execute().use { retryResponse ->
                   if (!retryResponse.isSuccessful) {
                     throw IOException("Unexpected code $retryResponse")
-                  } else {
-                    println("Image uploaded successfully after token refresh!")
                   }
                 }
               } else {
@@ -257,12 +251,10 @@ constructor(
             } else {
               throw IOException("Unexpected code $response")
             }
-          } else {
-            println("Image uploaded successfully!")
           }
         }
       } catch (e: IOException) {
-        Log.e("AuthenticationController", "Error uploading image: ${e.message}")
+        throw IOException("Error uploading image: ${e.message}")
       }
     }
   }
