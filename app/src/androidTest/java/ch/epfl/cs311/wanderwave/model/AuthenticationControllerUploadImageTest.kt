@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuth
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
+import java.io.IOException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runBlockingTest
@@ -34,6 +35,7 @@ class AuthenticationControllerUploadImageTest {
 
   @Before
   fun setup() {
+    MockKAnnotations.init(this, relaxed = true)
     authenticationController =
         AuthenticationController(
             mockFirebaseAuth, mockHttpClient, mockTokenRepository, testDispatcher)
@@ -48,7 +50,7 @@ class AuthenticationControllerUploadImageTest {
           every { isSuccessful } returns true
           every { body } returns responseBody
         }
-    coEvery { call.execute() } returns response
+    every { call.execute() } returns response
   }
 
   private fun mockFailureResponse(code: Int) {
@@ -58,67 +60,87 @@ class AuthenticationControllerUploadImageTest {
     val response =
         mockk<Response> {
           every { isSuccessful } returns false
-          every { code } returns code
+          every { this@mockk.code } returns code
           every { body } returns responseBody
         }
-    coEvery { call.execute() } returns response
+    every { call.execute() } returns response
+  }
+
+  private fun mockIOException() {
+    val call = mockk<Call>()
+    every { mockHttpClient.newCall(any()) } returns call
+    every { call.execute() } throws IOException("Network Error")
   }
 
   @Test
   fun uploadPlaylistImage_SuccessfulUpload() = runBlockingTest {
     mockSuccessfulResponse()
     coEvery { mockTokenRepository.getAuthToken(any()) } returns "VALID_TOKEN"
+    coEvery { authenticationController.refreshSpotifyToken() } returns true
 
     val context = ApplicationProvider.getApplicationContext<Context>()
     authenticationController.uploadPlaylistImage(context, "test_playlist")
 
     verify { mockHttpClient.newCall(any<Request>()) }
   }
-  //
-  //    @Test
-  //    fun uploadPlaylistImage_TokenRefreshAndRetry() = runBlockingTest {
-  //        mockFailureResponse(401)
-  //        coEvery { mockTokenRepository.getAuthToken(any()) } returns "EXPIRED_TOKEN"
-  //        coEvery {
-  // mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN) }
-  // returns "NEW_VALID_TOKEN"
-  //        coEvery { authenticationController.refreshSpotifyToken() } returns true
-  //        mockSuccessfulResponse()
-  //
-  //        val context = ApplicationProvider.getApplicationContext<Context>()
-  //        authenticationController.uploadPlaylistImage(context, "test_playlist")
-  //
-  //        verify { mockHttpClient.newCall(any<Request>()) }
-  //    }
-  //
-  //    @Test
-  //    fun uploadPlaylistImage_FailedTokenRefresh() = runBlockingTest {
-  //        mockFailureResponse(401)
-  //        coEvery { mockTokenRepository.getAuthToken(any()) } returns "EXPIRED_TOKEN"
-  //        coEvery { authenticationController.refreshSpotifyToken() } returns false
-  //
-  //        val context = ApplicationProvider.getApplicationContext<Context>()
-  //        try {
-  //            authenticationController.uploadPlaylistImage(context, "test_playlist")
-  //        } catch (e: IOException) {
-  //            assert(e.message?.contains("Failed to refresh token") == true)
-  //        }
-  //
-  //        verify { mockHttpClient.newCall(any<Request>()) }
-  //    }
-  //
-  //    @Test
-  //    fun uploadPlaylistImage_UnexpectedResponseCode() = runBlockingTest {
-  //        mockFailureResponse(500)
-  //        coEvery { mockTokenRepository.getAuthToken(any()) } returns "VALID_TOKEN"
-  //
-  //        val context = ApplicationProvider.getApplicationContext<Context>()
-  //        try {
-  //            authenticationController.uploadPlaylistImage(context, "test_playlist")
-  //        } catch (e: IOException) {
-  //            assert(e.message?.contains("Unexpected code") == true)
-  //        }
-  //
-  //        verify { mockHttpClient.newCall(any<Request>()) }
-  //    }
+
+  @Test
+  fun uploadPlaylistImage_TokenRefreshAndRetry() = runBlockingTest {
+    mockFailureResponse(401)
+    coEvery { mockTokenRepository.getAuthToken(any()) } returns "EXPIRED_TOKEN"
+    coEvery {
+      mockTokenRepository.getAuthToken(AuthTokenRepository.AuthTokenType.SPOTIFY_ACCESS_TOKEN)
+    } returns "NEW_VALID_TOKEN"
+    coEvery { authenticationController.refreshSpotifyToken() } returns true
+    mockSuccessfulResponse()
+
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    authenticationController.uploadPlaylistImage(context, "test_playlist")
+
+    verify { mockHttpClient.newCall(any<Request>()) }
+  }
+
+  @Test
+  fun uploadPlaylistImage_FailedTokenRefresh() = runBlockingTest {
+    mockFailureResponse(401)
+    coEvery { mockTokenRepository.getAuthToken(any()) } returns "EXPIRED_TOKEN"
+    coEvery { authenticationController.refreshSpotifyToken() } returns false
+
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    authenticationController.uploadPlaylistImage(context, "test_playlist")
+
+    // No need to verify calls as the function should return early
+  }
+
+  @Test
+  fun uploadPlaylistImage_UnexpectedResponseCode() = runBlockingTest {
+    mockFailureResponse(500)
+    coEvery { mockTokenRepository.getAuthToken(any()) } returns "VALID_TOKEN"
+    coEvery { authenticationController.refreshSpotifyToken() } returns true
+
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    try {
+      authenticationController.uploadPlaylistImage(context, "test_playlist")
+    } catch (e: IOException) {
+      assert(e.message?.contains("Unexpected code") == true)
+    }
+
+    verify { mockHttpClient.newCall(any<Request>()) }
+  }
+
+  @Test
+  fun uploadPlaylistImage_NetworkError() = runBlockingTest {
+    mockIOException()
+    coEvery { mockTokenRepository.getAuthToken(any()) } returns "VALID_TOKEN"
+    coEvery { authenticationController.refreshSpotifyToken() } returns true
+
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    try {
+      authenticationController.uploadPlaylistImage(context, "test_playlist")
+    } catch (e: IOException) {
+      assert(e.message?.contains("Network Error") == true)
+    }
+
+    verify { mockHttpClient.newCall(any<Request>()) }
+  }
 }
