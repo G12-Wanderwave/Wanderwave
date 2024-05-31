@@ -44,24 +44,15 @@ constructor(
   }
 
   suspend fun checkIfFirstTime() {
-    val userId = authenticationController.getUserData()?.id
-    if (userId == null) {
-      Log.i("SpotifyConnectVM", "User ID is null, exiting checkIfFirstTime")
-      return
-    }
-    Log.i("SpotifyConnectVM", "Fetching profile for user ID: $userId")
-
+    val userId = authenticationController.getUserData()?.id ?: return
+    Log.i("UserId", "UserID: $userId")
     val profileResult = profileRepository.getItem(userId).firstOrNull()
-    if (profileResult == null) {
-      Log.i("SpotifyConnectVM", "Profile result is null")
-    } else if (profileResult.isFailure) {
-      Log.e(
-          "SpotifyConnectVM", "Error fetching profile: ${profileResult.exceptionOrNull()?.message}")
-    }
-
     _isFirstTime.value =
         profileResult?.isFailure == true &&
             profileResult.exceptionOrNull()?.message == "Document does not exist"
+
+    Log.i("isfirstime", "isfirsttime: $_isFirstTime")
+    Log.i("profileresult", "profileresult: $profileResult")
   }
 
   data class UiState(
