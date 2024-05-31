@@ -53,8 +53,6 @@ constructor(
     val profileResult = profileRepository.getItem(userId).firstOrNull()
     if (profileResult == null) {
       Log.i("CheckFirstTime", "No profile result obtained")
-    } else {
-      Log.i("CheckFirstTime", "Profile fetch result: ${profileResult.isSuccess}")
     }
     _isFirstTime.value =
         profileResult?.isFailure == true &&
