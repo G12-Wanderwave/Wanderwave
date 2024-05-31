@@ -20,19 +20,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class SpotifyConnectScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
+class SpotifyConnectScreenTest :
+    TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSupport()) {
 
-  @get:Rule
-  val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-  @get:Rule
-  val mockkRule = MockKRule(this)
+  @get:Rule val mockkRule = MockKRule(this)
 
-  @RelaxedMockK
-  private lateinit var mockNavigationActions: NavigationActions
+  @RelaxedMockK private lateinit var mockNavigationActions: NavigationActions
 
-  @RelaxedMockK
-  private lateinit var mockViewModel: SpotifyConnectScreenViewModel
+  @RelaxedMockK private lateinit var mockViewModel: SpotifyConnectScreenViewModel
 
   private val uiStateFlow = MutableStateFlow(SpotifyConnectScreenViewModel.UiState())
   private val isFirstTimeFlow = MutableStateFlow(false)
@@ -53,9 +50,7 @@ class SpotifyConnectScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.w
   fun spotifyConnectScreenProgressIndicatorIsDisplayed() = run {
     setup(SpotifyConnectScreenViewModel.UiState(hasResult = false), isFirstTime = false)
 
-    onComposeScreen<SpotifyConnectScreen>(composeTestRule) {
-      assertIsDisplayed()
-    }
+    onComposeScreen<SpotifyConnectScreen>(composeTestRule) { assertIsDisplayed() }
   }
 
   @Test
@@ -68,7 +63,9 @@ class SpotifyConnectScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.w
 
   @Test
   fun spotifyConnectScreenNavigatesToMapOnSuccess() = run {
-    setup(SpotifyConnectScreenViewModel.UiState(hasResult = true, success = true), isFirstTime = false)
+    setup(
+        SpotifyConnectScreenViewModel.UiState(hasResult = true, success = true),
+        isFirstTime = false)
 
     onComposeScreen<SpotifyConnectScreen>(composeTestRule) {}
     coVerify { mockNavigationActions.navigateToTopLevel(Route.MAP) }
@@ -76,7 +73,9 @@ class SpotifyConnectScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.w
 
   @Test
   fun spotifyConnectScreenNavigatesToLoginOnFailure() = run {
-    setup(SpotifyConnectScreenViewModel.UiState(hasResult = true, success = false), isFirstTime = false)
+    setup(
+        SpotifyConnectScreenViewModel.UiState(hasResult = true, success = false),
+        isFirstTime = false)
 
     onComposeScreen<SpotifyConnectScreen>(composeTestRule) {}
     coVerify { mockNavigationActions.navigateToTopLevel(Route.LOGIN) }

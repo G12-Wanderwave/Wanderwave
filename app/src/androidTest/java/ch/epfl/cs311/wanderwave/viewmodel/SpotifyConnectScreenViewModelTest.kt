@@ -39,7 +39,9 @@ class SpotifyConnectScreenViewModelTest {
     every { mockAuthenticationController.isSignedIn() } returns isSignedIn
     coEvery { mockAuthenticationController.refreshTokenIfNecessary() } returns
         (isSignedIn || canRefresh)
-    viewModel = SpotifyConnectScreenViewModel(mockSpotifyController, mockAuthenticationController,mockProfileRepository)
+    viewModel =
+        SpotifyConnectScreenViewModel(
+            mockSpotifyController, mockAuthenticationController, mockProfileRepository)
   }
 
   @Test
@@ -100,20 +102,20 @@ class SpotifyConnectScreenViewModelTest {
     assert(uiState.hasResult)
     assert(uiState.success.not())
   }
+
   @Test
   fun checkIfFirstTime_whenProfileExists() = runBlocking {
-
     setup(SpotifyController.ConnectResult.SUCCESS, true, true)
     val userId = "user123"
-    val profile = Profile(
-      firstName = "John",
-      lastName = "Doe",
-      description = "A profile description",
-      numberOfLikes = 0,
-      isPublic = true,
-      spotifyUid = "spotifyUid",
-      firebaseUid = "firebaseUid"
-    )
+    val profile =
+        Profile(
+            firstName = "John",
+            lastName = "Doe",
+            description = "A profile description",
+            numberOfLikes = 0,
+            isPublic = true,
+            spotifyUid = "spotifyUid",
+            firebaseUid = "firebaseUid")
     val profileResult = Result.success(profile)
     every { mockProfileRepository.getItem(userId) } returns flowOf(profileResult)
 

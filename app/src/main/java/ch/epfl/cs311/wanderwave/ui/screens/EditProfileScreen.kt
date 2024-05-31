@@ -48,7 +48,11 @@ import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
  * @last update 1.0
  */
 @Composable
-fun EditProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel,canCancel: Boolean = true ) {
+fun EditProfileScreen(
+    navActions: NavigationActions,
+    viewModel: ProfileViewModel,
+    canCancel: Boolean = true
+) {
   val profile by viewModel.profile.collectAsState()
   val profile2 = profile.copy()
   var firstName by remember { mutableStateOf(profile2.firstName) }
@@ -94,8 +98,7 @@ fun EditProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel
               viewModel.deleteProfile()
               navActions.navigateToTopLevel(Route.LOGIN)
             },
-            canCancel = canCancel
-        )
+            canCancel = canCancel)
       }
 }
 
@@ -173,31 +176,28 @@ fun ActionButtons(
     onDelete: () -> Unit,
     canCancel: Boolean // Add this parameter to control the display of the Cancel button
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+  Column(
+      verticalArrangement = Arrangement.spacedBy(2.dp),
+      horizontalAlignment = Alignment.CenterHorizontally) {
         Button(
             onClick = onSave,
             colors = ButtonDefaults.buttonColors(containerColor = md_theme_light_primary),
             modifier = Modifier.width(100.dp).testTag("saveButton"),
-            shape = RoundedCornerShape(size = 10.dp)
-        ) {
-            Text(stringResource(id = R.string.save))
-        }
+            shape = RoundedCornerShape(size = 10.dp)) {
+              Text(stringResource(id = R.string.save))
+            }
         Spacer(modifier = Modifier.width(8.dp))
 
         // Conditional rendering based on canCancel
         if (canCancel) {
-            Button(
-                onClick = onCancel,
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                border = BorderStroke(1.dp, md_theme_dark_error),
-                shape = RoundedCornerShape(size = 10.dp),
-                modifier = Modifier.width(100.dp).testTag("cancelButton")
-            ) {
+          Button(
+              onClick = onCancel,
+              colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+              border = BorderStroke(1.dp, md_theme_dark_error),
+              shape = RoundedCornerShape(size = 10.dp),
+              modifier = Modifier.width(100.dp).testTag("cancelButton")) {
                 Text(text = stringResource(id = R.string.cancel), color = md_theme_dark_error)
-            }
+              }
         }
 
         Spacer(Modifier.padding(8.dp))
@@ -207,10 +207,8 @@ fun ActionButtons(
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
             border = BorderStroke(1.dp, md_theme_dark_error),
             shape = RoundedCornerShape(size = 10.dp),
-            modifier = Modifier.width(200.dp).testTag("deleteButton")
-        ) {
-            Text(text = stringResource(id = R.string.deleteProfile), color = md_theme_dark_error)
-        }
-    }
-
+            modifier = Modifier.width(200.dp).testTag("deleteButton")) {
+              Text(text = stringResource(id = R.string.deleteProfile), color = md_theme_dark_error)
+            }
+      }
 }
