@@ -51,7 +51,7 @@ constructor(
     }
     Log.i("UserId", "UserID: $userId")
     val profileResult = profileRepository.getItem(userId).firstOrNull()
-    // if (profileResult == nul) {
+    // if (profileResult == null) {
     //   Log.i("CheckFirstTime", "No profile result obtained")
     // }
     _isFirstTime.value =
