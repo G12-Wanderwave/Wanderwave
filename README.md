@@ -1,17 +1,26 @@
-# CS-311-Group-12
 # Wanderwave
+### CS-311 Group 12
 
+In a day and age where music has never been as diverse, people tend to only listen to a fairly small subset 
+of what is available. Wanderwave aims to expand users’ musical horizons by transforming their daily commutes
+into adventures that will lead them to find new genres and artists. In that, it allows users to escape the
+constraints imposed by the algorithms used by music providers, which by their very nature tend to restrain 
+their recommendations to remain as close as possible to users’ habits.
 
+The service works via the use of so-called *beacons* that are placed virtually around the world. For the 
+user, a beacon is like an interactive map marker that contains a list of tracks. When near a beacon,
+users can add songs to the beacon to share them with the world, or look at beacons to view what other
+users have put there.
 
-## Group members
-Tsogt Baigalmaa
-Ayman Bakiri
-Menzo Bouaissi
-Imade Bouhamria
-Clarence Joannis Linden
-Jonas Michael Rindlisbacher
-Yoric Pascal Züger
+## Usage
 
+### Getting started
+
+## Team
+Wanderwave is brought to you by Team #12 of EPFL's 2024 iteration of the course
+CS-311: *The software enterprise: from ideas to products*.
+The team is made up of the members
+Ayman, Clarence, Imade, Jonas, Menzo, Tsogt and Yoric.
 
 ## Figma link
 https://www.figma.com/files/project/215171825/Team-project?fuid=1213059135171411879
@@ -19,8 +28,6 @@ https://www.figma.com/files/project/215171825/Team-project?fuid=1213059135171411
 
 ## Application
 
-In a day and age where music has never been as diverse, people tend to only listen to a fairly small subset of what is available. Wanderwave aims to expand users’ musical horizons by transforming their daily commutes into adventures that will lead them to find new genres and artists. Our app will allow users to escape the algorithms used by music providers, which by their very nature tend to restrain their recommendations to remain as close as possible to users’ habits.
-Users’ will be able to evaluate each song they received, and drops that have been highly appreciated by the community will reward the person who shared them with some points and achievements. Those points could then be used for things such as creating new beacons, increasing the likelihood of one’s dropped songs to be shared to other users, or maybe even to unlock in-app customisation items.
 
 A handful of modes, described below, will also be available for users to switch between in order to adapt their experience to their current needs. In short, the app will be able to be used both passively and actively, as well as online and offline.
 
