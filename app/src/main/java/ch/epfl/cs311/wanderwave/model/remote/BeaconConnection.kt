@@ -2,7 +2,6 @@ package ch.epfl.cs311.wanderwave.model.remote
 
 import android.util.Log
 import ch.epfl.cs311.wanderwave.model.data.Beacon
-import ch.epfl.cs311.wanderwave.model.data.Profile
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.TrackRecord
@@ -101,6 +100,9 @@ class BeaconConnection(
                         }
                       } ?: flowOf(Result.failure(Exception("Could not retrieve chosenSongs")))
 
+              // Send the original beacon first
+              trySend(Result.success(beacon))
+
               // Update the beacon with the profile and track
               profileAndTracks.collect { result ->
                 result.onSuccess { profileAndTracks ->
@@ -153,17 +155,21 @@ class BeaconConnection(
     db.runTransaction { transaction ->
           val snapshot: DocumentSnapshot = transaction[beaconRef]
           val beacon = Beacon.from(snapshot)
-          val tracks = snapshot.get("tracks") as? List<Map<String, DocumentReference>> ?: listOf()
+          val tracks = snapshot.get("tracks") as? List<Map<String, Any>> ?: listOf()
           val associations =
               tracks.mapNotNull {
-                val creatorRef = it["creator"]
-                val trackRef = it["track"]
-                val numberOfLikes = it["numberOfLikes"] as? Int ?: 0
+                val creatorRef = it["creator"] as? DocumentReference
+                val trackRef = it["track"] as? DocumentReference
 
-                val creator = creatorRef?.let { Profile.from(transaction[it]) }
-                val track = trackRef?.let { Track.from(transaction[it]) }
+                val creatorSnapshot = creatorRef?.let { transaction[it] }
+                val trackSnapshot = trackRef?.let { transaction[it] }
 
-                track?.let { ProfileTrackAssociation(creator, it, numberOfLikes) }
+                trackSnapshot?.let { trackSnapshot ->
+                  ProfileTrackAssociation.from(
+                      it,
+                      profileDocumentSnapshot = creatorSnapshot,
+                      trackDocumentSnapshot = trackSnapshot)
+                } ?: null
               }
 
           beacon?.let { beaconNotNull ->
@@ -172,11 +178,16 @@ class BeaconConnection(
                     .map { it.toMap(db) }
                     .toMutableList()
                     .apply {
-                      val trackRef =
-                          db.collection(trackConnection.collectionName).document(track.id)
+                      val trackId =
+                          if (track.id.contains("spotify:track:")) track.id
+                          else "spotify:track:" + track.id
+                      val trackRef = db.collection(trackConnection.collectionName).document(trackId)
                       add(
                           hashMapOf(
-                              "profile" to profileRef, "track" to trackRef, "numberOfLikes" to 0))
+                              "creator" to profileRef,
+                              "track" to trackRef,
+                              "likersId" to emptyList<String>(),
+                              "likes" to 0))
                     }
 
             transaction.update(beaconRef, "tracks", newTracks)

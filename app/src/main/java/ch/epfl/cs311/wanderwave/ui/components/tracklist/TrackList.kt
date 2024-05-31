@@ -25,12 +25,16 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import ch.epfl.cs311.wanderwave.R
+import ch.epfl.cs311.wanderwave.model.data.Beacon
 import ch.epfl.cs311.wanderwave.model.data.ProfileTrackAssociation
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.data.viewModelType
 import ch.epfl.cs311.wanderwave.navigation.NavigationActions
 import ch.epfl.cs311.wanderwave.ui.components.profile.AddTrackDialog
+import ch.epfl.cs311.wanderwave.viewmodel.BeaconViewModel
+import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
 @Composable
 fun TrackList(
@@ -40,7 +44,9 @@ fun TrackList(
     onAddTrack: (Track) -> Unit,
     onSelectTrack: (Track) -> Unit = {},
     navActions: NavigationActions,
-    viewModelName: viewModelType
+    viewModelName: viewModelType,
+    profileViewModel: ProfileViewModel,
+    canLike: Boolean = false
 ) {
   Column {
     Row(
@@ -74,7 +80,9 @@ fun TrackList(
             onClick = {
               selectedTrack = track
               onSelectTrack(track)
-            })
+            },
+            profileViewModel = profileViewModel,
+            canLike = canLike)
       }
     }
   }
@@ -83,6 +91,9 @@ fun TrackList(
 @Composable
 fun TrackListWithProfiles(
     tracks: List<ProfileTrackAssociation>,
+    profileViewModel: ProfileViewModel,
+    beacon: Beacon,
+    beaconViewModel: BeaconViewModel,
     title: String? = null,
     canAddSong: Boolean = true,
     onAddTrack: (Track) -> Unit,
@@ -115,7 +126,10 @@ fun TrackListWithProfiles(
       items(tracks) { trackAndProfile ->
         TrackListItemWithProfile(
             trackAndProfile,
-            trackAndProfile.track == selectedTrack,
+            profileViewModel,
+            beacon,
+            beaconViewModel,
+            selected = trackAndProfile.track == selectedTrack,
             navigationActions = navigationActions,
             onClick = {
               selectedTrack = trackAndProfile.track
@@ -149,6 +163,7 @@ fun RemovableTrackList(
     onAddTrack: () -> Unit,
     onSelectTrack: (Track) -> Unit = {},
     onRemoveTrack: (Track) -> Unit,
+    profileViewModel: ProfileViewModel
 ) {
   Column {
     Row(
@@ -180,7 +195,8 @@ fun RemovableTrackList(
               selectedTrack = track
               onSelectTrack(track)
             },
-            onRemove = { onRemoveTrack(track) })
+            onRemove = { onRemoveTrack(track) },
+            profileViewModel = profileViewModel)
       }
     }
   }
@@ -204,5 +220,7 @@ fun PreviewRemovableTrackList() {
     tracks = tracks.filterNot { it.id == track.id }
     Log.d("TrackList", "Tracks: $tracks")
   }
-  RemovableTrackList(tracks, title, canAddSong, ::onAddTrack, ::onSelectTrack, ::onRemoveTrack)
+  val profileViewModel: ProfileViewModel = hiltViewModel()
+  RemovableTrackList(
+      tracks, title, canAddSong, ::onAddTrack, ::onSelectTrack, ::onRemoveTrack, profileViewModel)
 }

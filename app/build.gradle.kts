@@ -36,6 +36,12 @@ android {
         // Spotify API redirect URI: wanderwave-auth://callback
         manifestPlaceholders["redirectSchemeName"] = "wanderwave-auth"
         manifestPlaceholders["redirectHostName"] = "callback"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments["room.schemaLocation"] = "$projectDir/schemas"
+            }
+        }
     }
 
     signingConfigs {

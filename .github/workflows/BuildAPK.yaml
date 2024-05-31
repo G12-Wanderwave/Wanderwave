@@ -65,6 +65,7 @@ jobs:
           mkdir ~/.android
           echo "${{ secrets.KEYSTORE_DEBUG_B64 }}" | base64 -d > ~/.android/debug.keystore
           echo "${{ secrets.KEYSTORE_RELEASE_B64 }}" | base64 -d > ./release.keystore
+          echo "${{ secrets.GOOGLE_SERVICES_JSON_B64 }}" | base64 -d > ./app/google-services.json
 
       # Make the gradlew script executable
       - name: Grant execute permission for gradlew

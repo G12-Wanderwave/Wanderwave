@@ -9,6 +9,7 @@ import ch.epfl.cs311.wanderwave.di.ServiceModule.provideLocationSource
 import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
+import ch.epfl.cs311.wanderwave.model.repository.RecentlyPlayedRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import ch.epfl.cs311.wanderwave.model.spotify.getLikedTracksFromSpotify
 import ch.epfl.cs311.wanderwave.model.spotify.getTracksFromSpotifyPlaylist
@@ -35,6 +36,7 @@ import com.spotify.protocol.types.PlayerState
 import io.mockk.Awaits
 import io.mockk.Runs
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -42,6 +44,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.verify
 import java.net.URL
 import junit.framework.TestCase.assertEquals
@@ -60,6 +63,9 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -80,12 +86,15 @@ class SpotifyControllerTest {
   @RelaxedMockK private lateinit var spotifyController: SpotifyController
   private lateinit var context: Context
   private lateinit var authenticationController: AuthenticationController
+  @RelaxedMockK private lateinit var mockRecentlyPlayedRepository: RecentlyPlayedRepository
 
   @RelaxedMockK private lateinit var mockScope: CoroutineScope
 
   private lateinit var requestManager: RequestManager
   private lateinit var requestBuilder: RequestBuilder<Bitmap>
   private lateinit var futureTarget: FutureTarget<Bitmap>
+
+  private lateinit var testDispatcher: TestDispatcher
 
   @Before
   fun setup() {
@@ -105,7 +114,10 @@ class SpotifyControllerTest {
 
     context = ApplicationProvider.getApplicationContext()
     authenticationController = mockk<AuthenticationController>()
-    spotifyController = SpotifyController(context, authenticationController)
+    testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
+    spotifyController =
+        SpotifyController(
+            context, authenticationController, testDispatcher, mockRecentlyPlayedRepository)
     spotifyController.appRemote.value = mockAppRemote
     mockkStatic(SpotifyAppRemote::class)
     spotifyController.appRemote.value = mockAppRemote
@@ -113,6 +125,235 @@ class SpotifyControllerTest {
     coEvery { authenticationController.makeApiRequest(any()) } returns "Test"
 
     mockScope = mockk<CoroutineScope>()
+  }
+
+  @Test
+  fun testGetCurrentUserId_Success() = runBlocking {
+    val userIdJson = """{"id": "testUserId"}"""
+    coEvery {
+      authenticationController.makeApiRequest(URL("https://api.spotify.com/v1/me"))
+    } returns userIdJson
+
+    val userId = spotifyController.getCurrentUserId()
+    assertEquals("testUserId", userId)
+  }
+
+  @Test(expected = Exception::class)
+  fun testGetCurrentUserId_Failure() =
+      runBlocking<Unit> {
+        coEvery {
+          authenticationController.makeApiRequest(URL("https://api.spotify.com/v1/me"))
+        } returns "FAILURE"
+
+        spotifyController.getCurrentUserId()
+      }
+
+  @Test
+  fun testGetAllPlaylists() = runBlocking {
+    val playlistsJson =
+        """
+        {
+            "items": [
+                {
+                    "id": "playlist1",
+                    "name": "Playlist 1"
+                },
+                {
+                    "id": "playlist2",
+                    "name": "Playlist 2"
+                }
+            ]
+        }
+    """
+    coEvery {
+      authenticationController.makeApiRequest(URL("https://api.spotify.com/v1/me/playlists"))
+    } returns playlistsJson
+
+    val playlists = spotifyController.getAllPlaylists()
+
+    assertEquals(2, playlists.size)
+    assertEquals("playlist1", playlists[0].id)
+    assertEquals("Playlist 1", playlists[0].title)
+    assertEquals("playlist2", playlists[1].id)
+    assertEquals("Playlist 2", playlists[1].title)
+  }
+
+  @Test
+  fun testCreatePlaylistIfNotExist_ExistingPlaylist() = runBlocking {
+    val playlistsJson =
+        """
+        {
+            "items": [
+                {
+                    "id": "existingPlaylistId",
+                    "name": "Wanderwave"
+                }
+            ]
+        }
+    """
+    coEvery {
+      authenticationController.makeApiRequest(URL("https://api.spotify.com/v1/me/playlists"))
+    } returns playlistsJson
+
+    val playlistId = spotifyController.createPlaylistIfNotExist()
+    assertEquals("existingPlaylistId", playlistId)
+  }
+
+  @Test
+  fun testCreatePlaylistIfNotExist_NewPlaylist() = runBlocking {
+    val playlistName = "Wanderwave"
+    val playlistDescription = "Liked songs from Wanderwave"
+    val userId = "testUserId"
+    val newPlaylistId = "newPlaylistId"
+    val newPlaylistJson =
+        """
+        {
+            "id": "$newPlaylistId",
+            "name": "$playlistName"
+        }
+    """
+    val userPlaylistsJson = """
+        {
+            "items": []
+        }
+    """
+
+    // Mocking the responses for makeApiRequest
+    coEvery {
+      authenticationController.makeApiRequest(URL("https://api.spotify.com/v1/me"))
+    } returns """{"id": "$userId"}"""
+    coEvery {
+      authenticationController.makeApiRequest(URL("https://api.spotify.com/v1/me/playlists"))
+    } returns userPlaylistsJson
+    coEvery {
+      authenticationController.makeApiRequest(
+          URL("https://api.spotify.com/v1/users/$userId/playlists"), "POST", any())
+    } returns newPlaylistJson
+
+    // Mocking the uploadPlaylistImage method
+    coEvery { authenticationController.uploadPlaylistImage(any(), any()) } just Runs
+
+    // Call the method under test
+    val result = spotifyController.createPlaylistIfNotExist()
+
+    // Verify that the result is the new playlist ID
+    assertEquals(newPlaylistId, result)
+
+    // Verify that the uploadPlaylistImage method was called
+    coVerify { authenticationController.uploadPlaylistImage(context, newPlaylistId) }
+  }
+
+  @Test
+  fun testAddToPlaylist_Success() = runBlocking {
+    val playlistId = "existingPlaylistId"
+    val track = Track("spotify:track:6rqhFgbbKwnb9MLmUQDhG6", "Track Name", "Artist Name")
+    val playlistsJson =
+        """
+        {
+            "items": [
+                {
+                    "id": "$playlistId",
+                    "name": "Wanderwave"
+                }
+            ]
+        }
+    """
+    coEvery {
+      authenticationController.makeApiRequest(URL("https://api.spotify.com/v1/me/playlists"))
+    } returns playlistsJson
+    coEvery {
+      authenticationController.makeApiRequest(
+          URL("https://api.spotify.com/v1/playlists/$playlistId/tracks"), "POST", any())
+    } returns "SUCCESS"
+
+    spotifyController.addToPlaylist(track)
+  }
+
+  @Test(expected = Exception::class)
+  fun testAddToPlaylist_Failure() = runBlocking {
+    val playlistId = "existingPlaylistId"
+    val track = Track("spotify:track:6rqhFgbbKwnb9MLmUQDhG6", "Track Name", "Artist Name")
+    val playlistsJson =
+        """
+        {
+            "items": [
+                {
+                    "id": "$playlistId",
+                    "name": "Wanderwave"
+                }
+            ]
+        }
+    """
+    coEvery {
+      authenticationController.makeApiRequest(URL("https://api.spotify.com/v1/me/playlists"))
+    } returns playlistsJson
+    coEvery {
+      authenticationController.makeApiRequest(
+          URL("https://api.spotify.com/v1/playlists/$playlistId/tracks"), "POST", any())
+    } returns "FAILURE"
+
+    spotifyController.addToPlaylist(track)
+  }
+
+  @Test
+  fun testRemoveFromPlaylist_Success() = runBlocking {
+    val playlistId = "existingPlaylistId"
+    val track = Track("spotify:track:6rqhFgbbKwnb9MLmUQDhG6", "Track Name", "Artist Name")
+    val playlistsJson =
+        """
+        {
+            "items": [
+                {
+                    "id": "$playlistId",
+                    "name": "Wanderwave"
+                }
+            ]
+        }
+    """
+    coEvery {
+      authenticationController.makeApiRequest(URL("https://api.spotify.com/v1/me/playlists"))
+    } returns playlistsJson
+    coEvery {
+      authenticationController.makeApiRequest(
+          URL("https://api.spotify.com/v1/playlists/$playlistId/tracks"), "DELETE", any())
+    } returns "SUCCESS"
+
+    spotifyController.removeFromPlaylist(track)
+  }
+
+  @Test
+  fun testRemoveFromPlaylist_Failure() = runBlocking {
+    val playlistId = "existingPlaylistId"
+    val track = Track("spotify:track:6rqhFgbbKwnb9MLmUQDhG6", "Track Name", "Artist Name")
+    val playlistsJson =
+        """
+        {
+            "items": [
+                {
+                    "id": "$playlistId",
+                    "name": "Wanderwave"
+                }
+            ]
+        }
+    """
+    coEvery {
+      authenticationController.makeApiRequest(URL("https://api.spotify.com/v1/me/playlists"))
+    } returns playlistsJson
+    coEvery {
+      authenticationController.makeApiRequest(
+          URL("https://api.spotify.com/v1/playlists/$playlistId/tracks"), "DELETE", any())
+    } returns "FAILURE"
+
+    spotifyController.removeFromPlaylist(track)
+  }
+
+  @Test
+  fun testGetCurrentUserId() = runBlocking {
+    val url = "https://api.spotify.com/v1/me"
+    val response = "{'id': 'testUserId'}"
+    coEvery { authenticationController.makeApiRequest(URL(url)) } returns response
+    val result = spotifyController.getCurrentUserId()
+    assertEquals("testUserId", result)
   }
 
   @Test
@@ -170,6 +411,69 @@ class SpotifyControllerTest {
 
     val result = spotifyController.getAlbumImage(albumId)
     assertNotNull(result)
+  }
+
+  @Test
+  fun testGetTrackImage() = runBlocking {
+    val trackId = "spotify:track:6rqhFgbbKwnb9MLmUQDhG6"
+    val albumId = "testAlbumId"
+    val spotifyController =
+        spyk(
+            SpotifyController(
+                context, authenticationController, testDispatcher, mockRecentlyPlayedRepository))
+    val json =
+        """
+            {
+                "album": {
+                    "id": "$albumId"
+                }
+            }
+        """
+    val bitmap: Bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+    coEvery {
+      spotifyController.spotifyGetFromURL(
+          "https://api.spotify.com/v1/tracks/${trackId.split(":")[2]}")
+    } returns json
+    coEvery {
+      authenticationController.makeApiRequest(URL("https://api.spotify.com/v1/albums/$albumId"))
+    } returns
+        """
+            {
+                "images": [
+                    {"url": "https://example.com/image1.jpg"},
+                    {"url": "https://example.com/image2.jpg"}
+                ]
+            }
+        """
+    every { futureTarget.get() } returns bitmap
+
+    val result = spotifyController.getTrackImage(trackId)
+    assertNotNull(result)
+  }
+
+  @Test
+  fun testGetAlbumIdFromTrackId() = runBlocking {
+    val spotifyController =
+        spyk(
+            SpotifyController(
+                context, authenticationController, testDispatcher, mockRecentlyPlayedRepository))
+    val trackId = "spotify:track:6rqhFgbbKwnb9MLmUQDhG6"
+    val expectedAlbumId = "testAlbumId"
+    val json =
+        """
+            {
+                "album": {
+                    "id": "$expectedAlbumId"
+                }
+            }
+        """
+    coEvery {
+      spotifyController.spotifyGetFromURL(
+          "https://api.spotify.com/v1/tracks/${trackId.split(":")[2]}")
+    } returns json
+
+    val result = spotifyController.getAlbumIdFromTrackId(spotifyController, trackId)
+    assertEquals(expectedAlbumId, result)
   }
 
   @Test
@@ -385,7 +689,9 @@ class SpotifyControllerTest {
 
     // Initialize SpotifyController with mocked PlayerApi
     every { mockAppRemote.playerApi } returns mockPlayerApi
-    val spotifyController = SpotifyController(context, authenticationController)
+    val spotifyController =
+        SpotifyController(
+            context, authenticationController, testDispatcher, mockRecentlyPlayedRepository)
     spotifyController.appRemote.value = mockAppRemote
 
     // Mock a PlayerState
@@ -442,7 +748,9 @@ class SpotifyControllerTest {
         }
 
     spotifyController.playTrackList(listOf(mockTrack1, mockTrack2))
-    val spotifyController = SpotifyController(context, authenticationController)
+    val spotifyController =
+        SpotifyController(
+            context, authenticationController, testDispatcher, mockRecentlyPlayedRepository)
     spotifyController.appRemote.value = mockAppRemote
     // Call playerState()
     val playerStateFlow = spotifyController.playerState()
@@ -990,12 +1298,29 @@ class SpotifyControllerTest {
     val playerApi = mockk<PlayerApi>(relaxed = true)
     val subscription = mockk<Subscription<PlayerState>>(relaxed = true)
 
+    val spotifyTrack =
+        com.spotify.protocol.types.Track(
+            Artist("Rick Astley", ""),
+            listOf(),
+            mockk(),
+            1,
+            "Never Gonna Give You Up",
+            "spotify:track:4PTG3Z6ehGkBFwjybzWkR8?si=0f7d62dba3704a0b",
+            mockk(),
+            false,
+            false)
+
     // When playerApi.subscribeToPlayerState() is called, return the mocked subscription
     every { playerApi.subscribeToPlayerState() } returns subscription
 
     // When subscription.setEventCallback(any()) is called, invoke the callback with the test
     // PlayerState
-    every { subscription.setEventCallback(any()) } answers { subscription }
+    every { subscription.setEventCallback(any()) } answers
+        {
+          val callback = firstArg<Subscription.EventCallback<PlayerState>>()
+          callback.onEvent(PlayerState(spotifyTrack, false, 1f, 0, mockk(), mockk()))
+          subscription
+        }
 
     // When subscription.setErrorCallback(any()) is called, do nothing
     every { subscription.setErrorCallback(any()) } just Awaits
@@ -1008,6 +1333,16 @@ class SpotifyControllerTest {
 
     // Verify that setEventCallback was called
     verify { subscription.setEventCallback(any()) }
+
+    verify {
+      mockRecentlyPlayedRepository.addRecentlyPlayed(
+          withArg {
+            assertEquals(it.id, spotifyTrack.uri)
+            assertEquals(it.title, spotifyTrack.name)
+            assertEquals(it.artist, spotifyTrack.artist.name)
+          },
+          any())
+    }
   }
 
   @Test
@@ -1212,6 +1547,8 @@ class SpotifyControllerTest {
     parseTracks(jsonResponse, likedSongsTrackList)
     assertEquals(likedSongsTrackList.value.size, 0)
   }
+
+  @Test fun recentlyPlayedTracksAreRecorder() = runBlocking {}
 }
 
 interface UrlFactory {

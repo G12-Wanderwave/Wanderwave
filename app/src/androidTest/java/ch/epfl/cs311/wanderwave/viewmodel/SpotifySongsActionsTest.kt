@@ -1,6 +1,5 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
-import ch.epfl.cs311.wanderwave.model.data.ListType
 import ch.epfl.cs311.wanderwave.model.data.Track
 import ch.epfl.cs311.wanderwave.viewmodel.interfaces.SpotifySongsActions
 import com.google.common.base.Verify.verify
@@ -28,20 +27,8 @@ class SpotifySongsActionsTest {
 
   @Test
   fun addTrackToListAddsTrack() {
-    spotifySongsActions.addTrackToList(ListType.TOP_SONGS, mockTrack)
-    verify { spotifySongsActions.addTrackToList(ListType.TOP_SONGS, mockTrack) }
-  }
-
-  @Test
-  fun retrieveAndAddSubsectionRetrievesAndAddsSubsection() {
-    spotifySongsActions.retrieveAndAddSubsection()
-    verify { spotifySongsActions.retrieveAndAddSubsection() }
-  }
-
-  @Test
-  fun retrieveChildRetrievesChild() {
-    spotifySongsActions.retrieveChild(mockListItem)
-    verify { spotifySongsActions.retrieveChild(mockListItem) }
+    spotifySongsActions.addTrackToList(mockTrack)
+    verify { spotifySongsActions.addTrackToList(mockTrack) }
   }
 
   @Test

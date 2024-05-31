@@ -17,6 +17,12 @@ data class Beacon(
     /** Number of likes the beacon has */
     val numberOfLikes: Int = 0
 ) {
+  fun updateProfileAndTrackElement(newTrackProfile: ProfileTrackAssociation): Beacon {
+    val newProfileAndTrack = profileAndTrack.toMutableList()
+    newProfileAndTrack.removeIf { it.track.id == newTrackProfile.track.id }
+    newProfileAndTrack.add(newTrackProfile)
+    return Beacon(id, location, newProfileAndTrack)
+  }
 
   fun toMap(db: FirebaseFirestore): HashMap<String, Any> =
       hashMapOf(
@@ -37,7 +43,7 @@ data class Beacon(
 
         val profileAndTrack = listOf<ProfileTrackAssociation>()
 
-        val numberOfLikes = document.getLong("likes")?.toInt() ?: 0
+        val numberOfLikes = document.getLong("numberOfLikes")?.toInt() ?: 0
 
         Beacon(
             id = id,

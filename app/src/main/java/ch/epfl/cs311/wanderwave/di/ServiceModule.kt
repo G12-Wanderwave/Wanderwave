@@ -6,6 +6,7 @@ import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.location.FastLocationSource
 import ch.epfl.cs311.wanderwave.model.repository.AuthTokenRepository
+import ch.epfl.cs311.wanderwave.model.repository.RecentlyPlayedRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import com.google.android.gms.maps.LocationSource
 import com.google.firebase.Firebase
@@ -37,9 +38,11 @@ object ServiceModule {
   @Singleton
   fun provideSpotifyController(
       @ApplicationContext context: Context,
-      authenticationController: AuthenticationController
+      authenticationController: AuthenticationController,
+      recentlyPlayedRepository: RecentlyPlayedRepository
   ): SpotifyController {
-    return SpotifyController(context, authenticationController)
+    return SpotifyController(
+        context, authenticationController, Dispatchers.IO, recentlyPlayedRepository)
   }
 
   @Provides
