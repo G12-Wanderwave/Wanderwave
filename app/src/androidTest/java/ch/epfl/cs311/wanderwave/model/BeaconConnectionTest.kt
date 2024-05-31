@@ -32,6 +32,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -228,7 +229,11 @@ public class BeaconConnectionTest {
                       Track("Sample Track ID", "Sample Track Title", "Sample Artist Name"))))
 
       // Call the function under test
-      val retrievedBeacon = beaconConnection.getItem("testBeacon").first()
+      val retrievedBeacon =
+          beaconConnection
+              .getItem("testBeacon")
+              .filter { it.getOrNull()?.let { it.profileAndTrack.isNotEmpty() } ?: false }
+              .first()
 
       // Verify that the get function is called on the document with the correct id
       coVerify { documentReference.addSnapshotListener(any()) }

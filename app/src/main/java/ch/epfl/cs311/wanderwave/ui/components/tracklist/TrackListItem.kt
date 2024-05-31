@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.ui.components.tracklist
 
+import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.TweenSpec
@@ -8,9 +9,11 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,7 +22,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
@@ -39,10 +44,13 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.ExperimentalWearMaterialApi
@@ -77,61 +85,78 @@ fun TrackListItem(
 ) {
   val scope = rememberCoroutineScope()
   val scrollState = rememberScrollState()
+  val bitmapImage = rememberSaveable { mutableStateOf<Bitmap?>(null) }
 
+  // Launching the effect to fetch the image
+  if (track.id.contains("spotify"))
+      LaunchedEffect(track.id) {
+        val bitmap = profileViewModel.fetchImage(track.id)
+        bitmapImage.value = bitmap
+      }
   TrackListItemLaunchedEffect(scope = scope, scrollState = scrollState)
 
   TrackListItemCard(onClick = onClick, selected = selected) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-    ) {
-      val isLiked = remember {
-        mutableStateOf(profileViewModel.wanderwaveLikedTracks.value.contains(track))
-      }
-      if (canLike) {
-        LikeButton(
-            isLiked = isLiked,
-            onLike = {
-              scope.launch {
-                // Add liked track to the profile
-                profileViewModel.likeTrack(track)
-                // Update it on Firebase
-                profileViewModel.updateProfile(profileViewModel.profile.value)
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth()) {
+          Box(
+              modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+              contentAlignment = Alignment.Center) {
+                bitmapImage.value?.let { bitmap ->
+                  Image(
+                      bitmap = bitmap.asImageBitmap(),
+                      contentDescription = "Album Cover",
+                      modifier = Modifier.fillMaxSize(.8f),
+                  )
+                }
+                    ?: run {
+                      Image(
+                          imageVector = Icons.Default.PlayArrow,
+                          contentDescription = "Album Cover",
+                          modifier = Modifier.fillMaxSize(.8f),
+                      )
+                    }
               }
-              // Update UI
-              isLiked.value = true
-            },
-            onUnlike = {
-              // Add liked track to the profile
-              profileViewModel.unlikeTrack(track)
-              // Update it on Firebase
-              profileViewModel.updateProfile(profileViewModel.profile.value)
-
-              // Update UI
-              isLiked.value = false
-            })
-      }
-
-      Box(
-          modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-          contentAlignment = Alignment.Center) {
-            Image(
-                imageVector = Icons.Default.PlayArrow,
-                contentDescription = "Album Cover",
-                modifier = Modifier.fillMaxSize(.8f),
-            )
+          Column(modifier = Modifier.padding(8.dp).weight(1f).horizontalScroll(scrollState)) {
+            Text(
+                text = track.title,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = track.artist,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium)
           }
-      Column(modifier = Modifier.padding(8.dp).horizontalScroll(scrollState)) {
-        Text(
-            text = track.title,
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.titleMedium)
-        Text(
-            text = track.artist,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-      }
-    }
+          if (canLike) {
+            val isLiked = remember {
+              mutableStateOf(profileViewModel.wanderwaveLikedTracks.value.contains(track))
+            }
+            LikeButton(
+                isLiked = isLiked,
+                onLike = {
+                  isLiked.value = true
+                  scope.launch {
+                    profileViewModel.likeTrack(track)
+                    // Update it on Firebase
+                    profileViewModel.updateProfile(profileViewModel.profile.value)
+                    // Update UI
+                  }
+                },
+                onUnlike = {
+                  scope.launch {
+                    profileViewModel.unlikeTrack(track)
+                    // Update it on Firebase
+                    profileViewModel.updateProfile(profileViewModel.profile.value)
+                    // Update UI
+                    isLiked.value = false
+                  }
+                },
+                modifier =
+                    Modifier.padding(start = 8.dp) // Ensure some padding between text and heart
+                )
+          }
+        }
   }
 }
 
@@ -153,97 +178,114 @@ fun TrackListItemWithProfile(
   val scope = rememberCoroutineScope()
   val snackbarHostState = remember { SnackbarHostState() }
   val scrollState = rememberScrollState()
+  val bitmapImage = rememberSaveable { mutableStateOf<Bitmap?>(null) }
+
+  // Launching the effect to fetch the image
+  if (trackAndProfile.track.id.contains("spotify"))
+      LaunchedEffect(trackAndProfile.track.id) {
+        val bitmap = profileViewModel.fetchImage(trackAndProfile.track.id)
+        bitmapImage.value = bitmap
+      }
   TrackListItemLaunchedEffect(scope = scope, scrollState = scrollState)
 
   TrackListItemCard(onClick = onClick, selected = selected) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-    ) {
-      val isLiked = remember {
-        mutableStateOf(profileViewModel.wanderwaveLikedTracks.value.contains(trackAndProfile.track))
-      }
-      LikeButton(
-          isLiked = isLiked,
-          onLike = {
-            //            // Update the profile and track association
-            //            val newTrackProfile =
-            // trackAndProfile.likeTrack(profileViewModel.profile.value)
-            //            // Update it in the beacon
-            //            val newBeacon = beacon.updateProfileAndTrackElement(newTrackProfile)
-            //            // Update it on Firebase
-            //            beaconViewModel.updateBeacon(newBeacon)
-            scope.launch {
-              // Add liked track to the profile
-              profileViewModel.likeTrack(trackAndProfile.track)
-              // Update it on Firebase
-              profileViewModel.updateProfile(profileViewModel.profile.value)
-            }
-
-            // Update UI
-            isLiked.value = true
-          },
-          onUnlike = {
-            //            // Update the profile and track association
-            //            val newTrackProfile =
-            // trackAndProfile.unlikeTrack(profileViewModel.profile.value)
-            //            // Update it in the beacon
-            //            val newBeacon = beacon.updateProfileAndTrackElement(newTrackProfile)
-            //            // Update it on Firebase
-            //            beaconViewModel.updateBeacon(newBeacon)
-
-            // Add liked track to the profile
-            profileViewModel.unlikeTrack(trackAndProfile.track)
-            // Update it on Firebase
-            profileViewModel.updateProfile(profileViewModel.profile.value)
-
-            // Update UI
-            isLiked.value = false
-          })
-      Box(
-          modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-          contentAlignment = Alignment.Center) {
-            Image(
-                imageVector = Icons.Default.PlayArrow,
-                contentDescription = "Album Cover",
-                modifier = Modifier.fillMaxSize(.8f),
-            )
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+          Box(
+              modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+              contentAlignment = Alignment.Center) {
+                bitmapImage.value?.let { bitmap ->
+                  Image(
+                      bitmap = bitmap.asImageBitmap(),
+                      contentDescription = "Album Cover",
+                      modifier = Modifier.fillMaxSize(.8f),
+                  )
+                }
+                    ?: run {
+                      Image(
+                          imageVector = Icons.Default.PlayArrow,
+                          contentDescription = "Album Cover",
+                          modifier = Modifier.fillMaxSize(.8f),
+                      )
+                    }
+              }
+          Column(modifier = Modifier.weight(1f).horizontalScroll(scrollState)) {
+            Text(
+                text = trackAndProfile.track.title,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = trackAndProfile.track.artist,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium)
           }
-      Column(modifier = Modifier.padding(8.dp).horizontalScroll(scrollState)) {
-        Text(
-            text = trackAndProfile.track.title,
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.titleMedium)
-        Text(
-            text = trackAndProfile.track.artist,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-      }
 
-      if (trackAndProfile.profile != null) {
-        SelectImage(
-            modifier =
-                Modifier.size(width = 150.dp, height = 100.dp)
-                    .clickable(
-                        enabled = trackAndProfile.profile.isPublic,
-                        onClick = {
-                          if (trackAndProfile.profile.isPublic) {
-                            // if the profile is public, navigate to the profile view screen
-                            navigationActions.navigateToProfile(trackAndProfile.profile.firebaseUid)
-                          } else {
-                            // if the profile is private , output a message that say the profile
-                            // is
-                            // private, you cannot access to profile informations
-                            scope.launch {
-                              snackbarHostState.showSnackbar(
-                                  "This profile is private, you cannot access profile information.")
-                            }
-                          }
-                        }),
-            imageUri = trackAndProfile.profile.profilePictureUri,
-            profile = trackAndProfile.profile)
-      }
-    }
+          Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.End) {
+                val isLiked = remember {
+                  mutableStateOf(
+                      profileViewModel.wanderwaveLikedTracks.value.contains(trackAndProfile.track))
+                }
+                LikeButton(
+                    isLiked = isLiked,
+                    onLike = {
+
+                      // Update UI
+                      isLiked.value = true
+                      scope.launch {
+                        profileViewModel.likeTrack(trackAndProfile.track)
+                        // Update it on Firebase
+                        profileViewModel.updateProfile(profileViewModel.profile.value)
+                      }
+                    },
+                    onUnlike = {
+
+                      // Add liked track to the profile
+                      profileViewModel.unlikeTrack(trackAndProfile.track)
+                      // Update it on Firebase
+                      profileViewModel.updateProfile(profileViewModel.profile.value)
+
+                      // Update UI
+                      isLiked.value = false
+                    },
+                    modifier = Modifier.size(20.dp) // Adjust size of the heart icon here
+                    )
+
+                Spacer(
+                    modifier =
+                        Modifier.width(
+                            8.dp)) // Add some space between profile picture and heart icon
+                if (trackAndProfile.profile != null) {
+                  SelectImage(
+                      modifier =
+                          Modifier.size(64.dp)
+                              .clip(CircleShape) // Make the profile image circular
+                              .clickable(
+                                  enabled = trackAndProfile.profile.isPublic,
+                                  onClick = {
+                                    if (trackAndProfile.profile.isPublic) {
+                                      // if the profile is public, navigate to the profile view
+                                      // screen
+                                      navigationActions.navigateToProfile(
+                                          trackAndProfile.profile.firebaseUid)
+                                    } else {
+                                      // if the profile is private , output a message that say the
+                                      // profile
+                                      // is private, you cannot access to profile informations
+                                      scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            "This profile is private, you cannot access profile information.")
+                                      }
+                                    }
+                                  }),
+                      imageUri = trackAndProfile.profile.profilePictureUri,
+                      profile = trackAndProfile.profile)
+                }
+              }
+        }
   }
 }
 

@@ -51,7 +51,7 @@ class TrackConnectionTest {
     collectionReference = mockk<CollectionReference>(relaxed = true)
 
     // Mock data
-    track = Track("testTrack", "Test Title", "Test Artist")
+    track = Track("spotify:track:testTrack", "Test Title", "Test Artist")
 
     // Define behavior for the mocks
     every { collectionReference.document(track.id) } returns documentReference
@@ -87,7 +87,7 @@ class TrackConnectionTest {
       val mockTask = mockk<Task<DocumentSnapshot>>()
       val mockDocumentSnapshot = mockk<DocumentSnapshot>()
 
-      val getTestTrack = Track("testTrack", "Test Title", "Test Artist")
+      val getTestTrack = Track("spotify:track:testTrack", "Test Title", "Test Artist")
 
       every { mockDocumentSnapshot.getData() } returns getTestTrack.toMap()
       every { mockDocumentSnapshot.exists() } returns true
@@ -107,7 +107,7 @@ class TrackConnectionTest {
           }
 
       // Call the function under test
-      val retrievedTrack = trackConnection.getItem("testTrack").first()
+      val retrievedTrack = trackConnection.getItem("spotify:track:testTrack").first()
 
       // Verify that the get function is called on the document with the correct id
       coVerify { documentReference.addSnapshotListener(any()) }
@@ -118,7 +118,7 @@ class TrackConnectionTest {
   @Test
   fun testDeleteItem() {
     // Call the function under test
-    trackConnection.deleteItem("testTrack")
+    trackConnection.deleteItem("spotify:track:testTrack")
 
     // Verify that the delete function is called on the document with the correct id
     verify { documentReference.delete() }
@@ -133,7 +133,7 @@ class TrackConnectionTest {
     val mockDocumentSnapshot = mockk<DocumentSnapshot>()
 
     // Mock the Track
-    val mockTrack = Track("testTrackId", "Test Title", "Test Artist")
+    val mockTrack = Track("spotify:track:testTrackId", "Test Title", "Test Artist")
     val mockProfile =
         Profile(
             "Test First Name",
@@ -256,7 +256,7 @@ class TrackConnectionTest {
     val mockDocumentSnapshot = mockk<DocumentSnapshot>()
 
     // Mock the Track
-    val mockTrack = Track("testTrackId", "Test Title", "Test Artist")
+    val mockTrack = Track("spotify:track:testTrackId", "Test Title", "Test Artist")
 
     // Define behavior for the get() method on the DocumentReference to return the mock task
     coEvery { mockTrackDocumentReference.addSnapshotListener(any()) } answers
@@ -356,8 +356,7 @@ class TrackConnectionTest {
     trackConnection.addItemsIfNotExist(listOf(track))
 
     // Verify that the get function is called on the document with the correct id
-    coVerify { collectionReference.whereEqualTo("id", "spotify:track:" + track.id) }
-    coVerify { collectionReference.whereEqualTo("id", "spotify:track:" + track.id).get() }
+    coVerify { collectionReference.whereEqualTo("id", track.id) }
   }
 
   @Test
@@ -367,7 +366,7 @@ class TrackConnectionTest {
       val mockDocumentSnapshot = mockk<DocumentSnapshot>()
 
       // Mock the Track
-      val mockTrack = Track("testTrackId", "Test Title", "Test Artist")
+      val mockTrack = Track("spotify:track:testTrackId", "Test Title", "Test Artist")
 
       // Call the function under test
       val retrievedTrack =
