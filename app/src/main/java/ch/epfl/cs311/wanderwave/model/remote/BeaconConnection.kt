@@ -9,6 +9,7 @@ import ch.epfl.cs311.wanderwave.model.localDb.AppDatabase
 import ch.epfl.cs311.wanderwave.model.repository.BeaconRepository
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -173,24 +174,17 @@ class BeaconConnection(
               }
 
           beacon?.let { beaconNotNull ->
-            val newTracks =
-                associations
-                    .map { it.toMap(db) }
-                    .toMutableList()
-                    .apply {
-                      val trackId =
-                          if (track.id.contains("spotify:track:")) track.id
-                          else "spotify:track:" + track.id
-                      val trackRef = db.collection(trackConnection.collectionName).document(trackId)
-                      add(
-                          hashMapOf(
-                              "creator" to profileRef,
-                              "track" to trackRef,
-                              "likersId" to emptyList<String>(),
-                              "likes" to 0))
-                    }
+            val trackId =
+                if (track.id.contains("spotify:track:")) track.id else "spotify:track:" + track.id
+            val trackRef = db.collection(trackConnection.collectionName).document(trackId)
+            val newTrack =
+                hashMapOf(
+                    "creator" to profileRef,
+                    "track" to trackRef,
+                    "likersId" to emptyList<String>(),
+                    "likes" to 0)
 
-            transaction.update(beaconRef, "tracks", newTracks)
+            transaction.update(beaconRef, "tracks", FieldValue.arrayUnion(newTrack))
 
             // After updating Firestore, save the track addition locally
             coroutineScope.launch {
