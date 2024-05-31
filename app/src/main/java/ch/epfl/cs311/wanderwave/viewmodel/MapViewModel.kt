@@ -26,6 +26,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -155,16 +156,20 @@ constructor(
           fetchedProfile.onSuccess { profile ->
             if (profile.topSongs.isNotEmpty()) {
               val track = profile.topSongs.random()
-              val beacon = beaconRepository.getItem(beaconId).first()
-              beacon.onSuccess {
-                if (it.profileAndTrack.none { it.track.id == track.id }) {
-                  // Update the beacon with the new profile and track using addTrackToBeacon
-                  beaconRepository.addTrackToBeacon(
-                      beaconId, track, onComplete = {}, profileUid = profile.firebaseUid)
-                  // observe beacon should still be on, so the beacon list will be updated
-                  // automatically
-                }
-              }
+              beaconRepository
+                  .getItem(beaconId)
+                  .filter { it.getOrNull()?.profileAndTrack?.isNotEmpty() ?: false }
+                  .collect { beacon ->
+                    beacon.onSuccess {
+                      if (it.profileAndTrack.none { it.track.id == track.id }) {
+                        // Update the beacon with the new profile and track using addTrackToBeacon
+                        beaconRepository.addTrackToBeacon(
+                            beaconId, track, onComplete = {}, profileUid = profile.firebaseUid)
+                        // observe beacon should still be on, so the beacon list will be updated
+                        // automatically
+                      }
+                    }
+                  }
             }
           }
 
