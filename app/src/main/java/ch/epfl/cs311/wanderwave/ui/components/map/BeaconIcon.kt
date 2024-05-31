@@ -18,5 +18,5 @@ private fun resizeBitmap(bitmap: Bitmap, width: Int, height: Int): Bitmap {
 
 fun getIcon(context: Context): BitmapDescriptor {
   return BitmapDescriptorFactory.fromBitmap(
-      resizeBitmap(bitmapFromResource(R.drawable.beaconlogosmall, context = context), 100, 100))
+      resizeBitmap(bitmapFromResource(R.drawable.beaconlogo, context = context), 75, 75))
 }

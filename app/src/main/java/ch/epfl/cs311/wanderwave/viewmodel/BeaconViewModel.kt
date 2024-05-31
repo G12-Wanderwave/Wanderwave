@@ -73,6 +73,7 @@ constructor(
 
   fun addTrackToBeacon(beaconId: String, track: Track, onComplete: (Boolean) -> Unit) {
     // Call the BeaconConnection's addTrackToBeacon with the provided beaconId and track
+    Log.d("BeaconViewModel", "Adding track to beacon id : $beaconId")
     ch.epfl.cs311.wanderwave.model.utils.addTrackToBeacon(
         beaconId, track, trackRepository, beaconRepository, authenticationController, onComplete)
   }

@@ -1,5 +1,6 @@
 package ch.epfl.cs311.wanderwave.viewmodel
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -76,6 +77,10 @@ constructor(
   fun updateProfile(updatedProfile: Profile) {
     _profile.value = updatedProfile
     repository.updateItem(updatedProfile)
+  }
+
+  suspend fun fetchImage(trackId: String): Bitmap? {
+    return spotifyController.getTrackImage(trackId)
   }
 
   fun deleteProfile() {

@@ -42,8 +42,10 @@ class TrackConnection(
     // database, for now I just check the normal ID
     CoroutineScope(ioDispatcher).launch {
       tracks.forEach { track ->
+        Log.d("TrackConnection", "Adding track: ${track.id.contains("spotify:track:")}")
         val trackId =
             if (track.id.contains("spotify:track:")) track.id else "spotify:track:" + track.id
+        Log.d("TrackConnection", "Adding track: ${trackId}")
         val correctTrack = track.copy(id = trackId)
         db.collection(collectionName)
             .whereEqualTo("id", correctTrack.id)
@@ -93,10 +95,17 @@ class TrackConnection(
             } else {
               profileRef?.addSnapshotListener { profileDocument, error ->
                 val profile = profileDocument?.let { Profile.from(it) }
+                val trackId =
+                    if (track.id.contains("spotify:track:")) track.id
+                    else "spotify:track:" + track.id
+                val correctTrack = track.copy(id = trackId)
                 trySend(
                     Result.success(
                         ProfileTrackAssociation(
-                            profile = profile, track = track, likersId = likersId, likes = likes)))
+                            profile = profile,
+                            track = correctTrack,
+                            likersId = likersId,
+                            likes = likes)))
               } ?: trySend(Result.success(ProfileTrackAssociation(null, track, likersId, likes)))
             }
           }

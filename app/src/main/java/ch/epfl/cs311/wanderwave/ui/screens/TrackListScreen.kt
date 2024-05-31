@@ -1,6 +1,7 @@
 package ch.epfl.cs311.wanderwave.ui.screens
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -82,7 +83,7 @@ fun TabContent1(
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   var searchQuery by remember { mutableStateOf("") }
-  LaunchedEffect(Unit) { viewModel.updateBannedSongs() }
+  LaunchedEffect(Unit) { viewModel.updateBannedAndRetrievedSongsSongs() }
 
   Column(modifier = Modifier.testTag("trackListScreen")) {
     TextField(
@@ -114,9 +115,10 @@ fun TabContent1(
             canLike = true)
       }
       1 -> {
+        Log.d("TrackListScreen", "Chosen songs: ${uiState.retrievedTrack}")
         TrackList(
             tracks =
-                uiState.tracks.filter { track ->
+                uiState.retrievedTrack.filter { track ->
                   uiState.bannedTracks.any { it.id == track.id }.not()
                 },
             title = stringResource(R.string.recently_added_tracks),

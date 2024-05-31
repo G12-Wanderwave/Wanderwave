@@ -104,11 +104,12 @@ constructor(
     }
   }
 
-  fun updateBannedSongs() {
+  fun updateBannedAndRetrievedSongsSongs() {
     viewModelScope.launch {
       val profileId = authenticationController.getUserData()!!.id
       profileRepository.getItem(profileId).collect { fetchedProfile ->
         fetchedProfile.onSuccess { profile ->
+          _uiState.value = uiState.value.copy(retrievedTrack = profile.chosenSongs)
           _uiState.value = uiState.value.copy(bannedTracks = profile.bannedSongs)
         }
       }
