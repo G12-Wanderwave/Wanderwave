@@ -6,11 +6,11 @@ import ch.epfl.cs311.wanderwave.model.auth.AuthenticationController
 import ch.epfl.cs311.wanderwave.model.repository.ProfileRepository
 import ch.epfl.cs311.wanderwave.model.spotify.SpotifyController
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.single
+import javax.inject.Inject
 
 @HiltViewModel
 class SpotifyConnectScreenViewModel
@@ -51,9 +51,9 @@ constructor(
     }
     Log.i("UserId", "UserID: $userId")
     val profileResult = profileRepository.getItem(userId).firstOrNull()
-    if (profileResult == null) {
-      Log.i("CheckFirstTime", "No profile result obtained")
-    }
+    // if (profileResult == null) {
+    //   Log.i("CheckFirstTime", "No profile result obtained")
+    // }
     _isFirstTime.value =
         profileResult?.isFailure == true &&
             profileResult.exceptionOrNull()?.message == "Document does not exist"
