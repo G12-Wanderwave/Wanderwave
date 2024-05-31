@@ -165,8 +165,7 @@ constructor(
                         // Update the beacon with the new profile and track using addTrackToBeacon
                         beaconRepository.addTrackToBeacon(
                             beaconId, track, onComplete = {}, profileUid = profile.firebaseUid)
-                        // observe beacon should still be on, so the beacon list will be updated
-                        // automatically
+                        // observe beacon should still work, the list still will be updated
                       }
                     }
                   }
