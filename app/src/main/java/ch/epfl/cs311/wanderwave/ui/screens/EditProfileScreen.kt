@@ -188,7 +188,6 @@ fun ActionButtons(
             }
         Spacer(modifier = Modifier.width(8.dp))
 
-
         // Conditional rendering based on canCancel
         if (canCancel) {
           Button(
@@ -200,7 +199,6 @@ fun ActionButtons(
                 Text(text = stringResource(id = R.string.cancel), color = md_theme_dark_error)
               }
         }
-
 
         Spacer(Modifier.padding(8.dp))
 
