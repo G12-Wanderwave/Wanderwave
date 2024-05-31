@@ -51,12 +51,22 @@ constructor(
     }
     Log.i("UserId", "UserID: $userId")
     val profileResult = profileRepository.getItem(userId).firstOrNull()
-    // if (profileResult == null) {
-    //   Log.i("CheckFirstTime", "No profile result obtained")
-    // }
+    // Log the result status and the specific failure message if present
+    if (profileResult != null) {
+      if (profileResult.isFailure) {
+        Log.i(
+            "CheckFirstTime",
+            "Profile fetch failed with exception: ${profileResult.exceptionOrNull()?.message}")
+      } else {
+        Log.i("CheckFirstTime", "Profile fetch succeeded")
+      }
+    } else {
+      Log.i("CheckFirstTime", "No profile result obtained")
+    }
     _isFirstTime.value =
         profileResult?.isFailure == true &&
             profileResult.exceptionOrNull()?.message == "Document does not exist"
+    Log.i("CheckFirstTime", "Is first time: ${isFirstTime.value}")
   }
 
   data class UiState(
