@@ -24,8 +24,8 @@ constructor(
   private var _uiState = MutableStateFlow(UiState())
   val uiState: StateFlow<UiState> = _uiState
 
-  private var _isFirstTime = MutableStateFlow(false)
-  val isFirstTime: StateFlow<Boolean> = _isFirstTime
+  private var _isFirstTime = MutableStateFlow<Boolean?>(null)
+  val isFirstTime: StateFlow<Boolean?> = _isFirstTime
 
   suspend fun connectRemote() {
     if (!authenticationController.refreshTokenIfNecessary()) {
@@ -44,9 +44,18 @@ constructor(
   }
 
   suspend fun checkIfFirstTime() {
-    val userId = authenticationController.getUserData()?.id ?: return
+    val userId = authenticationController.getUserData()?.id
+    if (userId == null) {
+      Log.i("CheckFirstTime", "No user ID found, exiting...")
+      return
+    }
     Log.i("UserId", "UserID: $userId")
     val profileResult = profileRepository.getItem(userId).firstOrNull()
+    if (profileResult == null) {
+      Log.i("CheckFirstTime", "No profile result obtained")
+    } else {
+      Log.i("CheckFirstTime", "Profile fetch result: ${profileResult.isSuccess}")
+    }
     _isFirstTime.value =
         profileResult?.isFailure == true &&
             profileResult.exceptionOrNull()?.message == "Document does not exist"

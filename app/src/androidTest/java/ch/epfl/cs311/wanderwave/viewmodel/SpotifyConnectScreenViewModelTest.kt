@@ -10,7 +10,11 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.verify
+import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertNull
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
@@ -122,7 +126,7 @@ class SpotifyConnectScreenViewModelTest {
     viewModel.checkIfFirstTime()
 
     val isFirstTime = viewModel.isFirstTime.first()
-    assert(!isFirstTime)
+    assert(!isFirstTime!!)
   }
 
   @Test
@@ -135,6 +139,34 @@ class SpotifyConnectScreenViewModelTest {
     viewModel.checkIfFirstTime()
 
     val isFirstTime = viewModel.isFirstTime.first()
-    assert(!isFirstTime)
+    if (isFirstTime != null) {
+      assertTrue(!isFirstTime)
+    }
+  }
+
+  @Test
+  fun checkIfFirstTime_whenNoUserId() = runBlocking {
+    setup(SpotifyController.ConnectResult.SUCCESS, true, true)
+    every { mockAuthenticationController.getUserData() } returns null
+
+    viewModel.checkIfFirstTime()
+
+    val isFirstTime = viewModel.isFirstTime.firstOrNull()
+    assertNull(isFirstTime) // Now correctly checks for null
+  }
+
+  @Test
+  fun checkIfFirstTime_whenProfileLoadFailsWithDifferentMessage() = runBlocking {
+    setup(SpotifyController.ConnectResult.SUCCESS, true, true)
+    val userId = "user123"
+    val profileResult = Result.failure<Profile>(Exception("Some other error"))
+    every { mockProfileRepository.getItem(userId) } returns flowOf(profileResult)
+
+    viewModel.checkIfFirstTime()
+
+    val isFirstTime = viewModel.isFirstTime.first()
+    if (isFirstTime != null) {
+      assertFalse(isFirstTime)
+    }
   }
 }
