@@ -57,11 +57,6 @@ constructor(
         profileResult?.isFailure == true &&
             profileResult.exceptionOrNull()?.message == "Document does not exist"
     Log.i("CheckFirstTime", "Is first time: ${isFirstTime.value}")
-    if (profileResult != null) {
-      Log.i(
-          "CheckFirstTime",
-          "Profile fetch failed with exception: ${profileResult.exceptionOrNull()?.message}")
-    }
   }
 
   data class UiState(
