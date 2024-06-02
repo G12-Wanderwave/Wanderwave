@@ -4,8 +4,5 @@ enum class viewModelType {
   PROFILE,
   TRACKLIST,
   BEACON,
-  SONGLIST,
-  UISTATE,
-  LISTTYPE,
   NULL
 }

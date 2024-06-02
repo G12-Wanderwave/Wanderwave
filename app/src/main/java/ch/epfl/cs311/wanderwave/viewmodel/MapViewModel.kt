@@ -78,6 +78,11 @@ constructor(
     }
   }
 
+  /**
+   * Fetches the beacons in the vicinity of the given location
+   * @param location The location to fetch the beacons from
+   * @param context The context to use for fetching the beacons
+   */
   private fun retrieveBeacons(location: Location1, context: Context) {
     viewModelScope.launch {
       // Update _uiState to reflect a loading state
@@ -110,6 +115,11 @@ constructor(
     return location?.let { LatLng(it.latitude, it.longitude) }
   }
 
+  /**
+   * Fetches the beacons in the vicinity of the given location
+   * @param context The context to use for fetching the beacons
+   * @param location The location to fetch the beacons from
+   */
   fun loadBeacons(context: Context, location: ch.epfl.cs311.wanderwave.model.data.Location) {
 
     if (!_areBeaconsLoaded.value) {
@@ -121,9 +131,7 @@ constructor(
   /**
    * Fetches a random song from the list of songs associated with the given beacon id
    *
-   * @param id The id of the beacon
-   * @author Menzo Bouaissi
-   * @since 4.0
+   * @param beaconId The id of the beacon to fetch the song from
    */
   fun getRandomSong(beaconId: String) {
     viewModelScope.launch {
@@ -146,6 +154,10 @@ constructor(
     }
   }
 
+  /**
+   * Retrieves a random song from the profile of the current user and adds it to the given beacon
+   * @param beaconId The id of the beacon to add the song to
+   */
   fun retrieveRandomSongFromProfileAndAddToBeacon(beaconId: String) {
     viewModelScope.launch {
       profile.value?.let { currentProfile ->
@@ -187,6 +199,10 @@ constructor(
     }
   }
 
+  /**
+   * Updates the profile of the current user by adding the chosen song to the list of chosen songs
+   *
+   */
   fun updateChosenSongsProfile() {
     viewModelScope.launch {
       val profileId = authenticationController.getUserData()?.id
@@ -211,8 +227,10 @@ constructor(
     }
   }
 
+  /**
+   * Fetches the profile of the current user
+   */
   fun getProfileOfCurrentUser() {
-
     viewModelScope.launch {
       val currentUserId = authenticationController.getUserData()!!.id
       profileRepository.getItem(currentUserId).collect { fetchedProfile ->

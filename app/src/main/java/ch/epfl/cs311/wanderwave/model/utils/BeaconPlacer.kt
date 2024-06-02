@@ -132,9 +132,6 @@ val types: List<String> =
  * @param beacons the list of existing beacons
  * @param location the user's location
  * @return the beacons that are to be added
- * @author Menzo Bouaissi
- * @since 2.0
- * @last update 2.0
  */
 fun placeBeaconsRandomly(
     beacons: List<Beacon>,
@@ -159,9 +156,6 @@ fun placeBeaconsRandomly(
  * @param newBeacons the list of new beacons
  * @param beacons the list of existing beacons
  * @return the distance between the new beacons and the existing beacons
- * @author Menzo Bouaissi
- * @since 2.0
- * @last update 2.0
  */
 fun computeDistanceBetweenBeacons(newBeacons: List<Beacon>, beacons: List<Beacon>): Double {
   var distance = 0.0
@@ -179,9 +173,6 @@ fun computeDistanceBetweenBeacons(newBeacons: List<Beacon>, beacons: List<Beacon
  * @param location the user's location
  * @param newBeacons the list of new beacons
  * @param it the iteration number
- * @author Menzo Bouaissi
- * @since 2.0
- * @last update 2.0
  */
 fun findRandomBeacon(
     location: Location,
@@ -199,6 +190,13 @@ fun findRandomBeacon(
   newBeacons.add(newBeacon)
 }
 
+/**
+ * This function finds the closest beacon to the user's location. It computes the haversine distance
+ * between the user's location and each beacon's location. It then returns the closest beacon.
+ * @param userPosition the user's location
+ * @param beacons the list of existing beacons
+ * @return the closest beacon
+ **/
 fun findClosestBeacon(userPosition: Location, beacons: List<Beacon>): Beacon? {
   var closestBeacon: Beacon? = null
   var smallestDistance = Double.MAX_VALUE
@@ -213,6 +211,7 @@ fun findClosestBeacon(userPosition: Location, beacons: List<Beacon>): Beacon? {
 
   return closestBeacon
 }
+
 /**
  * This function finds the beacons that are in the vicinity of the user's location. It computes the
  * haversine distance between the user's location and each beacon's location. If the distance is
@@ -223,9 +222,6 @@ fun findClosestBeacon(userPosition: Location, beacons: List<Beacon>): Beacon? {
  * @param beacons the list of existing beacons
  * @param radius the radius in which the beacons are considered to be nearby
  * @return the list of nearby beacons
- * @author Menzo Bouaissi
- * @since 2.0
- * @last update 2.0
  */
 fun findNearbyBeacons(userPosition: Location, beacons: List<Beacon>): List<Beacon> {
   var nearbyBeacons = mutableListOf<Beacon>()
@@ -242,9 +238,6 @@ fun findNearbyBeacons(userPosition: Location, beacons: List<Beacon>): List<Beaco
  * @param beacons the list of existing beacons
  * @param radius the radius in which the beacons are considered to be nearby
  * @return the list of nearby beacons
- * @author Menzo Bouaissi
- * @since 2.0
- * @last update 2.0
  */
 fun hasEnoughBeacons(userPosition: Location, beacons: List<Beacon>): Boolean {
   var nearbyBeacons = mutableListOf<Beacon>()
@@ -263,9 +256,6 @@ fun hasEnoughBeacons(userPosition: Location, beacons: List<Beacon>): Boolean {
  * @param userPosition the user's location
  * @param distance the distance from the user's location
  * @return the random latitude and longitude from the user's location and distance
- * @author Menzo Bouaissi
- * @since 2.0
- * @last update 2.0
  */
 fun randomLatLongFromPosition(userPosition: Location, distance: Double): Location {
   val latRad = Math.toRadians(userPosition.latitude)

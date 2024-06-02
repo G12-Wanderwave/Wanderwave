@@ -20,9 +20,6 @@ import ch.epfl.cs311.wanderwave.model.data.Profile
  *
  * @param modifier the modifier to be applied to the Icon
  * @param profile the profile of the user
- * @author Menzo Bouaissi
- * @since 1.0
- * @last update 1.0
  */
 @Composable
 fun VisitCard(modifier: Modifier = Modifier, profile: Profile) {

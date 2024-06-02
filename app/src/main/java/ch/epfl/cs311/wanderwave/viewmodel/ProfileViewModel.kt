@@ -57,8 +57,6 @@ constructor(
   private val _wanderwaveLikedTracks = MutableStateFlow<List<Track>>(emptyList())
   val wanderwaveLikedTracks: StateFlow<List<Track>> = _wanderwaveLikedTracks
 
-  private val _retrievedSongs = MutableStateFlow<List<Track>>(emptyList())
-  val retrievedSongs: StateFlow<List<Track>> = _retrievedSongs
 
   // Function to add a track to a song list
   override fun addTrackToList(track: Track) {
@@ -127,10 +125,7 @@ constructor(
 
   /**
    * Get all the liked tracks of the user and add them to the likedSongs list.
-   *
-   * @author Menzo Bouaissi
-   * @since 3.0
-   * @last update 3.0
+   * @param page the page of liked songs to get
    */
   override suspend fun getLikedTracks(page: Int) {
     getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope, page)

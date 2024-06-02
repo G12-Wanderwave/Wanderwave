@@ -15,9 +15,6 @@ import androidx.compose.ui.unit.dp
  * @param modifier the modifier to be applied to the Icon
  * @param icon the icon to be display
  * @param viewModel the viewModel that will handle the profile
- * @author Menzo Bouaissi
- * @since 1.0
- * @last update 1.0
  */
 @Composable
 fun ClickableIcon(modifier: Modifier = Modifier, icon: ImageVector, onClick: () -> Unit) {

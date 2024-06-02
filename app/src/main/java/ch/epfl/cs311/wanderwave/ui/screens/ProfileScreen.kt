@@ -55,14 +55,12 @@ const val MAX_NBR_CHAR_DESC = 35
 val INPUT_BOX_NAM_SIZE = 150.dp
 
 /**
- * This is the screen composable which can either show the profile of the user or it can show a view
- * to modify the profile. It also includes a toggle to switch between showing the "TOP SONGS" list
- * or the "CHOSEN SONGS" list, as well as dialogs to add new tracks to the lists.
+ * This is the main screen of the profile, it displays the user's profile picture, name, description
+ * and top songs. It also contains buttons to sign out and access the about screen.
  *
- * @author Ayman Bakiri
- * @author Menzo Bouaissi
- * @since 1.0
- * @last update 2.0
+ * @param navActions to navigate to and from the profile editor
+ * @param viewModel to get the profile
+ * @param online to determine if the user is online or not
  */
 @Composable
 fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel, online: Boolean) {
@@ -103,9 +101,7 @@ fun ProfileScreen(navActions: NavigationActions, viewModel: ProfileViewModel, on
  * This handle the logic behind the switch that can permit the user to switch to the anonymous mode
  *
  * @param modifier to place the switch at a place, and still be able to modify it.
- * @author Menzo Bouaissi
- * @since 1.0
- * @last update 1.0
+ * @param viewModel to get the profile
  */
 @Composable
 fun ProfileSwitch(modifier: Modifier = Modifier, viewModel: ProfileViewModel = hiltViewModel()) {

@@ -40,6 +40,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
+var totalLikes = -1
 class SpotifyController
 @Inject
 constructor(
@@ -446,9 +447,6 @@ constructor(
    *
    * @return a Flow of ListItem which has all the playlist, title, ... from the home page of the
    *   user.
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 2.0
    */
   fun getAllElementFromSpotify(): Flow<List<ListItem>> {
     val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
@@ -471,9 +469,6 @@ constructor(
    *
    * @param listItem the ListItem to get the children from
    * @return a Flow of ListItem
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 2.0
    */
   fun getChildren(listItem: ListItem): Flow<ListItem> {
     return callbackFlow {
@@ -497,9 +492,6 @@ constructor(
    *
    * @param listItem the ListItem to get the childrens from
    * @return a Flow of List<ListItem> which contains all the children of the ListItem
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 2.0
    */
   fun getAllChildren(listItem: ListItem): Flow<List<ListItem>> {
     val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
@@ -548,12 +540,16 @@ constructor(
   }
 }
 
-var totalLikes = -1
 
 fun com.spotify.protocol.types.Track.toWanderwaveTrack(): Track {
   return Track(this.uri, this.name, this.artist.name)
 }
 
+/**
+ * Get the total number of liked tracks of the user.
+ * @param spotifyController the SpotifyController
+ * @return the total number of liked tracks of the user
+ */
 suspend fun getTotalLikedTracksFromSpotity(spotifyController: SpotifyController): Int {
   val url = "https://api.spotify.com/v1/me/tracks"
   return try {
@@ -572,9 +568,6 @@ suspend fun getTotalLikedTracksFromSpotity(spotifyController: SpotifyController)
  * @param likedSongsTrackList the list of liked songs
  * @param spotifyController the SpotifyController
  * @param scope the CoroutineScope
- * @author Menzo Bouaissi
- * @since 3.0
- * @last update 3.0
  */
 fun getLikedTracksFromSpotify(
     likedSongsTrackList: MutableStateFlow<List<ListItem>>,
@@ -619,9 +612,6 @@ fun getTracksFromSpotifyPlaylist(
  *
  * @param jsonResponse the JSON response from the Spotify API
  * @param songsTrackList the list of liked songs
- * @author Menzo Bouaissi
- * @since 3.0
- * @last update 3.0
  */
 fun parseTracks(
     jsonResponse: String,
