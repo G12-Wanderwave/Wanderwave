@@ -43,9 +43,8 @@ CS-311: *The software enterprise: from ideas to products*.
 The team is made up of the members
 Ayman, Clarence, Imade, Jonas, Menzo, Tsogt and Yoric.
 
-## Figma link
-https://www.figma.com/files/project/215171825/Team-project?fuid=1213059135171411879
-
+## UI
+[Figma Link](https://www.figma.com/files/project/215171825/Team-project?fuid=1213059135171411879)
 
 ## Application
 
