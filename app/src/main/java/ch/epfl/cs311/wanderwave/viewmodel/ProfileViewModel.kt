@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 class ProfileViewModel
 @Inject
 constructor(
-    private val repository: ProfileRepository, // TODO revoir
+    private val repository: ProfileRepository,
     private val spotifyController: SpotifyController,
     private val authenticationController: AuthenticationController
 ) : ViewModel(), SpotifySongsActions {
@@ -56,9 +56,6 @@ constructor(
 
   private val _wanderwaveLikedTracks = MutableStateFlow<List<Track>>(emptyList())
   val wanderwaveLikedTracks: StateFlow<List<Track>> = _wanderwaveLikedTracks
-
-  private val _retrievedSongs = MutableStateFlow<List<Track>>(emptyList())
-  val retrievedSongs: StateFlow<List<Track>> = _retrievedSongs
 
   // Function to add a track to a song list
   override fun addTrackToList(track: Track) {
@@ -99,7 +96,7 @@ constructor(
     viewModelScope.launch {
       repository.getItem(id).collect { fetchedProfile ->
         fetchedProfile.onSuccess { profile ->
-          profile.profilePictureUri = null // TODO : @Clarence, pls can you do it more properly
+          profile.profilePictureUri = null
           _profile.value = profile
           _uiState.value = UIState(profile = profile, isLoading = false)
         }
@@ -128,9 +125,7 @@ constructor(
   /**
    * Get all the liked tracks of the user and add them to the likedSongs list.
    *
-   * @author Menzo Bouaissi
-   * @since 3.0
-   * @last update 3.0
+   * @param page the page of liked songs to get
    */
   override suspend fun getLikedTracks(page: Int) {
     getLikedTracksFromSpotify(this._likedSongsTrackList, spotifyController, viewModelScope, page)

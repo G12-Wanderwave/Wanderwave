@@ -68,16 +68,6 @@ fun AppBottomBar(navActions: NavigationActions, online: Boolean) {
             }
 
         if (online) {
-          //      IconButton(
-          //          onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[1].route) },
-          //          modifier = Modifier.weight(1f).testTag("bottomAppBarButton" +
-          // Route.MAP.routeString)) {
-          //            Image(
-          //                modifier = Modifier.padding(top = 5.dp, bottom = 5.dp),
-          //                painter = painterResource(id = R.drawable.map),
-          //                contentDescription = "Beacon icon",
-          //            )
-          //          }
           IconButton(
               onClick = { navActions.navigateToTopLevel(TOP_LEVEL_DESTINATIONS[1].route) },
               modifier =

@@ -85,6 +85,11 @@ constructor(
     return builder.build()
   }
 
+  /**
+   * Get all the playlists of the user on the Spotify API
+   *
+   * @return a list of ListItem that contains all the playlists of the user
+   */
   suspend fun getAllPlaylists(): List<ListItem> {
     val url = "https://api.spotify.com/v1/me/playlists"
     val playlists = spotifyGetFromURL(url)
@@ -102,6 +107,12 @@ constructor(
     return list
   }
 
+  /**
+   * Create a playlist if it does not exist
+   *
+   * @return the id of the playlist
+   * @throws Exception if the playlist could not be created
+   */
   suspend fun createPlaylistIfNotExist(): String {
     val list = getAllPlaylists()
     if (list.any { it.title == PLAYLIST_NAME }) {
@@ -132,6 +143,11 @@ constructor(
     return playlistId
   }
 
+  /**
+   * Get the current user id with the Spotify API
+   *
+   * @return the current user id
+   */
   suspend fun getCurrentUserId(): String {
     val url = "https://api.spotify.com/v1/me"
     val response = authenticationController.makeApiRequest(URL(url))
@@ -142,6 +158,11 @@ constructor(
     return jsonObject.getString("id")
   }
 
+  /**
+   * Add a track to the playlist
+   *
+   * @param track the track to add
+   */
   suspend fun addToPlaylist(track: Track) {
     val playlistId = createPlaylistIfNotExist()
     Log.d("SpotifyController", "Adding track to playlist: $playlistId")
@@ -163,6 +184,11 @@ constructor(
     }
   }
 
+  /**
+   * Remove a track from the playlist
+   *
+   * @param track the track to remove
+   */
   suspend fun removeFromPlaylist(track: Track) {
     val playlistId = createPlaylistIfNotExist()
     Log.d("SpotifyController", "Removing track from playlist: $playlistId")
@@ -181,6 +207,12 @@ constructor(
     }
   }
 
+  /**
+   * Get the track image from the track id
+   *
+   * @param trackId the id of the track
+   * @return the track image
+   */
   suspend fun getTrackImage(trackId: String): Bitmap? {
     return try {
       val albumId = getAlbumIdFromTrackId(this, trackId)
@@ -191,6 +223,13 @@ constructor(
     }
   }
 
+  /**
+   * Get the album id from the track id
+   *
+   * @param spotifyController the SpotifyController
+   * @param trackId the id of the track
+   * @return the id of the album
+   */
   suspend fun getAlbumIdFromTrackId(spotifyController: SpotifyController, trackId: String): String {
     val trackId = trackId.split(":")[2]
     val jsonResponse =
@@ -200,6 +239,12 @@ constructor(
     return album.getString("id")
   }
 
+  /**
+   * Get the album image from the album id
+   *
+   * @param albumId the id of the album
+   * @return the album image
+   */
   suspend fun getAlbumImage(albumId: String): Bitmap? {
     return try {
       val url = "https://api.spotify.com/v1/albums/$albumId"
@@ -241,6 +286,11 @@ constructor(
     }
   }
 
+  /**
+   * Get the recently played tracks
+   *
+   * @return a Flow of List<Track> that contains the recently played tracks
+   */
   fun getLogoutRequest(): AuthorizationRequest {
     val builder =
         AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.CODE, REDIRECT_URI)
@@ -253,11 +303,23 @@ constructor(
     return appRemote.value?.isConnected ?: false
   }
 
+  /**
+   * Add a track to the recently played list
+   *
+   * @param track the track to add
+   * @param timestamp the time the track was played
+   * @return a Flow of List<Track> that contains the recently played tracks
+   */
   fun addRecentlyPlayedTrack(track: com.spotify.protocol.types.Track) {
     val wanderwaveTrack = track.toWanderwaveTrack()
     recentlyPlayedRepository.addRecentlyPlayed(wanderwaveTrack, Instant.now())
   }
 
+  /**
+   * Connect to the Spotify app remote
+   *
+   * @return a Flow of ConnectResult that can be either SUCCESS, NOT_LOGGED_IN, or FAILED
+   */
   fun connectRemote(): Flow<ConnectResult> {
     return callbackFlow {
       if (isConnected()) {
@@ -289,11 +351,19 @@ constructor(
     }
   }
 
+  /** Disconnect from the spotify app remote */
   fun disconnectRemote() {
     appRemote.value.let { SpotifyAppRemote.disconnect(it) }
     appRemote.value = null
   }
 
+  /**
+   * Play a track on the Spotify player. Leaves the playing tracks list untouched.
+   *
+   * @param track the track to play
+   * @param onSuccess the function to call on success
+   * @param onFailure the function to call on failure
+   */
   fun playTrack(track: Track, onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
     appRemote.value?.let {
       it.playerApi
@@ -310,6 +380,16 @@ constructor(
     }
   }
 
+  /**
+   * Play a list of tracks. If a track is provided, it will start at that track. If no track is
+   * provided, it will start at the first track in the list.
+   *
+   * @param trackList the list of tracks to play
+   * @param track the track to start at, or null to start at the beginning of the list
+   * @param onSuccess the function to call on success
+   * @param onFailure the function to call on failure
+   * @throws Throwable("Empty track list") if the track list is empty
+   */
   fun playTrackList(
       trackList: List<Track>,
       track: Track? = null,
@@ -331,6 +411,12 @@ constructor(
         onFailure = onFailure)
   }
 
+  /**
+   * Pause the currently playing track. Does nothing if already paused.
+   *
+   * @param onSuccess the function to call on success
+   * @param onFailure the function to call on failure
+   */
   fun pauseTrack(onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
     appRemote.value?.let {
       it.playerApi
@@ -340,6 +426,12 @@ constructor(
     }
   }
 
+  /**
+   * Resume the track that is currently playing (paused). Does nothing if not paused.
+   *
+   * @param onSuccess the function to call on success
+   * @param onFailure the function to call on failure
+   */
   fun resumeTrack(onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
     appRemote.value?.let {
       it.playerApi
@@ -349,6 +441,14 @@ constructor(
     }
   }
 
+  /**
+   * Skip to the next or previous track in the track list. If the current track is not in the track
+   * list, this function does nothing.
+   *
+   * @param direction the direction to skip in. 1 for next, -1 for previous
+   * @param onSuccess the function to call on success
+   * @param onFailure the function to call on failure
+   */
   suspend fun skip(
       direction: Int,
       onSuccess: () -> Unit = {},
@@ -372,6 +472,12 @@ constructor(
     }
   }
 
+  /**
+   * Get the current player state of the Spotify player. The player state contains information about
+   * the current track, playback position, and playback status.
+   *
+   * @return a Flow of PlayerState
+   */
   @OptIn(ExperimentalCoroutinesApi::class)
   fun playerState(): Flow<PlayerState?> {
     return appRemote.flatMapLatest { appRemote ->
@@ -394,6 +500,12 @@ constructor(
     }
   }
 
+  /**
+   * Start a timer that updates the track progress every second until the track ends
+   *
+   * @param trackDuration the duration of the track in milliseconds
+   * @param scope the CoroutineScope to run the timer in
+   */
   fun startPlaybackTimer(
       trackDuration: Long,
       scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -423,7 +535,7 @@ constructor(
     playbackTimer = null
   }
 
-  fun onPlayerStateUpdate() { // TODO: Coverage
+  internal fun onPlayerStateUpdate() {
     appRemote.value?.let {
       it.playerApi.subscribeToPlayerState().setEventCallback { playerState: PlayerState ->
         if (playerState.track != null) {
@@ -434,10 +546,16 @@ constructor(
     }
   }
 
+  /**
+   * Set the function that is called when a track ends
+   *
+   * @param callback the function that is called when a track ends
+   */
   fun setOnTrackEndCallback(callback: () -> Unit) {
     onTrackEndCallback = callback
   }
 
+  /** Get the function that is called when a track ends */
   fun getOnTrackEndCallback(): (() -> Unit)? {
     return onTrackEndCallback
   }
@@ -446,9 +564,6 @@ constructor(
    *
    * @return a Flow of ListItem which has all the playlist, title, ... from the home page of the
    *   user.
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 2.0
    */
   fun getAllElementFromSpotify(): Flow<List<ListItem>> {
     val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
@@ -471,9 +586,6 @@ constructor(
    *
    * @param listItem the ListItem to get the children from
    * @return a Flow of ListItem
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 2.0
    */
   fun getChildren(listItem: ListItem): Flow<ListItem> {
     return callbackFlow {
@@ -497,9 +609,6 @@ constructor(
    *
    * @param listItem the ListItem to get the childrens from
    * @return a Flow of List<ListItem> which contains all the children of the ListItem
-   * @author Menzo Bouaissi
-   * @since 2.0
-   * @last update 2.0
    */
   fun getAllChildren(listItem: ListItem): Flow<List<ListItem>> {
     val list: MutableList<ListItem> = emptyList<ListItem>().toMutableList()
@@ -549,7 +658,11 @@ constructor(
 }
 
 var totalLikes = -1
-
+/**
+ * Convert a Spotify Track to a Wanderwave Track
+ *
+ * @return the Wanderwave Track
+ */
 fun com.spotify.protocol.types.Track.toWanderwaveTrack(): Track {
   return Track(this.uri, this.name, this.artist.name)
 }
@@ -572,9 +685,6 @@ suspend fun getTotalLikedTracksFromSpotity(spotifyController: SpotifyController)
  * @param likedSongsTrackList the list of liked songs
  * @param spotifyController the SpotifyController
  * @param scope the CoroutineScope
- * @author Menzo Bouaissi
- * @since 3.0
- * @last update 3.0
  */
 fun getLikedTracksFromSpotify(
     likedSongsTrackList: MutableStateFlow<List<ListItem>>,
@@ -595,6 +705,14 @@ fun getLikedTracksFromSpotify(
   }
 }
 
+/**
+ * Get all the tracks from a Spotify playlist and add them to the playlist list.
+ *
+ * @param playlistId the id of the playlist
+ * @param playlist the list of tracks
+ * @param spotifyController the SpotifyController
+ * @param scope the CoroutineScope
+ */
 fun getTracksFromSpotifyPlaylist(
     playlistId: String,
     playlist: MutableStateFlow<List<ListItem>>,
@@ -619,9 +737,6 @@ fun getTracksFromSpotifyPlaylist(
  *
  * @param jsonResponse the JSON response from the Spotify API
  * @param songsTrackList the list of liked songs
- * @author Menzo Bouaissi
- * @since 3.0
- * @last update 3.0
  */
 fun parseTracks(
     jsonResponse: String,

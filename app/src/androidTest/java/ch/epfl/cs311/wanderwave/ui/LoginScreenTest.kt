@@ -72,7 +72,7 @@ class LoginScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCompos
       }
       signInButton {
         assertIsDisplayed()
-        hasText("Sign in with Spotify") // TODO don't hardcode strings
+        hasText("Sign in with Spotify")
         assertHasClickAction()
       }
     }

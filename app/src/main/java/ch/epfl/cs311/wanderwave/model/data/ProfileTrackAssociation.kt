@@ -9,6 +9,8 @@ import com.google.firebase.firestore.FirebaseFirestore
  *
  * @param profile The profile associated with the track.
  * @param track The track associated with the profile.
+ * @param likersId The list of ids of the profiles that liked the track.
+ * @param likes The number of likes the track has.
  * @author Clarence LINDEN
  * @since 3.0
  * @last update 3.0

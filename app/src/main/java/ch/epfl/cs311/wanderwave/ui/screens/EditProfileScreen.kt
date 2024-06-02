@@ -38,14 +38,13 @@ import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_primary
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
 /**
- * Display the profile of the user, with the possibility to edit it
+ * Display the profile of the user, with the possibility to edit it The user can change his profile
+ * picture, first name, last name and description The user can also delete his profile The user can
+ * save or cancel the changes
  *
- * @param profile the profile of the user
- * @param onProfileChange enable to transmit the changed to the caller
- * @param viewModel the viewModel that will handle the profile
- * @author Menzo Bouaissi
- * @since 1.0
- * @last update 1.0
+ * @param navActions the navigation actions
+ * @param viewModel the view model of the profile
+ * @param canCancel enable to display the cancel button
  */
 @Composable
 fun EditProfileScreen(
@@ -111,9 +110,6 @@ fun EditProfileScreen(
  * @param onFirstNameChange enable to transmit the changed to the caller
  * @param onLastNameChange enable to transmit the changed to the caller
  * @param onDescriptionChange enable to transmit the changed to the caller
- * @author Menzo Bouaissi
- * @since 1.0
- * @last update 1.0
  */
 @Composable
 fun EditableTextFields(
@@ -165,9 +161,8 @@ fun EditableTextFields(
  *
  * @param onSave the action to be done when the user wants to save the changes
  * @param onCancel the action to be done when the user wants to cancel the changes
- * @author Menzo Bouaissi
- * @since 1.0
- * @last update 1.0
+ * @param onDelete the action to be done when the user wants to delete his profile
+ * @param canCancel enable to display the cancel button
  */
 @Composable
 fun ActionButtons(

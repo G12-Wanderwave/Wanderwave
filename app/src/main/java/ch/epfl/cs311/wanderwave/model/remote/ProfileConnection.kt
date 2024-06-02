@@ -20,6 +20,17 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 
+/**
+ * This class is responsible for the connection to the Firestore database for the profiles. It is a
+ * subclass of FirebaseConnection and implements the ProfileRepository interface. It is used to
+ * fetch, add, update and delete profiles from the Firestore database. It also contains a reference
+ * to the TrackConnection class to fetch the tracks associated with the profiles.
+ *
+ * @param db The Firestore database instance
+ * @param ioDispatcher The dispatcher used for IO operations
+ * @param trackConnection The connection to the tracks
+ * @param appDatabase The local database instance
+ */
 class ProfileConnection(
     private val db: FirebaseFirestore,
     private val ioDispatcher: CoroutineDispatcher,

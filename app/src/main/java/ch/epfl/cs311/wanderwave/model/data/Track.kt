@@ -2,6 +2,13 @@ package ch.epfl.cs311.wanderwave.model.data
 
 import com.google.firebase.firestore.DocumentSnapshot
 
+/**
+ * This class represents a track. It corresponds to a spotify track.
+ *
+ * @param id The id of the track, which is the spotify id.
+ * @param title The title of the track.
+ * @param artist The artist of the track.
+ */
 data class Track(
     /** Firebase id = Spotify id */
     val id: String,

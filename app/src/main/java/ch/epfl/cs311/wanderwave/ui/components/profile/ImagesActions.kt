@@ -46,20 +46,13 @@ import ch.epfl.cs311.wanderwave.ui.theme.ProfileBackground9
 import kotlin.math.abs
 
 /**
- * Handle the logic behind the image, when the user has a profile picture, we display it via
- * AsynImage, else we just display a based image with Image
+ * Display the profile picture of the user, which is for the MVP a placeholder
  *
  * @param modifier the modifier to be applied to the Icon
  * @param profile the profile of the user
- * @author Menzo Bouaissi
- * @since 1.0
- * @last update 3.0
  */
 @Composable
 fun SelectImage(modifier: Modifier, imageUri: Uri?, profile: Profile) {
-  // if (imageUri != null) {
-  // AsyncImage(model = imageUri, contentDescription = "Profile picture", modifier = modifier)
-  // } else {
   PlaceholderProfilePicture(
       name = profile.firstName,
       modifier =
@@ -74,9 +67,6 @@ fun SelectImage(modifier: Modifier, imageUri: Uri?, profile: Profile) {
  *
  * @param profile the profile of the user
  * @param onImageChange enable to transmit the changed to the caller
- * @author Menzo Bouaissi
- * @since 1.0
- * @last update 3.0
  */
 @Composable
 fun ImageSelection(profile: Profile, onImageChange: (Uri?) -> Unit) {

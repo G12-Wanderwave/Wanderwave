@@ -47,10 +47,7 @@ import com.spotify.protocol.types.ListItem
  * Screen to select a song from Spotify
  *
  * @param navActions Navigation actions
- * @param viewModel ProfileViewModel
- * @author Menzo Bouaissi
- * @since 2.0
- * @last update 2.0
+ * @param viewModel a view model
  */
 @Composable
 fun SelectSongScreen(navActions: NavigationActions, viewModel: SpotifySongsActions) {
@@ -67,10 +64,7 @@ fun SelectSongScreen(navActions: NavigationActions, viewModel: SpotifySongsActio
 /**
  * Initialize the song screen
  *
- * @param viewModel ProfileViewModel
- * @author Menzo Bouaissi
- * @since 3.0
- * @last update 3.0
+ * @param viewModel a view model
  */
 @Composable
 fun initSongScreen(viewModel: SpotifySongsActions) {
@@ -81,6 +75,14 @@ fun initSongScreen(viewModel: SpotifySongsActions) {
   }
 }
 
+/**
+ * Song screen scaffold
+ *
+ * @param navActions Navigation actions
+ * @param displayedList List of ListItem
+ * @param viewModel SpotifySongsActions
+ * @param nbrLikedSongs Number of liked songs
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongScreenScaffold(
@@ -146,6 +148,12 @@ fun SongScreenScaffold(
   loadNextSongs(viewModel = viewModel, page = page)
 }
 
+/**
+ * Load the next songs
+ *
+ * @param viewModel SpotifySongsActions
+ * @param page Int
+ */
 @Composable
 fun loadNextSongs(viewModel: SpotifySongsActions, page: Int) {
   LaunchedEffect(page) { viewModel.getLikedTracks(page) }
@@ -178,10 +186,6 @@ fun TrackItem(listItem: ListItem, onClick: () -> Unit) {
  * @param items List of ListItem
  * @param navActions Navigation actions
  * @param viewModel ProfileViewModel
- * @param isTopSongsListVisible Boolean indicating if the top songs list is visible
- * @author Menzo Bouaissi
- * @since 3.0
- * @last update 3.0
  */
 @Composable
 fun SongList(
@@ -203,9 +207,6 @@ fun SongList(
  * @param listItem ListItem
  * @param navActions Navigation actions
  * @param viewModel ProfileViewModel
- * @author Menzo Bouaissi
- * @since 3.0
- * @last update 3.0
  */
 fun handleItemClick(
     listItem: ListItem,
