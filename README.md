@@ -24,12 +24,12 @@ account, as well as have the Spotify app installed on their phone.
 Upon first opening the app, you are presented with a login screen. Click on the *Connect to Spotify* 
 button to link your Spotify account to Wanderwave, logging you in.
 
-![Login Screen](res/login-screen.jpg)
+<img src="res/login-screen.jpg" alt="Login Screen" width="200"/>
 
 After loggin in, you will see a screen with a map interface. On it, you should find several icons that
 represent Wanderwave Beacons. You can click on them to view their contents.
 
-![Map Screen](res/map-screen.jpg)
+<img src="res/map-screen.jpg" alt="Map Screen" width="200"/>
 
 You can use the bottom app bar to navigate to your profile to view and edit it, as well as to the 
 different playlists compiled for you by Wanderwave, like the list of songs you recently viewed.
