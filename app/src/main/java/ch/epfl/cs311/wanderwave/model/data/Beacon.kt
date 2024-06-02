@@ -3,8 +3,15 @@ package ch.epfl.cs311.wanderwave.model.data
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
+/**
+ * Data class representing a beacon It's the object of interest in the app on the map screen
+ *
+ * @param id The id of the beacon
+ * @param location The location of the beacon
+ * @param profileAndTrack The list of tracks that are broadcast from the beacon
+ * @param numberOfLikes The number of likes the beacon has
+ */
 data class Beacon(
-
     /** GUID of the beacon */
     val id: String,
 

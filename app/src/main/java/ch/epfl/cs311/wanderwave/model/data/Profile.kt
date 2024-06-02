@@ -5,6 +5,23 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
+/**
+ * Data class representing a user profile It's the object of interest in the app on the profile
+ * screen The profile represents the user's information and preferences
+ *
+ * @param firstName The first name of the user
+ * @param lastName The last name of the user
+ * @param description The description of the user
+ * @param numberOfLikes The number of likes the user has
+ * @param isPublic Whether the profile is public or not
+ * @param profilePictureUri The uri of the profile picture
+ * @param spotifyUid The spotify uid of the user
+ * @param firebaseUid The firebase uid of the user
+ * @param likedSongs The list of songs the user liked
+ * @param topSongs The list of songs the user has in their top songs
+ * @param chosenSongs The list of songs the user has chosen
+ * @param bannedSongs The list of songs the user has banned
+ */
 data class Profile(
     var firstName: String,
     var lastName: String,

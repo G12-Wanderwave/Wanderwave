@@ -25,6 +25,19 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 
+/**
+ * This class is responsible for the connection to the Firestore database for the beacons. It is a
+ * subclass of FirebaseConnection and implements the BeaconRepository interface. It is used to
+ * fetch, add, update and delete beacons from the Firestore database. It also contains a reference
+ * to the TrackConnection and ProfileConnection classes to fetch the tracks and profiles associated
+ * with the beacons.
+ *
+ * @param db The Firestore database instance
+ * @param ioDispatcher The dispatcher used for IO operations
+ * @param trackConnection The connection to the tracks
+ * @param profileConnection The connection to the profiles
+ * @param appDatabase The local database instance
+ */
 class BeaconConnection(
     private val db: FirebaseFirestore,
     private val ioDispatcher: CoroutineDispatcher,

@@ -17,6 +17,15 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * This class is responsible for the connection to the Firestore database for the tracks. It is a
+ * subclass of FirebaseConnection and implements the TrackRepository interface. It is used to fetch,
+ * add, update and delete tracks from the Firestore database.
+ *
+ * @param db The Firestore database instance
+ * @param ioDispatcher The dispatcher used for IO operations
+ * @param appDatabase The local database instance
+ */
 class TrackConnection(
     private val db: FirebaseFirestore,
     private val ioDispatcher: CoroutineDispatcher

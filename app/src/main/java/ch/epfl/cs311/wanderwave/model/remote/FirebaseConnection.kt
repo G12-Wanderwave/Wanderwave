@@ -14,6 +14,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
+/**
+ * This class is responsible for the connection to the Firestore database. It is a superclass for
+ * all the connections to the Firestore database. It contains the basic functions to add, update,
+ * delete and get items from the Firestore database. It is used to fetch, add, update and delete
+ * items from the Firestore database.
+ *
+ * @param db The Firestore database instance
+ * @param ioDispatcher The dispatcher used for IO operations
+ * @param T The type of the item to be fetched, added, updated or deleted
+ * @param U The type of the item to be transformed to when getting all items
+ */
 abstract class FirebaseConnection<T, U>(
     private val db: FirebaseFirestore,
     private val ioDispatcher: CoroutineDispatcher
