@@ -12,9 +12,30 @@ user, a beacon is like an interactive map marker that contains a list of tracks.
 users can add songs to the beacon to share them with the world, or look at beacons to view what other
 users have put there.
 
+Wanderwave integrates with Spotify to provide insights about your music tastes, as well as be able to 
+play music from your device. As such, users are required to link their Wanderwave account to their Spotify
+account, as well as have the Spotify app installed on their phone.
+
 ## Usage
 
 ### Getting started
+Upon first opening the app, you are presented with a login screen. Click on the *Connect to Spotify* 
+button to link your Spotify account to Wanderwave, logging you in.
+
+![(login image)]
+
+After loggin in, you will see a screen with a map interface. On it, you should find several icons that
+represent Wanderwave Beacons. You can click on them to view their contents.
+
+![(map image)]
+
+You can use the bottom app bar to navigate to your profile to view and edit it, as well as to the 
+different playlists compiled for you by Wanderwave, like the list of songs you recently viewed.
+
+![(Bottom app bar image)]
+
+After clicking a beacon and clicking the *+* icon, your Spotify home page is shown to you as a list,
+and you can select songs from there in order to add them to the beacon.
 
 ## Team
 Wanderwave is brought to you by Team #12 of EPFL's 2024 iteration of the course
