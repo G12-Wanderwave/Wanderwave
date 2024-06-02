@@ -80,6 +80,7 @@ constructor(
 
   /**
    * Fetches the beacons in the vicinity of the given location
+   *
    * @param location The location to fetch the beacons from
    * @param context The context to use for fetching the beacons
    */
@@ -117,6 +118,7 @@ constructor(
 
   /**
    * Fetches the beacons in the vicinity of the given location
+   *
    * @param context The context to use for fetching the beacons
    * @param location The location to fetch the beacons from
    */
@@ -156,6 +158,7 @@ constructor(
 
   /**
    * Retrieves a random song from the profile of the current user and adds it to the given beacon
+   *
    * @param beaconId The id of the beacon to add the song to
    */
   fun retrieveRandomSongFromProfileAndAddToBeacon(beaconId: String) {
@@ -201,7 +204,6 @@ constructor(
 
   /**
    * Updates the profile of the current user by adding the chosen song to the list of chosen songs
-   *
    */
   fun updateChosenSongsProfile() {
     viewModelScope.launch {
@@ -227,9 +229,7 @@ constructor(
     }
   }
 
-  /**
-   * Fetches the profile of the current user
-   */
+  /** Fetches the profile of the current user */
   fun getProfileOfCurrentUser() {
     viewModelScope.launch {
       val currentUserId = authenticationController.getUserData()!!.id

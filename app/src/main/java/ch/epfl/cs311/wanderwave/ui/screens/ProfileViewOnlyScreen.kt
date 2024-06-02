@@ -22,7 +22,6 @@ import ch.epfl.cs311.wanderwave.ui.components.profile.VisitCard
 import ch.epfl.cs311.wanderwave.ui.components.utils.LoadingScreen
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
-
 /**
  * This is the screen composable which can only show the profile of the user. It includes a visit
  * card and a list of songs. This screen is not modifiable.
@@ -30,7 +29,6 @@ import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
  * @param profileId the id of the profile to display
  * @param navigationActions the navigation actions
  * @param viewModel the view model of the profile
- *
  */
 @Composable
 fun ProfileViewOnlyScreen(

@@ -32,10 +32,9 @@ import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 import ch.epfl.cs311.wanderwave.viewmodel.TrackListViewModel
 
 /**
- * This function is responsible for displaying the TrackListScreen.
- * It displays the list of tracks based on the selected tab.
- * The user can search for tracks and add them to the list.
- * The user can also play the tracks.
+ * This function is responsible for displaying the TrackListScreen. It displays the list of tracks
+ * based on the selected tab. The user can search for tracks and add them to the list. The user can
+ * also play the tracks.
  *
  * @param navActions: NavigationActions
  * @param viewModel: TrackListViewModel

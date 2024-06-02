@@ -106,7 +106,7 @@ fun MapScreen(navigationActions: NavigationActions, viewModel: MapViewModel) {
  *
  * @param locationState The state that holds the current location.
  * @param viewModel The MapViewModel that is used to load the beacons and the profile of the current
- * user.
+ *   user.
  * @return The BroadcastReceiver that listens for location updates.
  */
 fun createLocationReceiver(
@@ -156,10 +156,9 @@ fun AskForPermissions(permissionState: MultiplePermissionsState) {
  * NavigationActions object and a MapViewModel as input and displays the beacons on the map.
  *
  * @param navigationActions The NavigationActions object that contains the navigation logic for
- * navigating between the top-level destinations.
+ *   navigating between the top-level destinations.
  * @param viewModel The MapViewModel that is used to load the beacons and the profile of the current
- * user.
-
+ *   user.
  */
 @Composable
 fun MapContent(navigationActions: NavigationActions, viewModel: MapViewModel) {
