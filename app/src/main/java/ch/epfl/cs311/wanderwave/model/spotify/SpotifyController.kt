@@ -40,7 +40,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
-var totalLikes = -1
 class SpotifyController
 @Inject
 constructor(
@@ -606,6 +605,7 @@ constructor(
   }
 }
 
+var totalLikes = -1
 /**
  * Convert a Spotify Track to a Wanderwave Track
  *
@@ -615,11 +615,6 @@ fun com.spotify.protocol.types.Track.toWanderwaveTrack(): Track {
   return Track(this.uri, this.name, this.artist.name)
 }
 
-/**
- * Get the total number of liked tracks of the user.
- * @param spotifyController the SpotifyController
- * @return the total number of liked tracks of the user
- */
 suspend fun getTotalLikedTracksFromSpotity(spotifyController: SpotifyController): Int {
   val url = "https://api.spotify.com/v1/me/tracks"
   return try {

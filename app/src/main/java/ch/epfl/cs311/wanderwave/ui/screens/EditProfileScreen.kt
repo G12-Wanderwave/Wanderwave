@@ -38,10 +38,9 @@ import ch.epfl.cs311.wanderwave.ui.theme.md_theme_light_primary
 import ch.epfl.cs311.wanderwave.viewmodel.ProfileViewModel
 
 /**
- * Display the profile of the user, with the possibility to edit it
- * The user can change his profile picture, first name, last name and description
- * The user can also delete his profile
- * The user can save or cancel the changes
+ * Display the profile of the user, with the possibility to edit it The user can change his profile
+ * picture, first name, last name and description The user can also delete his profile The user can
+ * save or cancel the changes
  *
  * @param navActions the navigation actions
  * @param viewModel the view model of the profile

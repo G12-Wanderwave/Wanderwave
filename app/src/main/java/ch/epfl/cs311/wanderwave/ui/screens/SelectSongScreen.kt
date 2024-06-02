@@ -47,7 +47,7 @@ import com.spotify.protocol.types.ListItem
  * Screen to select a song from Spotify
  *
  * @param navActions Navigation actions
- * @param viewModel a  view model
+ * @param viewModel a view model
  */
 @Composable
 fun SelectSongScreen(navActions: NavigationActions, viewModel: SpotifySongsActions) {
@@ -77,11 +77,11 @@ fun initSongScreen(viewModel: SpotifySongsActions) {
 
 /**
  * Song screen scaffold
+ *
  * @param navActions Navigation actions
  * @param displayedList List of ListItem
  * @param viewModel SpotifySongsActions
  * @param nbrLikedSongs Number of liked songs
-
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -150,6 +150,7 @@ fun SongScreenScaffold(
 
 /**
  * Load the next songs
+ *
  * @param viewModel SpotifySongsActions
  * @param page Int
  */

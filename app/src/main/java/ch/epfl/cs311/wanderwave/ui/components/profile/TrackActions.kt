@@ -86,9 +86,9 @@ fun AddTrackDialog(
       modifier = Modifier.testTag(dialogTestTag))
 }
 
-
 /**
  * Display the list of songs in the profile
+ *
  * @param navigationActions the navigation actions
  * @param songLists the list of songs
  * @param onAddTrack the callback to add a track
@@ -96,7 +96,6 @@ fun AddTrackDialog(
  * @param canAddSong the flag to enable adding a song
  * @param viewModelName the name of the view model
  * @param profileViewModel the profile view model
- *
  */
 @Composable
 fun SongsListDisplay(

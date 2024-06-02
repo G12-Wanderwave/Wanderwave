@@ -193,10 +193,11 @@ fun findRandomBeacon(
 /**
  * This function finds the closest beacon to the user's location. It computes the haversine distance
  * between the user's location and each beacon's location. It then returns the closest beacon.
+ *
  * @param userPosition the user's location
  * @param beacons the list of existing beacons
  * @return the closest beacon
- **/
+ */
 fun findClosestBeacon(userPosition: Location, beacons: List<Beacon>): Beacon? {
   var closestBeacon: Beacon? = null
   var smallestDistance = Double.MAX_VALUE
