@@ -1,6 +1,8 @@
 # Wanderwave
 ### CS-311 Group 12
 
+![Big Logo](res/logo-big.jpg)
+
 In a day and age where music has never been as diverse, people tend to only listen to a fairly small subset 
 of what is available. Wanderwave aims to expand users’ musical horizons by transforming their daily commutes
 into adventures that will lead them to find new genres and artists. In that, it allows users to escape the
