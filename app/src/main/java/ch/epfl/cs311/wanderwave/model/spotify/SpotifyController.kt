@@ -424,7 +424,6 @@ constructor(
     playbackTimer = null
   }
 
-  fun onPlayerStateUpdate() { // TODO: Coverage
     appRemote.value?.let {
       it.playerApi.subscribeToPlayerState().setEventCallback { playerState: PlayerState ->
         if (playerState.track != null) {

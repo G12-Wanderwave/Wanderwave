@@ -52,9 +52,9 @@ constructor(
       _uiState.value = _uiState.value.copy(loading = true)
       when (index) {
         0 -> loadRecentlyPlayedTracks()
-        1 -> loadRecentlyAddedTracks() // TODO: modify here for recently added tracks
-        2 -> loadRecentlyAddedTracks() // TODO: modify here for the liked tracks
-        3 -> loadRecentlyAddedTracks() // TODO: modify here for the banned tracks
+        1 -> loadRecentlyAddedTracks()
+        2 -> loadRecentlyAddedTracks()
+        3 -> loadRecentlyAddedTracks()
       }
     }
   }

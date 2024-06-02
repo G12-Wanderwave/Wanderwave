@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 class ProfileViewModel
 @Inject
 constructor(
-    private val repository: ProfileRepository, // TODO revoir
+    private val repository: ProfileRepository,
     private val spotifyController: SpotifyController,
     private val authenticationController: AuthenticationController
 ) : ViewModel(), SpotifySongsActions {
@@ -97,7 +97,7 @@ constructor(
     viewModelScope.launch {
       repository.getItem(id).collect { fetchedProfile ->
         fetchedProfile.onSuccess { profile ->
-          profile.profilePictureUri = null // TODO : @Clarence, pls can you do it more properly
+          profile.profilePictureUri = null
           _profile.value = profile
           _uiState.value = UIState(profile = profile, isLoading = false)
         }

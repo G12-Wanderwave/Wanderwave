@@ -124,7 +124,6 @@ fun BeaconInformation(location: Location) {
           style = MaterialTheme.typography.titleMedium,
           modifier = Modifier.testTag("beaconLocation"))
     }
-    // TODO: Maybe add location tracking here too?
     WanderwaveGoogleMap(
         cameraPositionState =
             CameraPositionState(

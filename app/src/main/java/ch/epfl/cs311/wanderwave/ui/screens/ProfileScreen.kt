@@ -147,7 +147,6 @@ fun ProfileButton(
   val currentProfileState by viewModel.profile.collectAsState()
   val currentProfile: Profile = currentProfileState
 
-  // Display the button only when on the main screen TODO: Also from Map ?
   Box(
       modifier =
           modifier
@@ -173,7 +172,6 @@ fun ProfileButton(
  */
 @Composable
 fun SignOutButton(modifier: Modifier, navActions: NavigationActions) {
-  // TODO: Implement actual user sign out
   Button(
       onClick = { navActions.navigateToTopLevel(Route.LOGIN) },
       modifier = modifier.testTag("signOutButton"),
