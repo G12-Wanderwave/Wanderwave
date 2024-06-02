@@ -259,6 +259,11 @@ constructor(
     recentlyPlayedRepository.addRecentlyPlayed(wanderwaveTrack, Instant.now())
   }
 
+  /**
+   * Connect to the Spotify app remote
+   *
+   * @return a Flow of ConnectResult that can be either SUCCESS, NOT_LOGGED_IN, or FAILED
+   */
   fun connectRemote(): Flow<ConnectResult> {
     return callbackFlow {
       if (isConnected()) {
@@ -290,11 +295,21 @@ constructor(
     }
   }
 
+  /**
+   * Disconnect from the spotify app remote
+   */
   fun disconnectRemote() {
     appRemote.value.let { SpotifyAppRemote.disconnect(it) }
     appRemote.value = null
   }
 
+  /**
+   * Play a track on the Spotify player. Leaves the playing tracks list untouched.
+   *
+   * @param track the track to play
+   * @param onSuccess the function to call on success
+   * @param onFailure the function to call on failure
+   */
   fun playTrack(track: Track, onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
     appRemote.value?.let {
       it.playerApi
@@ -311,6 +326,17 @@ constructor(
     }
   }
 
+  /**
+   * Play a list of tracks. If a track is provided, it will start at that track.
+   * If no track is provided, it will start at the first track in the list.
+   *
+   * @throws Throwable("Empty track list") if the track list is empty
+   *
+   * @param trackList the list of tracks to play
+   * @param track the track to start at, or null to start at the beginning of the list
+   * @param onSuccess the function to call on success
+   * @param onFailure the function to call on failure
+   */
   fun playTrackList(
       trackList: List<Track>,
       track: Track? = null,
@@ -332,6 +358,12 @@ constructor(
         onFailure = onFailure)
   }
 
+  /**
+   * Pause the currently playing track. Does nothing if already paused.
+   *
+   * @param onSuccess the function to call on success
+   * @param onFailure the function to call on failure
+   */
   fun pauseTrack(onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
     appRemote.value?.let {
       it.playerApi
@@ -341,6 +373,12 @@ constructor(
     }
   }
 
+  /**
+   * Resume the track that is currently playing (paused). Does nothing if not paused.
+   *
+   * @param onSuccess the function to call on success
+   * @param onFailure the function to call on failure
+  */
   fun resumeTrack(onSuccess: () -> Unit = {}, onFailure: (Throwable) -> Unit = {}) {
     appRemote.value?.let {
       it.playerApi
@@ -350,6 +388,14 @@ constructor(
     }
   }
 
+  /**
+   * Skip to the next or previous track in the track list.
+   * If the current track is not in the track list, this function does nothing.
+   *
+   * @param direction the direction to skip in. 1 for next, -1 for previous
+   * @param onSuccess the function to call on success
+   * @param onFailure the function to call on failure
+   */
   suspend fun skip(
       direction: Int,
       onSuccess: () -> Unit = {},
@@ -373,6 +419,12 @@ constructor(
     }
   }
 
+  /**
+   * Get the current player state of the Spotify player.
+   * The player state contains information about the current track, playback position, and playback
+   * status.
+   * @return a Flow of PlayerState
+   */
   @OptIn(ExperimentalCoroutinesApi::class)
   fun playerState(): Flow<PlayerState?> {
     return appRemote.flatMapLatest { appRemote ->
@@ -395,6 +447,12 @@ constructor(
     }
   }
 
+  /**
+   * Start a timer that updates the track progress every second until the track ends
+   *
+   * @param trackDuration the duration of the track in milliseconds
+   * @param scope the CoroutineScope to run the timer in
+   */
   fun startPlaybackTimer(
       trackDuration: Long,
       scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -424,6 +482,7 @@ constructor(
     playbackTimer = null
   }
 
+  internal fun onPlayerStateUpdate() {
     appRemote.value?.let {
       it.playerApi.subscribeToPlayerState().setEventCallback { playerState: PlayerState ->
         if (playerState.track != null) {
@@ -434,10 +493,18 @@ constructor(
     }
   }
 
+  /**
+   * Set the function that is called when a track ends
+   *
+   * @param callback the function that is called when a track ends
+   */
   fun setOnTrackEndCallback(callback: () -> Unit) {
     onTrackEndCallback = callback
   }
 
+  /**
+   * Get the function that is called when a track ends
+   */
   fun getOnTrackEndCallback(): (() -> Unit)? {
     return onTrackEndCallback
   }
@@ -539,7 +606,11 @@ constructor(
   }
 }
 
-
+/**
+ * Convert a Spotify Track to a Wanderwave Track
+ *
+ * @return the Wanderwave Track
+ */
 fun com.spotify.protocol.types.Track.toWanderwaveTrack(): Track {
   return Track(this.uri, this.name, this.artist.name)
 }
@@ -587,6 +658,14 @@ fun getLikedTracksFromSpotify(
   }
 }
 
+/**
+ * Get all the tracks from a Spotify playlist and add them to the playlist list.
+ *
+ * @param playlistId the id of the playlist
+ * @param playlist the list of tracks
+ * @param spotifyController the SpotifyController
+ * @param scope the CoroutineScope
+ */
 fun getTracksFromSpotifyPlaylist(
     playlistId: String,
     playlist: MutableStateFlow<List<ListItem>>,
