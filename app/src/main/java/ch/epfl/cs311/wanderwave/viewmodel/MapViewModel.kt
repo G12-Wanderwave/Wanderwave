@@ -152,26 +152,17 @@ constructor(
         try {
           val fetchedProfile = profileRepository.getItem(currentProfile.firebaseUid).first()
 
-          Log.d("Profile", "Current profile: $fetchedProfile")
-          Log.d("BeaconId", "BeaconId: $beaconId")
           fetchedProfile.onSuccess { profile ->
             if (profile.topSongs.isNotEmpty()) {
               val track = profile.topSongs.random()
-              Log.d("Track", "Track: $track")
-              val beacon = beaconRepository.getItem(beaconId).first()
-              beacon.onSuccess {
-                if (it.profileAndTrack.none { it.track.id == track.id }) {
-                  val newProfileAndTrack =
-                      it.profileAndTrack + ProfileTrackAssociation(profile, track)
-
-                  val newBeacon = it.copy(profileAndTrack = newProfileAndTrack)
-                  beaconRepository.updateItem(newBeacon)
-                  _uiState.value =
-                      _uiState.value.copy(
-                          beacons =
-                              _uiState.value.beacons.map { existingBeacon ->
-                                if (existingBeacon.id == beaconId) newBeacon else existingBeacon
-                              })
+              beaconRepository.getItem(beaconId).collect { beacon ->
+                beacon.onSuccess {
+                  if (it.profileAndTrack.none { it.track.id == track.id }) {
+                    // Update the beacon with the new profile and track using addTrackToBeacon
+                    beaconRepository.addTrackToBeacon(
+                        beaconId, track, onComplete = {}, profileUid = profile.firebaseUid)
+                    // observe beacon should still work, the list still will be updated
+                  }
                 }
               }
             }

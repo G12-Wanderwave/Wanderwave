@@ -203,6 +203,7 @@ class MapViewModelTest {
                 firstName = "My FirstName",
                 lastName = "My LastName",
                 description = "My Description")
+
         val beacon =
             Beacon(
                 beaconId,
@@ -213,7 +214,6 @@ class MapViewModelTest {
         coEvery { profileRepository.getItem(profile.firebaseUid) } returns
             flowOf(Result.success(profile))
         coEvery { mockBeaconRepository.getItem(beaconId) } returns flowOf(Result.success(beacon))
-        coEvery { mockBeaconRepository.updateItem(any()) } just Runs
 
         // Act
         viewModel.retrieveRandomSongFromProfileAndAddToBeacon(beaconId)
